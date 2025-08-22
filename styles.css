@@ -1,0 +1,50 @@
+
+.color-master-text-input {
+  width: 100px;
+}
+
+.setting-item-control input[type="color"],
+.color-master-text-input {
+  vertical-align: middle;
+}
+
+.is-ltr .color-master-text-input {
+  margin-left: 8px;
+}
+.is-ltr .setting-item-name, .is-ltr .setting-item-description, .is-ltr h2, .is-ltr h3 {
+  text-align: left;
+}
+
+
+.is-rtl {
+  direction: rtl; 
+}
+.is-rtl .color-master-text-input {
+  margin-right: 8px;
+}
+.is-rtl .setting-item-name, .is-rtl .setting-item-description, .is-rtl h2, .is-rtl h3 {
+  text-align: right; 
+}
+
+
+.setting-item-control input[type="color"] {
+  -webkit-appearance: none;
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  overflow: hidden; 
+}
+.setting-item-control input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+.setting-item-control input[type="color"]::-webkit-color-swatch {
+  border-radius: 50%;
+  border: 1px solid var(--background-modifier-border);
+  width: 100%; 
+  height: 100%; 
+  box-sizing: border-box;
+}
