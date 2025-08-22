@@ -27,7 +27,20 @@ The plugin comes with these hand-crafted profiles by default:
 3.  **Solarized Nebula**: A calm, low-contrast theme based on the popular "Solarized" palette, great for focus and long writing sessions.
 4.  **CyberPunk**: A stylish dark theme with neon purple and pink highlights for a futuristic vibe.
 
-<img width="1920" height="1044" alt="image" src="https://github.com/user-attachments/assets/086e52f4-5d04-414c-88c3-e2b7604718c8" />
+---
+
+## Profile Showcase
+
+| OLED Matrix | Solarized Nebula |
+| :---: | :---: |
+| A true-black theme with vibrant green accents. | A calm theme based on the "Solarized" palette. |
+| <img alt="OLED Matrix Preview" src="Images/OLED_Matrix_Priview.png" /> | <img alt="Solarized Nebula Preview" src="Images/solarized-nebula.png" /> |
+
+| Cyberpunk Sunset | Default |
+| :---: | :---: |
+| A stylish dark theme with neon highlights. | The standard Obsidian dark theme variables. |
+| <img alt="Cyberpunk Sunset Preview" src="Images/cyberpunk.png" /> | <img alt="Default Preview" src="Images/default.png" /> |
+
 
 ---
 
