@@ -372,7 +372,6 @@ const DEFAULT_SETTINGS = {
         "OLED Matrix": { vars: OLED_MATRIX_VARS },
         "Solarized Nebula": { vars: SOLARIZED_NEBULA_VARS },
         "CyberPunk": { vars: CYBERPUNK_SUNSET_VARS },
-
     }
 };
 
