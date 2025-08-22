@@ -4,8 +4,7 @@
 
 Take full control of your Obsidian theme with **Color Master**. This plugin provides a comprehensive user interface to edit every core CSS color variable in Obsidian. Create, save, and share your own color schemes with a powerful profile manager, all without needing to write a single line of CSS.
 
-<img width="1920" height="1044" alt="image" src="https://github.com/user-attachments/assets/086e52f4-5d04-414c-88c3-e2b7604718c8" />
-
+<img width="2560" height="640" alt="Color Master Screenshot" src="images/color-master-2560x640.png" />
 
 ---
 
@@ -27,6 +26,8 @@ The plugin comes with these hand-crafted profiles by default:
 2.  **OLED Matrix**: A true-black, high-contrast theme with vibrant green accents, perfect for OLED screens.
 3.  **Solarized Nebula**: A calm, low-contrast theme based on the popular "Solarized" palette, great for focus and long writing sessions.
 4.  **CyberPunk**: A stylish dark theme with neon purple and pink highlights for a futuristic vibe.
+
+<img width="1920" height="1044" alt="image" src="https://github.com/user-attachments/assets/086e52f4-5d04-414c-88c3-e2b7604718c8" />
 
 ---
 
