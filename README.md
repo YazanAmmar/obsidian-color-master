@@ -28,14 +28,12 @@ The plugin comes with these hand-crafted profiles by default:
 3.  **Solarized Nebula**: A calm, low-contrast theme based on the popular "Solarized" palette, great for focus and long writing sessions.
 4.  **CyberPunk**: A stylish dark theme with neon purple and pink highlights for a futuristic vibe.
 
-*(Screenshots of the default profiles would be great here!)*
-
 ---
 
 ## Installation
 
 1.  Download the latest release from the [GitHub Releases page](https://github.com/yazanammar/obsidian-color-master/releases).
-2.  Extract the `color-master` folder from the zip file into your vault's plugins folder: `<YourVault>/.obsidian/plugins/`.
+2.  Extract the `color-master` folder into your vault's plugins folder: `<YourVault>/.obsidian/plugins/`.
 3.  In Obsidian, go to `Settings` -> `Community plugins`.
 4.  Enable the "Color Master" plugin.
 5.  Open the plugin settings to start customizing!
