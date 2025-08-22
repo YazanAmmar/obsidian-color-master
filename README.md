@@ -31,15 +31,15 @@ The plugin comes with these hand-crafted profiles by default:
 
 ## Profile Showcase
 
-| OLED Matrix | Solarized Nebula |
+| Default | OLED Matrix |
 | :---: | :---: |
-| A true-black theme with vibrant green accents. | A calm theme based on the "Solarized" palette. |
-| <img alt="OLED Matrix Preview" src="Images/OLED_Matrix_Priview.png" /> | <img alt="Solarized Nebula Preview" src="Images/solarized-nebula.png" /> |
+| The standard Obsidian dark theme variables. | A true-black theme with vibrant green accents. |
+| <img alt="Default Preview" src="Images/Default_Profile.png" /> | <img alt="OLED Matrix Preview" src="Images/OLED_Matrix_Priview.png" /> |
 
-| Cyberpunk Sunset | Default |
+| Cyberpunk Sunset | Solarized Nebula |
 | :---: | :---: |
-| A stylish dark theme with neon highlights. | The standard Obsidian dark theme variables. |
-| <img alt="Cyberpunk Sunset Preview" src="Images/cyberpunk.png" /> | <img alt="Default Preview" src="Images/default.png" /> |
+| A stylish dark theme with neon highlights. | A calm theme based on the "Solarized" palette. |
+| <img alt="Cyberpunk Sunset Preview" src="Images/cyberpunk.png" /> | <img alt="Solarized Nebula Preview" src="Images/solarized-nebula.png" /> |
 
 
 ---
