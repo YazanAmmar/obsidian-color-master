@@ -18,23 +18,15 @@ Take full control of your Obsidian theme with **Color Master**. This plugin prov
 
 ---
 
-## Settings UI
-
-Here's a look at the simple and powerful settings panel where you can manage profiles and customize every color.
-
-<img alt="Settings UI Preview" src="Images/settings-ui.png" />
-
----
-
 ## Included Profiles
 
 The plugin comes with these hand-crafted profiles by default:
 
-1.  **Default**: The standard Obsidian dark theme variables.
-2.  **OLED Matrix**: A true-black, high-contrast theme with vibrant green accents.
-3.  **Citrus Zest** A brilliant light theme with a clean design and stunning orange highlights for a fresh, modern look.
-4.  **Solarized Nebula**: A calm, low-contrast theme based on the popular "Solarized" palette.
-5.  **Cyberpunk Sunset**: A stylish dark theme with neon purple and pink highlights.
+1.  **OLED Matrix**: A true-black, high-contrast theme with vibrant green accents.
+2.  **Citrus Zest** A brilliant light theme with a clean design and stunning orange highlights for a fresh, modern look.
+3.  **Solarized Nebula**: A calm, low-contrast theme based on the popular "Solarized" palette.
+4.  **Cyberpunk Sunset**: A stylish dark theme with neon purple and pink highlights.
+5.  **Default**: The standard Obsidian dark theme variables.
 
 ---
 
@@ -48,9 +40,26 @@ The plugin comes with these hand-crafted profiles by default:
 
 <img alt="Light Mod" src="Images/citruz-zest.png" />
 
-| 3. Cyberpunk Sunset | 4. Solarized Nebula |
-| :---: | :---: |
-| <img alt="Cyberpunk Sunset Preview" src="Images/cyber-punk.png" /> | <img alt="Solarized Nebula Preview" src="Images/solarized-nebula.png" /> |
+### 3. Cyberpunk Sunset : 
+
+<img alt="Cyberpunk Sunset Preview" src="Images/cyber-punk.png" />
+
+### 4. Solarized Nebula :
+
+<img alt="Solarized Nebula Preview" src="Images/solarized-nebula.png" />
+
+### 5. Default Theme : 
+
+<img alt="Default Theme Preview" src="Images/default.png" />
+
+
+---
+
+## Settings UI
+
+Here's a look at the simple and powerful settings panel where you can manage profiles and customize every color.
+
+<img alt="Settings UI Preview" src="Images/settings-ui.png" />
 
 ---
 
