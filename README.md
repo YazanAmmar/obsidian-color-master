@@ -106,6 +106,12 @@ For advanced users who want to know exactly what they're changing, here is a com
 
 ---
 
+## Future Plans ?!
+
+We're always looking for ways to make Color Master even better. In upcoming versions, we plan to add more color variables to give you control over elements from your other favorite plugins. Your perfect theme is just a few updates away!
+
+---
+
 ## Installation
 
 1.  Download the latest release from the [GitHub Releases page](https://github.com/yazanammar/obsidian-color-master/releases).
