@@ -29,7 +29,7 @@ The plugin comes with these hand-crafted profiles by default:
 
 ---
 
-## Profile Showcase
+## Theme Previews
 
 | Default | OLED Matrix |
 | :---: | :---: |
@@ -40,7 +40,6 @@ The plugin comes with these hand-crafted profiles by default:
 | :---: | :---: |
 | A stylish dark theme with neon highlights. | A calm theme based on the "Solarized" palette. |
 | <img alt="Cyberpunk Sunset Preview" src="Images/Cyber_Punk_Profile.png" /> | <img alt="Solarized Nebula Preview" src="Images/Solarized_Nebula_Profile.png" /> |
-
 
 ---
 
