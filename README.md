@@ -39,7 +39,7 @@ The plugin comes with these hand-crafted profiles by default:
 | Cyberpunk Sunset | Solarized Nebula |
 | :---: | :---: |
 | A stylish dark theme with neon highlights. | A calm theme based on the "Solarized" palette. |
-| <img alt="Cyberpunk Sunset Preview" src="Images/cyberpunk.png" /> | <img alt="Solarized Nebula Preview" src="Images/solarized-nebula.png" /> |
+| <img alt="Cyberpunk Sunset Preview" src="Images/Cyber_Punk_Profile.png" /> | <img alt="Solarized Nebula Preview" src="Images/Solarized_Nebula_Profile.png" /> |
 
 
 ---
