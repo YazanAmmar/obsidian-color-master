@@ -22,7 +22,6 @@ Take full control of your Obsidian theme with **Color Master**. This plugin prov
 
 Here's a look at the simple and powerful settings panel where you can manage profiles and customize every color.
 
-*(ملاحظة: هون لازم تحط صورة لإعدادات الإضافة. صوّرها وارفعها على مجلد Images وسميها مثلاً `settings-ui.png`)*
 <img alt="Settings UI Preview" src="Images/settings-ui.png" />
 
 ---
