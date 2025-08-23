@@ -48,11 +48,6 @@ The plugin comes with these hand-crafted profiles by default:
 
 <img alt="Solarized Nebula Preview" src="Images/solarized-nebula.png" />
 
-### 5. Default Theme : 
-
-<img alt="Default Theme Preview" src="Images/default.png" />
-
-
 ---
 
 ## Settings UI
