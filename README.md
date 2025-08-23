@@ -39,12 +39,15 @@ The plugin comes with these hand-crafted profiles by default:
 
 ## Theme Previews
 
-| Light Mod | OLED Matrix |
-| :---: | :---: |
-| A brilliant light theme with a clean design and stunning orange highlights for a fresh, modern look. | A true-black theme with vibrant green accents. |
-| <img alt="Default Preview" src="Images/Light_Mod.png" /> | <img alt="OLED Matrix Preview" src="Images/OLED_Matrix_Priview.png" /> |
+### 1. Light Mod : An energizing light mode with a zesty citrus-inspired color palette.
 
-| Cyberpunk Sunset | Solarized Nebula |
+<img alt="Light Mod" src="Images/Light_Mod.png" />
+
+### 2. OLED Matrix : A true-black theme with vibrant green accents. 
+
+<img alt="OLED Matrix Preview" src="Images/OLED_Matrix_Priview.png" />
+
+| 3. Cyberpunk Sunset | 4. Solarized Nebula |
 | :---: | :---: |
 | A stylish dark theme with neon highlights. | A calm theme based on the "Solarized" palette. |
 | <img alt="Cyberpunk Sunset Preview" src="Images/Cyber_Punk_Profile.png" /> | <img alt="Solarized Nebula Preview" src="Images/Solarized_Nebula_Profile.png" /> |
