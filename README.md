@@ -40,10 +40,10 @@ The plugin comes with these hand-crafted profiles by default:
 
 ## Theme Previews
 
-| Default | OLED Matrix |
+| Light Mod | OLED Matrix |
 | :---: | :---: |
-| The standard Obsidian dark theme variables. | A true-black theme with vibrant green accents. |
-| <img alt="Default Preview" src="Images/Default_Profile.png" /> | <img alt="OLED Matrix Preview" src="Images/OLED_Matrix_Priview.png" /> |
+| A brilliant light theme with a clean design and stunning orange highlights for a fresh, modern look. | A true-black theme with vibrant green accents. |
+| <img alt="Default Preview" src="Images/Light_Mod.png" /> | <img alt="OLED Matrix Preview" src="Images/OLED_Matrix_Priview.png" /> |
 
 | Cyberpunk Sunset | Solarized Nebula |
 | :---: | :---: |
