@@ -50,14 +50,6 @@ The plugin comes with these hand-crafted profiles by default:
 
 ---
 
-## Settings UI
-
-Here's a look at the simple and powerful settings panel where you can manage profiles and customize every color.
-
-<img alt="Settings UI Preview" src="Images/settings-ui.png" />
-
----
-
 ## Color Variable Reference
 
 For advanced users who want to know exactly what they're changing, here is a complete list of the CSS variables controlled by this plugin and their descriptions.
