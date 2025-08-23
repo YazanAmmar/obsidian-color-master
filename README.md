@@ -32,25 +32,25 @@ The plugin comes with these hand-crafted profiles by default:
 
 1.  **Default**: The standard Obsidian dark theme variables.
 2.  **OLED Matrix**: A true-black, high-contrast theme with vibrant green accents.
-3.  **Solarized Nebula**: A calm, low-contrast theme based on the popular "Solarized" palette.
-4.  **Cyberpunk Sunset**: A stylish dark theme with neon purple and pink highlights.
+3.  **Citrus Zest** A brilliant light theme with a clean design and stunning orange highlights for a fresh, modern look.
+4.  **Solarized Nebula**: A calm, low-contrast theme based on the popular "Solarized" palette.
+5.  **Cyberpunk Sunset**: A stylish dark theme with neon purple and pink highlights.
 
 ---
 
 ## Theme Previews
 
-### 1. Light Mod : An energizing light mode with a zesty citrus-inspired color palette.
+### 1. OLED Matrix :  
 
-<img alt="Light Mod" src="Images/Light_Mod.png" />
+<img alt="OLED Matrix Preview" src="Images/oled-matrix.png" />
 
-### 2. OLED Matrix : A true-black theme with vibrant green accents. 
+### 2. Citrus Zest : 
 
-<img alt="OLED Matrix Preview" src="Images/OLED_Matrix_Priview.png" />
+<img alt="Light Mod" src="Images/citruz-zest.png" />
 
 | 3. Cyberpunk Sunset | 4. Solarized Nebula |
 | :---: | :---: |
-| A stylish dark theme with neon highlights. | A calm theme based on the "Solarized" palette. |
-| <img alt="Cyberpunk Sunset Preview" src="Images/Cyber_Punk_Profile.png" /> | <img alt="Solarized Nebula Preview" src="Images/Solarized_Nebula_Profile.png" /> |
+| <img alt="Cyberpunk Sunset Preview" src="Images/cyber-punk.png" /> | <img alt="Solarized Nebula Preview" src="Images/solarized-nebula.png" /> |
 
 ---
 
