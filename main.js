@@ -314,6 +314,47 @@ const SOLARIZED_NEBULA_VARS = {
     "--checklist-done-color": "#859900"
 };
 
+// الصق هذا الكود مع باقي الثيمات
+const CITRUS_ZEST_VARS = {
+    "--background-primary": "#F5F5F5",
+    "--background-primary-alt": "#f2eded",
+    "--background-secondary": "#f2eded",
+    "--background-secondary-alt": "#F0F0F0",
+    "--background-modifier-border": "#E0E0E0",
+    "--background-modifier-border-hover": "#FF8C00",
+    "--background-modifier-border-focus": "#F57C00",
+    "--background-modifier-flair": "#FFFFFF",
+    "--background-modifier-hover": "#EEEEEE",
+    "--background-modifier-active": "#E0E0E0",
+    "--text-normal": "#3c3434",
+    "--text-muted": "#ff7300",
+    "--text-faint": "#ff7b00",
+    "--text-on-accent": "#FFFFFF",
+    "--text-accent": "#F57C00",
+    "--text-accent-hover": "#FF9800",
+    "--text-selection": "#f27602",
+    "--text-highlight-bg": "#E0E0E0",
+    "--interactive-normal": "#F5F5F5",
+    "--interactive-hover": "#EEEEEE",
+    "--interactive-accent": "#FF8C00",
+    "--interactive-accent-hover": "#FFA726",
+    "--interactive-success": "#4CAF50",
+    "--interactive-error": "#F44336",
+    "--interactive-warning": "#FFC107",
+    "--titlebar-background": "#FFFFFF",
+    "--titlebar-background-focused": "#F7F7F7",
+    "--titlebar-text-color": "#e0e0e0",
+    "--sidebar-background": "#FFFFFF",
+    "--sidebar-border-color": "#E0E0E0",
+    "--header-background": "#FDFDFD",
+    "--header-border-color": "#E0E0E0",
+    "--vault-name-color": "#F57C00",
+    "--scrollbar-thumb-bg": "#BDBDBD",
+    "--scrollbar-bg": "#F5F5F5",
+    "--divider-color": "#E0E0E0",
+    "--checklist-done-color": "#757575"
+};
+
 const CYBERPUNK_SUNSET_VARS = {
     "--background-primary": "#1a1b26",
     "--background-primary-alt": "#1f202e",
@@ -372,6 +413,7 @@ const DEFAULT_SETTINGS = {
         "OLED Matrix": { vars: OLED_MATRIX_VARS },
         "Solarized Nebula": { vars: SOLARIZED_NEBULA_VARS },
         "CyberPunk": { vars: CYBERPUNK_SUNSET_VARS },
+        "Citrus Zest": { vars: CITRUS_ZEST_VARS },
     }
 };
 
@@ -386,12 +428,12 @@ class ColorMaster extends Plugin {
             this.applyStyles();
         });
 
-        console.log("Color Master v2.0 loaded.");
+        console.log("Color Master v1.0 loaded.");
     }
 
     onunload() {
         this.clearStyles();
-        console.log("Color Master v2.0 unloaded.");
+        console.log("Color Master v1.0 unloaded.");
     }
 
     applyStyles() {
@@ -418,7 +460,18 @@ class ColorMaster extends Plugin {
             document.body.classList.remove("theme-light");
             document.body.classList.add("theme-dark");
         }
-
+        else if (this.settings.activeProfile.toLowerCase() === "citrus zest") {
+            document.body.classList.remove("theme-dark");
+            document.body.classList.add("theme-light");
+        }
+        else if (this.settings.activeProfile.toLowerCase() === "default") {
+            document.body.classList.remove("theme-light");
+            document.body.classList.add("theme-dark");
+        }
+        else if (this.settings.activeProfile.toLowerCase() === "solarized nebula") {
+            document.body.classList.remove("theme-light");
+            document.body.classList.add("theme-dark");
+        }
     }
 
 
