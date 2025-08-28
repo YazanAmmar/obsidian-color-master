@@ -1,6 +1,6 @@
 /*
  * Color Master - Obsidian Plugin
- * Version: 1.0.0 
+ * Version: 1.0.1 
  * Author: Yazan_Amar (GitHub : https://github.com/yazanammar )
  * Description: Provides a comprehensive UI to control all Obsidian CSS color variables directly, 
  * removing the need for Force Mode and expanding customization options.
@@ -23,6 +23,9 @@ const STRINGS = {
         RESET_BUTTON_TOOLTIP: "Reset to default",
         EXPORT_BUTTON_TOOLTIP: "Export active profile",
         IMPORT_BUTTON_TOOLTIP: "Import new profile",
+        ICONIZE_PLUGIN: "Iconize Plugin",
+        OVERRIDE_ICONIZE: "Override Iconize Plugin Colors", 
+        OVERRIDE_ICONIZE_DESC: "Let Color Master control all icon colors from the Iconize plugin. For best results, disable the color settings within Iconize itself.", 
         // Color Categories
         BACKGROUNDS: "Backgrounds",
         TEXT: "Text",
@@ -58,6 +61,9 @@ const STRINGS = {
         RESET_BUTTON_TOOLTIP: "إعادة تعيين للقيمة الافتراضية",
         EXPORT_BUTTON_TOOLTIP: "تصدير التشكيلة النشطة",
         IMPORT_BUTTON_TOOLTIP: "استيراد تشكيلة جديدة",
+        ICONIZE_PLUGIN: "إضافة Iconize",
+        OVERRIDE_ICONIZE: "تجاوز ألوان إضافة Iconize", 
+        OVERRIDE_ICONIZE_DESC: "اسمح لـ Color Master بالتحكم في كل ألوان أيقونات Iconize. لأفضل النتائج، قم بتعطيل إعدادات الألوان في إضافة Iconize نفسها.", 
         // Color Categories
         BACKGROUNDS: "الخلفيات",
         TEXT: "النصوص",
@@ -95,6 +101,9 @@ const { Plugin, PluginSettingTab, Setting, Notice, Modal } = require('obsidian')
 
 // A comprehensive list of Obsidian's themeable color variables.
 const OBSIDIAN_COLOR_VARS = {
+    "": { 
+        "--iconize-icon-color": "#808080"
+    },
     "Backgrounds": {
         "--background-primary": "#1e1e1e",
         "--background-primary-alt": "#252525",
@@ -141,10 +150,13 @@ const OBSIDIAN_COLOR_VARS = {
         "--scrollbar-bg": "#2a2a2a",
         "--divider-color": "#444444",
         "--checklist-done-color": "#28a745",
-    }
+    },
 };
 
+
 const COLOR_DESCRIPTIONS = {
+    // Iconize
+    "--iconize-icon-color": "Sets the color for all icons added by the Iconize plugin. This will override Iconize's own color settings.",
     // Backgrounds
     "--background-primary": "Main background color for the entire app, especially for editor and note panes.",
     "--background-primary-alt": "An alternate background color, often used for the active line in the editor.",
@@ -186,10 +198,12 @@ const COLOR_DESCRIPTIONS = {
     "--scrollbar-thumb-bg": "The color of the draggable part of the scrollbar.",
     "--scrollbar-bg": "The color of the scrollbar track (the background).",
     "--divider-color": "The color of horizontal lines (`---`) and other dividers in the UI.",
-    "--checklist-done-color": "The color of the checkmark and text for a completed to-do item."
+    "--checklist-done-color": "The color of the checkmark and text for a completed to-do item.",
 };
 
 const COLOR_DESCRIPTIONS_AR = {
+    // Iconize
+    "--iconize-icon-color": "يحدد لون جميع الأيقونات المضافة بواسطة إضافة Iconize. هذا الخيار سيتجاوز إعدادات الألوان الخاصة بالإضافة.",
     // Backgrounds
     "--background-primary": "لون الخلفية الأساسي للتطبيق بالكامل، خصوصاً للمحرر وصفحات الملاحظات.",
     "--background-primary-alt": "لون خلفية بديل، يستخدم غالباً للسطر النشط في المحرر.",
@@ -231,7 +245,7 @@ const COLOR_DESCRIPTIONS_AR = {
     "--scrollbar-thumb-bg": "لون الجزء القابل للسحب من شريط التمرير.",
     "--scrollbar-bg": "لون مسار شريط التمرير (الخلفية).",
     "--divider-color": "لون الخطوط الأفقية (`---`) والفواصل الأخرى في الواجهة.",
-    "--checklist-done-color": "لون علامة الصح والنص لمهمة منجزة في قائمة المهام."
+    "--checklist-done-color": "لون علامة الصح والنص لمهمة منجزة في قائمة المهام.",
 };
 
 const OLED_MATRIX_VARS = {
@@ -314,7 +328,6 @@ const SOLARIZED_NEBULA_VARS = {
     "--checklist-done-color": "#859900"
 };
 
-// الصق هذا الكود مع باقي الثيمات
 const CITRUS_ZEST_VARS = {
     "--background-primary": "#F5F5F5",
     "--background-primary-alt": "#f2eded",
@@ -407,6 +420,7 @@ function flattenVars(varsObject) {
 const DEFAULT_SETTINGS = {
     pluginEnabled: true,
     language: "en",
+    overrideIconizeColors: true,
     activeProfile: "Default",
     profiles: {
         "Default": { vars: flattenVars(OBSIDIAN_COLOR_VARS) },
@@ -421,71 +435,116 @@ class ColorMaster extends Plugin {
 
     async onload() {
         await this.loadSettings();
-		T = this;
+        T = this;
         this.addSettingTab(new ColorMasterSettingTab(this.app, this));
     
         this.app.workspace.onLayoutReady(() => {
             this.applyStyles();
         });
 
-        console.log("Color Master v1.0 loaded.");
+        console.log("Color Master v1.0.1 loaded.");
     }
 
     onunload() {
         this.clearStyles();
-        console.log("Color Master v1.0 unloaded.");
+        console.log("Color Master v1.0.1 unloaded.");
     }
 
-    applyStyles() {
-        this.clearStyles(); 
-        if (!this.settings.pluginEnabled) {
-            return; 
-        }
+forceIconizeColors() {
+    const iconizeColor = this.settings.overrideIconizeColors 
+        ? this.settings.profiles[this.settings.activeProfile]?.vars['--iconize-icon-color']
+        : null;
 
-        const profile = this.settings.profiles[this.settings.activeProfile];
-        if (!profile) {
-            console.error("Color Master: Active profile not found!");
-            return;
-        }
-        
-        for (const [key, value] of Object.entries(profile.vars)) {
-            document.body.style.setProperty(key, value);
-        }
+    document.querySelectorAll('.iconize-icon').forEach(iconNode => {
+        const svg = iconNode.querySelector('svg');
+        if (!svg) return;
 
-        if (this.settings.activeProfile.toLowerCase() === "oled matrix") {
-            document.body.classList.remove("theme-light");
-            document.body.classList.add("theme-dark");
-        }
-        else if (this.settings.activeProfile.toLowerCase() === "cyberpunk") {
-            document.body.classList.remove("theme-light");
-            document.body.classList.add("theme-dark");
-        }
-        else if (this.settings.activeProfile.toLowerCase() === "citrus zest") {
-            document.body.classList.remove("theme-dark");
-            document.body.classList.add("theme-light");
-        }
-        else if (this.settings.activeProfile.toLowerCase() === "default") {
-            document.body.classList.remove("theme-light");
-            document.body.classList.add("theme-dark");
-        }
-        else if (this.settings.activeProfile.toLowerCase() === "solarized nebula") {
-            document.body.classList.remove("theme-light");
-            document.body.classList.add("theme-dark");
-        }
-    }
+        [svg, ...svg.querySelectorAll('*')].forEach(el => {
+            if (typeof el.hasAttribute !== 'function') return;
 
-
-    clearStyles() {
-        const profile = this.settings.profiles[this.settings.activeProfile];
-        if (profile && profile.vars) {
-            for (const key of Object.keys(profile.vars)) {
-                document.body.style.removeProperty(key);
+            if (!iconizeColor) {
+                el.style.fill = '';
+                el.style.stroke = '';
+                return;
             }
-        }
-         for (const key of Object.keys(flattenVars(OBSIDIAN_COLOR_VARS))) {
-            document.body.style.removeProperty(key);
-        }
+            
+            const originalFill = el.getAttribute('fill');
+            const originalStroke = el.getAttribute('stroke');
+
+            if (originalFill && originalFill !== 'none' && !originalFill.startsWith('url(')) {
+                el.style.setProperty('fill', iconizeColor, 'important');
+            }
+            
+            if (originalStroke && originalStroke !== 'none') {
+                el.style.setProperty('stroke', iconizeColor, 'important');
+            }
+        });
+    });
+}
+    
+applyStyles() {
+    this.clearStyles(); 
+    if (!this.settings.pluginEnabled) {
+        return; 
     }
+
+    const profile = this.settings.profiles[this.settings.activeProfile];
+    if (!profile) {
+        console.error("Color Master: Active profile not found!");
+        return;
+    }
+    
+    for (const [key, value] of Object.entries(profile.vars)) {
+        document.body.style.setProperty(key, value);
+    }
+    
+    this.forceIconizeColors();
+    setTimeout(() => this.forceIconizeColors(), 100); 
+
+    const activeProfileName = this.settings.activeProfile.toLowerCase();
+    const forceDarkProfiles = ["oled matrix", "cyberpunk sunset", "solarized nebula", "default"]; 
+
+    if (activeProfileName === "citrus zest") {
+        document.body.classList.remove("theme-dark");
+        document.body.classList.add("theme-light");
+    } 
+    else if (forceDarkProfiles.includes(activeProfileName)) {
+        document.body.classList.remove("theme-light");
+        document.body.classList.add("theme-dark");
+    }
+}
+
+
+clearStyles() {
+    const allVars = new Set();
+    const activeProfile = this.settings.profiles[this.settings.activeProfile];
+    if (activeProfile && activeProfile.vars) {
+        Object.keys(activeProfile.vars).forEach(key => allVars.add(key));
+    }
+    Object.keys(flattenVars(OBSIDIAN_COLOR_VARS)).forEach(key => allVars.add(key));
+
+    allVars.forEach(key => {
+        document.body.style.removeProperty(key);
+    });
+
+    document.querySelectorAll('.iconize-icon').forEach(iconNode => {
+        const svg = iconNode.querySelector('svg');
+        if (!svg) return;
+
+        [svg, ...svg.querySelectorAll('*')].forEach(el => {
+            if (typeof el.hasAttribute !== 'function') return;
+            
+            el.style.removeProperty('fill');
+            el.style.removeProperty('stroke');
+        });
+    });
+
+    const styleId = 'color-master-overrides';
+    const overrideStyleEl = document.getElementById(styleId);
+    if (overrideStyleEl) {
+        overrideStyleEl.remove();
+    }
+}
 
     async loadSettings() {
         this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
@@ -615,18 +674,28 @@ class ColorMasterSettingTab extends PluginSettingTab {
             });
     }
 
-
-
     drawColorPickers() {
         const { containerEl } = this;
         const activeProfileVars = this.plugin.settings.profiles[this.plugin.settings.activeProfile].vars;
 
+        new Setting(containerEl)
+            .setName(t('OVERRIDE_ICONIZE'))
+            .setDesc(t('OVERRIDE_ICONIZE_DESC'))
+            .addToggle(toggle => {
+                toggle
+                .setValue(this.plugin.settings.overrideIconizeColors)
+                .onChange(async (value) => {
+                    this.plugin.settings.overrideIconizeColors = value;
+                    await this.plugin.saveSettings();
+                    });
+            });
+
         for (const [category, vars] of Object.entries(OBSIDIAN_COLOR_VARS)) {
-            containerEl.createEl('h3', { text: t(category.toUpperCase()) || category });
+            containerEl.createEl('h3', { text: t(category.toUpperCase().replace(' ', '_')) || category });
             for (const [varName, defaultValue] of Object.entries(vars)) {
                 
                 const description = this.plugin.settings.language === 'ar' ? (COLOR_DESCRIPTIONS_AR[varName] || '') : (COLOR_DESCRIPTIONS[varName] || '');
-                const setting = new Setting(containerEl).setName(varName.replace('--', '').replace(/-/g, ' ')).setDesc(description);                
+                const setting = new Setting(containerEl).setName(varName.replace('--', '').replace(/-/g, ' ')).setDesc(description);             
                 const colorPicker = setting.controlEl.createEl('input', { type: 'color' });
                 const textInput = setting.controlEl.createEl('input', { type: 'text', cls: 'color-master-text-input' });
                 
