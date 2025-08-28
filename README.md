@@ -60,11 +60,7 @@ For advanced users who want to know exactly what they're changing, here is a com
 | Variable | Description |
 |---|---|
 | **Iconize Plugin** | |
-| `--iconize-icon-color` | Sets the color for all icons added by the Iconize plugin, overriding its native color settings for a unified look.
-
-This entire feature is controlled by the **"Override Iconize Plugin Colors"** toggle in the settings. This override is completely non-destructive:
-- When turned **ON**, Color Master applies this custom color to the icons.
-- When turned **OFF**, Color Master stops managing the colors, and your original settings from the Iconize plugin are instantly restored without any permanent changes to your configuration. |
+| `--iconize-icon-color` | Sets the color for all icons added by the Iconize plugin, overriding its native color settings for a unified look.<br><br>This entire feature is controlled by the **"Override Iconize Plugin Colors"** toggle in the settings. This override is completely non-destructive:<br>- When turned **ON**, Color Master applies this custom color to the icons.<br>- When turned **OFF**, Color Master stops managing the colors, and your original settings from the Iconize plugin are instantly restored without any permanent changes to your configuration. |
 | **Backgrounds** | |
 | `--background-primary` | Main background color for the entire app, especially for editor and note panes. |
 | `--background-primary-alt` | An alternate background color, often used for the active line in the editor. |
