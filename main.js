@@ -61,7 +61,7 @@ const STRINGS = {
         RESET_BUTTON_TOOLTIP: "إعادة تعيين للقيمة الافتراضية",
         EXPORT_BUTTON_TOOLTIP: "تصدير التشكيلة النشطة",
         IMPORT_BUTTON_TOOLTIP: "استيراد تشكيلة جديدة",
-        ICONIZE_PLUGIN: "إضافة Iconize",
+        // ICONIZE_PLUGIN: "تكامل الإضافات",
         OVERRIDE_ICONIZE: "تجاوز ألوان إضافة Iconize", 
         OVERRIDE_ICONIZE_DESC: "اسمح لـ Color Master بالتحكم في كل ألوان أيقونات Iconize. لأفضل النتائج، قم بتعطيل إعدادات الألوان في إضافة Iconize نفسها.", 
         // Color Categories
@@ -100,59 +100,6 @@ let T;
 const { Plugin, PluginSettingTab, Setting, Notice, Modal } = require('obsidian');
 
 // A comprehensive list of Obsidian's themeable color variables.
-const OBSIDIAN_COLOR_VARS = {
-    "": { 
-        "--iconize-icon-color": "#808080"
-    },
-    "Backgrounds": {
-        "--background-primary": "#1e1e1e",
-        "--background-primary-alt": "#252525",
-        "--background-secondary": "#2a2a2a",
-        "--background-secondary-alt": "#303030",
-        "--background-modifier-border": "#444444",
-        "--background-modifier-border-hover": "#555555",
-        "--background-modifier-border-focus": "#007acc",
-        "--background-modifier-flair": "#3a3a3a",
-        "--background-modifier-hover": "#3a3a3a",
-        "--background-modifier-active": "#4a4a4a",
-    },
-    "Text": {
-        "--text-normal": "#e0e0e0",
-        "--text-muted": "#999999",
-        "--text-faint": "#666666",
-        "--text-on-accent": "#ffffff",
-        "--text-accent": "#00aaff",
-        "--text-accent-hover": "#33bbff",
-        "--text-selection": "rgba(0, 122, 204, 0.4)",
-        "--text-highlight-bg": "rgba(255, 255, 0, 0.4)",
-    },
-    "Interactive Elements": {
-        "--interactive-normal": "#5a5a5a",
-        "--interactive-hover": "#6a6a6a",
-        "--interactive-accent": "#007acc",
-        "--interactive-accent-hover": "#3399dd",
-        "--interactive-success": "#28a745",
-        "--interactive-error": "#dc3545",
-        "--interactive-warning": "#ffc107",
-    },
-    "UI Elements": {
-        "--titlebar-background": "#252525",
-        "--titlebar-background-focused": "#303030",
-        "--titlebar-text-color": "#e0e0e0",
-        "--sidebar-background": "#252525",
-        "--sidebar-border-color": "#333333",
-        "--header-background": "#2a2a2a",
-        "--header-border-color": "#333333",
-        "--vault-name-color": "#e0e0e0",
-    },
-    "Misc": {
-        "--scrollbar-thumb-bg": "#444444",
-        "--scrollbar-bg": "#2a2a2a",
-        "--divider-color": "#444444",
-        "--checklist-done-color": "#28a745",
-    },
-};
-
 
 const COLOR_DESCRIPTIONS = {
     // Iconize
@@ -248,7 +195,61 @@ const COLOR_DESCRIPTIONS_AR = {
     "--checklist-done-color": "لون علامة الصح والنص لمهمة منجزة في قائمة المهام.",
 };
 
+const DEFAULT_VARS = {
+    "Plugin Integrations": { 
+        "--iconize-icon-color": "#00aaff"
+    },
+    "Backgrounds": {
+        "--background-primary": "#1e1e1e",
+        "--background-primary-alt": "#252525",
+        "--background-secondary": "#2a2a2a",
+        "--background-secondary-alt": "#303030",
+        "--background-modifier-border": "#444444",
+        "--background-modifier-border-hover": "#555555",
+        "--background-modifier-border-focus": "#007acc",
+        "--background-modifier-flair": "#3a3a3a",
+        "--background-modifier-hover": "#3a3a3a",
+        "--background-modifier-active": "#4a4a4a",
+    },
+    "Text": {
+        "--text-normal": "#e0e0e0",
+        "--text-muted": "#999999",
+        "--text-faint": "#666666",
+        "--text-on-accent": "#ffffff",
+        "--text-accent": "#00aaff",
+        "--text-accent-hover": "#33bbff",
+        "--text-selection": "#007acc66",
+        "--text-highlight-bg": "#ffff0066",
+    },
+    "Interactive Elements": {
+        "--interactive-normal": "#5a5a5a",
+        "--interactive-hover": "#6a6a6a",
+        "--interactive-accent": "#007acc",
+        "--interactive-accent-hover": "#3399dd",
+        "--interactive-success": "#28a745",
+        "--interactive-error": "#dc3545",
+        "--interactive-warning": "#ffc107",
+    },
+    "UI Elements": {
+        "--titlebar-background": "#252525",
+        "--titlebar-background-focused": "#303030",
+        "--titlebar-text-color": "#e0e0e0",
+        "--sidebar-background": "#252525",
+        "--sidebar-border-color": "#333333",
+        "--header-background": "#2a2a2a",
+        "--header-border-color": "#333333",
+        "--vault-name-color": "#e0e0e0",
+    },
+    "Misc": {
+        "--scrollbar-thumb-bg": "#444444",
+        "--scrollbar-bg": "#2a2a2a",
+        "--divider-color": "#444444",
+        "--checklist-done-color": "#28a745",
+    },
+};
+
 const OLED_MATRIX_VARS = {
+    "--iconize-icon-color" : "#00ff00",
     "--background-primary": "#000000",
     "--background-primary-alt": "#0a0a0a",
     "--background-secondary": "#050505",
@@ -266,7 +267,7 @@ const OLED_MATRIX_VARS = {
     "--text-accent": "#00ff00",
     "--text-accent-hover": "#88ff88",
     "--text-selection": "rgba(0, 255, 0, 0.3)",
-    "--text-highlight-bg": "rgba(0, 100, 0, 0.5)",
+    "--text-highlight-bg": "#00640080",
     "--interactive-normal": "#1c1c1c",
     "--interactive-hover": "#2c2c2c",
     "--interactive-accent": "#008a00",
@@ -289,6 +290,7 @@ const OLED_MATRIX_VARS = {
 };
 
 const SOLARIZED_NEBULA_VARS = {
+    "--iconize-icon-color" : "#00a7b3",
     "--background-primary": "#002b36",
     "--background-primary-alt": "#073642",
     "--background-secondary": "#00212b",
@@ -304,9 +306,9 @@ const SOLARIZED_NEBULA_VARS = {
     "--text-faint": "#4a5f68",
     "--text-on-accent": "#ffffff",
     "--text-accent": "#268bd2",
-    "--text-accent-hover": "#5ab3e6",
-    "--text-selection": "rgba(88, 110, 117, 0.5)",
-    "--text-highlight-bg": "rgba(203, 75, 22, 0.4)",
+    "--text-accent-hover": "#5bb3e6ff",
+    "--text-selection": "#586e7580",
+    "--text-highlight-bg": "#cb4b1666",
     "--interactive-normal": "#073642",
     "--interactive-hover": "#004354",
     "--interactive-accent": "#268bd2",
@@ -329,6 +331,7 @@ const SOLARIZED_NEBULA_VARS = {
 };
 
 const CITRUS_ZEST_VARS = {
+    "--iconize-icon-color" : "#FF8C00",
     "--background-primary": "#F5F5F5",
     "--background-primary-alt": "#f2eded",
     "--background-secondary": "#f2eded",
@@ -369,6 +372,7 @@ const CITRUS_ZEST_VARS = {
 };
 
 const CYBERPUNK_SUNSET_VARS = {
+    "--iconize-icon-color" : "#737aa2",
     "--background-primary": "#1a1b26",
     "--background-primary-alt": "#1f202e",
     "--background-secondary": "#16161e",
@@ -385,8 +389,8 @@ const CYBERPUNK_SUNSET_VARS = {
     "--text-on-accent": "#1a1b26",
     "--text-accent": "#bb9af7",
     "--text-accent-hover": "#dbb2ff",
-    "--text-selection": "rgba(187, 154, 247, 0.3)",
-    "--text-highlight-bg": "rgba(255, 121, 198, 0.3)",
+    "--text-selection": "#bb9af74d",
+    "--text-highlight-bg": "#ff79c64d",
     "--interactive-normal": "#24283b",
     "--interactive-hover": "#414868",
     "--interactive-accent": "#bb9af7",
@@ -423,11 +427,11 @@ const DEFAULT_SETTINGS = {
     overrideIconizeColors: true,
     activeProfile: "Default",
     profiles: {
-        "Default": { vars: flattenVars(OBSIDIAN_COLOR_VARS) },
+        "Default": { vars: flattenVars(DEFAULT_VARS) },
         "OLED Matrix": { vars: OLED_MATRIX_VARS },
+        "Citrus Zest": { vars: CITRUS_ZEST_VARS },
         "Solarized Nebula": { vars: SOLARIZED_NEBULA_VARS },
         "CyberPunk": { vars: CYBERPUNK_SUNSET_VARS },
-        "Citrus Zest": { vars: CITRUS_ZEST_VARS },
     }
 };
 
@@ -521,7 +525,7 @@ clearStyles() {
     if (activeProfile && activeProfile.vars) {
         Object.keys(activeProfile.vars).forEach(key => allVars.add(key));
     }
-    Object.keys(flattenVars(OBSIDIAN_COLOR_VARS)).forEach(key => allVars.add(key));
+    Object.keys(flattenVars(DEFAULT_VARS)).forEach(key => allVars.add(key));
 
     allVars.forEach(key => {
         document.body.style.removeProperty(key);
@@ -629,7 +633,7 @@ class ColorMasterSettingTab extends PluginSettingTab {
                 .onClick(() => {
                     new NewProfileModal(this.app, (newName) => {
                         if (newName && !this.plugin.settings.profiles[newName]) {
-                            this.plugin.settings.profiles[newName] = { vars: { ...flattenVars(OBSIDIAN_COLOR_VARS) } };
+                            this.plugin.settings.profiles[newName] = { vars: { ...flattenVars(DEFAULT_VARS) } };
                             this.plugin.settings.activeProfile = newName;
                             this.plugin.saveSettings();
                             this.display();
@@ -690,7 +694,7 @@ class ColorMasterSettingTab extends PluginSettingTab {
                     });
             });
 
-        for (const [category, vars] of Object.entries(OBSIDIAN_COLOR_VARS)) {
+        for (const [category, vars] of Object.entries(DEFAULT_VARS)) {
             containerEl.createEl('h3', { text: t(category.toUpperCase().replace(' ', '_')) || category });
             for (const [varName, defaultValue] of Object.entries(vars)) {
                 
