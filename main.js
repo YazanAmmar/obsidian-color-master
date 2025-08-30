@@ -1,7 +1,7 @@
 /*
  * Color Master - Obsidian Plugin
  * Version: 1.0.2 
- * Author: Yazan_Amar (GitHub : https://github.com/yazanammar )
+ * Author: Yazan_Amar (GitHub : https://github.com/YazanAmmar )
  * Description: Provides a comprehensive UI to control all Obsidian CSS color variables directly, 
  * removing the need for Force Mode and expanding customization options.
 */
@@ -815,14 +815,14 @@ class ColorMasterSettingTab extends PluginSettingTab {
 
         const githubLink = contentContainer.createEl('a', {
             cls: 'cm-support-button',
-            href: 'https://github.com/yazanammar/obsidian-color-master',
+            href: 'https://github.com/YazanAmmar/obsidian-color-master',
             attr: { 'target': '_blank' }
         });
         githubLink.createSpan({ text: 'Star on GitHub' });
         
         const issuesLink = contentContainer.createEl('a', {
             cls: 'cm-support-button',
-            href: 'https://github.com/yazanammar/obsidian-color-master/issues',
+            href: 'https://github.com/YazanAmmar/obsidian-color-master/issues',
             attr: { 'target': '_blank' }
         });
         issuesLink.createSpan({ text: 'Report an Issue' });
