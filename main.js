@@ -1,6 +1,6 @@
 /*
  * Color Master - Obsidian Plugin
- * Version: 1.0.1 
+ * Version: 1.0.2 
  * Author: Yazan_Amar (GitHub : https://github.com/yazanammar )
  * Description: Provides a comprehensive UI to control all Obsidian CSS color variables directly, 
  * removing the need for Force Mode and expanding customization options.
@@ -26,6 +26,7 @@ const STRINGS = {
         ICONIZE_PLUGIN: "Iconize Plugin",
         OVERRIDE_ICONIZE: "Override Iconize Plugin Colors", 
         OVERRIDE_ICONIZE_DESC: "Let Color Master control all icon colors from the Iconize plugin. For best results, disable the color settings within Iconize itself.", 
+        ICONIZE_NOT_FOUND_NOTICE: "Iconize plugin not found. Please install and enable it to use this feature.",
         // Color Categories
         BACKGROUNDS: "Backgrounds",
         TEXT: "Text",
@@ -44,6 +45,22 @@ const STRINGS = {
         DELETE_PROFILE_CONFIRMATION: (name) => `Are you sure you want to delete the profile "${name}"? This action cannot be undone.`,
         PROFILE_DELETED_NOTICE: "Profile deleted.",
         CANNOT_DELETE_LAST_PROFILE: "Cannot delete the last profile.",
+        PROFILE_THEME_TYPE: "Profile Theme Type",
+        PROFILE_THEME_TYPE_DESC: "Set whether this profile should force a specific theme (Dark/Light) when activated.",
+        THEME_TYPE_AUTO: "Automatic (Don't Change)",
+        THEME_TYPE_DARK: "Force Dark Mode",
+        THEME_TYPE_LIGHT: "Force Light Mode",
+        SUPPORT_HEADER: "Like the Plugin?",
+        SUPPORT_GITHUB_STAR: "Would you mind supporting us with a ☆ on",
+        SUPPORT_GITHUB_ISSUES: "If you have any issues or feature requests, please let us know at this link.",
+        GITHUB_LINK_TEXT: "Github?",
+        ISSUES_LINK_TEXT: "this link.",
+        BUILT_IN_PROFILES: "Built-in Profiles",
+        CUSTOMIZABLE_COLORS: "Customizable Colors",
+        GITHUB_STAR_BUTTON: "Star on GitHub",
+        ISSUES_BUTTON: "Report an Issue",
+        FORCE_REFRESH_TOOLTIP: "Force Refresh UI",
+        SUPPORT_DESC: "If you like the plugin, would you mind giving us a star on GitHub? If you have an issue or a feature request, don't hesitate to click 'Report an Issue' and let us know!",
     },
     ar: {
         PLUGIN_NAME: "متحكم الألوان",
@@ -61,9 +78,10 @@ const STRINGS = {
         RESET_BUTTON_TOOLTIP: "إعادة تعيين للقيمة الافتراضية",
         EXPORT_BUTTON_TOOLTIP: "تصدير التشكيلة النشطة",
         IMPORT_BUTTON_TOOLTIP: "استيراد تشكيلة جديدة",
-        // ICONIZE_PLUGIN: "تكامل الإضافات",
+        // ICONIZE_PLUGIN:
         OVERRIDE_ICONIZE: "تجاوز ألوان إضافة Iconize", 
         OVERRIDE_ICONIZE_DESC: "اسمح لـ Color Master بالتحكم في كل ألوان أيقونات Iconize. لأفضل النتائج، قم بتعطيل إعدادات الألوان في إضافة Iconize نفسها.", 
+        ICONIZE_NOT_FOUND_NOTICE: "إضافة Iconize غير موجودة. يرجى تثبيتها وتفعيلها لاستخدام هذه الميزة.",
         // Color Categories
         BACKGROUNDS: "الخلفيات",
         TEXT: "النصوص",
@@ -82,6 +100,23 @@ const STRINGS = {
         DELETE_PROFILE_CONFIRMATION: (name) => `هل أنت متأكد من رغبتك في حذف التشكيلة "${name}"؟ لا يمكن التراجع عن هذا الإجراء.`,
         PROFILE_DELETED_NOTICE: "تم حذف التشكيلة.",
         CANNOT_DELETE_LAST_PROFILE: "لا يمكن حذف آخر تشكيلة.",
+        PROFILE_THEME_TYPE: "نوع ثيم التشكيلة",
+        PROFILE_THEME_TYPE_DESC: "حدد ما إذا كانت هذه التشكيلة ستفرض ثيماً معيناً (غامق/فاتح) عند تفعيلها.",
+        THEME_TYPE_AUTO: "تلقائي (لا تقم بالتغيير)",
+        THEME_TYPE_DARK: "فرض الوضع الغامق",
+        THEME_TYPE_LIGHT: "فرض الوضع الفاتح",
+        SUPPORT_HEADER: "هل أعجبتك الإضافة؟",
+        SUPPORT_GITHUB_STAR: "هل تمانع لو دعمتنا بنجمة ☆ على",
+        SUPPORT_GITHUB_ISSUES: "إذا واجهتك مشكلة أو لديك اقتراح لميزة جديدة، يسعدنا أن تخبرنا عبر",
+        GITHUB_LINK_TEXT: "Github؟",
+        ISSUES_LINK_TEXT: "هذا الرابط." ,
+        ISSUES_LINK_TEXT: "هذا الرابط.",
+        BUILT_IN_PROFILES: "تشكيلات جاهزة",
+        CUSTOMIZABLE_COLORS: "لون قابل للتخصيص",
+        GITHUB_STAR_BUTTON: "أضف نجمة على Github",
+        ISSUES_BUTTON: "أبلغ عن مشكلة",
+        FORCE_REFRESH_TOOLTIP: "فرض تحديث الواجهة",
+        SUPPORT_DESC: "هل تمانع لو منحتنا نجمة على github إذا عجبتك الاضافة ؟ وإذا كنت تعاني من مشكلة او تريد ميّزة ف لا تتردد بالضغط على زر Report an Issue وإخبارنا بها !",
     }
 };
 
@@ -124,6 +159,13 @@ const COLOR_DESCRIPTIONS = {
     "--text-accent-hover": "The color of accent text (like links) when you hover over it.",
     "--text-selection": "The background color of text that you have selected with your cursor.",
     "--text-highlight-bg": "The background color for text highlighted with ==highlight== syntax.",
+    // Headings
+    "--h1-color": "The color of H1 heading text.",
+    "--h2-color": "The color of H2 heading text.",
+    "--h3-color": "The color of H3 heading text.",
+    "--h4-color": "The color of H4 heading text.",
+    "--h5-color": "The color of H5 heading text.",
+    "--h6-color": "The color of H6 heading text.",
     // Interactive Elements
     "--interactive-normal": "The background color for interactive elements like buttons.",
     "--interactive-hover": "The background color for interactive elements when hovered.",
@@ -141,6 +183,14 @@ const COLOR_DESCRIPTIONS = {
     "--header-background": "The background for headers within panes (e.g., note title header).",
     "--header-border-color": "The border color below pane headers.",
     "--vault-name-color": "The color of your vault's name in the top-left corner.",
+    // Graph View
+    "--graph-line": "The color of the connection lines between notes in the Graph View.",
+    "--graph-node": "The color of the circular nodes for existing notes.",
+    "--graph-text": "The color of the text labels on the graph nodes.",
+    "--graph-node-unresolved": "The color of nodes for notes that do not exist yet (unresolved links).",
+    "--graph-node-focused" : "Color of the node that is focused or hovered (highlighted node).",
+    "--graph-node-tag": "Color of nodes representing tags when tags are shown in the graph.",
+    "--graph-node-attachment": "Color of nodes representing attachments (e.g., image or other linked files).",
     // Misc
     "--scrollbar-thumb-bg": "The color of the draggable part of the scrollbar.",
     "--scrollbar-bg": "The color of the scrollbar track (the background).",
@@ -171,6 +221,13 @@ const COLOR_DESCRIPTIONS_AR = {
     "--text-accent-hover": "لون النص المميز (مثل الروابط) عند مرور مؤشر الفأرة فوقه.",
     "--text-selection": "لون خلفية النص الذي تحدده بمؤشر الفأرة.",
     "--text-highlight-bg": "لون خلفية النص المظلل باستخدام صيغة ==التظليل==.",
+    // Headings
+    "--h1-color": "لون نصوص العناوين من نوع H1.",
+    "--h2-color": "لون نصوص العناوين من نوع H2.",
+    "--h3-color": "لون نصوص العناوين من نوع H3.",
+    "--h4-color": "لون نصوص العناوين من نوع H4.",
+    "--h5-color": "لون نصوص العناوين من نوع H5.",
+    "--h6-color": "لون نصوص العناوين من نوع H6.",
     // Interactive Elements
     "--interactive-normal": "لون خلفية العناصر التفاعلية مثل الأزرار.",
     "--interactive-hover": "لون خلفية العناصر التفاعلية عند مرور الفأرة فوقها.",
@@ -188,6 +245,14 @@ const COLOR_DESCRIPTIONS_AR = {
     "--header-background": "خلفية العناوين داخل اللوحات (مثل عنوان الملاحظة).",
     "--header-border-color": "لون الخط الفاصل تحت عناوين اللوحات.",
     "--vault-name-color": "لون اسم القبو (Vault) الخاص بك في الزاوية العلوية.",
+    // Graph View
+    "--graph-line": "لون الخطوط الواصلة بين الملاحظات في عرض الرسم البياني.",
+    "--graph-node": "لون النقاط الدائرية للملاحظات الموجودة.",
+    "--graph-text": "لون النصوص (أسماء الملاحظات) على النقاط في الرسم البياني.",
+    "--graph-node-unresolved": "لون النقاط الخاصة بالملاحظات التي لم يتم إنشاؤها بعد (روابط غير موجودة).",
+    "--graph-node-focused" : "لون العقدة التي عليها التركيز (عندما تمرر الفأرة عليها أو تحددها).",
+    "--graph-node-tag": "لون العقد التي تمثل الوسوم (Tags) إذا كانت ظاهرة في الرسم البياني.",
+    "--graph-node-attachment": "لون العقد التي تمثل المرفقات (مثل الصور أو الملفات الأخرى) في الرسم البياني.",
     // Misc
     "--scrollbar-thumb-bg": "لون الجزء القابل للسحب من شريط التمرير.",
     "--scrollbar-bg": "لون مسار شريط التمرير (الخلفية).",
@@ -220,6 +285,12 @@ const DEFAULT_VARS = {
         "--text-accent-hover": "#33bbff",
         "--text-selection": "#007acc66",
         "--text-highlight-bg": "#ffff0066",
+        "--h1-color": "#e0e0e0",
+        "--h2-color": "#d0d0d0",
+        "--h3-color": "#c0c0c0",
+        "--h4-color": "#b0b0b0",
+        "--h5-color": "#a0a0a0",
+        "--h6-color": "#909090",
     },
     "Interactive Elements": {
         "--interactive-normal": "#5a5a5a",
@@ -239,6 +310,15 @@ const DEFAULT_VARS = {
         "--header-background": "#2a2a2a",
         "--header-border-color": "#333333",
         "--vault-name-color": "#e0e0e0",
+    },
+    "Graph View": {
+        "--graph-line": "#444444",
+        "--graph-node": "#999999",
+        "--graph-text": "#e0e0e0",
+        "--graph-node-unresolved": "#dc3545",
+        "--graph-node-focused": "#ffffff",
+        "--graph-node-tag": "#86efac",
+        "--graph-node-attachment": "#60a5fa"
     },
     "Misc": {
         "--scrollbar-thumb-bg": "#444444",
@@ -286,7 +366,14 @@ const OLED_MATRIX_VARS = {
     "--scrollbar-thumb-bg": "#222222",
     "--scrollbar-bg": "#000000",
     "--divider-color": "#223322",
-    "--checklist-done-color": "#00ff00"
+    "--checklist-done-color": "#00ff00",
+    "--graph-line": "#000000",
+    "--graph-node": "#00ff00",
+    "--graph-text": "#000000",
+    "--graph-node-unresolved": "#00ff00",
+    "--graph-node-focused": "#000000",
+    "--graph-node-tag": "#000000",
+    "--graph-node-attachment": "#00ff00"
 };
 
 const SOLARIZED_NEBULA_VARS = {
@@ -327,7 +414,14 @@ const SOLARIZED_NEBULA_VARS = {
     "--scrollbar-thumb-bg": "#586e75",
     "--scrollbar-bg": "#00212b",
     "--divider-color": "#073642",
-    "--checklist-done-color": "#859900"
+    "--checklist-done-color": "#859900",
+    "--graph-line": "#444444",
+    "--graph-node": "#999999",
+    "--graph-text": "#e0e0e0",
+    "--graph-node-unresolved": "#dc3545",
+    "--graph-node-focused": "#ffffff",
+    "--graph-node-tag": "#86efac",
+    "--graph-node-attachment": "#60a5fa"
 };
 
 const CITRUS_ZEST_VARS = {
@@ -368,7 +462,14 @@ const CITRUS_ZEST_VARS = {
     "--scrollbar-thumb-bg": "#BDBDBD",
     "--scrollbar-bg": "#F5F5F5",
     "--divider-color": "#E0E0E0",
-    "--checklist-done-color": "#757575"
+    "--checklist-done-color": "#757575",
+    "--graph-line": "#F57C00",
+    "--graph-node": "#999999",
+    "--graph-text": "#e0e0e0",
+    "--graph-node-unresolved": "#F57C00",
+    "--graph-node-focused": "#ffffff",
+    "--graph-node-tag": "#F57C00",
+    "--graph-node-attachment": "#F57C00"
 };
 
 const CYBERPUNK_SUNSET_VARS = {
@@ -409,7 +510,14 @@ const CYBERPUNK_SUNSET_VARS = {
     "--scrollbar-thumb-bg": "#414868",
     "--scrollbar-bg": "#16161e",
     "--divider-color": "#414868",
-    "--checklist-done-color": "#9ece6a"
+    "--checklist-done-color": "#9ece6a",
+    "--graph-line": "#414868",
+    "--graph-node": "#999999",
+    "--graph-text": "#414868",
+    "--graph-node-unresolved": "#414868",
+    "--graph-node-focused": "#ffffff",
+    "--graph-node-tag": "#86efac",
+    "--graph-node-attachment": "#414868"
 };
 
 // Function to flatten the nested VARS object for easier processing
@@ -425,6 +533,7 @@ const DEFAULT_SETTINGS = {
     pluginEnabled: true,
     language: "en",
     overrideIconizeColors: true,
+    cleanupInterval: 5,
     activeProfile: "Default",
     profiles: {
         "Default": { vars: flattenVars(DEFAULT_VARS) },
@@ -436,22 +545,73 @@ const DEFAULT_SETTINGS = {
 };
 
 class ColorMaster extends Plugin {
+    iconizeWatcherInterval = null;
+    resetIconizeWatcher() {
+        if (this.iconizeWatcherInterval) {
+            window.clearInterval(this.iconizeWatcherInterval);
+        }
+
+        const intervalMilliseconds = this.settings.cleanupInterval * 1000;
+
+        this.iconizeWatcherInterval = window.setInterval(() => {
+            const iconizeIDs = ['obsidian-icon-folder', 'iconize'];
+            const isIconizeInstalled = iconizeIDs.some(id => this.app.plugins.plugins[id]);
+
+            if (!isIconizeInstalled) {
+                this.removeOrphanedIconizeElements();
+            }
+        }, intervalMilliseconds);
+
+        this.registerInterval(this.iconizeWatcherInterval);
+    }
 
     async onload() {
         await this.loadSettings();
         T = this;
         this.addSettingTab(new ColorMasterSettingTab(this.app, this));
-    
+
         this.app.workspace.onLayoutReady(() => {
             this.applyStyles();
+            setTimeout(() => this.app.workspace.trigger('css-change'), 100);
+            this.iconizeObserver = new MutationObserver(() => {
+    if (this.settings.pluginEnabled && this.settings.overrideIconizeColors) {
+        this.forceIconizeColors();
+    }
+});
+
+        this.iconizeObserver.observe(document.body, {
+            childList: true,
+            subtree: true
         });
 
-        console.log("Color Master v1.0.1 loaded.");
+        this.register(() => this.iconizeObserver.disconnect());
+    });
+        this.resetIconizeWatcher();
+        console.log("Color Master loaded with smart Iconize cleanup.");
     }
 
     onunload() {
         this.clearStyles();
-        console.log("Color Master v1.0.1 unloaded.");
+        console.log("Color Master v1.0.2 unloaded.");
+    }
+
+    async refreshOpenGraphViews() {
+        const graphLeaves = this.app.workspace.getLeavesOfType('graph');
+        if (graphLeaves.length === 0) {
+            return; 
+        }
+
+        console.log(`Color Master: Found ${graphLeaves.length} graph(s). Applying Plan C (programmatic rebuild).`);
+
+        for (const leaf of graphLeaves) {
+            const currentState = leaf.getViewState();
+            
+            await leaf.setViewState({
+                ...currentState, 
+                type: 'graph',   
+                state: { ...currentState.state } 
+            });
+        }
     }
 
 forceIconizeColors() {
@@ -485,8 +645,27 @@ forceIconizeColors() {
         });
     });
 }
+
+removeOrphanedIconizeElements() {
+    const iconizeIDs = ['obsidian-icon-folder', 'iconize'];
+    const isIconizeInstalled = iconizeIDs.some(id => this.app.plugins.plugins[id]);
+
+    // We only proceed if Iconize is actually installed. If so, we do nothing.
+    if (isIconizeInstalled) {
+        return;
+    }
+    // Find all elements with the .iconize-icon class and check if they have content.
+    const orphanedIcons = document.querySelectorAll('.iconize-icon');
     
+    // If we found any potential orphans, we log it for debugging.
+    if (orphanedIcons.length > 0) {
+        console.log(`Color Master: Found ${orphanedIcons.length} orphaned Iconize elements. Cleaning up...`);
+        orphanedIcons.forEach(icon => icon.remove());
+    }
+}
+
 applyStyles() {
+    this.removeOrphanedIconizeElements();
     this.clearStyles(); 
     if (!this.settings.pluginEnabled) {
         return; 
@@ -505,16 +684,14 @@ applyStyles() {
     this.forceIconizeColors();
     setTimeout(() => this.forceIconizeColors(), 100); 
 
-    const activeProfileName = this.settings.activeProfile.toLowerCase();
-    const forceDarkProfiles = ["oled matrix", "cyberpunk sunset", "solarized nebula", "default"]; 
+    const themeType = profile.themeType || 'auto'; 
 
-    if (activeProfileName === "citrus zest") {
-        document.body.classList.remove("theme-dark");
-        document.body.classList.add("theme-light");
-    } 
-    else if (forceDarkProfiles.includes(activeProfileName)) {
+    if (themeType === 'dark') {
         document.body.classList.remove("theme-light");
         document.body.classList.add("theme-dark");
+    } else if (themeType === 'light') {
+        document.body.classList.remove("theme-dark");
+        document.body.classList.add("theme-light");
     }
 }
 
@@ -548,6 +725,7 @@ clearStyles() {
     if (overrideStyleEl) {
         overrideStyleEl.remove();
     }
+    this.app.workspace.trigger('css-change');
 }
 
     async loadSettings() {
@@ -557,6 +735,8 @@ clearStyles() {
     async saveSettings() {
         await this.saveData(this.settings);
         this.applyStyles();
+        await this.refreshOpenGraphViews();
+        this.app.workspace.trigger('css-change');
     }
 }
 
@@ -564,6 +744,8 @@ class ColorMasterSettingTab extends PluginSettingTab {
     constructor(app, plugin) {
         super(app, plugin);
         this.plugin = plugin;
+        this.graphViewTempState = null; 
+        this.graphHeaderButtonsEl = null; 
     }
 
     display() {
@@ -608,7 +790,86 @@ class ColorMasterSettingTab extends PluginSettingTab {
 
         this.drawProfileManager();
         this.drawColorPickers();
+
+        // --- Support section ---
+
+        containerEl.createEl('hr');
+        const profilesCount = Object.keys(this.plugin.settings.profiles).length;
+        const colorsCount = Object.keys(flattenVars(DEFAULT_VARS)).length;
+
+        const supportBox = containerEl.createDiv({ cls: 'cm-support-container' });
+        
+        supportBox.createEl('div', { text: t('SUPPORT_HEADER'), cls: 'cm-support-title' });
+        supportBox.createEl('p', { text: t('SUPPORT_DESC'), cls: 'cm-support-description' });
+
+
+        const contentContainer = supportBox.createDiv({ cls: 'cm-support-content' });
+
+        const profilesStat = contentContainer.createDiv({ cls: 'cm-stat-item' });
+        profilesStat.createDiv({ text: profilesCount, cls: 'cm-stat-number' });
+        profilesStat.createDiv({ text: 'Built-in Profiles', cls: 'cm-stat-label' });
+
+        const colorsStat = contentContainer.createDiv({ cls: 'cm-stat-item' });
+        colorsStat.createDiv({ text: colorsCount, cls: 'cm-stat-number' });
+        colorsStat.createDiv({ text: 'Customizable Colors', cls: 'cm-stat-label' });
+
+        const githubLink = contentContainer.createEl('a', {
+            cls: 'cm-support-button',
+            href: 'https://github.com/yazanammar/obsidian-color-master',
+            attr: { 'target': '_blank' }
+        });
+        githubLink.createSpan({ text: 'Star on GitHub' });
+        
+        const issuesLink = contentContainer.createEl('a', {
+            cls: 'cm-support-button',
+            href: 'https://github.com/yazanammar/obsidian-color-master/issues',
+            attr: { 'target': '_blank' }
+        });
+        issuesLink.createSpan({ text: 'Report an Issue' });
+        
     }
+
+    hide() {
+        if (this.graphViewTempState) {
+            console.log("Color Master: Settings closed with pending changes. Reverting...");
+            
+            Object.assign(this.plugin.settings.profiles[this.plugin.settings.activeProfile].vars, this.graphViewTempState);
+            
+            this.plugin.applyStyles();
+            if (this.plugin.settings.pluginEnabled) this.plugin.refreshOpenGraphViews();
+
+            this.graphViewTempState = null;
+        }
+    }
+showGraphActionButtons() {
+    this.graphHeaderButtonsEl.empty();
+    
+const applyButton = this.graphHeaderButtonsEl.createEl('button', { text: 'Apply', cls: 'mod-cta' });
+applyButton.addEventListener('click', async () => {
+    await this.plugin.saveSettings();
+
+    this.app.workspace.trigger('css-change');
+
+    new Notice("Graph colors applied successfully to all open views!");
+    this.hideGraphActionButtons();
+});
+        const cancelButton = this.graphHeaderButtonsEl.createEl('button', { text: 'Cancel' });
+cancelButton.addEventListener('click', () => {
+        Object.assign(this.plugin.settings.profiles[this.plugin.settings.activeProfile].vars, this.graphViewTempState);
+        
+        this.plugin.applyStyles(); 
+        if (this.plugin.settings.pluginEnabled) this.plugin.refreshOpenGraphViews();
+        this.app.workspace.trigger('css-change');
+        this.hideGraphActionButtons();
+        this.display();
+});
+}
+hideGraphActionButtons() {
+    this.graphViewTempState = null; 
+    if(this.graphHeaderButtonsEl) {
+        this.graphHeaderButtonsEl.empty(); 
+    }
+}
 
     drawProfileManager() {
         const { containerEl } = this;
@@ -625,20 +886,24 @@ class ColorMasterSettingTab extends PluginSettingTab {
                 dropdown.onChange(async (value) => {
                     this.plugin.settings.activeProfile = value;
                     await this.plugin.saveSettings();
+                    this.app.workspace.trigger('css-change');
                     this.display(); 
                 });
             })
             .addButton(button => {
                 button.setButtonText(t('NEW_BUTTON'))
                 .onClick(() => {
-                    new NewProfileModal(this.app, (newName) => {
-                        if (newName && !this.plugin.settings.profiles[newName]) {
-                            this.plugin.settings.profiles[newName] = { vars: { ...flattenVars(DEFAULT_VARS) } };
-                            this.plugin.settings.activeProfile = newName;
+                    new NewProfileModal(this.app, (result) => {
+                        if (result && result.name && !this.plugin.settings.profiles[result.name]) {
+                            this.plugin.settings.profiles[result.name] = { 
+                                vars: { ...flattenVars(DEFAULT_VARS) },
+                                themeType: result.themeType
+                            };
+                            this.plugin.settings.activeProfile = result.name;
                             this.plugin.saveSettings();
                             this.display();
-                        } else if (newName) {
-                            new Notice(t('PROFILE_EXISTS_NOTICE', newName));
+                        } else if (result && result.name) {
+                            new Notice(t('PROFILE_EXISTS_NOTICE', result.name));
                         }
                     }).open();
                 });
@@ -675,7 +940,10 @@ class ColorMasterSettingTab extends PluginSettingTab {
                 .onClick(() => {
                     this.importProfile();
                 });
+                
+                
             });
+            
     }
 
     drawColorPickers() {
@@ -687,15 +955,64 @@ class ColorMasterSettingTab extends PluginSettingTab {
             .setDesc(t('OVERRIDE_ICONIZE_DESC'))
             .addToggle(toggle => {
                 toggle
-                .setValue(this.plugin.settings.overrideIconizeColors)
-                .onChange(async (value) => {
-                    this.plugin.settings.overrideIconizeColors = value;
-                    await this.plugin.saveSettings();
+                    .setValue(this.plugin.settings.overrideIconizeColors)
+                    .onChange(async (value) => {
+                        if (value) { 
+                    const iconizeIDs = ['obsidian-icon-folder', 'iconize']; 
+                    const isIconizeInstalled = iconizeIDs.some(id => this.app.plugins.plugins[id]);
+
+                    if (!isIconizeInstalled) {
+                        new Notice(t('ICONIZE_NOT_FOUND_NOTICE'));
+                                toggle.setValue(false); 
+                                return; 
+                            }
+                        }
+                        this.plugin.settings.overrideIconizeColors = value;
+                        await this.plugin.saveSettings();
+                    });
+        new Setting(containerEl)
+            .setName("Cleanup Interval") 
+            .setDesc("Sets how often (in seconds) the plugin checks for uninstalled Iconize plugin to clean up its icons.")
+            .addSlider(slider => {
+                slider
+                    .setLimits(1, 10, 1) 
+                    .setValue(this.plugin.settings.cleanupInterval)
+                    .setDynamicTooltip() 
+                    .onChange(async (value) => {
+                        this.plugin.settings.cleanupInterval = value;
+                        await this.plugin.saveSettings();
+                        this.plugin.resetIconizeWatcher(); 
                     });
             });
+            });
 
+
+            
         for (const [category, vars] of Object.entries(DEFAULT_VARS)) {
-            containerEl.createEl('h3', { text: t(category.toUpperCase().replace(' ', '_')) || category });
+
+
+if (category === "Graph View") {
+    const graphHeader = containerEl.createDiv({ cls: 'cm-graph-header' });
+    graphHeader.createEl('h3', { text: t('GRAPH_VIEW') || category });
+
+    const buttonContainer = graphHeader.createDiv({ cls: 'cm-buttons-wrapper' });
+
+    new Setting(buttonContainer)
+        .setClass('cm-refresh-button-setting') 
+        .addButton(button => {
+            button.setIcon('refresh-cw') 
+                  .setTooltip(t('FORCE_REFRESH_TOOLTIP'))
+                  .onClick(() => {
+                      this.app.workspace.trigger('css-change');
+                      new Notice('UI Refreshed!');
+                  });
+        });
+
+    this.graphHeaderButtonsEl = buttonContainer.createDiv({ cls: 'cm-temporary-buttons' });
+} else {
+        containerEl.createEl('h3', { text: t(category.toUpperCase().replace(' ', '_')) || category });
+    }
+    
             for (const [varName, defaultValue] of Object.entries(vars)) {
                 
                 const description = this.plugin.settings.language === 'ar' ? (COLOR_DESCRIPTIONS_AR[varName] || '') : (COLOR_DESCRIPTIONS[varName] || '');
@@ -707,29 +1024,52 @@ class ColorMasterSettingTab extends PluginSettingTab {
                 colorPicker.value = initialValue;
                 textInput.value = initialValue;
 
-                colorPicker.addEventListener('input', async (e) => {
-                    const newColor = e.target.value;
-                    textInput.value = newColor;
-                    activeProfileVars[varName] = newColor;
-                    await this.plugin.saveSettings();
-                });
+                const handleColorChange = (newColor) => {
+    if (category === "Graph View") {
+        if (!this.graphViewTempState) {
+            this.graphViewTempState = {};
+            Object.keys(DEFAULT_VARS["Graph View"]).forEach(key => {
+                this.graphViewTempState[key] = activeProfileVars[key] || DEFAULT_VARS["Graph View"][key];
+            });
+            this.showGraphActionButtons();
+        }
+    }
 
-                textInput.addEventListener('change', async (e) => {
-                    const newColor = e.target.value;
-                    colorPicker.value = newColor;
-                    activeProfileVars[varName] = newColor;
-                    await this.plugin.saveSettings();
-                });
+    activeProfileVars[varName] = newColor;
+    this.plugin.applyStyles();
+    if (category === "Graph View") this.plugin.refreshOpenGraphViews();
 
-                setting.addExtraButton(button => {
-                     button.setIcon("reset")
-                     .setTooltip(t('RESET_BUTTON_TOOLTIP'))
-                     .onClick(async () => {
-                         activeProfileVars[varName] = defaultValue;
-                         await this.plugin.saveSettings();
-                         this.display();
-                     });
-                });
+};
+
+colorPicker.addEventListener('input', (e) => {
+    const newColor = e.target.value;
+    textInput.value = newColor;
+    handleColorChange(newColor);
+});
+
+textInput.addEventListener('change', (e) => {
+    const newColor = e.target.value;
+    colorPicker.value = newColor;
+    handleColorChange(newColor);
+});
+
+setting.addExtraButton(button => {
+    button.setIcon("reset")
+    .setTooltip(t('RESET_BUTTON_TOOLTIP'))
+    .onClick(async () => {
+        const newColor = defaultValue;
+        activeProfileVars[varName] = newColor;
+
+        if (category === "Graph View") {
+            handleColorChange(newColor);
+            this.display(); 
+        } else {
+            await this.plugin.saveSettings();
+            this.display();
+        }
+    });
+});
+
             }
         }
     }
@@ -802,12 +1142,13 @@ class NewProfileModal extends Modal {
     this.onSubmit = onSubmit;
   }
 
-  onOpen() {
+onOpen() {
     const { contentEl } = this;
     contentEl.empty();
     contentEl.createEl("h3", { text: t('NEW_PROFILE_TITLE') });
 
     let profileName = "";
+    let themeType = "auto";
 
     new Setting(contentEl)
       .setName(t('PROFILE_NAME_LABEL'))
@@ -816,14 +1157,20 @@ class NewProfileModal extends Modal {
             .onChange((value) => {
                 profileName = value;
             });
-        text.inputEl.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && profileName.trim() !== '') {
-                e.preventDefault();
-                this.onSubmit(profileName.trim());
-                this.close();
-            }
-        });
       });
+
+    new Setting(contentEl)
+        .setName(t('PROFILE_THEME_TYPE'))
+        .setDesc(t('PROFILE_THEME_TYPE_DESC'))
+        .addDropdown(dropdown => {
+            dropdown.addOption('auto', t('THEME_TYPE_AUTO'));
+            dropdown.addOption('dark', t('THEME_TYPE_DARK'));
+            dropdown.addOption('light', t('THEME_TYPE_LIGHT'));
+            dropdown.setValue(themeType);
+            dropdown.onChange(value => {
+                themeType = value;
+            });
+        });
       
     const buttonContainer = contentEl.createDiv({ cls: 'modal-button-container', attr: { 'style': 'justify-content: flex-end;' } });
     
@@ -831,15 +1178,25 @@ class NewProfileModal extends Modal {
     cancelButton.addEventListener('click', () => this.close());
 
     const createButton = buttonContainer.createEl('button', { text: t('CREATE_BUTTON'), cls: 'mod-cta' });
-    createButton.addEventListener('click', () => {
+    
+    const submit = () => {
         if (profileName.trim() !== '') {
-            this.onSubmit(profileName.trim());
+            this.onSubmit({ name: profileName.trim(), themeType: themeType });
             this.close();
         } else {
             new Notice(t('EMPTY_PROFILE_NAME_NOTICE'));
         }
+    };
+
+    createButton.addEventListener('click', submit);
+
+    contentEl.querySelector('input[type="text"]').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            submit();
+        }
     });
-  }
+}
 
   onClose() {
     this.contentEl.empty();
