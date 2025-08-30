@@ -34,7 +34,7 @@ The plugin comes with these hand-crafted profiles by default:
 
 ### 1. OLED Matrix :  
 
-<img alt="OLED Matrix Preview" src="Images/oled-matrix.png" />
+<img alt="OLED Matrix Preview" src="Images/oled-matrix-theme.png" />
 
 ### 2. Citrus Zest : 
 
