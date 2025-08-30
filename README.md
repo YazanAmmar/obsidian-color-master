@@ -81,6 +81,13 @@ For advanced users who want to know exactly what they're changing, here is a com
 | `--text-accent-hover` | The color of accent text (like links) when you hover over it. |
 | `--text-selection` | The background color of text that you have selected with your cursor. |
 | `--text-highlight-bg` | The background color for text highlighted with `==highlight==` syntax. |
+| **Headings** | |
+| `-h1-color` | The color of H1 heading text. |
+| `-h2-color` | The color of H2 heading text. |
+| `-h3-color` | The color of H3 heading text. |
+| `-h4-color` | The color of H4 heading text. |
+| `-h5-color` | The color of H5 heading text. |
+| `-h6-color` | The color of H6 heading text. |
 | **Interactive Elements** | |
 | `--interactive-normal` | The background color for interactive elements like buttons. |
 | `--interactive-hover` | The background color for interactive elements when hovered. |
@@ -99,13 +106,13 @@ For advanced users who want to know exactly what they're changing, here is a com
 | `--header-border-color` | The border color below pane headers. |
 | `--vault-name-color` | The color of your vault's name in the top-left corner. |
 | **Graph View** | |
-| `--graph-line` | "The color of the connection lines between notes in the Graph View. |
-| `--graph-node` | "The color of the circular nodes for existing notes. |
-| `--graph-text` | "The color of the text labels on the graph nodes. |
-| `--graph-node-unresolved` | "The color of nodes for notes that do not exist yet (unresolved links). |
-| `--graph-node-focused` | "Color of the node that is focused or hovered (highlighted node). |
-| `--graph-node-tag`| "Color of nodes representing tags when tags are shown in the graph. |
-| `--graph-node-attachment` | "Color of nodes representing attachments (e.g., image or other linked files). |
+| `--graph-line` | The color of the connection lines between notes in the Graph View. |
+| `--graph-node` | The color of the circular nodes for existing notes. |
+| `--graph-text` | The color of the text labels on the graph nodes. |
+| `--graph-node-unresolved` | The color of nodes for notes that do not exist yet (unresolved links). |
+| `--graph-node-focused` | Color of the node that is focused or hovered (highlighted node). |
+| `--graph-node-tag`| Color of nodes representing tags when tags are shown in the graph. |
+| `--graph-node-attachment` | Color of nodes representing attachments (e.g., image or other linked files). |
 | **Misc** | |
 | `--scrollbar-thumb-bg` | The color of the draggable part of the scrollbar. |
 | `--scrollbar-bg` | The color of the scrollbar track (the background). |
