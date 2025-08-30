@@ -40,13 +40,13 @@ The plugin comes with these hand-crafted profiles by default:
 
 <img alt="Light Mod" src="Images/citruz-zest.png" />
 
-### 3. Cyberpunk Sunset : 
-
-<img alt="Cyberpunk Sunset Preview" src="Images/cyber-punk.png" />
-
-### 4. Solarized Nebula :
+### 3. Solarized Nebula :
 
 <img alt="Solarized Nebula Preview" src="Images/solarized-nebula.png" />
+
+### 4. Cyberpunk Sunset : 
+
+<img alt="Cyberpunk Sunset Preview" src="Images/cyber-punk.png" />
 
 ---
 
