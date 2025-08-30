@@ -98,6 +98,14 @@ For advanced users who want to know exactly what they're changing, here is a com
 | `--header-background` | The background for headers within panes (e.g., note title header). |
 | `--header-border-color` | The border color below pane headers. |
 | `--vault-name-color` | The color of your vault's name in the top-left corner. |
+| **Graph View** | |
+| `--graph-line` | "The color of the connection lines between notes in the Graph View. |
+| `--graph-node` | "The color of the circular nodes for existing notes. |
+| `--graph-text` | "The color of the text labels on the graph nodes. |
+| `--graph-node-unresolved` | "The color of nodes for notes that do not exist yet (unresolved links). |
+| `--graph-node-focused` | "Color of the node that is focused or hovered (highlighted node). |
+| `--graph-node-tag`| "Color of nodes representing tags when tags are shown in the graph. |
+| `--graph-node-attachment` | "Color of nodes representing attachments (e.g., image or other linked files). |
 | **Misc** | |
 | `--scrollbar-thumb-bg` | The color of the draggable part of the scrollbar. |
 | `--scrollbar-bg` | The color of the scrollbar track (the background). |
