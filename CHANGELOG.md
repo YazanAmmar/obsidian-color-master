@@ -4,24 +4,27 @@
 
 ### New Features & Major Improvements
 
--   **Advanced Graph View Control:**
-    -   A dedicated control system has been introduced for the **Graph View** to solve the old live-update issue. Color changes in this section are no longer applied instantly.
-    -   **Apply** and **Cancel** buttons now appear *only* when you modify Graph View colors, giving you full control and preventing accidental changes.
-    -   The settings panel is now smarter! If you change Graph View colors and then close the settings window without saving, your changes are **automatically discarded**.
+-   **Instant UI Refresh:**
+    -   The **Apply** button for the Graph View now triggers an instant, workspace-wide refresh. All open views, including existing Graph View tabs, will now update their colors immediately. **No more need to open new tabs!**
+    - We've added a **permanent Refresh** button to the Graph View section, to solve any color hang issue with the click of a button.
+-   **Profile-Specific Themes:**
+    -   You can now classify new profiles as **'Dark Mode'**, **'Light Mode'**, or **'Automatic'**.
+    -   Activating a profile will now automatically switch Obsidian to the corresponding theme, giving you complete environmental control with a single click.
 
--   **Smart & Robust Iconize Integration:**
-    -   A **MutationObserver** has been integrated to watch for any changes in the app's interface, re-applying `Iconize` colors instantly and reliably, even for dynamically loaded icons.
-    -   An automated **cleanup system** now periodically checks for and removes orphaned `Iconize` icons if the plugin is ever uninstalled, keeping your vault clean.
-    -   A new **"Cleanup Interval"** slider has been added to the settings, allowing you to control how often this check runs.
+-   **Smart Iconize Cleanup & Integration:**
+    -   Added an automated cleanup system that periodically checks for and removes orphaned `Iconize` icons if the plugin is ever uninstalled, keeping your vault clean.
+    -   Added a "Cleanup Interval" slider in the settings, allowing you to control how often this check runs.
+    -   Improved the reliability of color overrides for `Iconize` by using a `MutationObserver` to re-apply colors dynamically as your vault's interface changes.
 
 -   **Enhanced User Experience:**
-    -   A new "Like the Plugin?" support section has been added with live stats (number of profiles, customizable colors) and quick links to star the project on GitHub or report an issue.
+    -   The settings panel is now smarter! If you change Graph View colors and then close the settings window without saving, your changes are **automatically discarded**.
+    -   Added a new "Like the Plugin?" support section with live stats and quick links to star the project on GitHub or report an issue.
 
-### Bug Fixes & Other Improvements
+### Bug Fixes
 
--   **Improved:** Color overrides for `Iconize` are now more robust, using `!important` to ensure they take priority over other styles.
--   **Fixed:** Correctly handles cases where `Iconize` icon colors would "stick" even after disabling the override toggle or the main plugin. The cleanup process is now more thorough.
--   **Fixed:** The automated cleanup process is now safer and will only remove orphaned icons if it confirms the `Iconize` plugin is actually uninstalled.
+-   **Fixed: Graph View colors not updating!** The biggest fix of this release. The old issue where colors on existing Graph View tabs wouldn't update has been definitively solved with the new instant refresh system.
+
+
 
 ## v1.0.1 - 2025-08-28
 
