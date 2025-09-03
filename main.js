@@ -1,7 +1,7 @@
 /*
  * Color Master - Obsidian Plugin
- * Version: 1.0.2
- * Author: Yazan_Amar (GitHub : https://github.com/YazanAmmar )
+ * Version: 1.0.3
+ * Author: Yazan Ammar (GitHub : https://github.com/YazanAmmar )
  * Description: Provides a comprehensive UI to control all Obsidian CSS color variables directly,
  * removing the need for Force Mode and expanding customization options.
  */
@@ -17,6 +17,9 @@ const STRINGS = {
     LANGUAGE: "Language",
     LANGUAGE_DESC: "Set the interface language for the plugin.",
     PROFILE_MANAGER: "Profile Manager",
+    RESET_CONFIRM_TITLE: "Reset Profile Confirmation",
+    RESET_CONFIRM_DESC:
+      "Are you sure you want to reset this profile to the last pinned snapshot? This will overwrite your current colors and cannot be undone.",
     ACTIVE_PROFILE: "Active Profile",
     ACTIVE_PROFILE_DESC: "Manage and switch between color profiles.",
     NEW_BUTTON: "New",
@@ -24,6 +27,10 @@ const STRINGS = {
     RESET_BUTTON_TOOLTIP: "Reset to default",
     EXPORT_BUTTON_TOOLTIP: "Export active profile",
     IMPORT_BUTTON_TOOLTIP: "Import new profile",
+    OPTIONS_HEADING: "Options",
+    UPDATE_FREQUENCY_NAME: "Live Update FPS",
+    UPDATE_FREQUENCY_DESC:
+      "Sets how many times per second the UI previews color changes while dragging (0 = disable live preview). Lower values can improve performance.",
     ICONIZE_PLUGIN: "Iconize Plugin",
     OVERRIDE_ICONIZE: "Override Iconize Plugin Colors",
     OVERRIDE_ICONIZE_DESC:
@@ -79,6 +86,9 @@ const STRINGS = {
     LANGUAGE: "اللغة",
     LANGUAGE_DESC: "اختر لغة واجهة الإضافة.",
     PROFILE_MANAGER: "إدارة التشكيلات",
+    RESET_CONFIRM_TITLE: "تأكيد استرجاع التشكيلة",
+    RESET_CONFIRM_DESC:
+      "هل أنت متأكد من رغبتك في استرجاع هذه التشكيلة لآخر لقطة تم تثبيتها؟ سيتم الكتابة فوق الألوان الحالية ولا يمكن التراجع عن هذا الإجراء.",
     ACTIVE_PROFILE: "التشكيلة النشطة",
     ACTIVE_PROFILE_DESC: "تنقل بين التشكيلات أو أنشئ واحدة جديدة.",
     NEW_BUTTON: "جديد",
@@ -86,6 +96,10 @@ const STRINGS = {
     RESET_BUTTON_TOOLTIP: "إعادة تعيين للقيمة الافتراضية",
     EXPORT_BUTTON_TOOLTIP: "تصدير التشكيلة النشطة",
     IMPORT_BUTTON_TOOLTIP: "استيراد تشكيلة جديدة",
+    OPTIONS_HEADING: "الخيارات",
+    UPDATE_FREQUENCY_NAME: "معدل التحديث المباشر (إطار بالثانية)",
+    UPDATE_FREQUENCY_DESC:
+      "يحدد عدد مرات تحديث معاينة الألوان في الثانية أثناء السحب (0 = تعطيل المعاينة). القيم المنخفضة تحسن الأداء.",
     // ICONIZE_PLUGIN:
     OVERRIDE_ICONIZE: "تجاوز ألوان إضافة Iconize",
     OVERRIDE_ICONIZE_DESC:
@@ -130,11 +144,11 @@ const STRINGS = {
     ISSUES_BUTTON: "أبلغ عن مشكلة",
     FORCE_REFRESH_TOOLTIP: "فرض تحديث الواجهة",
     SUPPORT_DESC:
-      "هل تمانع لو منحتنا نجمة على github إذا عجبتك الاضافة ؟ وإذا كنت تعاني من مشكلة او تريد ميّزة ف لا تتردد بالضغط على زر Report an Issue وإخبارنا بها !",
+      "هل تمانع لو منحتنا نجمة على Github إذا أعجبتك الاضافة ؟ وإذا كنت تعاني من مشكلة او تريد ميّزة ف لا تتردد بالضغط على زر (أبلغ عن مشكلة) وإخبارنا بها !",
   },
 };
 
-// Helper function to get the correct translation
+// Helper for multi-language support.
 const t = (key, ...args) => {
   const lang = T.settings?.language || "en";
   const string = STRINGS[lang][key] || STRINGS["en"][key];
@@ -612,6 +626,7 @@ const DEFAULT_SETTINGS = {
   language: "en",
   overrideIconizeColors: true,
   cleanupInterval: 5,
+  colorUpdateFPS: 10,
   activeProfile: "Default",
   profiles: {
     Default: { vars: flattenVars(DEFAULT_VARS) },
@@ -620,10 +635,127 @@ const DEFAULT_SETTINGS = {
     "Solarized Nebula": { vars: SOLARIZED_NEBULA_VARS },
     CyberPunk: { vars: CYBERPUNK_SUNSET_VARS },
   },
+  pinnedSnapshots: {},
 };
 
 class ColorMaster extends Plugin {
   iconizeWatcherInterval = null;
+
+  colorUpdateInterval = null;
+  pendingVarUpdates = {};
+  settingTabInstance = null;
+
+  startColorUpdateLoop() {
+    this.stopColorUpdateLoop();
+
+    const fps = this.settings.colorUpdateFPS;
+    if (!this.settings.pluginEnabled || !fps || fps <= 0) {
+      return; // Stop if disabled or FPS is 0
+    }
+
+    const intervalMs = 1000 / fps;
+    this.colorUpdateInterval = window.setInterval(() => {
+      const pendingKeys = Object.keys(this.pendingVarUpdates);
+      if (pendingKeys.length === 0) return; // Do nothing if the box is empty
+
+      for (const varName of pendingKeys) {
+        document.body.style.setProperty(
+          varName,
+          this.pendingVarUpdates[varName]
+        );
+      }
+
+      this.pendingVarUpdates = {}; // Empty the box after applying
+
+      // Trigger updates for Graph View and accessibility checkers
+      this.app.workspace.trigger("css-change");
+
+      if (this.settingTabInstance) {
+        this.settingTabInstance.updateAccessibilityCheckers();
+      }
+      // ensure iconize icons update live using current computed var
+      try {
+        this.forceIconizeColors();
+      } catch (e) {
+        console.warn("forceIconizeColors failed in update loop", e);
+      }
+    }, intervalMs);
+  }
+
+  // New method to stop the update loop
+  stopColorUpdateLoop() {
+    if (this.colorUpdateInterval) {
+      window.clearInterval(this.colorUpdateInterval);
+      this.colorUpdateInterval = null;
+    }
+  }
+
+  // New method to easily restart the loop when settings change
+  restartColorUpdateLoop() {
+    this.stopColorUpdateLoop();
+    this.startColorUpdateLoop();
+  }
+
+  // New method to apply pending changes instantly
+  applyPendingNow() {
+    try {
+      const pending = this.pendingVarUpdates || {};
+      const keys = Object.keys(pending);
+      if (keys.length === 0) {
+        // If nothing is pending, still trigger a repaint for safety
+        this.app.workspace.trigger("css-change");
+        window.dispatchEvent(new Event("resize"));
+        return;
+      }
+
+      // Apply all pending CSS properties
+      for (const k of keys) {
+        document.body.style.setProperty(k, pending[k]);
+      }
+
+      // Clear pending updates
+      this.pendingVarUpdates = {};
+
+      // Notify Obsidian and other components to update
+      this.app.workspace.trigger("css-change");
+      this.forceIconizeColors();
+
+      // Force graph view to repaint by dispatching a resize event
+      window.dispatchEvent(new Event("resize"));
+    } catch (e) {
+      console.error("Color Master: applyPendingNow failed", e);
+    }
+  }
+
+  pinProfileSnapshot(profileName) {
+    if (!profileName) profileName = this.settings.activeProfile;
+    this.settings.pinnedSnapshots = this.settings.pinnedSnapshots || {};
+    const profileVars = this.settings.profiles?.[profileName]?.vars || {};
+    this.settings.pinnedSnapshots[profileName] = {
+      pinnedAt: new Date().toISOString(),
+      vars: JSON.parse(JSON.stringify(profileVars)),
+    };
+    return this.saveSettings();
+  }
+
+  async resetProfileToPinned(profileName) {
+    if (!profileName) profileName = this.settings.activeProfile;
+    const snap = this.settings.pinnedSnapshots?.[profileName];
+    if (!snap || !snap.vars)
+      throw new Error("No pinned snapshot for profile " + profileName);
+
+    this.settings.profiles[profileName].vars = JSON.parse(
+      JSON.stringify(snap.vars)
+    );
+
+    Object.keys(snap.vars).forEach((k) => {
+      this.pendingVarUpdates[k] = snap.vars[k];
+    });
+
+    await this.saveSettings();
+    this.applyPendingNow();
+  }
+
   resetIconizeWatcher() {
     if (this.iconizeWatcherInterval) {
       window.clearInterval(this.iconizeWatcherInterval);
@@ -648,11 +780,49 @@ class ColorMaster extends Plugin {
   async onload() {
     await this.loadSettings();
     T = this;
-    this.addSettingTab(new ColorMasterSettingTab(this.app, this));
+
+    this.addCommand({
+      id: "toggle-color-master",
+      name: "Toggle Color Master",
+      callback: async () => {
+        this.settings.pluginEnabled = !this.settings.pluginEnabled;
+        await this.saveSettings();
+        new Notice(
+          this.settings.pluginEnabled
+            ? t("PLUGIN_ENABLED_NOTICE")
+            : t("PLUGIN_DISABLED_NOTICE")
+        );
+      },
+    });
+
+    this.addCommand({
+      id: "cycle-color-profile",
+      name: "Cycle Color Master Profile",
+      callback: async () => {
+        const names = Object.keys(this.settings.profiles || {});
+        if (names.length === 0) {
+          new Notice("No profiles found.");
+          return;
+        }
+        const idx = names.indexOf(this.settings.activeProfile);
+        const next = names[(idx + 1) % names.length];
+        this.settings.activeProfile = next;
+        await this.saveSettings();
+        new Notice(`Active profile: ${next}`);
+      },
+    });
+
+    // Store a reference to the settings tab and add it
+    this.settingTabInstance = new ColorMasterSettingTab(this.app, this);
+    this.addSettingTab(this.settingTabInstance);
 
     this.app.workspace.onLayoutReady(() => {
       this.applyStyles();
       setTimeout(() => this.app.workspace.trigger("css-change"), 100);
+
+      // Start the update engine
+      this.startColorUpdateLoop();
+
       this.iconizeObserver = new MutationObserver(() => {
         if (
           this.settings.pluginEnabled &&
@@ -675,7 +845,8 @@ class ColorMaster extends Plugin {
 
   onunload() {
     this.clearStyles();
-    console.log("Color Master v1.0.2 unloaded.");
+    this.stopColorUpdateLoop();
+    console.log("Color Master v1.0.3 unloaded.");
   }
 
   async refreshOpenGraphViews() {
@@ -700,12 +871,32 @@ class ColorMaster extends Plugin {
   }
 
   forceIconizeColors() {
+    // read the *computed* CSS var first (this covers live-preview via pendingVarUpdates)
+    let computedIconizeColor = null;
+    try {
+      const cssVal = getComputedStyle(document.body).getPropertyValue(
+        "--iconize-icon-color"
+      );
+      if (cssVal) computedIconizeColor = cssVal.trim();
+    } catch (e) {
+      console.warn(
+        "Color Master: failed to read computed --iconize-icon-color",
+        e
+      );
+      computedIconizeColor = null;
+    }
+
+    // fallback to stored profile value if computed is empty
+    const storedIconizeColor =
+      this.settings.profiles?.[this.settings.activeProfile]?.vars?.[
+        "--iconize-icon-color"
+      ];
+
     const iconizeColor = this.settings.overrideIconizeColors
-      ? this.settings.profiles[this.settings.activeProfile]?.vars[
-          "--iconize-icon-color"
-        ]
+      ? computedIconizeColor || storedIconizeColor || null
       : null;
 
+    // Iterate over elements that Iconize marks (keep the original safe logic)
     document.querySelectorAll(".iconize-icon").forEach((iconNode) => {
       const svg = iconNode.querySelector("svg");
       if (!svg) return;
@@ -714,6 +905,7 @@ class ColorMaster extends Plugin {
         if (typeof el.hasAttribute !== "function") return;
 
         if (!iconizeColor) {
+          // remove inline overrides to let theme/defaults show
           el.style.fill = "";
           el.style.stroke = "";
           return;
@@ -722,16 +914,25 @@ class ColorMaster extends Plugin {
         const originalFill = el.getAttribute("fill");
         const originalStroke = el.getAttribute("stroke");
 
+        // apply with !important so plugin/theme inline styles are overridden
         if (
           originalFill &&
           originalFill !== "none" &&
           !originalFill.startsWith("url(")
         ) {
-          el.style.setProperty("fill", iconizeColor, "important");
+          try {
+            el.style.setProperty("fill", iconizeColor, "important");
+          } catch (e) {
+            el.style.fill = iconizeColor;
+          }
         }
 
         if (originalStroke && originalStroke !== "none") {
-          el.style.setProperty("stroke", iconizeColor, "important");
+          try {
+            el.style.setProperty("stroke", iconizeColor, "important");
+          } catch (e) {
+            el.style.stroke = iconizeColor;
+          }
         }
       });
     });
@@ -824,6 +1025,36 @@ class ColorMaster extends Plugin {
 
   async loadSettings() {
     this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+    if (!this.settings.installDate) {
+      this.settings.installDate = new Date().toISOString();
+      await this.saveData(this.settings);
+    }
+    if (!this.settings.pinnedSnapshots) {
+      this.settings.pinnedSnapshots = {};
+    }
+
+    // Seed pinned snapshots for up to the first 5 profiles if they don't have one
+    try {
+      const profileNames = Object.keys(this.settings.profiles || {});
+      let changed = false;
+      for (let i = 0; i < Math.min(5, profileNames.length); i++) {
+        const name = profileNames[i];
+        if (!this.settings.pinnedSnapshots[name]) {
+          const vars = this.settings.profiles[name]?.vars || {};
+          this.settings.pinnedSnapshots[name] = {
+            pinnedAt: new Date().toISOString(),
+            vars: JSON.parse(JSON.stringify(vars)),
+          };
+          changed = true;
+        }
+      }
+      if (changed) {
+        console.log("Color Master: Seeding initial pinned snapshots.");
+        await this.saveData(this.settings);
+      }
+    } catch (e) {
+      console.warn("Color Master: failed to seed pinnedSnapshots", e);
+    }
   }
 
   async saveSettings() {
@@ -833,13 +1064,599 @@ class ColorMaster extends Plugin {
     this.app.workspace.trigger("css-change");
   }
 }
+// Maps text color variables to their common backgrounds for contrast checking.
+const TEXT_TO_BG_MAP = {
+  "--text-normal": "--background-primary",
+  "--text-muted": "--background-primary",
+  "--text-faint": "--background-primary",
+  "--text-accent": "--background-primary",
+  "--text-accent-hover": "--background-primary",
+  "--h1-color": "--background-primary",
+  "--h2-color": "--background-primary",
+  "--h3-color": "--background-primary",
+  "--h4-color": "--background-primary",
+  "--h5-color": "--background-primary",
+  "--h6-color": "--background-primary",
+  "--text-on-accent": "--interactive-accent",
+  "--vault-name-color": "--sidebar-background",
+  "--titlebar-text-color": "--titlebar-background",
+  "--graph-text": "--graph-node",
+  "--checklist-done-color": "--background-primary",
+  "--text-highlight-bg": "--text-normal",
+};
+// Paste / Import modal
+// Paste / Import modal - UPGRADED with File Import
+class ProfileJsonImportModal extends Modal {
+  constructor(app, plugin, settingTabInstance) {
+    super(app);
+    this.plugin = plugin;
+    this.settingTab = settingTabInstance;
+  }
 
+  onOpen() {
+    const { contentEl } = this;
+    contentEl.empty();
+    contentEl.createEl("h3", { text: "Paste or Import Profile JSON" });
+
+    // Text area for pasting
+    contentEl.createEl("p", {
+      text: "You can paste a profile JSON in the box below.",
+    });
+    this.textarea = contentEl.createEl("textarea", {
+      cls: "cm-search-input",
+      attr: { rows: 8, placeholder: '{ "name": "...", "profile": { ... } }' },
+    });
+    this.textarea.style.width = "100%";
+    this.textarea.style.marginBottom = "15px";
+
+    // File import button
+    contentEl.createEl("p", {
+      text: "Or, you can import directly from a file.",
+    });
+    new Setting(contentEl)
+      .setName("Import from File")
+      .setDesc("Select a .json profile file from your computer.")
+      .addButton((button) => {
+        button.setButtonText("Choose File...").onClick(() => {
+          this._handleFileImport();
+        });
+      });
+
+    // Action buttons (Merge/Replace)
+    const ctrl = contentEl.createDiv({ cls: "cm-profile-actions" });
+    ctrl.createDiv({ cls: "cm-profile-action-spacer" }); // Spacer
+    const mergeBtn = ctrl.createEl("button", {
+      text: "Merge",
+      cls: "cm-profile-action-btn",
+    });
+    const replaceBtn = ctrl.createEl("button", {
+      text: "Replace",
+      cls: "cm-profile-action-btn mod-cta",
+    });
+
+    mergeBtn.addEventListener("click", () => this._applyImport("merge"));
+    replaceBtn.addEventListener("click", () => this._applyImport("replace"));
+  }
+
+  _handleFileImport() {
+    const input = createEl("input", {
+      type: "file",
+      attr: { accept: ".json" },
+    });
+    input.onchange = async () => {
+      if (!input.files || input.files.length === 0) return;
+      const file = input.files[0];
+      const content = await file.text();
+      this.textarea.value = content;
+      new Notice(`File "${file.name}" loaded. You can now Merge or Replace.`);
+    };
+    input.click();
+  }
+
+  onClose() {
+    this.contentEl.empty();
+  }
+
+  async _applyImport(mode) {
+    const raw = this.textarea.value.trim();
+    if (!raw) {
+      new Notice(
+        "The text box is empty. Paste some JSON or import a file first."
+      );
+      return;
+    }
+    let parsed;
+    try {
+      parsed = JSON.parse(raw);
+    } catch (e) {
+      new Notice("Invalid JSON.");
+      return;
+    }
+
+    const profileObj = parsed.profile ? parsed.profile : parsed;
+    if (!profileObj || typeof profileObj !== "object" || !profileObj.vars) {
+      new Notice("JSON does not look like a valid profile (missing 'vars').");
+      return;
+    }
+
+    const activeName = this.plugin.settings.activeProfile;
+    if (!activeName) {
+      new Notice("No active profile selected.");
+      return;
+    }
+
+    if (mode === "replace") {
+      this.plugin.settings.profiles[activeName].vars = { ...profileObj.vars };
+    } else {
+      this.plugin.settings.profiles[activeName].vars = {
+        ...this.plugin.settings.profiles[activeName].vars,
+        ...profileObj.vars,
+      };
+    }
+
+    await this.plugin.saveSettings();
+    Object.keys(profileObj.vars).forEach((k) => {
+      this.plugin.pendingVarUpdates[k] = profileObj.vars[k];
+    });
+    this.plugin.applyPendingNow();
+    this.settingTab.display();
+    this.close();
+    new Notice(`Profile ${mode}d successfully.`);
+  }
+}
 class ColorMasterSettingTab extends PluginSettingTab {
   constructor(app, plugin) {
     super(app, plugin);
     this.plugin = plugin;
     this.graphViewTempState = null;
+    this.graphViewWorkingState = null;
     this.graphHeaderButtonsEl = null;
+  }
+
+  initSearchUI(containerEl) {
+    // create container
+    this.searchContainer = containerEl.createDiv({
+      cls: "cm-search-container",
+    });
+    const left = this.searchContainer.createDiv({ cls: "cm-search-left" });
+    const right = this.searchContainer.createDiv({ cls: "cm-search-controls" });
+
+    // Search input
+    this.searchInput = left.createEl("input", {
+      cls: "cm-search-input",
+      type: "search",
+      placeholder: "Search variables (name or value)...",
+    });
+
+    // controls: case toggle, regex toggle, section dropdown, clear button
+    this.caseToggle = right.createEl("button", {
+      cls: "cm-search-small",
+      text: "Aa",
+    });
+    this.caseToggle.setAttr("aria-label", "Case-sensitive search");
+
+    this.regexToggle = right.createEl("button", {
+      cls: "cm-search-small",
+      text: "/ /",
+    });
+    this.regexToggle.setAttr("aria-label", "Use regular expression");
+
+    this.sectionSelect = right.createEl("select", { cls: "cm-search-small" });
+    this.sectionSelect.createEl("option", { value: "", text: "All Sections" });
+
+    try {
+      Object.keys(DEFAULT_VARS || {}).forEach((k) => {
+        this.sectionSelect.createEl("option", { value: k, text: k });
+      });
+    } catch (e) {}
+
+    this.searchInfo = right.createEl("div", {
+      cls: "cm-search-info",
+      text: " ",
+    });
+    this.clearBtn = right.createEl("button", {
+      cls: "cm-search-small",
+      text: "Clear",
+    });
+
+    // state
+    this._searchState = {
+      query: "",
+      regex: false,
+      caseSensitive: false,
+      section: "",
+    };
+
+    const debouncedFilter = this._debounce(
+      () => this._applySearchFilter(),
+      180
+    );
+
+    // events
+    this.searchInput.addEventListener("input", (e) => {
+      this._searchState.query = e.target.value;
+      debouncedFilter();
+    });
+    this.caseToggle.addEventListener("click", () => {
+      this._searchState.caseSensitive = !this._searchState.caseSensitive;
+      this.caseToggle.toggleClass("is-active", this._searchState.caseSensitive);
+      debouncedFilter();
+    });
+    this.regexToggle.addEventListener("click", () => {
+      this._searchState.regex = !this._searchState.regex;
+      this.regexToggle.toggleClass("is-active", this._searchState.regex);
+      debouncedFilter();
+    });
+    this.sectionSelect.addEventListener("change", (e) => {
+      this._searchState.section = e.target.value;
+      debouncedFilter();
+    });
+    this.clearBtn.addEventListener("click", () => {
+      this.searchInput.value = "";
+      this.sectionSelect.value = "";
+      this._searchState = {
+        query: "",
+        regex: false,
+        caseSensitive: false,
+        section: "",
+      };
+      this.caseToggle.removeClass("is-active");
+      this.regexToggle.removeClass("is-active");
+      this._applySearchFilter();
+    });
+
+    // initial populate
+    this._applySearchFilter();
+  }
+
+  _debounce(fn, ms = 200) {
+    let t = null;
+    return (...args) => {
+      if (t) clearTimeout(t);
+      t = setTimeout(() => fn.apply(this, args), ms);
+    };
+  }
+
+  _getAllVarRows() {
+    return Array.from(this.containerEl.querySelectorAll(".cm-var-row"));
+  }
+
+  _applySearchFilter() {
+    const s = this._searchState;
+    const rows = this._getAllVarRows();
+    let visibleCount = 0;
+
+    let qRegex = null;
+    if (s.query && s.query.trim()) {
+      if (s.regex) {
+        try {
+          qRegex = new RegExp(s.query, s.caseSensitive ? "" : "i");
+        } catch (e) {
+          qRegex = null;
+        }
+      }
+    }
+
+    rows.forEach((row) => {
+      const varName = row.dataset.var || "";
+      const category = row.dataset.category || "";
+      const textInput = row.querySelector("input[type='text']");
+      const varValue = textInput ? textInput.value.trim() : "";
+
+      // Section filter
+      if (s.section && s.section !== category) {
+        row.classList.add("cm-hidden");
+        return;
+      }
+
+      // Name/Value filter
+      if (s.query && s.query.trim()) {
+        const q = s.query.trim();
+        let isMatch = false;
+
+        if (s.regex && qRegex) {
+          isMatch = qRegex.test(varName) || qRegex.test(varValue);
+        } else {
+          const queryLower = s.caseSensitive ? q : q.toLowerCase();
+          const nameLower = s.caseSensitive ? varName : varName.toLowerCase();
+          const valueLower = s.caseSensitive
+            ? varValue
+            : varValue.toLowerCase();
+          isMatch =
+            nameLower.includes(queryLower) || valueLower.includes(queryLower);
+        }
+
+        if (!isMatch) {
+          row.classList.add("cm-hidden");
+          return;
+        }
+      }
+
+      row.classList.remove("cm-hidden");
+      visibleCount++;
+      this._highlightRowMatches(row, s);
+    });
+
+    this.searchInfo.setText(`${visibleCount} found`);
+  }
+
+  _highlightRowMatches(row, state) {
+    const nameEl = row.querySelector(".cm-var-name");
+    if (!nameEl) return;
+
+    const originalText = nameEl.dataset.originalText || nameEl.textContent;
+    nameEl.dataset.originalText = originalText;
+
+    const query = state.query.trim();
+    if (!query) {
+      nameEl.innerHTML = originalText;
+      return;
+    }
+
+    const flags = state.caseSensitive ? "g" : "gi";
+    const regex = state.regex
+      ? new RegExp(query, flags)
+      : new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), flags);
+
+    try {
+      nameEl.innerHTML = originalText.replace(
+        regex,
+        (match) => `<span class="cm-highlight">${match}</span>`
+      );
+    } catch (e) {
+      nameEl.innerHTML = originalText; // Revert on regex error
+    }
+  }
+
+  initProfileCopyUI(containerEl) {
+    const actionsEl = containerEl.createDiv("cm-profile-actions");
+
+    actionsEl
+      .createEl("button", { text: "Export File", cls: "cm-profile-action-btn" })
+      .addEventListener("click", () => this._exportProfileToFile());
+
+    actionsEl
+      .createEl("button", { text: "Copy JSON", cls: "cm-profile-action-btn" })
+      .addEventListener("click", () => this._copyProfileToClipboard());
+
+    actionsEl.createDiv({ cls: "cm-profile-action-spacer" }); // Spacer
+
+    actionsEl
+      .createEl("button", {
+        text: "Paste / Import...",
+        cls: "cm-profile-action-btn mod-cta",
+      })
+      .addEventListener("click", () =>
+        new ProfileJsonImportModal(this.app, this.plugin, this).open()
+      );
+  }
+
+  _updatePinButtons() {
+    const name = this.plugin.settings.activeProfile;
+    const snapshot = this.plugin.settings.pinnedSnapshots?.[name];
+
+    if (this.resetPinBtn) {
+      this.resetPinBtn.setDisabled(!snapshot);
+    }
+
+    if (this.pinBtn) {
+      if (snapshot && snapshot.pinnedAt) {
+        const dateObj = new Date(snapshot.pinnedAt);
+        const year = dateObj.getFullYear();
+        const month = dateObj.getMonth() + 1;
+        const day = dateObj.getDate();
+        const formattedDate = `${year}-${month}-${day}`;
+
+        this.pinBtn.setTooltip(
+          `Colors pinned on ${formattedDate}. Click to re-pin.`
+        );
+      } else {
+        this.pinBtn.setTooltip("Pin current colors as a snapshot");
+      }
+    }
+  }
+
+  initLikePluginUI(containerEl) {
+    const likeCardEl = containerEl.createDiv("cm-like-card");
+
+    const leftSide = likeCardEl.createDiv({
+      attr: {
+        style: "display:flex; flex-direction:column; gap: 8px; flex-grow:1;",
+      },
+    });
+
+    // --- Top part: Icon and Text ---
+    const topPart = leftSide.createDiv({
+      attr: { style: "display:flex; gap: 12px; align-items:center;" },
+    });
+    const badge = topPart.createDiv("cm-like-badge");
+    badge.innerHTML = `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27z" fill="white"/></svg>`;
+
+    const body = topPart.createDiv("cm-like-body");
+    body.createEl("div", {
+      cls: "cm-like-title",
+      text: "Enjoying Color Master?",
+    });
+
+    // --- Stats Progress Bars ---
+    const statsContainer = leftSide.createDiv("cm-like-stats");
+    const profilesCount = this._calcProfilesCount();
+    const varsCount = this._calcVarsCount();
+    const sinceInstalled =
+      this.plugin.settings.installDate || new Date().toISOString();
+    const days = Math.max(
+      1,
+      Math.floor(
+        (Date.now() - new Date(sinceInstalled)) / (1000 * 60 * 60 * 24)
+      )
+    );
+
+    this._createStatBar(
+      statsContainer,
+      "Profiles",
+      profilesCount,
+      10,
+      "#00b3ffff"
+    ); // Max 10 profiles
+    this._createStatBar(
+      statsContainer,
+      "Customizable Colors",
+      varsCount,
+      varsCount,
+      "#ffbb00ff"
+    ); // Max is total colors
+    this._createStatBar(statsContainer, "Days of Use", days, 365, "#ff0008ff"); // Max 1 year
+
+    // --- Right part: Action Buttons ---
+    const actions = likeCardEl.createDiv("cm-like-actions");
+
+    // Star Button
+    const starButtonWrapper = actions.createDiv({ cls: "codepen-button" });
+    starButtonWrapper.createEl("span", { text: "Star on GitHub" });
+    starButtonWrapper.addEventListener("click", () => {
+      window.open(
+        "https://github.com/YazanAmmar/obsidian-color-master",
+        "_blank"
+      );
+    });
+
+    // Report Button
+    const reportButtonWrapper = actions.createDiv({ cls: "codepen-button" });
+    reportButtonWrapper.createEl("span", { text: "Report an Issue" });
+    reportButtonWrapper.addEventListener("click", () => {
+      window.open(
+        "https://github.com/YazanAmmar/obsidian-color-master/issues",
+        "_blank"
+      );
+    });
+  }
+  _launchLikeConfetti(hostEl) {
+    const colors = ["#ff9a9e", "#ffd76b", "#6dd3ff", "#a6c1ee", "#b8ffb0"];
+    for (let i = 0; i < 20; i++) {
+      const p = hostEl.createDiv("piece");
+      p.style.background = colors[i % colors.length];
+      p.style.left = `${10 + Math.random() * 80}%`;
+      p.style.top = `${-10 + Math.random() * 10}px`;
+
+      const anim = p.animate(
+        [
+          { transform: "translate3d(0, 0, 0) rotate(0deg)", opacity: 1 },
+          {
+            transform: `translate3d(${
+              (Math.random() - 0.5) * 200
+            }px, 150px, 0) rotate(${(Math.random() - 0.5) * 540}deg)`,
+            opacity: 0,
+          },
+        ],
+        {
+          duration: 1000 + Math.random() * 800,
+          easing: "cubic-bezier(.15,.85,.25,1)",
+          delay: Math.random() * 100,
+        }
+      );
+
+      anim.onfinish = () => p.remove();
+    }
+  }
+
+  _createStatBar(parentEl, label, value, max) {
+    const skillBox = parentEl.createDiv("cm-stat-box");
+
+    // --- Header with Title and Value ---
+    const header = skillBox.createDiv("cm-stat-header");
+    header.createEl("span", { cls: "title", text: label });
+    header.createEl("span", { cls: "value", text: value });
+
+    // --- Progress Bar ---
+    const skillBar = skillBox.createDiv("skill-bar");
+    const percentage = Math.min(100, Math.round((value / max) * 100));
+
+    const skillPer = skillBar.createEl("span", { cls: "skill-per" });
+    skillPer.style.width = `${percentage}%`;
+    skillPer.style.background = `linear-gradient(115deg, #33ff00, #ffcc00, #8000ff, #00b7ff, #00ff66)`;
+  }
+
+  _calcProfilesCount() {
+    return Object.keys(this.plugin.settings.profiles || {}).length;
+  }
+
+  _calcVarsCount() {
+    return Object.keys(flattenVars(DEFAULT_VARS)).length;
+  }
+
+  _getCurrentProfileJson() {
+    const p =
+      this.plugin.settings.profiles?.[this.plugin.settings.activeProfile];
+    if (!p) return null;
+    return {
+      name: this.plugin.settings.activeProfile,
+      exportedAt: new Date().toISOString(),
+      profile: p,
+    };
+  }
+
+  async _copyProfileToClipboard() {
+    const payload = this._getCurrentProfileJson();
+    if (!payload) {
+      new Notice("No active profile to copy.");
+      return;
+    }
+    await navigator.clipboard.writeText(JSON.stringify(payload, null, 2));
+    new Notice("Profile JSON copied to clipboard.");
+  }
+
+  _exportProfileToFile() {
+    const payload = this._getCurrentProfileJson();
+    if (!payload) {
+      new Notice("No active profile to export.");
+      return;
+    }
+    const blob = new Blob([JSON.stringify(payload, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.download = `${this.plugin.settings.activeProfile}.profile.json`;
+    a.href = url;
+    a.click();
+    URL.revokeObjectURL(url);
+    a.remove();
+  }
+
+  // --- Smart update function for contrast checkers ---
+  updateAccessibilityCheckers() {
+    const activeProfileVars =
+      this.plugin.settings.profiles[this.plugin.settings.activeProfile].vars;
+    const allDefaultVars = flattenVars(DEFAULT_VARS);
+
+    const checkerElements = this.containerEl.querySelectorAll(
+      ".cm-accessibility-checker"
+    );
+
+    checkerElements.forEach((checkerEl) => {
+      const varName = checkerEl.dataset.varName;
+      if (!varName) return;
+
+      const bgVarForTextColor = TEXT_TO_BG_MAP[varName];
+      if (!bgVarForTextColor) return;
+
+      let textColor = activeProfileVars[varName] || allDefaultVars[varName];
+      let bgColor =
+        activeProfileVars[bgVarForTextColor] ||
+        allDefaultVars[bgVarForTextColor];
+
+      if (varName === "--text-highlight-bg") {
+        [textColor, bgColor] = [bgColor, textColor];
+      }
+
+      if (!textColor || !bgColor) return;
+
+      const ratio = getContrastRatio(bgColor, textColor);
+      const rating = getAccessibilityRating(ratio);
+
+      checkerEl.className = `cm-accessibility-checker ${rating.cls}`;
+      checkerEl.setText(`${rating.text} (${rating.score})`);
+    });
   }
 
   display() {
@@ -862,6 +1679,7 @@ class ColorMasterSettingTab extends PluginSettingTab {
           .onChange(async (value) => {
             this.plugin.settings.pluginEnabled = value;
             await this.plugin.saveSettings();
+            this.plugin.restartColorUpdateLoop(); // Restart loop on enable/disable
             new Notice(
               value ? t("PLUGIN_ENABLED_NOTICE") : t("PLUGIN_DISABLED_NOTICE")
             );
@@ -885,70 +1703,125 @@ class ColorMasterSettingTab extends PluginSettingTab {
     containerEl.createEl("hr");
 
     this.drawProfileManager();
+    this.initSearchUI(containerEl); // ✅ إظهار واجهة البحث
+    this.initProfileCopyUI(containerEl); // ✅ إظهار أزرار النسخ واللصق
+    // --- ✅  Options Section ---
+    containerEl.createEl("h3", { text: t("OPTIONS_HEADING") });
+
+    new Setting(containerEl)
+      .setName(t("UPDATE_FREQUENCY_NAME"))
+      .setDesc(t("UPDATE_FREQUENCY_DESC"))
+      .addSlider((slider) => {
+        slider
+          .setLimits(0, 60, 1) // Range 0-60, step 1
+          .setValue(this.plugin.settings.colorUpdateFPS)
+          .setDynamicTooltip()
+          .onChange(async (value) => {
+            this.plugin.settings.colorUpdateFPS = value;
+            await this.plugin.saveSettings();
+            this.plugin.restartColorUpdateLoop(); // Restart the loop with the new FPS
+            new Notice(`Live Update FPS set to: ${value}`);
+          });
+      });
+
     this.drawColorPickers();
-
-    // --- Support section ---
-
     containerEl.createEl("hr");
-    const profilesCount = Object.keys(this.plugin.settings.profiles).length;
-    const colorsCount = Object.keys(flattenVars(DEFAULT_VARS)).length;
-
-    const supportBox = containerEl.createDiv({ cls: "cm-support-container" });
-
-    supportBox.createEl("div", {
-      text: t("SUPPORT_HEADER"),
-      cls: "cm-support-title",
-    });
-    supportBox.createEl("p", {
-      text: t("SUPPORT_DESC"),
-      cls: "cm-support-description",
-    });
-
-    const contentContainer = supportBox.createDiv({
-      cls: "cm-support-content",
-    });
-
-    const profilesStat = contentContainer.createDiv({ cls: "cm-stat-item" });
-    profilesStat.createDiv({ text: profilesCount, cls: "cm-stat-number" });
-    profilesStat.createDiv({ text: "Built-in Profiles", cls: "cm-stat-label" });
-
-    const colorsStat = contentContainer.createDiv({ cls: "cm-stat-item" });
-    colorsStat.createDiv({ text: colorsCount, cls: "cm-stat-number" });
-    colorsStat.createDiv({ text: "Customizable Colors", cls: "cm-stat-label" });
-
-    const githubLink = contentContainer.createEl("a", {
-      cls: "cm-support-button",
-      href: "https://github.com/YazanAmmar/obsidian-color-master",
-      attr: { target: "_blank" },
-    });
-    githubLink.createSpan({ text: "Star on GitHub" });
-
-    const issuesLink = contentContainer.createEl("a", {
-      cls: "cm-support-button",
-      href: "https://github.com/YazanAmmar/obsidian-color-master/issues",
-      attr: { target: "_blank" },
-    });
-    issuesLink.createSpan({ text: "Report an Issue" });
+    this.initLikePluginUI(containerEl);
   }
 
+  // ---------- Replacement hide() that acts like "Cancel" on accidental close ----------
   hide() {
+    // If user had pending graph edits, treat closing the settings as a CANCEL action.
     if (this.graphViewTempState) {
       console.log(
-        "Color Master: Settings closed with pending changes. Reverting..."
+        "Color Master: Settings closed with pending Graph edits. Performing Cancel (revert) instead of applying partial state."
       );
 
-      Object.assign(
-        this.plugin.settings.profiles[this.plugin.settings.activeProfile].vars,
-        this.graphViewTempState
-      );
+      // 1) Restore saved profile vars from the temp snapshot
+      const profileVars =
+        this.plugin.settings.profiles[this.plugin.settings.activeProfile]
+          .vars || {};
+      Object.assign(profileVars, this.graphViewTempState);
 
-      this.plugin.applyStyles();
-      if (this.plugin.settings.pluginEnabled)
-        this.plugin.refreshOpenGraphViews();
+      // 2) Enqueue them so visuals update immediately (works for FPS==0 or >0)
+      for (const k in this.graphViewTempState) {
+        if (Object.prototype.hasOwnProperty.call(this.graphViewTempState, k)) {
+          this.plugin.pendingVarUpdates[k] = this.graphViewTempState[k];
+        }
+      }
 
+      // 3) Apply pending now to force visual restore
+      try {
+        this.plugin.applyPendingNow();
+      } catch (e) {
+        console.warn("Color Master: applyPendingNow failed during hide()", e);
+        // fallback: trigger css-change
+        this.app.workspace.trigger("css-change");
+      }
+
+      // 4) Clean up internal temporary state and UI buttons (but do NOT call this.display())
       this.graphViewTempState = null;
+      this.graphViewWorkingState = null;
+      this.hideGraphActionButtons && this.hideGraphActionButtons();
+
+      // 5) Refresh graph views if plugin enabled
+      if (this.plugin.settings.pluginEnabled) {
+        try {
+          this.plugin.refreshOpenGraphViews();
+        } catch (e) {
+          console.warn(
+            "Color Master: refreshOpenGraphViews failed during hide()",
+            e
+          );
+        }
+      }
+
+      // Ensure Obsidian re-evaluates styles
+      this.app.workspace.trigger("css-change");
     }
   }
+
+  // ✅ الدالة الجديدة للتعامل مع كبسة Apply
+  async onGraphApply() {
+    if (!this.graphViewWorkingState) return;
+    const profileVars =
+      this.plugin.settings.profiles[this.plugin.settings.activeProfile].vars ||
+      {};
+
+    Object.assign(profileVars, this.graphViewWorkingState);
+
+    await this.plugin.saveSettings();
+
+    this.graphViewTempState = null;
+    this.graphViewWorkingState = null;
+    this.hideGraphActionButtons();
+    new Notice("Graph colors applied!");
+  }
+
+  // ✅ الدالة الجديدة للتعامل مع كبسة Cancel
+  onGraphCancel() {
+    if (!this.graphViewTempState) {
+      this.hideGraphActionButtons();
+      return;
+    }
+
+    const profileVars =
+      this.plugin.settings.profiles[this.plugin.settings.activeProfile].vars ||
+      {};
+
+    Object.assign(profileVars, this.graphViewTempState);
+
+    for (const key in this.graphViewTempState) {
+      this.plugin.pendingVarUpdates[key] = this.graphViewTempState[key];
+    }
+    this.plugin.applyPendingNow();
+
+    this.graphViewTempState = null;
+    this.graphViewWorkingState = null;
+    this.hideGraphActionButtons();
+    this.display();
+  }
+
   showGraphActionButtons() {
     this.graphHeaderButtonsEl.empty();
 
@@ -956,38 +1829,23 @@ class ColorMasterSettingTab extends PluginSettingTab {
       text: "Apply",
       cls: "mod-cta",
     });
-    applyButton.addEventListener("click", async () => {
-      await this.plugin.saveSettings();
+    applyButton.addEventListener("click", () => this.onGraphApply()); // ✅ صار يستدعي الدالة الجديدة
 
-      this.app.workspace.trigger("css-change");
-
-      new Notice("Graph colors applied successfully to all open views!");
-      this.hideGraphActionButtons();
-    });
     const cancelButton = this.graphHeaderButtonsEl.createEl("button", {
       text: "Cancel",
     });
-    cancelButton.addEventListener("click", () => {
-      Object.assign(
-        this.plugin.settings.profiles[this.plugin.settings.activeProfile].vars,
-        this.graphViewTempState
-      );
-
-      this.plugin.applyStyles();
-      if (this.plugin.settings.pluginEnabled)
-        this.plugin.refreshOpenGraphViews();
-      this.app.workspace.trigger("css-change");
-      this.hideGraphActionButtons();
-      this.display();
-    });
+    cancelButton.addEventListener("click", () => this.onGraphCancel()); // ✅ صار يستدعي الدالة الجديدة
   }
+  // ---------- Ensure hideGraphActionButtons also clears workingState ----------
   hideGraphActionButtons() {
+    // Clear both states
     this.graphViewTempState = null;
+    this.graphViewWorkingState = null;
+
     if (this.graphHeaderButtonsEl) {
       this.graphHeaderButtonsEl.empty();
     }
   }
-
   drawProfileManager() {
     const { containerEl } = this;
     containerEl.createEl("h3", { text: t("PROFILE_MANAGER") });
@@ -1003,9 +1861,42 @@ class ColorMasterSettingTab extends PluginSettingTab {
         dropdown.onChange(async (value) => {
           this.plugin.settings.activeProfile = value;
           await this.plugin.saveSettings();
-          this.app.workspace.trigger("css-change");
           this.display();
         });
+      })
+      .addButton((button) => {
+        // ✅ --- زر التثبيت (Pin) صار هون --- ✅
+        this.pinBtn = button; // Save reference to the button component
+        button
+          .setIcon("pin")
+          .setTooltip("Pin current colors as a snapshot")
+          .onClick(async () => {
+            await this.plugin.pinProfileSnapshot(
+              this.plugin.settings.activeProfile
+            );
+            new Notice("Profile colors pinned successfully!");
+            this._updatePinButtons();
+          });
+      })
+      .addButton((button) => {
+        // ✅ --- زر الاسترجاع (Reset) صار هون --- ✅
+        this.resetPinBtn = button; // Save reference
+        button
+          .setIcon("reset")
+          .setTooltip("Reset to pinned colors")
+          .onClick(() => {
+            const name = this.plugin.settings.activeProfile;
+            new ConfirmationModal(
+              this.app,
+              t("RESET_CONFIRM_TITLE"),
+              t("RESET_CONFIRM_DESC"),
+              async () => {
+                await this.plugin.resetProfileToPinned(name);
+                new Notice("Profile has been reset to the pinned snapshot.");
+                this.display();
+              }
+            ).open();
+          });
       })
       .addButton((button) => {
         button.setButtonText(t("NEW_BUTTON")).onClick(() => {
@@ -1034,12 +1925,10 @@ class ColorMasterSettingTab extends PluginSettingTab {
             new Notice(t("CANNOT_DELETE_LAST_PROFILE"));
             return;
           }
-
           const message = t(
             "DELETE_PROFILE_CONFIRMATION",
             this.plugin.settings.activeProfile
           );
-
           new ConfirmationModal(
             this.app,
             t("DELETE_PROFILE_TITLE"),
@@ -1057,23 +1946,9 @@ class ColorMasterSettingTab extends PluginSettingTab {
             }
           ).open();
         });
-      })
-      .addButton((button) => {
-        button
-          .setIcon("lucide-upload")
-          .setTooltip(t("EXPORT_BUTTON_TOOLTIP"))
-          .onClick(() => {
-            this.exportProfile();
-          });
-      })
-      .addButton((button) => {
-        button
-          .setIcon("lucide-download")
-          .setTooltip(t("IMPORT_BUTTON_TOOLTIP"))
-          .onClick(() => {
-            this.importProfile();
-          });
       });
+
+    this._updatePinButtons(); // Update buttons on initial draw
   }
 
   drawColorPickers() {
@@ -1159,6 +2034,36 @@ class ColorMasterSettingTab extends PluginSettingTab {
         const setting = new Setting(containerEl)
           .setName(varName.replace("--", "").replace(/-/g, " "))
           .setDesc(description);
+
+        // ✅ --- "تعليم" السطر بمعلومات البحث ---
+        setting.settingEl.classList.add("cm-var-row");
+        setting.settingEl.dataset.var = varName;
+        setting.settingEl.dataset.category = category;
+        setting.nameEl.classList.add("cm-var-name");
+        // --- نهاية التعليم ---
+
+        const bgVarForTextColor = TEXT_TO_BG_MAP[varName];
+
+        if (bgVarForTextColor) {
+          let textColor = activeProfileVars[varName] || defaultValue;
+          let bgColor =
+            activeProfileVars[bgVarForTextColor] ||
+            flattenVars(DEFAULT_VARS)[bgVarForTextColor];
+
+          if (varName === "--text-highlight-bg") {
+            [textColor, bgColor] = [bgColor, textColor];
+          }
+
+          const ratio = getContrastRatio(bgColor, textColor);
+          const rating = getAccessibilityRating(ratio);
+
+          const checkerEl = setting.controlEl.createDiv({
+            cls: `cm-accessibility-checker ${rating.cls}`,
+          });
+          checkerEl.dataset.varName = varName;
+          checkerEl.setText(`${rating.text} (${rating.score})`);
+        }
+
         const colorPicker = setting.controlEl.createEl("input", {
           type: "color",
         });
@@ -1167,37 +2072,84 @@ class ColorMasterSettingTab extends PluginSettingTab {
           cls: "color-master-text-input",
         });
 
-        const initialValue = activeProfileVars[varName] || defaultValue;
+        let initialValue;
+        if (
+          category === "Graph View" &&
+          this.graphViewWorkingState &&
+          this.graphViewWorkingState[varName] !== undefined
+        ) {
+          initialValue = this.graphViewWorkingState[varName];
+        } else {
+          initialValue = activeProfileVars[varName] || defaultValue;
+        }
         colorPicker.value = initialValue;
         textInput.value = initialValue;
 
-        const handleColorChange = (newColor) => {
+        // ✅ --- New Performance-Optimized Event Handling ---
+
+        // Event 1: While dragging (input event) - for live preview
+        colorPicker.addEventListener("input", (e) => {
+          const newColor = e.target.value;
+          textInput.value = newColor; // Update text field immediately
+
+          // If live preview is enabled, put the change in the "pending box"
+          if (this.plugin.settings.colorUpdateFPS > 0) {
+            this.plugin.pendingVarUpdates[varName] = newColor;
+          }
+        });
+
+        const handleFinalChange = (newColor) => {
           if (category === "Graph View") {
             if (!this.graphViewTempState) {
               this.graphViewTempState = {};
+              const profileVars =
+                this.plugin.settings.profiles[
+                  this.plugin.settings.activeProfile
+                ].vars || {};
               Object.keys(DEFAULT_VARS["Graph View"]).forEach((key) => {
                 this.graphViewTempState[key] =
-                  activeProfileVars[key] || DEFAULT_VARS["Graph View"][key];
+                  profileVars[key] ?? DEFAULT_VARS["Graph View"][key];
               });
-              this.showGraphActionButtons();
             }
+
+            if (!this.graphViewWorkingState) {
+              this.graphViewWorkingState = { ...this.graphViewTempState };
+            }
+
+            this.graphViewWorkingState[varName] = newColor;
+            this.showGraphActionButtons();
+
+            this.plugin.pendingVarUpdates[varName] = newColor;
+            if (this.plugin.settings.colorUpdateFPS === 0) {
+              this.plugin.applyPendingNow();
+            } else {
+              this.plugin.startColorUpdateLoop();
+            }
+            return;
           }
 
           activeProfileVars[varName] = newColor;
-          this.plugin.applyStyles();
-          if (category === "Graph View") this.plugin.refreshOpenGraphViews();
+
+          if (this.plugin.settings.colorUpdateFPS === 0) {
+            this.plugin.pendingVarUpdates[varName] = newColor;
+            this.plugin.applyPendingNow();
+            this.plugin.saveSettings();
+            this.display();
+            return;
+          }
+
+          this.plugin.pendingVarUpdates[varName] = newColor;
+          this.plugin.saveSettings();
+          setTimeout(() => this.app.workspace.trigger("css-change"), 50);
         };
 
-        colorPicker.addEventListener("input", (e) => {
-          const newColor = e.target.value;
-          textInput.value = newColor;
-          handleColorChange(newColor);
+        colorPicker.addEventListener("change", (e) => {
+          handleFinalChange(e.target.value);
         });
 
         textInput.addEventListener("change", (e) => {
-          const newColor = e.target.value;
-          colorPicker.value = newColor;
-          handleColorChange(newColor);
+          colorPicker.value = e.target.value;
+          handleFinalChange(e.target.value);
         });
 
         setting.addExtraButton((button) => {
@@ -1209,7 +2161,7 @@ class ColorMasterSettingTab extends PluginSettingTab {
               activeProfileVars[varName] = newColor;
 
               if (category === "Graph View") {
-                handleColorChange(newColor);
+                handleFinalChange(newColor);
                 this.display();
               } else {
                 await this.plugin.saveSettings();
@@ -1219,70 +2171,6 @@ class ColorMasterSettingTab extends PluginSettingTab {
         });
       }
     }
-  }
-
-  exportProfile() {
-    const activeProfileName = this.plugin.settings.activeProfile;
-    const activeProfile = this.plugin.settings.profiles[activeProfileName];
-    if (!activeProfile) {
-      new Notice("Active profile not found.");
-      return;
-    }
-
-    const dataStr =
-      "data:text/json;charset=utf-8," +
-      encodeURIComponent(JSON.stringify(activeProfile, null, 2));
-    const downloadAnchorNode = document.createElement("a");
-    downloadAnchorNode.setAttribute("href", dataStr);
-    downloadAnchorNode.setAttribute("download", `${activeProfileName}.json`);
-    document.body.appendChild(downloadAnchorNode);
-    downloadAnchorNode.click();
-    downloadAnchorNode.remove();
-    new Notice(`Profile "${activeProfileName}" exported.`);
-  }
-
-  importProfile() {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = ".json,application/json";
-
-    input.onchange = async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        try {
-          const importedData = JSON.parse(event.target.result);
-
-          const vars = importedData.vars || importedData;
-
-          if (typeof vars !== "object" || vars === null) {
-            throw new Error("Invalid JSON structure.");
-          }
-
-          new NewProfileModal(this.app, (newName) => {
-            if (newName && !this.plugin.settings.profiles[newName]) {
-              this.plugin.settings.profiles[newName] = { vars: vars };
-              this.plugin.settings.activeProfile = newName;
-              this.plugin.saveSettings();
-              this.display();
-              new Notice(`Profile "${newName}" imported successfully.`);
-            } else if (newName) {
-              new Notice(t("PROFILE_EXISTS_NOTICE", newName));
-            }
-          }).open();
-        } catch (error) {
-          new Notice(
-            "Failed to parse profile file. Make sure it's a valid JSON."
-          );
-          console.error("Color Master Import Error:", error);
-        }
-      };
-      reader.readAsText(file);
-    };
-
-    input.click();
   }
 }
 
@@ -1397,6 +2285,43 @@ class ConfirmationModal extends Modal {
   onClose() {
     this.contentEl.empty();
   }
+}
+
+// --- Accessibility (a11y) Checker Logic ---
+function getLuminance(hex) {
+  const rgb = parseInt(hex.startsWith("#") ? hex.substring(1) : hex, 16);
+  const r = (rgb >> 16) & 0xff;
+  const g = (rgb >> 8) & 0xff;
+  const b = (rgb >> 0) & 0xff;
+
+  const a = [r, g, b].map((v) => {
+    v /= 255;
+    return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+  });
+
+  return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
+}
+
+function getContrastRatio(hex1, hex2) {
+  const lum1 = getLuminance(hex1);
+  const lum2 = getLuminance(hex2);
+  const brightest = Math.max(lum1, lum2);
+  const darkest = Math.min(lum1, lum2);
+  return (brightest + 0.05) / (darkest + 0.05);
+}
+
+function getAccessibilityRating(ratio) {
+  const score = ratio.toFixed(2);
+  if (ratio >= 7) {
+    return { text: "AAA", score, cls: "cm-accessibility-pass" };
+  }
+  if (ratio >= 4.5) {
+    return { text: "AA", score, cls: "cm-accessibility-pass" };
+  }
+  if (ratio >= 3) {
+    return { text: "AA Large", score, cls: "cm-accessibility-warn" };
+  }
+  return { text: "Fail", score, cls: "cm-accessibility-fail" };
 }
 
 module.exports = ColorMaster;
