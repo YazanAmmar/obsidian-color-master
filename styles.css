@@ -52,75 +52,6 @@
   box-sizing: border-box;
 }
 
-.cm-support-container {
-  border: 1px solid var(--background-modifier-border);
-  border-radius: 8px;
-  padding: 15px;
-  margin-top: 20px;
-  background-color: var(--background-secondary-alt);
-}
-
-.cm-support-title {
-  font-size: 1.2em;
-  font-weight: bold;
-  margin-bottom: 15px;
-  text-align: center;
-}
-
-.cm-support-content {
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 15px;
-}
-
-.cm-stat-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 5px;
-}
-
-.cm-stat-item .cm-stat-number {
-  font-size: 1.5em;
-  font-weight: bold;
-  color: var(--text-accent);
-}
-
-.cm-stat-item .cm-stat-label {
-  font-size: 0.9em;
-  color: var(--text-muted);
-}
-
-.cm-support-button {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 15px;
-  background-color: var(--interactive-accent);
-  color: var(--text-on-accent);
-  border-radius: 5px;
-  text-decoration: none;
-  transition: background-color 0.2s;
-}
-/* ---- Style for the support description text ---- */
-.cm-support-description {
-  font-size: 0.9em;
-  color: var(--text-muted);
-  text-align: center;
-  margin-top: 5px;
-  margin-bottom: 20px;
-  max-width: 500px;
-  margin-left: auto;
-  margin-right: auto;
-  line-height: 1.5;
-}
-
-.cm-support-button:hover {
-  background-color: var(--interactive-accent-hover);
-  color: var(--text-on-accent);
-}
 /* --- Styles for Graph View Header Buttons --- */
 .cm-graph-header {
   display: flex;
@@ -155,4 +86,346 @@
 
 .cm-temporary-buttons {
   display: contents;
+}
+/* --- Styles for Accessibility Checker --- */
+.cm-accessibility-checker {
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 5px;
+  margin-left: 10px; /* For LTR */
+  font-size: 11px;
+  font-weight: 500;
+  border: 1px solid var(--background-modifier-border);
+}
+
+.is-rtl .cm-accessibility-checker {
+  margin-left: 0;
+  margin-right: 10px; /* For RTL */
+}
+
+/* Accessibility Rating Colors */
+.cm-accessibility-pass {
+  background-color: #28a74520; /* Green tint */
+  color: #28a745;
+  border-color: #28a74580;
+}
+.cm-accessibility-warn {
+  background-color: #ffc10720; /* Yellow tint */
+  color: #b58900;
+  border-color: #ffc10780;
+}
+.cm-accessibility-fail {
+  background-color: #dc354520; /* Red tint */
+  color: #dc3545;
+  border-color: #dc354580;
+}
+
+.cm-search-input {
+  width: 100%;
+  padding: 8px 12px;
+  background-color: var(--background-secondary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 5px;
+  color: var(--text-normal);
+}
+
+/* Color Master — Search UI */
+.cm-search-container {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 8px 0 12px;
+}
+.cm-search-left {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex: 1;
+}
+
+.cm-search-controls {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.cm-search-info {
+  font-size: 12px;
+  color: var(--muted-text);
+  margin-left: 6px;
+}
+
+.cm-var-row.cm-hidden {
+  display: none !important;
+}
+.cm-var-row .cm-var-name {
+  font-weight: 600;
+}
+.cm-highlight {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 0, 0.25),
+    rgba(255, 255, 0, 0.05)
+  );
+  padding: 0 2px;
+  border-radius: 2px;
+}
+
+.cm-filter-badge {
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--text-normal);
+  margin-left: 6px;
+}
+.cm-search-small {
+  font-size: 12px;
+  padding: 4px 6px;
+  border-radius: 6px;
+}
+
+/* Profile copy / paste buttons */
+.cm-profile-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 10px 0 14px;
+}
+.cm-profile-action-btn {
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  border: 1px solid var(--interactive-border);
+  background: var(--background-secondary);
+  color: var(--text-normal);
+}
+.cm-profile-action-btn:active {
+  transform: translateY(1px);
+}
+.cm-profile-action-btn.mod-cta {
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border-color: var(--interactive-accent);
+}
+.cm-profile-action-spacer {
+  flex: 1;
+}
+
+.cm-like-card {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 14px;
+  margin-top: 20px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0.02));
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(8px);
+  transition: transform 0.18s cubic-bezier(0.2, 0.9, 0.3, 1),
+    box-shadow 0.18s ease;
+  position: relative;
+  overflow: visible;
+}
+.cm-like-badge {
+  min-width: 50px;
+  height: 50px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: conic-gradient(
+    from 0deg at 50% 50%,
+    #33ff00,
+    #ffcc00,
+    #8000ff,
+    #00b7ff
+  );
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+  transition: transform 0.25s ease;
+}
+.cm-like-badge .icon {
+  font-size: 22px;
+  color: white;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.25));
+}
+.cm-like-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.cm-like-title {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-normal);
+}
+.cm-like-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* ===== Like Card: improved star + stats donuts ===== */
+.cm-like-card .cm-like-badge svg {
+  width: 32px;
+  height: 32px;
+  display: block;
+}
+.cm-like-body {
+  flex-grow: 1;
+}
+.cm-like-stats {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.cm-like-actions {
+  display: flex;
+  flex-direction: column; /* Stack buttons vertically */
+  gap: 8px;
+  align-self: stretch; /* Make buttons stretch */
+}
+.cm-like-action {
+  width: 100%;
+  justify-content: center;
+}
+/* ===== Stats Progress Bars ===== */
+/* ===== Stats Progress Bars (Corrected) ===== */
+.cm-like-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 14px; /* More space between bars */
+  margin-top: 12px;
+  width: 100%;
+}
+.cm-stat-box {
+  width: 100%;
+}
+.cm-stat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+}
+.cm-stat-header .title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+.cm-stat-header .value {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-normal);
+}
+.cm-stat-box .skill-bar {
+  height: 8px;
+  width: 100%;
+  border-radius: 6px;
+  background-color: var(--background-modifier-border);
+  overflow: hidden;
+}
+.skill-bar .skill-per {
+  display: block;
+  height: 100%;
+  width: 0%;
+  border-radius: 6px;
+  animation: cm-progress 0.8s ease-out forwards;
+}
+@keyframes cm-progress {
+  from {
+    width: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.skill-per .tooltip {
+  position: absolute;
+  right: -18px;
+  top: -30px;
+  font-size: 11px;
+  font-weight: 500; /* Normal weight */
+  color: var(--text-on-accent);
+  padding: 2px 6px;
+  border-radius: 4px;
+  background-color: var(--interactive-accent);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.skill-bar:hover .tooltip {
+  opacity: 1;
+}
+.tooltip::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -3px;
+  height: 6px;
+  width: 6px;
+  background-color: var(--interactive-accent);
+  transform: translateX(-50%) rotate(45deg);
+}
+
+/* ===== Animated Buttons ("codepen-button" style) ===== */
+.codepen-button {
+  display: block;
+  cursor: pointer;
+  color: white;
+  position: relative;
+  text-decoration: none;
+  font-weight: 600;
+  border-radius: 6px;
+  overflow: hidden;
+  padding: 2px; /* Controls border thickness */
+  isolation: isolate;
+  width: 100%;
+}
+.codepen-button::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 400%;
+  height: 100%;
+  background: linear-gradient(
+    115deg,
+    #33ff00,
+    #ffcc00,
+    #8000ff,
+    #00b7ff,
+    #00ff66
+  );
+  background-size: 25% 100%;
+  animation: cm-border-animation 0.75s linear infinite;
+  animation-play-state: paused;
+  translate: -5% 0%;
+  transition: translate 0.25s ease-out;
+}
+.codepen-button:hover::before {
+  animation-play-state: running;
+  transition-duration: 0.75s;
+  translate: 0% 0%;
+}
+@keyframes cm-border-animation {
+  to {
+    transform: translateX(-25%);
+  }
+}
+.codepen-button span {
+  position: relative;
+  display: block;
+  text-align: center;
+  padding: 8px 12px;
+  font-size: 13px;
+  background: var(--background-secondary);
+  border-radius: 4px;
+  height: 100%;
+}
+/* --- Light Mode Fix for Animated Buttons --- */
+.theme-light .codepen-button span {
+  color: #000000;
+  background: #f0f2f5;
 }
