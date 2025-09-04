@@ -1,5 +1,28 @@
 # Changelog
 
+## v1.0.4 - 2025-09-04 (The CSS Freedom Update)
+
+### New Features & Major Improvements
+
+* **New: Paste CSS for Instant Theming!**
+    * Introducing a revolutionary way to create color profiles! You can now click the new "Paste CSS" button to paste raw CSS code from any theme or snippet.
+    * This creates a special "CSS Profile" that directly applies your pasted code, allowing you to use complex themes without needing to install them separately. It's the ultimate tool for theme experimentation and customization. 
+
+* **New: Multi-Step Color Undo**
+    * The "Reset" button next to each color picker has been upgraded to an intelligent **Undo** button .
+    * It now remembers the last 5 changes you made to that specific color. If you make a mistake or want to go back, simply click Undo to step back through your recent edits.
+    * If there's no history, it will simply notify you instead of reverting to default, giving you full control.
+
+* **Complete Search Overhaul**
+    * **Better Placement**: The entire search interface has been moved to the top of the settings panel, right where you'd expect it to be.
+    * **Focus Mode**: When you start typing in the search bar, all irrelevant sections (like Profile Manager and Options) automatically disappear, providing a clean and focused view of your color variables and results. 
+    * **Smarter Filtering**: Fixed a bug where searching for a term like `h1` would show empty category titles. Now, only the categories that actually contain a matching result will be displayed. 
+
+### UI & UX Enhancements
+
+* **Redesigned Support Area**: The "Like the Plugin?" section has been visually updated for a cleaner and more engaging look.
+* **New 'My GitHub' Button**: Added a new button that links directly to Yazan Ammar's GitHub profile, making it easier to connect.
+
 ## v1.0.3 - 2025-09-03 (The Power User Update) 
 
 ### New Features & Major Improvements
