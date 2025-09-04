@@ -1,22 +1,36 @@
 # Color Master for Obsidian
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![GitHub release (latest by date)](https://img.shields.io/github/v/release/YazanAmmar/obsidian-color-master?color=blue&label=version)
-](https://github.com/YazanAmmar/obsidian-color-master/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![GitHub release (latest by date)](https://img.shields.io/github/v/release/YazanAmmar/obsidian-color-master?color=blue&label=version)](https://github.com/YazanAmmar/obsidian-color-master/releases)
 
-
-Take full control of your Obsidian theme with **Color Master**. This plugin provides a comprehensive user interface to edit every core CSS color variable in Obsidian. Create, save, and share your own color schemes with a powerful profile manager, all without needing to write a single line of CSS.
+Take full control of your Obsidian theme with **Color Master**. This plugin provides a comprehensive user interface to edit every core CSS color variable in Obsidian. Create, save, and share your own color schemes with a powerful profile manager, or even paste raw CSS to instantly use any theme you want—all without writing a single line of code.
 
 <img width="2560" height="640" alt="Color Master Screenshot" src="Images/color-master-2560x640.png" />
 
 ---
 
-## Features
+## ✨ Features
 
+Color Master is packed with features designed for both beginners and power-users, giving you ultimate control over your workspace's appearance.
+
+#### Core Customization
 * **Live Color Editor**: An intuitive UI with color pickers to see your changes instantly.
-* **Profile Management**: Create, delete, and switch between multiple color profiles.
-* **Import & Export**: Easily share your favorite profiles with others or back them up.
+* **Full Profile Management**: Create, delete, and switch between multiple color profiles.
+* **Import & Export**: Easily share your favorite profiles with others or back them up with flexible **Merge** and **Replace** options.
 * **Bilingual Interface**: Full support for both English and Arabic (العربية), with automatic Right-to-Left (RTL) mode.
-* **Beautiful Default Themes**: Comes with four stunning, ready-to-use profiles to get you started.
+* **Beautiful Default Themes**: Comes with five stunning, ready-to-use profiles to get you started.
+
+#### 🚀 Power-User Tools
+* **NEW - Paste CSS for Instant Theming!**: The ultimate creative tool! Paste raw CSS from any theme or snippet to create a special "CSS Profile," allowing you to use complex themes without needing to install them.
+* **Multi-Step Color Undo**: The "Reset" button has been upgraded to an intelligent **Undo** button that remembers your last 5 changes for each color.
+* **Profile Snapshots**: Safely experiment with your colors! Use the **Pin** button to save a snapshot of your profile, and revert back to it anytime with **Reset to Pinned**.
+* **Profile-Specific Themes**: Force Obsidian into **Dark Mode** or **Light Mode** automatically when you activate a specific profile.
+* **Advanced Search & Filtering**: A powerful search bar to filter colors by name or value, with toggles for case-sensitivity and Regular Expressions.
+
+#### workflow & UI
+* **Smart Search UI**: The search bar is now at the top, and using it automatically hides other UI elements for a clean, **Focus Mode** experience.
+* **Workflow Hotkeys**: Assign hotkeys to toggle the plugin on/off or instantly cycle to your next profile.
+* **Performance Control (FPS Slider)**: Adjust the live preview frame rate to ensure a smooth experience, even on lower-spec devices.
+* **Plugin Integrations**: Full color control for the **Iconize** plugin, with an automated cleanup system that removes orphaned icons if the plugin is uninstalled.
 
 ---
 
@@ -25,7 +39,7 @@ Take full control of your Obsidian theme with **Color Master**. This plugin prov
 The plugin comes with these hand-crafted profiles by default:
 
 1.  **OLED Matrix**: A true-black, high-contrast theme with vibrant green accents.
-2.  **Citrus Zest** A brilliant light theme with a clean design and stunning orange highlights for a fresh, modern look.
+2.  **Citrus Zest**: A brilliant light theme with a clean design and stunning orange highlights.
 3.  **Solarized Nebula**: A calm, low-contrast theme based on the popular "Solarized" palette.
 4.  **Cyberpunk Sunset**: A stylish dark theme with neon purple and pink highlights.
 5.  **Default**: The standard Obsidian dark theme variables.
@@ -34,21 +48,20 @@ The plugin comes with these hand-crafted profiles by default:
 
 ## Theme Previews
 
-### 1. OLED Matrix :  
-
+### 1. OLED Matrix
 <img alt="OLED Matrix Preview" src="Images/oled-matrix-theme.png" />
 
-### 2. Citrus Zest : 
+### 2. Citrus Zest
+<img alt="Citrus Zest Preview" src="Images/citruz-zest.png" />
 
-<img alt="Light Mod" src="Images/citruz-zest.png" />
-
-### 3. Solarized Nebula :
-
+### 3. Solarized Nebula
 <img alt="Solarized Nebula Preview" src="Images/solarized-nebula.png" />
 
-### 4. Cyberpunk Sunset : 
-
+### 4. Cyberpunk Sunset
 <img alt="Cyberpunk Sunset Preview" src="Images/cyber-punk.png" />
+
+### 5. Default
+<img alt="Default Preview" src="Images/default.png" />
 
 ---
 
@@ -61,7 +74,7 @@ For advanced users who want to know exactly what they're changing, here is a com
 
 | Variable | Description |
 |---|---|
-| **Iconize Plugin** | |
+| **Plugin Integrations** | |
 | `--iconize-icon-color` | Sets the color for all icons added by the Iconize plugin, overriding its native color settings for a unified look.<br><br>This entire feature is controlled by the **"Override Iconize Plugin Colors"** toggle in the settings. This override is completely non-destructive:<br>- When turned **ON**, Color Master applies this custom color to the icons.<br>- When turned **OFF**, Color Master stops managing the colors, and your original settings from the Iconize plugin are instantly restored without any permanent changes to your configuration. |
 | **Backgrounds** | |
 | `--background-primary` | Main background color for the entire app, especially for editor and note panes. |
@@ -122,12 +135,6 @@ For advanced users who want to know exactly what they're changing, here is a com
 | `--checklist-done-color` | The color of the checkmark and text for a completed to-do item. |
 
 </details>
-
----
-
-## Future Plans ?!
-
-We're always looking for ways to make Color Master even better. In upcoming versions, we plan to add more color variables to give you control over elements from your other favorite plugins. Your perfect theme is just a few updates away!
 
 ---
 
