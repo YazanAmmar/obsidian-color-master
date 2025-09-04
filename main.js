@@ -2542,37 +2542,39 @@ class PasteCssModal extends Modal {
     saveBtn.addEventListener("click", async () => {
       const cssText = this.textarea.value.trim();
       let name = this.nameInput.value.trim();
+
       if (!cssText) {
         new Notice("Paste some CSS first.");
         return;
       }
-      if (!name) name = `CSS Profile ${Date.now()}`;
-
-      const safeName = name;
-
-      this.plugin.settings.profiles = this.plugin.settings.profiles || {};
-      if (this.plugin.settings.profiles[safeName]) {
-        if (!confirm(`Profile "${safeName}" already exists. Overwrite?`))
-          return;
+      if (!name) {
+        name = `CSS Profile ${Date.now()}`;
       }
 
-      this.plugin.settings.profiles[safeName] =
-        this.plugin.settings.profiles[safeName] || {};
-      this.plugin.settings.profiles[safeName].vars =
-        this.plugin.settings.profiles[safeName].vars || {};
-      this.plugin.settings.profiles[safeName].isCssProfile = true;
-      this.plugin.settings.profiles[safeName].customCss = cssText;
-      this.plugin.settings.activeProfile = safeName;
+      const proceedWithSave = async () => {
+        this.plugin.settings.profiles[name] =
+          this.plugin.settings.profiles[name] || {};
+        this.plugin.settings.profiles[name].vars =
+          this.plugin.settings.profiles[name].vars || {};
+        this.plugin.settings.profiles[name].isCssProfile = true;
+        this.plugin.settings.profiles[name].customCss = cssText;
+        this.plugin.settings.activeProfile = name;
 
-      try {
         await this.plugin.saveSettings();
-        // apply css immediately is handled by saveSettings -> applyStyles
         this.settingTab.display();
-        new Notice(`Profile "${safeName}" created and applied.`);
+        new Notice(`Profile "${name}" created and applied.`);
         this.close();
-      } catch (e) {
-        console.error(e);
-        new Notice("Failed to save CSS profile.");
+      };
+
+      if (this.plugin.settings.profiles[name]) {
+        new ConfirmationModal(
+          this.app,
+          "Overwrite Profile?",
+          `Profile "${name}" already exists. Are you sure you want to overwrite it?`,
+          proceedWithSave
+        ).open();
+      } else {
+        proceedWithSave();
       }
     });
 
