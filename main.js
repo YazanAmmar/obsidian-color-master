@@ -1,6 +1,6 @@
 /*
  * Color Master - Obsidian Plugin
- * Version: 1.0.3
+ * Version: 1.0.4
  * Author: Yazan Ammar (GitHub : https://github.com/YazanAmmar )
  * Description: Provides a comprehensive UI to control all Obsidian CSS color variables directly,
  * removing the need for Force Mode and expanding customization options.
@@ -59,7 +59,7 @@ const STRINGS = {
     PROFILE_THEME_TYPE: "Profile Theme Type",
     PROFILE_THEME_TYPE_DESC:
       "Set whether this profile should force a specific theme (Dark/Light) when activated.",
-    THEME_TYPE_AUTO: "Automatic (Don't Change)",
+    THEME_TYPE_AUTO: "Obsidian's Default Theme",
     THEME_TYPE_DARK: "Force Dark Mode",
     THEME_TYPE_LIGHT: "Force Light Mode",
     SUPPORT_HEADER: "Like the Plugin?",
@@ -128,7 +128,7 @@ const STRINGS = {
     PROFILE_THEME_TYPE: "نوع ثيم التشكيلة",
     PROFILE_THEME_TYPE_DESC:
       "حدد ما إذا كانت هذه التشكيلة ستفرض ثيماً معيناً (غامق/فاتح) عند تفعيلها.",
-    THEME_TYPE_AUTO: "تلقائي (لا تقم بالتغيير)",
+    THEME_TYPE_AUTO: "الثيم الافتراضي لأوبسيديان",
     THEME_TYPE_DARK: "فرض الوضع الغامق",
     THEME_TYPE_LIGHT: "فرض الوضع الفاتح",
     SUPPORT_HEADER: "هل أعجبتك الإضافة؟",
@@ -630,10 +630,10 @@ const DEFAULT_SETTINGS = {
   activeProfile: "Default",
   profiles: {
     Default: { vars: flattenVars(DEFAULT_VARS) },
-    "OLED Matrix": { vars: OLED_MATRIX_VARS },
-    "Citrus Zest": { vars: CITRUS_ZEST_VARS },
-    "Solarized Nebula": { vars: SOLARIZED_NEBULA_VARS },
-    CyberPunk: { vars: CYBERPUNK_SUNSET_VARS },
+    "OLED Matrix": { vars: OLED_MATRIX_VARS, themeType: "dark" },
+    "Citrus Zest": { vars: CITRUS_ZEST_VARS, themeType: "light" },
+    "Solarized Nebula": { vars: SOLARIZED_NEBULA_VARS, themeType: "dark" },
+    CyberPunk: { vars: CYBERPUNK_SUNSET_VARS, themeType: "dark" },
   },
   pinnedSnapshots: {},
 };
@@ -694,6 +694,34 @@ class ColorMaster extends Plugin {
   restartColorUpdateLoop() {
     this.stopColorUpdateLoop();
     this.startColorUpdateLoop();
+  }
+
+  applyCustomCssForProfile(profileName) {
+    try {
+      if (!profileName) profileName = this.settings.activeProfile;
+      const profile = this.settings.profiles?.[profileName];
+      this.removeInjectedCustomCss();
+
+      if (!profile || !profile.isCssProfile || !profile.customCss) {
+        return;
+      }
+
+      const el = document.createElement("style");
+      el.id = `cm-custom-css-for-profile`;
+      el.textContent = profile.customCss;
+      document.head.appendChild(el);
+    } catch (e) {
+      console.warn("applyCustomCssForProfile failed", e);
+    }
+  }
+
+  removeInjectedCustomCss() {
+    try {
+      const oldStyle = document.getElementById("cm-custom-css-for-profile");
+      if (oldStyle) oldStyle.remove();
+    } catch (e) {
+      console.warn(e);
+    }
   }
 
   // New method to apply pending changes instantly
@@ -845,8 +873,9 @@ class ColorMaster extends Plugin {
 
   onunload() {
     this.clearStyles();
+    this.removeInjectedCustomCss();
     this.stopColorUpdateLoop();
-    console.log("Color Master v1.0.3 unloaded.");
+    console.log("Color Master v1.0.4 unloaded.");
   }
 
   async refreshOpenGraphViews() {
@@ -964,6 +993,7 @@ class ColorMaster extends Plugin {
     this.removeOrphanedIconizeElements();
     this.clearStyles();
     if (!this.settings.pluginEnabled) {
+      this.removeInjectedCustomCss();
       return;
     }
 
@@ -989,6 +1019,7 @@ class ColorMaster extends Plugin {
       document.body.classList.remove("theme-dark");
       document.body.classList.add("theme-light");
     }
+    this.applyCustomCssForProfile(this.settings.activeProfile);
   }
 
   clearStyles() {
@@ -1064,6 +1095,7 @@ class ColorMaster extends Plugin {
     this.app.workspace.trigger("css-change");
   }
 }
+
 // Maps text color variables to their common backgrounds for contrast checking.
 const TEXT_TO_BG_MAP = {
   "--text-normal": "--background-primary",
@@ -1084,7 +1116,6 @@ const TEXT_TO_BG_MAP = {
   "--checklist-done-color": "--background-primary",
   "--text-highlight-bg": "--text-normal",
 };
-// Paste / Import modal
 // Paste / Import modal - UPGRADED with File Import
 class ProfileJsonImportModal extends Modal {
   constructor(app, plugin, settingTabInstance) {
@@ -1323,6 +1354,10 @@ class ColorMasterSettingTab extends PluginSettingTab {
 
   _applySearchFilter() {
     const s = this._searchState;
+    if (this.staticContentContainer) {
+      const isSearching = s.query.trim().length > 0;
+      this.staticContentContainer.toggleClass("cm-hidden", isSearching);
+    }
     const rows = this._getAllVarRows();
     let visibleCount = 0;
 
@@ -1376,7 +1411,21 @@ class ColorMasterSettingTab extends PluginSettingTab {
       visibleCount++;
       this._highlightRowMatches(row, s);
     });
+    const headings = this.containerEl.querySelectorAll(
+      ".cm-category-container"
+    );
+    headings.forEach((heading) => {
+      const category = heading.dataset.category;
+      const hasVisibleRows = this.containerEl.querySelector(
+        `.cm-var-row[data-category="${category}"]:not(.cm-hidden)`
+      );
 
+      if (hasVisibleRows) {
+        heading.classList.remove("cm-hidden");
+      } else {
+        heading.classList.add("cm-hidden");
+      }
+    });
     this.searchInfo.setText(`${visibleCount} found`);
   }
 
@@ -1404,7 +1453,7 @@ class ColorMasterSettingTab extends PluginSettingTab {
         (match) => `<span class="cm-highlight">${match}</span>`
       );
     } catch (e) {
-      nameEl.innerHTML = originalText; // Revert on regex error
+      nameEl.innerHTML = originalText;
     }
   }
 
@@ -1419,7 +1468,19 @@ class ColorMasterSettingTab extends PluginSettingTab {
       .createEl("button", { text: "Copy JSON", cls: "cm-profile-action-btn" })
       .addEventListener("click", () => this._copyProfileToClipboard());
 
-    actionsEl.createDiv({ cls: "cm-profile-action-spacer" }); // Spacer
+    actionsEl.createDiv({ cls: "cm-profile-action-spacer" });
+
+    const pasteCssBtn = actionsEl.createEl("button", {
+      text: "Paste CSS",
+      cls: "cm-profile-action-btn cm-paste-css-btn",
+    });
+    const newBadge = pasteCssBtn.createSpan({
+      cls: "cm-badge-new",
+      text: "New",
+    });
+    pasteCssBtn.addEventListener("click", () => {
+      new PasteCssModal(this.app, this.plugin, this).open();
+    });
 
     actionsEl
       .createEl("button", {
@@ -1458,30 +1519,69 @@ class ColorMasterSettingTab extends PluginSettingTab {
 
   initLikePluginUI(containerEl) {
     const likeCardEl = containerEl.createDiv("cm-like-card");
+    const bannerContainer = likeCardEl.createDiv("cm-banner-container");
+    bannerContainer.innerHTML = `
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="240" viewBox="0 0 1280 240" role="img" aria-label="Color Master banner" class="cm-banner-svg">
+  <defs>
+    <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#0066FF"/>
+      <stop offset="14%" stop-color="#7A00FF"/>
+      <stop offset="28%" stop-color="#FF1E56"/>
+      <stop offset="42%" stop-color="#FF3EB5"/>
+      <stop offset="56%" stop-color="#FF7A00"/>
+      <stop offset="70%" stop-color="#FFD200"/>
+      <stop offset="84%" stop-color="#00D166"/>
+      <stop offset="100%" stop-color="#00C2FF"/>
+    </linearGradient>
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="6" dy="6" stdDeviation="6" flood-color="#000" flood-opacity="0.45"/>
+    </filter>
+    <filter id="blackEdge" x="-200%" y="-200%" width="400%" height="400%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2.0" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.6 0" result="edge"/>
+      <feMerge>
+        <feMergeNode in="edge"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="1280" height="240" rx="16" ry="16" fill="url(#g)"/>
+  <g filter="url(#shadow)">
+    <text x="50%" y="55%" text-anchor="middle"
+          font-family="Montserrat, 'Poppins', Arial, sans-serif"
+          font-weight="800" font-size="110"
+          fill="#000000" opacity="0.85" font-style="normal"
+          stroke="none" >
+      Color Master
+    </text>
+    <text x="50%" y="55%" text-anchor="middle"
+          font-family="Montserrat, 'Poppins', Arial, sans-serif"
+          font-weight="800" font-size="110"
+          fill="#FFFFFF"
+          stroke="#000000" stroke-width="4.2"
+          stroke-linejoin="round"
+          paint-order="stroke fill"
+          font-style="normal"
+          filter="url(#blackEdge)">
+      Color Master
+    </text>
+  </g>
+  <text x="50%" y="74%" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="18" fill="#FFFFFF" opacity="0.95">
+    Theme your Obsidian — edit, save &amp; share color profiles
+  </text>
+  <text x="50%" y="84%" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="18" fill="#FFFFFF" opacity="0.95">
+    Color Master for Obsidian — control themes &amp; color schemes
+  </text>
+</svg>
+    `;
 
-    const leftSide = likeCardEl.createDiv({
-      attr: {
-        style: "display:flex; flex-direction:column; gap: 8px; flex-grow:1;",
-      },
-    });
-
-    // --- Top part: Icon and Text ---
-    const topPart = leftSide.createDiv({
-      attr: { style: "display:flex; gap: 12px; align-items:center;" },
-    });
-    const badge = topPart.createDiv("cm-like-badge");
-    badge.innerHTML = `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27z" fill="white"/></svg>`;
-
-    const body = topPart.createDiv("cm-like-body");
-    body.createEl("div", {
-      cls: "cm-like-title",
-      text: "Enjoying Color Master?",
-    });
+    const contentWrapper = likeCardEl.createDiv("cm-content-wrapper");
 
     // --- Stats Progress Bars ---
-    const statsContainer = leftSide.createDiv("cm-like-stats");
+    const statsContainer = contentWrapper.createDiv("cm-like-stats");
     const profilesCount = this._calcProfilesCount();
     const varsCount = this._calcVarsCount();
+    const integrationsCount = this._calcPluginIntegrations();
     const sinceInstalled =
       this.plugin.settings.installDate || new Date().toISOString();
     const days = Math.max(
@@ -1497,20 +1597,26 @@ class ColorMasterSettingTab extends PluginSettingTab {
       profilesCount,
       10,
       "#00b3ffff"
-    ); // Max 10 profiles
+    );
     this._createStatBar(
       statsContainer,
       "Customizable Colors",
       varsCount,
       varsCount,
       "#ffbb00ff"
-    ); // Max is total colors
-    this._createStatBar(statsContainer, "Days of Use", days, 365, "#ff0008ff"); // Max 1 year
+    );
+    this._createStatBar(
+      statsContainer,
+      "Plugin Integrations",
+      integrationsCount,
+      5,
+      "#8000ffff"
+    );
+    this._createStatBar(statsContainer, "Days of Use", days, 365, "#ff0008ff");
 
-    // --- Right part: Action Buttons ---
-    const actions = likeCardEl.createDiv("cm-like-actions");
+    // --- Action Buttons ---
+    const actions = contentWrapper.createDiv("cm-like-actions");
 
-    // Star Button
     const starButtonWrapper = actions.createDiv({ cls: "codepen-button" });
     starButtonWrapper.createEl("span", { text: "Star on GitHub" });
     starButtonWrapper.addEventListener("click", () => {
@@ -1520,7 +1626,6 @@ class ColorMasterSettingTab extends PluginSettingTab {
       );
     });
 
-    // Report Button
     const reportButtonWrapper = actions.createDiv({ cls: "codepen-button" });
     reportButtonWrapper.createEl("span", { text: "Report an Issue" });
     reportButtonWrapper.addEventListener("click", () => {
@@ -1529,7 +1634,22 @@ class ColorMasterSettingTab extends PluginSettingTab {
         "_blank"
       );
     });
+    const syncPromoContainer = actions.createDiv({ cls: "cm-promo-container" });
+
+    const syncButtonWrapper = syncPromoContainer.createDiv({
+      cls: "codepen-button",
+    });
+    syncButtonWrapper.createEl("span", { text: "Sync Your Vault" });
+    syncButtonWrapper.addEventListener("click", () => {
+      window.open("https://github.com/YazanAmmar/SyncEveryThing", "_blank");
+    });
+    const myGithubButtonWrapper = actions.createDiv({ cls: "codepen-button" });
+    myGithubButtonWrapper.createEl("span", { text: "My GitHub" });
+    myGithubButtonWrapper.addEventListener("click", () => {
+      window.open("https://github.com/YazanAmmar", "_blank");
+    });
   }
+
   _launchLikeConfetti(hostEl) {
     const colors = ["#ff9a9e", "#ffd76b", "#6dd3ff", "#a6c1ee", "#b8ffb0"];
     for (let i = 0; i < 20; i++) {
@@ -1582,6 +1702,20 @@ class ColorMasterSettingTab extends PluginSettingTab {
 
   _calcVarsCount() {
     return Object.keys(flattenVars(DEFAULT_VARS)).length;
+  }
+
+  _calcPluginIntegrations() {
+    try {
+      if (DEFAULT_VARS && DEFAULT_VARS["Plugin Integrations"]) {
+        return Object.keys(DEFAULT_VARS["Plugin Integrations"]).length;
+      }
+    } catch (e) {
+      console.error(
+        "Color Master: Failed to calculate plugin integrations.",
+        e
+      );
+    }
+    return 0;
   }
 
   _getCurrentProfileJson() {
@@ -1669,7 +1803,6 @@ class ColorMasterSettingTab extends PluginSettingTab {
 
     containerEl.createEl("h2", { text: t("PLUGIN_NAME") });
 
-    // --- GENERAL SETTINGS ---
     new Setting(containerEl)
       .setName(t("ENABLE_PLUGIN"))
       .setDesc(t("ENABLE_PLUGIN_DESC"))
@@ -1679,7 +1812,7 @@ class ColorMasterSettingTab extends PluginSettingTab {
           .onChange(async (value) => {
             this.plugin.settings.pluginEnabled = value;
             await this.plugin.saveSettings();
-            this.plugin.restartColorUpdateLoop(); // Restart loop on enable/disable
+            this.plugin.restartColorUpdateLoop();
             new Notice(
               value ? t("PLUGIN_ENABLED_NOTICE") : t("PLUGIN_DISABLED_NOTICE")
             );
@@ -1700,27 +1833,68 @@ class ColorMasterSettingTab extends PluginSettingTab {
         });
       });
 
-    containerEl.createEl("hr");
+    this.initSearchUI(containerEl);
+    this.staticContentContainer = containerEl.createDiv({
+      cls: "cm-static-sections",
+    });
+    this.staticContentContainer.createEl("hr");
+    this.drawProfileManager(this.staticContentContainer);
+    this.initProfileCopyUI(this.staticContentContainer);
+    this.staticContentContainer.createEl("h3", { text: t("OPTIONS_HEADING") });
 
-    this.drawProfileManager();
-    this.initSearchUI(containerEl); // ✅ إظهار واجهة البحث
-    this.initProfileCopyUI(containerEl); // ✅ إظهار أزرار النسخ واللصق
-    // --- ✅  Options Section ---
-    containerEl.createEl("h3", { text: t("OPTIONS_HEADING") });
-
-    new Setting(containerEl)
+    new Setting(this.staticContentContainer)
       .setName(t("UPDATE_FREQUENCY_NAME"))
       .setDesc(t("UPDATE_FREQUENCY_DESC"))
       .addSlider((slider) => {
         slider
-          .setLimits(0, 60, 1) // Range 0-60, step 1
+          .setLimits(0, 60, 1)
           .setValue(this.plugin.settings.colorUpdateFPS)
           .setDynamicTooltip()
           .onChange(async (value) => {
             this.plugin.settings.colorUpdateFPS = value;
             await this.plugin.saveSettings();
-            this.plugin.restartColorUpdateLoop(); // Restart the loop with the new FPS
+            this.plugin.restartColorUpdateLoop();
             new Notice(`Live Update FPS set to: ${value}`);
+          });
+      });
+
+    new Setting(this.staticContentContainer)
+      .setName(t("OVERRIDE_ICONIZE"))
+      .setDesc(t("OVERRIDE_ICONIZE_DESC"))
+      .addToggle((toggle) => {
+        toggle
+          .setValue(this.plugin.settings.overrideIconizeColors)
+          .onChange(async (value) => {
+            if (value) {
+              const iconizeIDs = ["obsidian-icon-folder", "iconize"];
+              const isIconizeInstalled = iconizeIDs.some(
+                (id) => this.app.plugins.plugins[id]
+              );
+
+              if (!isIconizeInstalled) {
+                new Notice(t("ICONIZE_NOT_FOUND_NOTICE"));
+                toggle.setValue(false);
+                return;
+              }
+            }
+            this.plugin.settings.overrideIconizeColors = value;
+            await this.plugin.saveSettings();
+          });
+        new Setting(this.staticContentContainer)
+          .setName("Cleanup Interval")
+          .setDesc(
+            "Sets how often (in seconds) the plugin checks for uninstalled Iconize plugin to clean up its icons."
+          )
+          .addSlider((slider) => {
+            slider
+              .setLimits(1, 10, 1)
+              .setValue(this.plugin.settings.cleanupInterval)
+              .setDynamicTooltip()
+              .onChange(async (value) => {
+                this.plugin.settings.cleanupInterval = value;
+                await this.plugin.saveSettings();
+                this.plugin.resetIconizeWatcher();
+              });
           });
       });
 
@@ -1781,7 +1955,6 @@ class ColorMasterSettingTab extends PluginSettingTab {
     }
   }
 
-  // ✅ الدالة الجديدة للتعامل مع كبسة Apply
   async onGraphApply() {
     if (!this.graphViewWorkingState) return;
     const profileVars =
@@ -1798,7 +1971,6 @@ class ColorMasterSettingTab extends PluginSettingTab {
     new Notice("Graph colors applied!");
   }
 
-  // ✅ الدالة الجديدة للتعامل مع كبسة Cancel
   onGraphCancel() {
     if (!this.graphViewTempState) {
       this.hideGraphActionButtons();
@@ -1829,12 +2001,12 @@ class ColorMasterSettingTab extends PluginSettingTab {
       text: "Apply",
       cls: "mod-cta",
     });
-    applyButton.addEventListener("click", () => this.onGraphApply()); // ✅ صار يستدعي الدالة الجديدة
+    applyButton.addEventListener("click", () => this.onGraphApply());
 
     const cancelButton = this.graphHeaderButtonsEl.createEl("button", {
       text: "Cancel",
     });
-    cancelButton.addEventListener("click", () => this.onGraphCancel()); // ✅ صار يستدعي الدالة الجديدة
+    cancelButton.addEventListener("click", () => this.onGraphCancel());
   }
   // ---------- Ensure hideGraphActionButtons also clears workingState ----------
   hideGraphActionButtons() {
@@ -1846,8 +2018,7 @@ class ColorMasterSettingTab extends PluginSettingTab {
       this.graphHeaderButtonsEl.empty();
     }
   }
-  drawProfileManager() {
-    const { containerEl } = this;
+  drawProfileManager(containerEl) {
     containerEl.createEl("h3", { text: t("PROFILE_MANAGER") });
 
     new Setting(containerEl)
@@ -1855,17 +2026,22 @@ class ColorMasterSettingTab extends PluginSettingTab {
       .setDesc(t("ACTIVE_PROFILE_DESC"))
       .addDropdown((dropdown) => {
         for (const profileName in this.plugin.settings.profiles) {
-          dropdown.addOption(profileName, profileName);
+          let displayName = profileName;
+          if (this.plugin.settings.profiles[profileName]?.isCssProfile) {
+            displayName += " (CSS)";
+          }
+          dropdown.addOption(profileName, displayName);
         }
         dropdown.setValue(this.plugin.settings.activeProfile);
         dropdown.onChange(async (value) => {
+          this.plugin.removeInjectedCustomCss();
+
           this.plugin.settings.activeProfile = value;
           await this.plugin.saveSettings();
           this.display();
         });
       })
       .addButton((button) => {
-        // ✅ --- زر التثبيت (Pin) صار هون --- ✅
         this.pinBtn = button; // Save reference to the button component
         button
           .setIcon("pin")
@@ -1879,7 +2055,6 @@ class ColorMasterSettingTab extends PluginSettingTab {
           });
       })
       .addButton((button) => {
-        // ✅ --- زر الاسترجاع (Reset) صار هون --- ✅
         this.resetPinBtn = button; // Save reference
         button
           .setIcon("reset")
@@ -1921,6 +2096,8 @@ class ColorMasterSettingTab extends PluginSettingTab {
       })
       .addButton((button) => {
         button.setButtonText(t("DELETE_BUTTON")).onClick(() => {
+          this.plugin.removeInjectedCustomCss();
+
           if (Object.keys(this.plugin.settings.profiles).length <= 1) {
             new Notice(t("CANNOT_DELETE_LAST_PROFILE"));
             return;
@@ -1956,50 +2133,16 @@ class ColorMasterSettingTab extends PluginSettingTab {
     const activeProfileVars =
       this.plugin.settings.profiles[this.plugin.settings.activeProfile].vars;
 
-    new Setting(containerEl)
-      .setName(t("OVERRIDE_ICONIZE"))
-      .setDesc(t("OVERRIDE_ICONIZE_DESC"))
-      .addToggle((toggle) => {
-        toggle
-          .setValue(this.plugin.settings.overrideIconizeColors)
-          .onChange(async (value) => {
-            if (value) {
-              const iconizeIDs = ["obsidian-icon-folder", "iconize"];
-              const isIconizeInstalled = iconizeIDs.some(
-                (id) => this.app.plugins.plugins[id]
-              );
-
-              if (!isIconizeInstalled) {
-                new Notice(t("ICONIZE_NOT_FOUND_NOTICE"));
-                toggle.setValue(false);
-                return;
-              }
-            }
-            this.plugin.settings.overrideIconizeColors = value;
-            await this.plugin.saveSettings();
-          });
-        new Setting(containerEl)
-          .setName("Cleanup Interval")
-          .setDesc(
-            "Sets how often (in seconds) the plugin checks for uninstalled Iconize plugin to clean up its icons."
-          )
-          .addSlider((slider) => {
-            slider
-              .setLimits(1, 10, 1)
-              .setValue(this.plugin.settings.cleanupInterval)
-              .setDynamicTooltip()
-              .onChange(async (value) => {
-                this.plugin.settings.cleanupInterval = value;
-                await this.plugin.saveSettings();
-                this.plugin.resetIconizeWatcher();
-              });
-          });
-      });
-
     for (const [category, vars] of Object.entries(DEFAULT_VARS)) {
       if (category === "Graph View") {
-        const graphHeader = containerEl.createDiv({ cls: "cm-graph-header" });
-        graphHeader.createEl("h3", { text: t("GRAPH_VIEW") || category });
+        const graphHeader = containerEl.createDiv({
+          cls: ["cm-graph-header", "cm-category-container"],
+        });
+        graphHeader.dataset.category = category;
+
+        const graphHeading = graphHeader.createEl("h3", {
+          text: t("GRAPH_VIEW") || category,
+        });
 
         const buttonContainer = graphHeader.createDiv({
           cls: "cm-buttons-wrapper",
@@ -2021,9 +2164,11 @@ class ColorMasterSettingTab extends PluginSettingTab {
           cls: "cm-temporary-buttons",
         });
       } else {
-        containerEl.createEl("h3", {
+        const headingEl = containerEl.createEl("h3", {
           text: t(category.toUpperCase().replace(" ", "_")) || category,
+          cls: "cm-category-container",
         });
+        headingEl.dataset.category = category;
       }
 
       for (const [varName, defaultValue] of Object.entries(vars)) {
@@ -2035,12 +2180,10 @@ class ColorMasterSettingTab extends PluginSettingTab {
           .setName(varName.replace("--", "").replace(/-/g, " "))
           .setDesc(description);
 
-        // ✅ --- "تعليم" السطر بمعلومات البحث ---
         setting.settingEl.classList.add("cm-var-row");
         setting.settingEl.dataset.var = varName;
         setting.settingEl.dataset.category = category;
         setting.nameEl.classList.add("cm-var-name");
-        // --- نهاية التعليم ---
 
         const bgVarForTextColor = TEXT_TO_BG_MAP[varName];
 
@@ -2085,7 +2228,7 @@ class ColorMasterSettingTab extends PluginSettingTab {
         colorPicker.value = initialValue;
         textInput.value = initialValue;
 
-        // ✅ --- New Performance-Optimized Event Handling ---
+        // --- New Performance-Optimized Event Handling ---
 
         // Event 1: While dragging (input event) - for live preview
         colorPicker.addEventListener("input", (e) => {
@@ -2099,6 +2242,18 @@ class ColorMasterSettingTab extends PluginSettingTab {
         });
 
         const handleFinalChange = (newColor) => {
+          const profile =
+            this.plugin.settings.profiles[this.plugin.settings.activeProfile];
+          const oldColor = profile.vars[varName] || defaultValue;
+
+          if (oldColor.toLowerCase() !== newColor.toLowerCase()) {
+            profile.history = profile.history || {};
+            profile.history[varName] = profile.history[varName] || [];
+
+            profile.history[varName].unshift(oldColor);
+
+            profile.history[varName] = profile.history[varName].slice(0, 5);
+          }
           if (category === "Graph View") {
             if (!this.graphViewTempState) {
               this.graphViewTempState = {};
@@ -2134,7 +2289,6 @@ class ColorMasterSettingTab extends PluginSettingTab {
             this.plugin.pendingVarUpdates[varName] = newColor;
             this.plugin.applyPendingNow();
             this.plugin.saveSettings();
-            this.display();
             return;
           }
 
@@ -2155,17 +2309,29 @@ class ColorMasterSettingTab extends PluginSettingTab {
         setting.addExtraButton((button) => {
           button
             .setIcon("reset")
-            .setTooltip(t("RESET_BUTTON_TOOLTIP"))
+            .setTooltip("Undo last change")
             .onClick(async () => {
-              const newColor = defaultValue;
-              activeProfileVars[varName] = newColor;
+              const profile =
+                this.plugin.settings.profiles[
+                  this.plugin.settings.activeProfile
+                ];
+              const history = profile.history?.[varName];
 
-              if (category === "Graph View") {
-                handleFinalChange(newColor);
-                this.display();
-              } else {
+              let restoredColor;
+              let noticeMessage = "";
+
+              if (history && history.length > 0) {
+                const restoredColor = history.shift();
+
+                activeProfileVars[varName] = restoredColor;
+                colorPicker.value = restoredColor;
+                textInput.value = restoredColor;
+
                 await this.plugin.saveSettings();
-                this.display();
+                this.updateAccessibilityCheckers();
+                new Notice(`Restored: ${restoredColor}`);
+              } else {
+                new Notice("No color history to restore.");
               }
             });
         });
@@ -2322,6 +2488,100 @@ function getAccessibilityRating(ratio) {
     return { text: "AA Large", score, cls: "cm-accessibility-warn" };
   }
   return { text: "Fail", score, cls: "cm-accessibility-fail" };
+}
+
+class PasteCssModal extends Modal {
+  constructor(app, plugin, settingTab) {
+    super(app);
+    this.plugin = plugin;
+    this.settingTab = settingTab;
+  }
+
+  onOpen() {
+    const { contentEl } = this;
+    contentEl.empty();
+    contentEl.createEl("h3", { text: "Paste CSS and create profile" });
+    contentEl.createEl("div", {
+      text: "Note: Pasted CSS can affect UI; proceed only with trusted CSS.",
+    });
+
+    // name input
+    const nameRow = contentEl.createDiv();
+    nameRow.createEl("label", {
+      text: "Profile name :",
+      cls: "cm-modal-label",
+    });
+    this.nameInput = nameRow.createEl("input", {
+      type: "text",
+      placeholder: t("PROFILE_NAME_PLACEHOLDER"),
+      attr: { style: "width:100%" },
+    });
+
+    // textarea
+    this.textarea = contentEl.createEl("textarea", {
+      cls: "cm-search-input",
+      attr: { rows: 12, placeholder: "Paste your CSS here..." },
+    });
+    this.textarea.style.width = "100%";
+    this.textarea.style.marginTop = "8px";
+
+    // controls
+    const ctrl = contentEl.createDiv({
+      cls: "cm-profile-actions",
+      attr: { style: "justify-content: flex-end; margin-top:8px; gap:8px;" },
+    });
+    const cancelBtn = ctrl.createEl("button", {
+      text: "Cancel",
+      cls: "cm-profile-action-btn",
+    });
+    const saveBtn = ctrl.createEl("button", {
+      text: "Save as profile",
+      cls: "mod-cta",
+    });
+
+    saveBtn.addEventListener("click", async () => {
+      const cssText = this.textarea.value.trim();
+      let name = this.nameInput.value.trim();
+      if (!cssText) {
+        new Notice("Paste some CSS first.");
+        return;
+      }
+      if (!name) name = `CSS Profile ${Date.now()}`;
+
+      const safeName = name;
+
+      this.plugin.settings.profiles = this.plugin.settings.profiles || {};
+      if (this.plugin.settings.profiles[safeName]) {
+        if (!confirm(`Profile "${safeName}" already exists. Overwrite?`))
+          return;
+      }
+
+      this.plugin.settings.profiles[safeName] =
+        this.plugin.settings.profiles[safeName] || {};
+      this.plugin.settings.profiles[safeName].vars =
+        this.plugin.settings.profiles[safeName].vars || {};
+      this.plugin.settings.profiles[safeName].isCssProfile = true;
+      this.plugin.settings.profiles[safeName].customCss = cssText;
+      this.plugin.settings.activeProfile = safeName;
+
+      try {
+        await this.plugin.saveSettings();
+        // apply css immediately is handled by saveSettings -> applyStyles
+        this.settingTab.display();
+        new Notice(`Profile "${safeName}" created and applied.`);
+        this.close();
+      } catch (e) {
+        console.error(e);
+        new Notice("Failed to save CSS profile.");
+      }
+    });
+
+    cancelBtn.addEventListener("click", () => this.close());
+  }
+
+  onClose() {
+    this.contentEl.empty();
+  }
 }
 
 module.exports = ColorMaster;
