@@ -573,3 +573,81 @@
   display: block;
   margin-bottom: 6px;
 }
+
+.setting-item-control input[type="color"].is-transparent {
+  position: relative;
+  background-color: white;
+}
+
+.setting-item-control input[type="color"].is-transparent::-webkit-color-swatch {
+  background-image: linear-gradient(45deg, #ccc 25%, transparent 25%),
+    linear-gradient(-45deg, #ccc 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #ccc 75%),
+    linear-gradient(-45deg, transparent 75%, #ccc 75%);
+  background-size: 10px 10px;
+  background-position: 0 0, 0 5px, 5px -5px, -5px 0px;
+}
+
+/* --- CSS Snippets  --- */
+
+.cm-snippets-container {
+  margin-bottom: 20px;
+}
+
+.cm-snippets-container h3 {
+  margin-top: -10px;
+  margin-bottom: 15px;
+}
+
+.cm-last-option-item {
+  margin-bottom: -20px;
+}
+
+/* ======================================================= */
+
+.tag {
+  color: var(--tag-color) !important;
+  background-color: var(--tag-bg) !important;
+  padding: 2px 8px;
+  border-radius: 12px;
+  text-decoration: none;
+}
+.tag:hover {
+  color: var(--tag-color-hover) !important;
+}
+
+/* 2. Styling for Editor View (NOW WITH RTL SUPPORT) */
+
+.cm-s-obsidian span.cm-hashtag-begin,
+.cm-s-obsidian span.cm-hashtag-end {
+  color: var(--tag-color) !important;
+  background-color: var(--tag-bg) !important;
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
+.cm-s-obsidian span.cm-hashtag-begin {
+  padding-inline-start: 8px;
+  border-start-start-radius: 12px;
+  border-end-start-radius: 12px;
+}
+
+.cm-s-obsidian span.cm-hashtag-end {
+  padding-inline-end: 8px;
+  border-start-end-radius: 12px;
+  border-end-end-radius: 12px;
+}
+
+/* =================================================================== */
+
+.cm-segmented-control button.is-active {
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+  font-weight: 600;
+}
+
+.cm-segmented-control button:hover:not(.is-active) {
+  background-color: var(--background-modifier-hover);
+}
+
+/* =================================================================== */
