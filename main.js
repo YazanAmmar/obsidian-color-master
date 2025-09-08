@@ -1633,7 +1633,7 @@ class ColorMasterSettingTab extends PluginSettingTab {
     actionsEl.createDiv({ cls: "cm-profile-action-spacer" });
 
     const pasteCssBtn = actionsEl.createEl("button", {
-      text: "Import / Paste (.css) ...",
+      text: "Import / Paste (.css)",
       cls: "cm-profile-action-btn cm-paste-css-btn",
     });
     pasteCssBtn.createSpan({
@@ -1647,7 +1647,7 @@ class ColorMasterSettingTab extends PluginSettingTab {
 
     actionsEl
       .createEl("button", {
-        text: "Import / Paste (.json)...",
+        text: "Import / Paste (.json)",
         cls: "cm-profile-action-btn mod-cta",
       })
       .addEventListener("click", () =>
