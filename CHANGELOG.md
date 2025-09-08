@@ -21,6 +21,10 @@
         * `--tag-color-hover`: The text color when you hover over the tag.
         * `--tag-bg`: The background color of the tag "pill".
 
+* **Powerful Import Modal:** The JSON import modal is now much more powerful. We've replaced the confusing "Merge" button with a highly-requested **"Create New"** button. You can now import a `.json` file and instantly create a new profile from it.
+
+* **More Accurate Contrast Checker:** The accessibility checker is now more comprehensive and correctly checks the contrast for tags, icons, and interactive elements.
+
 ### Bug Fixes & Quality of Life Enhancements
 
 * **Snapshots Now Save Everything!**
