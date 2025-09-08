@@ -96,6 +96,9 @@ For advanced users who want to know exactly what they're changing, here is a com
 | `--text-accent-hover` | The color of accent text (like links) when you hover over it. |
 | `--text-selection` | The background color of text that you have selected with your cursor. |
 | `--text-highlight-bg` | The background color for text highlighted with `==highlight==` syntax. |
+| `--tag-color` | Sets the text color of #tags. |
+| `--tag-color-hover` | Sets the text color of #tags when hovering over them. |
+| `--tag-bg` | Sets the background color of #tags, allowing for a 'pill' shape. |
 | **Headings** | |
 | `-h1-color` | The color of H1 heading text. |
 | `-h2-color` | The color of H2 heading text. |
