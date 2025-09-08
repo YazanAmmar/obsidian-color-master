@@ -1,6 +1,6 @@
 /*
  * Color Master - Obsidian Plugin
- * Version: 1.0.4
+ * Version: 1.0.5
  * Author: Yazan Ammar (GitHub : https://github.com/YazanAmmar )
  * Description: Provides a comprehensive UI to control all Obsidian CSS color variables directly,
  * removing the need for Force Mode and expanding customization options.
@@ -54,6 +54,13 @@ const STRINGS = {
     DELETE_PROFILE_TITLE: "Delete Profile",
     DELETE_PROFILE_CONFIRMATION: (name) =>
       `Are you sure you want to delete the profile "${name}"? This action cannot be undone.`,
+    SNIPPETS_HEADING: "CSS Snippets",
+    SAVE_AS_TYPE: "Save as Type",
+    SAVE_AS_PROFILE: "Profile",
+    SAVE_AS_SNIPPET: "Snippet",
+    EDIT_SNIPPET_TITLE: "Edit CSS Snippet",
+    EDIT_PROFILE_TITLE: "Edit CSS Profile",
+
     PROFILE_DELETED_NOTICE: "Profile deleted.",
     CANNOT_DELETE_LAST_PROFILE: "Cannot delete the last profile.",
     PROFILE_THEME_TYPE: "Profile Theme Type",
@@ -75,6 +82,9 @@ const STRINGS = {
     FORCE_REFRESH_TOOLTIP: "Force Refresh UI",
     SUPPORT_DESC:
       "If you like the plugin, would you mind giving us a star on GitHub? If you have an issue or a feature request, don't hesitate to click 'Report an Issue' and let us know!",
+    RESTORE_BUTTON: "Restore",
+    RESET_BUTTON: "Reset",
+    UPDATE_BUTTON: "Update",
   },
   ar: {
     PLUGIN_NAME: "متحكم الألوان",
@@ -123,6 +133,13 @@ const STRINGS = {
     DELETE_PROFILE_TITLE: "حذف التشكيلة",
     DELETE_PROFILE_CONFIRMATION: (name) =>
       `هل أنت متأكد من رغبتك في حذف التشكيلة "${name}"؟ لا يمكن التراجع عن هذا الإجراء.`,
+    SNIPPETS_HEADING: "قصاصات CSS",
+    SAVE_AS_TYPE: "حفظ كـ",
+    SAVE_AS_PROFILE: "بروفايل",
+    SAVE_AS_SNIPPET: "قصاصة",
+    EDIT_SNIPPET_TITLE: "تعديل قصاصة CSS",
+    EDIT_PROFILE_TITLE: "تعديل بروفايل CSS",
+
     PROFILE_DELETED_NOTICE: "تم حذف التشكيلة.",
     CANNOT_DELETE_LAST_PROFILE: "لا يمكن حذف آخر تشكيلة.",
     PROFILE_THEME_TYPE: "نوع ثيم التشكيلة",
@@ -145,6 +162,9 @@ const STRINGS = {
     FORCE_REFRESH_TOOLTIP: "فرض تحديث الواجهة",
     SUPPORT_DESC:
       "هل تمانع لو منحتنا نجمة على Github إذا أعجبتك الاضافة ؟ وإذا كنت تعاني من مشكلة او تريد ميّزة ف لا تتردد بالضغط على زر (أبلغ عن مشكلة) وإخبارنا بها !",
+    RESTORE_BUTTON: "استعادة",
+    RESET_BUTTON: "إعادة تعيين",
+    UPDATE_BUTTON: "تحديث",
   },
 };
 
@@ -211,6 +231,12 @@ const COLOR_DESCRIPTIONS = {
     "The background color of text that you have selected with your cursor.",
   "--text-highlight-bg":
     "The background color for text highlighted with ==highlight== syntax.",
+  "--checklist-done-color":
+    "The color of the checkmark and text for a completed to-do item.",
+  "--tag-color": "Sets the text color of #tags.",
+  "--tag-color-hover": "Sets the text color of #tags when hovering over them.",
+  "--tag-bg":
+    "Sets the background color of #tags, allowing for a 'pill' shape.",
   // Headings
   "--h1-color": "The color of H1 heading text.",
   "--h2-color": "The color of H2 heading text.",
@@ -306,6 +332,10 @@ const COLOR_DESCRIPTIONS_AR = {
     "لون النص المميز (مثل الروابط) عند مرور مؤشر الفأرة فوقه.",
   "--text-selection": "لون خلفية النص الذي تحدده بمؤشر الفأرة.",
   "--text-highlight-bg": "لون خلفية النص المظلل باستخدام صيغة ==التظليل==.",
+  "--checklist-done-color": "لون علامة الصح والنص لمهمة منجزة في قائمة المهام.",
+  "--tag-color": "يحدد لون نص التاغات (#tags).",
+  "--tag-color-hover": "يحدد لون نص التاغات عند تمرير الماوس فوقها.",
+  "--tag-bg": "يحدد لون خلفية التاغات، مما يسمح بإنشاء شكل 'الحبة'.",
   // Headings
   "--h1-color": "لون نصوص العناوين من نوع H1.",
   "--h2-color": "لون نصوص العناوين من نوع H2.",
@@ -383,6 +413,10 @@ const DEFAULT_VARS = {
     "--h4-color": "#b0b0b0",
     "--h5-color": "#a0a0a0",
     "--h6-color": "#909090",
+    "--tag-color": "#8AB4F8",
+    "--tag-color": "#8AB4F8",
+    "--tag-color-hover": "#C2E7FF",
+    "--tag-bg": "#8ab4f833",
   },
   "Interactive Elements": {
     "--interactive-normal": "#5a5a5a",
@@ -612,6 +646,26 @@ const CYBERPUNK_SUNSET_VARS = {
   "--graph-node-attachment": "#414868",
 };
 
+const BUILT_IN_PROFILES_VARS = {
+  Default: flattenVars(DEFAULT_VARS),
+  "OLED Matrix": OLED_MATRIX_VARS,
+  "Citrus Zest": CITRUS_ZEST_VARS,
+  "Solarized Nebula": SOLARIZED_NEBULA_VARS,
+  CyberPunk: CYBERPUNK_SUNSET_VARS,
+};
+
+const BUILT_IN_PROFILES_DATA = {
+  Default: { vars: flattenVars(DEFAULT_VARS), themeType: "dark", snippets: {} },
+  "OLED Matrix": { vars: OLED_MATRIX_VARS, themeType: "dark", snippets: {} },
+  "Citrus Zest": { vars: CITRUS_ZEST_VARS, themeType: "light", snippets: {} },
+  "Solarized Nebula": {
+    vars: SOLARIZED_NEBULA_VARS,
+    themeType: "dark",
+    snippets: {},
+  },
+  CyberPunk: { vars: CYBERPUNK_SUNSET_VARS, themeType: "dark", snippets: {} },
+};
+
 // Function to flatten the nested VARS object for easier processing
 function flattenVars(varsObject) {
   let flatVars = {};
@@ -628,13 +682,7 @@ const DEFAULT_SETTINGS = {
   cleanupInterval: 5,
   colorUpdateFPS: 10,
   activeProfile: "Default",
-  profiles: {
-    Default: { vars: flattenVars(DEFAULT_VARS) },
-    "OLED Matrix": { vars: OLED_MATRIX_VARS, themeType: "dark" },
-    "Citrus Zest": { vars: CITRUS_ZEST_VARS, themeType: "light" },
-    "Solarized Nebula": { vars: SOLARIZED_NEBULA_VARS, themeType: "dark" },
-    CyberPunk: { vars: CYBERPUNK_SUNSET_VARS, themeType: "dark" },
-  },
+  profiles: JSON.parse(JSON.stringify(BUILT_IN_PROFILES_DATA)),
   pinnedSnapshots: {},
 };
 
@@ -724,6 +772,30 @@ class ColorMaster extends Plugin {
     }
   }
 
+  applyCssSnippets() {
+    this.removeCssSnippets();
+    const activeProfile = this.settings.profiles[this.settings.activeProfile];
+    if (!activeProfile) return;
+
+    const snippets = activeProfile.snippets || {};
+    const enabledCss = Object.values(snippets)
+      .filter((s) => s.enabled && s.css)
+      .map((s) => `/* Snippet: ${s.name} */\n${s.css}`)
+      .join("\n\n");
+
+    if (enabledCss) {
+      const el = document.createElement("style");
+      el.id = "cm-css-snippets";
+      el.textContent = enabledCss;
+      document.head.appendChild(el);
+    }
+  }
+
+  removeCssSnippets() {
+    const el = document.getElementById("cm-css-snippets");
+    if (el) el.remove();
+  }
+
   // New method to apply pending changes instantly
   applyPendingNow() {
     try {
@@ -758,10 +830,21 @@ class ColorMaster extends Plugin {
   pinProfileSnapshot(profileName) {
     if (!profileName) profileName = this.settings.activeProfile;
     this.settings.pinnedSnapshots = this.settings.pinnedSnapshots || {};
-    const profileVars = this.settings.profiles?.[profileName]?.vars || {};
+    const profile = this.settings.profiles?.[profileName];
+    if (!profile) {
+      new Notice("Cannot pin snapshot: Profile not found.");
+      return;
+    }
+
+    const snapshotData = {
+      vars: JSON.parse(JSON.stringify(profile.vars || {})),
+      customCss: profile.customCss || "",
+      snippets: JSON.parse(JSON.stringify(profile.snippets || {})),
+    };
+
     this.settings.pinnedSnapshots[profileName] = {
       pinnedAt: new Date().toISOString(),
-      vars: JSON.parse(JSON.stringify(profileVars)),
+      ...snapshotData,
     };
     return this.saveSettings();
   }
@@ -769,12 +852,22 @@ class ColorMaster extends Plugin {
   async resetProfileToPinned(profileName) {
     if (!profileName) profileName = this.settings.activeProfile;
     const snap = this.settings.pinnedSnapshots?.[profileName];
-    if (!snap || !snap.vars)
-      throw new Error("No pinned snapshot for profile " + profileName);
+    if (!snap || !snap.vars) {
+      new Notice("No pinned snapshot found for this profile.");
+      return;
+    }
 
-    this.settings.profiles[profileName].vars = JSON.parse(
-      JSON.stringify(snap.vars)
-    );
+    const activeProfile = this.settings.profiles[profileName];
+    if (!activeProfile) {
+      new Notice("Active profile could not be found.");
+      return;
+    }
+
+    activeProfile.vars = JSON.parse(JSON.stringify(snap.vars));
+    activeProfile.customCss = snap.customCss || "";
+    activeProfile.snippets = snap.snippets
+      ? JSON.parse(JSON.stringify(snap.snippets))
+      : {};
 
     Object.keys(snap.vars).forEach((k) => {
       this.pendingVarUpdates[k] = snap.vars[k];
@@ -875,7 +968,7 @@ class ColorMaster extends Plugin {
     this.clearStyles();
     this.removeInjectedCustomCss();
     this.stopColorUpdateLoop();
-    console.log("Color Master v1.0.4 unloaded.");
+    console.log("Color Master v1.0.5 unloaded.");
   }
 
   async refreshOpenGraphViews() {
@@ -1020,9 +1113,11 @@ class ColorMaster extends Plugin {
       document.body.classList.add("theme-light");
     }
     this.applyCustomCssForProfile(this.settings.activeProfile);
+    this.applyCssSnippets();
   }
 
   clearStyles() {
+    this.removeCssSnippets();
     const allVars = new Set();
     const activeProfile = this.settings.profiles[this.settings.activeProfile];
     if (activeProfile && activeProfile.vars) {
@@ -1115,6 +1210,11 @@ const TEXT_TO_BG_MAP = {
   "--graph-text": "--graph-node",
   "--checklist-done-color": "--background-primary",
   "--text-highlight-bg": "--text-normal",
+  "--tag-color": "--tag-bg",
+  // "--iconize-icon-color": "--background-secondary",
+  "--interactive-success": "--background-primary",
+  "--interactive-error": "--background-primary",
+  "--interactive-warning": "--background-primary",
 };
 // Paste / Import modal - UPGRADED with File Import
 class ProfileJsonImportModal extends Modal {
@@ -1142,31 +1242,31 @@ class ProfileJsonImportModal extends Modal {
 
     // File import button
     contentEl.createEl("p", {
-      text: "Or, you can import directly from a file.",
+      text: "Or, you can import directly from a file :",
     });
     new Setting(contentEl)
       .setName("Import from File")
-      .setDesc("Select a .json profile file from your computer.")
+      .setDesc("Select a (.json) profile file from your computer.")
       .addButton((button) => {
         button.setButtonText("Choose File...").onClick(() => {
           this._handleFileImport();
         });
       });
 
-    // Action buttons (Merge/Replace)
+    // Action buttons (Replace/Create New)
     const ctrl = contentEl.createDiv({ cls: "cm-profile-actions" });
-    ctrl.createDiv({ cls: "cm-profile-action-spacer" }); // Spacer
-    const mergeBtn = ctrl.createEl("button", {
-      text: "Merge",
+    ctrl.createDiv({ cls: "cm-profile-action-spacer" });
+    const replaceBtn = ctrl.createEl("button", {
+      text: "Replace Active",
       cls: "cm-profile-action-btn",
     });
-    const replaceBtn = ctrl.createEl("button", {
-      text: "Replace",
+    const createBtn = ctrl.createEl("button", {
+      text: "Create New",
       cls: "cm-profile-action-btn mod-cta",
     });
 
-    mergeBtn.addEventListener("click", () => this._applyImport("merge"));
     replaceBtn.addEventListener("click", () => this._applyImport("replace"));
+    createBtn.addEventListener("click", () => this._applyCreate());
   }
 
   _handleFileImport() {
@@ -1179,13 +1279,55 @@ class ProfileJsonImportModal extends Modal {
       const file = input.files[0];
       const content = await file.text();
       this.textarea.value = content;
-      new Notice(`File "${file.name}" loaded. You can now Merge or Replace.`);
+      new Notice(
+        `File "${file.name}" loaded. You can now Replace the active profile or Create a New one.`
+      );
     };
     input.click();
   }
 
   onClose() {
     this.contentEl.empty();
+  }
+
+  async _applyCreate() {
+    const raw = this.textarea.value.trim();
+    if (!raw) {
+      new Notice(
+        "The text box is empty. Paste some JSON or import a file first."
+      );
+      return;
+    }
+    let parsed;
+    try {
+      parsed = JSON.parse(raw);
+    } catch (e) {
+      new Notice("Invalid JSON.");
+      return;
+    }
+
+    const newProfileName = parsed.name;
+    const profileObj = parsed.profile ? parsed.profile : parsed;
+
+    if (!newProfileName) {
+      new Notice(
+        "The imported JSON must have a 'name' property to create a new profile."
+      );
+      return;
+    }
+    if (this.plugin.settings.profiles[newProfileName]) {
+      new Notice(`A profile named "${newProfileName}" already exists.`);
+      return;
+    }
+
+    // Create the new profile and make it active
+    this.plugin.settings.profiles[newProfileName] = profileObj;
+    this.plugin.settings.activeProfile = newProfileName;
+
+    await this.plugin.saveSettings();
+    this.settingTab.display();
+    this.close();
+    new Notice(`Profile "${newProfileName}" was created successfully.`);
   }
 
   async _applyImport(mode) {
@@ -1205,31 +1347,33 @@ class ProfileJsonImportModal extends Modal {
     }
 
     const profileObj = parsed.profile ? parsed.profile : parsed;
-    if (!profileObj || typeof profileObj !== "object" || !profileObj.vars) {
-      new Notice("JSON does not look like a valid profile (missing 'vars').");
+    if (typeof profileObj !== "object") {
+      new Notice("JSON does not appear to be a valid profile object.");
       return;
     }
 
     const activeName = this.plugin.settings.activeProfile;
-    if (!activeName) {
+    const activeProfile = this.plugin.settings.profiles[activeName];
+    if (!activeProfile) {
       new Notice("No active profile selected.");
       return;
     }
 
+    const importedVars = profileObj.vars || {};
+    const importedSnippets = profileObj.snippets || {};
+
     if (mode === "replace") {
-      this.plugin.settings.profiles[activeName].vars = { ...profileObj.vars };
-    } else {
-      this.plugin.settings.profiles[activeName].vars = {
-        ...this.plugin.settings.profiles[activeName].vars,
-        ...profileObj.vars,
-      };
+      activeProfile.vars = importedVars;
+      activeProfile.snippets = importedSnippets;
+      activeProfile.themeType = profileObj.themeType || "auto";
     }
 
     await this.plugin.saveSettings();
-    Object.keys(profileObj.vars).forEach((k) => {
-      this.plugin.pendingVarUpdates[k] = profileObj.vars[k];
+    Object.keys(importedVars).forEach((k) => {
+      this.plugin.pendingVarUpdates[k] = importedVars[k];
     });
     this.plugin.applyPendingNow();
+
     this.settingTab.display();
     this.close();
     new Notice(`Profile ${mode}d successfully.`);
@@ -1242,6 +1386,14 @@ class ColorMasterSettingTab extends PluginSettingTab {
     this.graphViewTempState = null;
     this.graphViewWorkingState = null;
     this.graphHeaderButtonsEl = null;
+  }
+
+  updateColorPickerAppearance(textInput, colorPicker) {
+    if (textInput.value.toLowerCase() === "transparent") {
+      colorPicker.classList.add("is-transparent");
+    } else {
+      colorPicker.classList.remove("is-transparent");
+    }
   }
 
   initSearchUI(containerEl) {
@@ -1274,6 +1426,10 @@ class ColorMasterSettingTab extends PluginSettingTab {
 
     this.sectionSelect = right.createEl("select", { cls: "cm-search-small" });
     this.sectionSelect.createEl("option", { value: "", text: "All Sections" });
+    this.sectionSelect.createEl("option", {
+      value: "CSS Snippets",
+      text: "CSS Snippets",
+    });
 
     try {
       Object.keys(DEFAULT_VARS || {}).forEach((k) => {
@@ -1358,7 +1514,10 @@ class ColorMasterSettingTab extends PluginSettingTab {
       const isSearching = s.query.trim().length > 0;
       this.staticContentContainer.toggleClass("cm-hidden", isSearching);
     }
-    const rows = this._getAllVarRows();
+    const rows = Array.from(
+      this.containerEl.querySelectorAll(".cm-var-row, .cm-searchable-row")
+    );
+
     let visibleCount = 0;
 
     let qRegex = null;
@@ -1373,13 +1532,16 @@ class ColorMasterSettingTab extends PluginSettingTab {
     }
 
     rows.forEach((row) => {
-      const varName = row.dataset.var || "";
+      const varName = row.dataset.var || row.dataset.name || "";
       const category = row.dataset.category || "";
       const textInput = row.querySelector("input[type='text']");
       const varValue = textInput ? textInput.value.trim() : "";
 
       // Section filter
-      if (s.section && s.section !== category) {
+      const rowType = row.classList.contains("cm-searchable-row")
+        ? "CSS Snippets"
+        : category;
+      if (s.section && s.section !== rowType) {
         row.classList.add("cm-hidden");
         return;
       }
@@ -1471,20 +1633,21 @@ class ColorMasterSettingTab extends PluginSettingTab {
     actionsEl.createDiv({ cls: "cm-profile-action-spacer" });
 
     const pasteCssBtn = actionsEl.createEl("button", {
-      text: "Paste CSS",
+      text: "Import / Paste (.css) ...",
       cls: "cm-profile-action-btn cm-paste-css-btn",
     });
-    const newBadge = pasteCssBtn.createSpan({
+    pasteCssBtn.createSpan({
       cls: "cm-badge-new",
       text: "New",
     });
+
     pasteCssBtn.addEventListener("click", () => {
-      new PasteCssModal(this.app, this.plugin, this).open();
+      new PasteCssModal(this.app, this.plugin, this, null, "Profile").open();
     });
 
     actionsEl
       .createEl("button", {
-        text: "Paste / Import...",
+        text: "Import / Paste (.json)...",
         cls: "cm-profile-action-btn mod-cta",
       })
       .addEventListener("click", () =>
@@ -1517,6 +1680,91 @@ class ColorMasterSettingTab extends PluginSettingTab {
     }
   }
 
+  drawCssSnippetsUI(containerEl) {
+    const snippetsContainer = containerEl.createDiv({
+      cls: "cm-snippets-container",
+    });
+    snippetsContainer.createEl("h3", { text: t("SNIPPETS_HEADING") });
+
+    const activeProfile =
+      this.plugin.settings.profiles[this.plugin.settings.activeProfile];
+    if (!activeProfile) return;
+    const snippets = activeProfile.snippets || {};
+
+    if (Object.keys(snippets).length === 0) {
+      new Setting(snippetsContainer)
+        .setDesc("No CSS snippets created for this profile yet.")
+        .addButton((button) => {
+          button
+            .setButtonText("Create New Snippet")
+            .setCta()
+            .onClick(() => {
+              new PasteCssModal(
+                this.app,
+                this.plugin,
+                this,
+                null,
+                "Snippet"
+              ).open();
+            });
+        });
+    }
+
+    for (const snippetName in snippets) {
+      const snippet = snippets[snippetName];
+      const setting = new Setting(snippetsContainer)
+        .setName(snippet.name)
+        .addToggle((toggle) => {
+          toggle.setValue(snippet.enabled).onChange(async (value) => {
+            snippet.enabled = value;
+            await this.plugin.saveSettings();
+          });
+        })
+        .addExtraButton((button) => {
+          button
+            .setIcon("pencil")
+            .setTooltip("Edit Snippet")
+            .onClick(() => {
+              new PasteCssModal(this.app, this.plugin, this, snippet).open();
+            });
+        })
+        .addExtraButton((button) => {
+          button
+            .setIcon("copy")
+            .setTooltip("Copy CSS to clipboard")
+            .onClick(async () => {
+              if (snippet.css) {
+                await navigator.clipboard.writeText(snippet.css);
+                new Notice("Snippet CSS copied to clipboard!");
+              } else {
+                new Notice("This snippet is empty.");
+              }
+            });
+        })
+        .addExtraButton((button) => {
+          button
+            .setIcon("trash")
+            .setTooltip("Delete Snippet")
+            .onClick(() => {
+              new ConfirmationModal(
+                this.app,
+                `Delete Snippet: ${snippet.name}`,
+                `Are you sure you want to delete this snippet? This action cannot be undone.`,
+                async () => {
+                  delete this.plugin.settings.profiles[
+                    this.plugin.settings.activeProfile
+                  ].snippets[snippetName];
+                  await this.plugin.saveSettings();
+                  this.display();
+                }
+              ).open();
+            });
+        });
+      setting.settingEl.addClass("cm-searchable-row");
+      setting.settingEl.dataset.name = snippet.name;
+      setting.settingEl.dataset.category = "CSS Snippets";
+    }
+  }
   initLikePluginUI(containerEl) {
     const likeCardEl = containerEl.createDiv("cm-like-card");
     const bannerContainer = likeCardEl.createDiv("cm-banner-container");
@@ -1882,6 +2130,7 @@ class ColorMasterSettingTab extends PluginSettingTab {
           });
         new Setting(this.staticContentContainer)
           .setName("Cleanup Interval")
+          .setClass("cm-last-option-item")
           .setDesc(
             "Sets how often (in seconds) the plugin checks for uninstalled Iconize plugin to clean up its icons."
           )
@@ -1897,6 +2146,9 @@ class ColorMasterSettingTab extends PluginSettingTab {
               });
           });
       });
+
+    this.staticContentContainer.createEl("hr");
+    this.drawCssSnippetsUI(this.staticContentContainer);
 
     this.drawColorPickers();
     containerEl.createEl("hr");
@@ -2020,6 +2272,12 @@ class ColorMasterSettingTab extends PluginSettingTab {
   }
   drawProfileManager(containerEl) {
     containerEl.createEl("h3", { text: t("PROFILE_MANAGER") });
+    const activeProfileName = this.plugin.settings.activeProfile;
+    const activeProfile = this.plugin.settings.profiles[activeProfileName];
+    const isBuiltInProfile = Object.keys(BUILT_IN_PROFILES_VARS).includes(
+      activeProfileName
+    );
+    const isCssProfile = activeProfile?.isCssProfile;
 
     new Setting(containerEl)
       .setName(t("ACTIVE_PROFILE"))
@@ -2032,7 +2290,7 @@ class ColorMasterSettingTab extends PluginSettingTab {
           }
           dropdown.addOption(profileName, displayName);
         }
-        dropdown.setValue(this.plugin.settings.activeProfile);
+        dropdown.setValue(activeProfileName);
         dropdown.onChange(async (value) => {
           this.plugin.removeInjectedCustomCss();
 
@@ -2042,7 +2300,61 @@ class ColorMasterSettingTab extends PluginSettingTab {
         });
       })
       .addButton((button) => {
-        this.pinBtn = button; // Save reference to the button component
+        if (isBuiltInProfile) {
+          button
+            .setIcon("history")
+            .setTooltip("Restore to original built-in colors")
+            .onClick(() => {
+              new ConfirmationModal(
+                this.app,
+                `Restore Profile: ${activeProfileName}`,
+                `Are you sure you want to restore "${activeProfileName}" to its original colors? All your customizations for this profile will be lost.`,
+                async () => {
+                  const originalProfileData =
+                    BUILT_IN_PROFILES_DATA[activeProfileName];
+                  if (!originalProfileData) {
+                    new Notice(
+                      "Could not find original data for this profile."
+                    );
+                    return;
+                  }
+
+                  this.plugin.settings.profiles[activeProfileName] = JSON.parse(
+                    JSON.stringify(originalProfileData)
+                  );
+
+                  await this.plugin.saveSettings();
+                  new Notice(
+                    `Profile "${activeProfileName}" has been restored to its default state.`
+                  );
+                  this.display();
+                },
+                { buttonText: t("RESTORE_BUTTON"), buttonClass: "mod-cta" }
+              ).open();
+            });
+        } else if (isCssProfile) {
+          button
+            .setIcon("pencil")
+            .setTooltip("Edit CSS Profile")
+            .onClick(() => {
+              const profileData = {
+                name: activeProfileName,
+                css: this.plugin.settings.profiles[activeProfileName].customCss,
+                isProfile: true,
+              };
+              new PasteCssModal(
+                this.app,
+                this.plugin,
+                this,
+                profileData
+              ).open();
+            });
+        } else {
+          button.buttonEl.style.display = "none";
+        }
+      })
+      .addButton((button) => {
+        this.pinBtn = button;
         button
           .setIcon("pin")
           .setTooltip("Pin current colors as a snapshot")
@@ -2055,7 +2367,7 @@ class ColorMasterSettingTab extends PluginSettingTab {
           });
       })
       .addButton((button) => {
-        this.resetPinBtn = button; // Save reference
+        this.resetPinBtn = button;
         button
           .setIcon("reset")
           .setTooltip("Reset to pinned colors")
@@ -2069,7 +2381,8 @@ class ColorMasterSettingTab extends PluginSettingTab {
                 await this.plugin.resetProfileToPinned(name);
                 new Notice("Profile has been reset to the pinned snapshot.");
                 this.display();
-              }
+              },
+              { buttonText: t("RESET_BUTTON"), buttonClass: "mod-cta" }
             ).open();
           });
       })
@@ -2227,6 +2540,7 @@ class ColorMasterSettingTab extends PluginSettingTab {
         }
         colorPicker.value = initialValue;
         textInput.value = initialValue;
+        this.updateColorPickerAppearance(textInput, colorPicker);
 
         // --- New Performance-Optimized Event Handling ---
 
@@ -2242,6 +2556,8 @@ class ColorMasterSettingTab extends PluginSettingTab {
         });
 
         const handleFinalChange = (newColor) => {
+          this.updateColorPickerAppearance(textInput, colorPicker);
+
           const profile =
             this.plugin.settings.profiles[this.plugin.settings.activeProfile];
           const oldColor = profile.vars[varName] || defaultValue;
@@ -2308,6 +2624,18 @@ class ColorMasterSettingTab extends PluginSettingTab {
 
         setting.addExtraButton((button) => {
           button
+            .setIcon("eraser")
+            .setTooltip("Set to transparent")
+            .onClick(() => {
+              const newColor = "transparent";
+              textInput.value = newColor;
+              handleFinalChange(newColor);
+              this.updateColorPickerAppearance(textInput, colorPicker);
+            });
+        });
+
+        setting.addExtraButton((button) => {
+          button
             .setIcon("reset")
             .setTooltip("Undo last change")
             .onClick(async () => {
@@ -2326,6 +2654,8 @@ class ColorMasterSettingTab extends PluginSettingTab {
                 activeProfileVars[varName] = restoredColor;
                 colorPicker.value = restoredColor;
                 textInput.value = restoredColor;
+
+                this.updateColorPickerAppearance(textInput, colorPicker);
 
                 await this.plugin.saveSettings();
                 this.updateAccessibilityCheckers();
@@ -2415,11 +2745,13 @@ class NewProfileModal extends Modal {
 }
 
 class ConfirmationModal extends Modal {
-  constructor(app, title, message, onConfirm) {
+  constructor(app, title, message, onConfirm, options = {}) {
     super(app);
     this.title = title;
     this.message = message;
     this.onConfirm = onConfirm;
+    this.confirmButtonText = options.buttonText || t("DELETE_BUTTON");
+    this.confirmButtonClass = options.buttonClass || "mod-warning";
   }
 
   onOpen() {
@@ -2439,8 +2771,8 @@ class ConfirmationModal extends Modal {
     cancelButton.addEventListener("click", () => this.close());
 
     const confirmButton = buttonContainer.createEl("button", {
-      text: t("DELETE_BUTTON"),
-      cls: "mod-warning",
+      text: this.confirmButtonText,
+      cls: this.confirmButtonClass,
     });
     confirmButton.addEventListener("click", () => {
       this.onConfirm();
@@ -2491,94 +2823,277 @@ function getAccessibilityRating(ratio) {
 }
 
 class PasteCssModal extends Modal {
-  constructor(app, plugin, settingTab) {
+  constructor(
+    app,
+    plugin,
+    settingTab,
+    existingSnippet = null,
+    defaultSaveType = "Profile"
+  ) {
     super(app);
     this.plugin = plugin;
     this.settingTab = settingTab;
+    this.existingSnippet = existingSnippet;
+    this.isEditing = !!existingSnippet;
+    this.saveType = defaultSaveType;
+  }
+
+  _updateUIForSaveType(saveType) {
+    if (this.isEditing) return;
+
+    const isSnippet = saveType === "Snippet";
+    const titleText = isSnippet
+      ? "Create New CSS Snippet"
+      : "Import / Paste CSS and create profile";
+    const nameLabel = isSnippet ? "Snippet Name" : t("PROFILE_NAME_LABEL");
+    const namePlaceholder = isSnippet
+      ? "Enter snippet name..."
+      : t("PROFILE_NAME_PLACEHOLDER");
+    if (this.modalTitleEl) this.modalTitleEl.setText(titleText);
+    if (this.nameSetting) this.nameSetting.setName(nameLabel);
+    if (this.nameInput) this.nameInput.setPlaceholder(namePlaceholder);
+  }
+
+  _handleFileImport() {
+    const input = createEl("input", {
+      type: "file",
+      attr: { accept: ".css" },
+    });
+    input.onchange = async () => {
+      if (!input.files || input.files.length === 0) return;
+      const file = input.files[0];
+      const content = await file.text();
+      this.cssTextarea.value = content;
+      new Notice(`File "${file.name}" loaded into the text area.`);
+    };
+    input.click();
   }
 
   onOpen() {
     const { contentEl } = this;
     contentEl.empty();
-    contentEl.createEl("h3", { text: "Paste CSS and create profile" });
-    contentEl.createEl("div", {
+
+    const titleContainer = contentEl.createDiv({ cls: "cm-title-container" });
+    const titleText = this.isEditing
+      ? this.existingSnippet.isProfile
+        ? t("EDIT_PROFILE_TITLE")
+        : t("EDIT_SNIPPET_TITLE")
+      : "Import / Paste CSS and create profile";
+    this.modalTitleEl = titleContainer.createEl("h3", { text: titleText });
+    contentEl.createEl("p", {
       text: "Note: Pasted CSS can affect UI; proceed only with trusted CSS.",
     });
 
-    // name input
-    const nameRow = contentEl.createDiv();
-    nameRow.createEl("label", {
-      text: "Profile name :",
-      cls: "cm-modal-label",
-    });
-    this.nameInput = nameRow.createEl("input", {
-      type: "text",
-      placeholder: t("PROFILE_NAME_PLACEHOLDER"),
-      attr: { style: "width:100%" },
-    });
+    let saveType = this.saveType || "Profile";
 
-    // textarea
-    this.textarea = contentEl.createEl("textarea", {
+    if (!this.isEditing) {
+      new Setting(contentEl)
+        .setName(t("SAVE_AS_TYPE"))
+        .setClass("cm-segmented-control-setting")
+        .then((setting) => {
+          const profileButton = setting.controlEl.createEl("button", {
+            text: t("SAVE_AS_PROFILE"),
+          });
+          const snippetButton = setting.controlEl.createEl("button", {
+            text: t("SAVE_AS_SNIPPET"),
+          });
+
+          setting.controlEl.classList.add("cm-segmented-control");
+          const updateActiveButton = (activeType) => {
+            profileButton.classList.toggle(
+              "is-active",
+              activeType === "Profile"
+            );
+            snippetButton.classList.toggle(
+              "is-active",
+              activeType === "Snippet"
+            );
+          };
+
+          profileButton.addEventListener("click", () => {
+            saveType = "Profile";
+            updateActiveButton(saveType);
+            this._updateUIForSaveType(saveType);
+          });
+
+          snippetButton.addEventListener("click", () => {
+            saveType = "Snippet";
+            updateActiveButton(saveType);
+            this._updateUIForSaveType(saveType);
+          });
+
+          updateActiveButton(saveType);
+        });
+    }
+
+    this.nameSetting = new Setting(contentEl)
+      .setName(
+        this.isEditing && !this.existingSnippet.isProfile
+          ? "Snippet Name"
+          : t("PROFILE_NAME_LABEL")
+      )
+      .addText((text) => {
+        this.nameInput = text;
+        let placeholderText;
+        if (this.isEditing) {
+          placeholderText = this.existingSnippet.isProfile
+            ? t("PROFILE_NAME_PLACEHOLDER")
+            : "Enter snippet name...";
+        } else {
+          placeholderText =
+            this.saveType === "Snippet"
+              ? "Enter snippet name..."
+              : t("PROFILE_NAME_PLACEHOLDER");
+        }
+
+        text
+          .setValue(this.isEditing ? this.existingSnippet.name : "")
+          .setPlaceholder(placeholderText)
+          .onChange((value) => {
+            this.snippetName = value.trim();
+          });
+      });
+
+    new Setting(contentEl)
+      .setName("Import from File")
+      .setDesc("Select a (.css) file from your computer.")
+      .addButton((button) => {
+        button.setButtonText("Choose File...").onClick(() => {
+          this._handleFileImport();
+        });
+      });
+
+    this.cssTextarea = contentEl.createEl("textarea", {
       cls: "cm-search-input",
-      attr: { rows: 12, placeholder: "Paste your CSS here..." },
+      attr: { rows: 12, placeholder: "Or, paste your CSS here..." },
     });
-    this.textarea.style.width = "100%";
-    this.textarea.style.marginTop = "8px";
+    this.cssTextarea.style.width = "100%";
+    this.cssTextarea.value = this.isEditing ? this.existingSnippet.css : "";
 
-    // controls
-    const ctrl = contentEl.createDiv({
-      cls: "cm-profile-actions",
-      attr: { style: "justify-content: flex-end; margin-top:8px; gap:8px;" },
-    });
-    const cancelBtn = ctrl.createEl("button", {
-      text: "Cancel",
-      cls: "cm-profile-action-btn",
-    });
-    const saveBtn = ctrl.createEl("button", {
-      text: "Save as profile",
-      cls: "mod-cta",
+    const buttonContainer = contentEl.createDiv({
+      cls: "modal-button-container",
+      attr: { style: "justify-content: flex-end;" },
     });
 
-    saveBtn.addEventListener("click", async () => {
-      const cssText = this.textarea.value.trim();
-      let name = this.nameInput.value.trim();
+    buttonContainer
+      .createEl("button", { text: t("CANCEL_BUTTON") })
+      .addEventListener("click", () => this.close());
 
-      if (!cssText) {
-        new Notice("Paste some CSS first.");
+    buttonContainer
+      .createEl("button", {
+        text: this.isEditing ? t("UPDATE_BUTTON") : t("CREATE_BUTTON"),
+        cls: "mod-cta",
+      })
+      .addEventListener("click", () => this.handleSave(saveType));
+
+    this._updateUIForSaveType(saveType);
+  }
+
+  handleSave(saveType) {
+    const cssText = this.cssTextarea.value.trim();
+    let name = (
+      this.snippetName || (this.isEditing ? this.existingSnippet.name : "")
+    ).trim();
+    if (!name) {
+      new Notice(t("EMPTY_PROFILE_NAME_NOTICE"));
+      return;
+    }
+    if (!cssText) {
+      new Notice("CSS content cannot be empty.");
+      return;
+    }
+    let isNameTaken = false;
+    if (saveType === "Snippet") {
+      const activeProfileSnippets =
+        this.plugin.settings.profiles[this.plugin.settings.activeProfile]
+          ?.snippets || {};
+      isNameTaken = Object.keys(activeProfileSnippets).some(
+        (snippetName) =>
+          snippetName.toLowerCase() === name.toLowerCase() &&
+          (!this.isEditing ||
+            this.existingSnippet.name.toLowerCase() !== name.toLowerCase())
+      );
+      if (isNameTaken) {
+        new Notice(`Snippet name "${name}" already exists.`);
         return;
       }
-      if (!name) {
-        name = `CSS Profile ${Date.now()}`;
+    } else {
+      isNameTaken = Object.keys(this.plugin.settings.profiles || {}).some(
+        (profileName) =>
+          profileName.toLowerCase() === name.toLowerCase() &&
+          (!this.isEditing ||
+            this.existingSnippet.name.toLowerCase() !== name.toLowerCase())
+      );
+      if (isNameTaken) {
+        new Notice(`Profile name "${name}" already exists.`);
+        return;
       }
+    }
+    if (this.isEditing) {
+      if (this.existingSnippet.isProfile) {
+        const oldName = this.existingSnippet.name;
+        const oldProfileData = this.plugin.settings.profiles[oldName] || {};
 
-      const proceedWithSave = async () => {
-        this.plugin.settings.profiles[name] =
-          this.plugin.settings.profiles[name] || {};
-        this.plugin.settings.profiles[name].vars =
-          this.plugin.settings.profiles[name].vars || {};
-        this.plugin.settings.profiles[name].isCssProfile = true;
-        this.plugin.settings.profiles[name].customCss = cssText;
+        if (oldName !== name) {
+          if (this.plugin.settings.pinnedSnapshots[oldName]) {
+            this.plugin.settings.pinnedSnapshots[name] =
+              this.plugin.settings.pinnedSnapshots[oldName];
+            delete this.plugin.settings.pinnedSnapshots[oldName];
+          }
+
+          delete this.plugin.settings.profiles[oldName];
+        }
+        this.plugin.settings.profiles[name] = {
+          ...oldProfileData,
+          isCssProfile: true,
+          customCss: cssText,
+        };
         this.plugin.settings.activeProfile = name;
-
-        await this.plugin.saveSettings();
-        this.settingTab.display();
-        new Notice(`Profile "${name}" created and applied.`);
-        this.close();
-      };
-
-      if (this.plugin.settings.profiles[name]) {
-        new ConfirmationModal(
-          this.app,
-          "Overwrite Profile?",
-          `Profile "${name}" already exists. Are you sure you want to overwrite it?`,
-          proceedWithSave
-        ).open();
+        new Notice(`Profile "${name}" updated.`);
       } else {
-        proceedWithSave();
-      }
-    });
+        const oldName = this.existingSnippet.name;
+        const activeProfile =
+          this.plugin.settings.profiles[this.plugin.settings.activeProfile];
+        if (!activeProfile) return;
+        activeProfile.snippets = activeProfile.snippets || {};
 
-    cancelBtn.addEventListener("click", () => this.close());
+        if (oldName !== name) {
+          delete activeProfile.snippets[oldName];
+        }
+        activeProfile.snippets[name] = {
+          ...this.existingSnippet,
+          name: name,
+          css: cssText,
+        };
+        new Notice(`Snippet "${name}" updated.`);
+      }
+    } else {
+      if (saveType === "Snippet") {
+        const activeProfile =
+          this.plugin.settings.profiles[this.plugin.settings.activeProfile];
+        if (!activeProfile) return;
+        activeProfile.snippets = activeProfile.snippets || {};
+        activeProfile.snippets[name] = {
+          name: name,
+          css: cssText,
+          enabled: true,
+        };
+        new Notice(`Snippet "${name}" has been created successfully!`);
+      } else {
+        this.plugin.settings.profiles[name] = {
+          vars: {},
+          isCssProfile: true,
+          customCss: cssText,
+        };
+        this.plugin.settings.activeProfile = name;
+        new Notice(`Profile "${name}" has been created successfully!`);
+      }
+    }
+    this.plugin.saveSettings().then(() => {
+      this.plugin.applyCssSnippets();
+      this.settingTab.display();
+      this.close();
+    });
   }
 
   onClose() {
