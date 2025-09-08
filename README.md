@@ -12,25 +12,29 @@ Take full control of your Obsidian theme with **Color Master**. This plugin prov
 
 Color Master is packed with features designed for both beginners and power-users, giving you ultimate control over your workspace's appearance.
 
-#### Core Customization
-* **Live Color Editor**: An intuitive UI with color pickers to see your changes instantly.
-* **Full Profile Management**: Create, delete, and switch between multiple color profiles.
-* **Import & Export**: Easily share your favorite profiles with others or back them up with flexible **Merge** and **Replace** options.
+#### 🏛️ Foundational Features
+* **Live Color Editor**: An intuitive UI with color pickers and text inputs to see your changes instantly.
+* **Full Profile Management**: Create, delete, and switch between multiple color profiles. Each profile can have its own colors, snippets, and theme settings.
 * **Bilingual Interface**: Full support for both English and Arabic (العربية), with automatic Right-to-Left (RTL) mode.
 * **Beautiful Default Themes**: Comes with five stunning, ready-to-use profiles to get you started.
 
 #### 🚀 Power-User Tools
-* **NEW - Paste CSS for Instant Theming!**: The ultimate creative tool! Paste raw CSS from any theme or snippet to create a special "CSS Profile," allowing you to use complex themes without needing to install them.
-* **Multi-Step Color Undo**: The "Reset" button has been upgraded to an intelligent **Undo** button that remembers your last 5 changes for each color.
-* **Profile Snapshots**: Safely experiment with your colors! Use the **Pin** button to save a snapshot of your profile, and revert back to it anytime with **Reset to Pinned**.
+* **NEW - Per-Profile CSS Snippets!**: The "Paste CSS" feature has evolved! Snippets are **no longer global** and are now saved directly to the active profile. This means your small CSS tweaks are perfectly organized and are **exported automatically** with your theme.
+* **NEW - Powerful Import/Export**:
+    * **Create New Profile from JSON**: Easily import a `.json` file to create a brand new profile instantly, without needing to create an empty one first.
+    * **Complete Profile Sync**: The "Replace" function now updates *everything* from the imported file—colors, snippets, and the Dark/Light mode theme setting.
+* **NEW - One-Click Restore**: A new **Restore (`history`) button** appears next to the default profiles. If you've modified a built-in theme, you can instantly revert it back to its original state, including any future default snippets.
+* **Reliable Profile Snapshots**: Safely experiment with your colors! The **Pin** button now saves a complete snapshot of your profile (colors, CSS, and snippets). When you rename a profile, its snapshot is intelligently renamed with it.
+* **Multi-Step Color Undo**: The "Undo" button (`reset` icon) remembers the last 5 changes you made to each color.
 * **Profile-Specific Themes**: Force Obsidian into **Dark Mode** or **Light Mode** automatically when you activate a specific profile.
-* **Advanced Search & Filtering**: A powerful search bar to filter colors by name or value, with toggles for case-sensitivity and Regular Expressions.
 
-#### workflow & UI
-* **Smart Search UI**: The search bar is now at the top, and using it automatically hides other UI elements for a clean, **Focus Mode** experience.
+####  workflow & UI
+* **Full CSS Editing**: Create and **edit** your CSS-based profiles and snippets at any time.
+* **Smart Search UI**: A powerful search bar to filter colors and snippets, with toggles for case-sensitivity and Regular Expressions.
+* **NEW - Eraser Tool**: A handy **Eraser (`eraser`) button** has been added to every color picker to instantly set any color to `transparent`.
 * **Workflow Hotkeys**: Assign hotkeys to toggle the plugin on/off or instantly cycle to your next profile.
-* **Performance Control (FPS Slider)**: Adjust the live preview frame rate to ensure a smooth experience, even on lower-spec devices.
-* **Plugin Integrations**: Full color control for the **Iconize** plugin, with an automated cleanup system that removes orphaned icons if the plugin is uninstalled.
+* **Performance Control (FPS Slider)**: Adjust the live preview frame rate to ensure a smooth experience.
+* **Plugin Integrations**: Full color control for the **Iconize** plugin, with an automated cleanup system.
 
 ---
 
