@@ -1,5 +1,42 @@
 # Changelog
 
+## v1.0.5 - 2025-09-08 (The Snippet & Polish Update)
+
+### New Features & Major Improvements
+
+* **Introducing CSS Snippets!**
+    * The "Paste CSS" feature has been completely upgraded and now allows you to save code as either a full **Profile** or a lightweight **Snippet**.
+    * **Why is this a game-changer?** Now you can save small, reusable CSS tweaks (like coloring a specific header or styling checkboxes) without creating an entire profile. This keeps your setup clean, organized, and powerful. You can toggle snippets on and off, edit them, and even copy their code with a new dedicated button.
+
+* **Full Editing for CSS Profiles:**
+    * You can now edit your existing CSS-based profiles directly. Change the name or update the CSS code at any time without needing to create a new profile from scratch.
+
+* **Restore Built-in Profiles with One Click!**
+    * A new **Restore (`history`) button** now appears next to the default profiles (like OLED Matrix). If you've modified a built-in theme and want to go back to its original state, just click this button.
+    * **Smart Recovery:** Accidentally deleted a default profile? No problem! Just create a new, empty profile with the *exact same name* (e.g., "OLED Matrix"), and the restore button will magically reappear, allowing you to bring it back to its factory settings.
+
+* **Complete Tag Styling Control:**
+    * Added three new color variables specifically for styling tags, giving you pixel-perfect control over their appearance:
+        * `--tag-color`: Sets the main text color of the tag.
+        * `--tag-color-hover`: The text color when you hover over the tag.
+        * `--tag-bg`: The background color of the tag "pill".
+
+### Bug Fixes & Quality of Life Enhancements
+
+* **Snapshots Now Save Everything!**
+    * Fixed a critical issue where taking a Snapshot of a CSS Profile would only save the color variables but not the CSS code. Now, Snapshots correctly save and restore **both** the colors and the associated CSS code, making them completely reliable.
+
+* **Smarter Profile Renaming:**
+    * Fixed a bug where renaming a profile would cause its Snapshot to be lost. Now, when you rename a profile, its pinned Snapshot is intelligently renamed with it.
+    * Fixed a related bug where updating a CSS profile's name would fail or not save correctly. The process is now seamless.
+
+* **New "Transparent" Tool:**
+    * Added a new **Eraser (`eraser`) button** next to each color picker. Clicking it instantly sets the color to `transparent`, which is perfect for removing backgrounds or borders.
+
+* **UI & Wording Improvements:**
+    * The "Paste CSS" button has been renamed to **"Paste / Import (CSS)..."** to better reflect its ability to Import and paste `.css` files.
+    * Fixed a minor bug where updating a CSS profile with the same name would show two notifications. Now, it correctly shows only "Profile updated."
+
 ## v1.0.4 - 2025-09-04 (The CSS Freedom Update)
 
 ### New Features & Major Improvements
