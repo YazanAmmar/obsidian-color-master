@@ -1,5 +1,50 @@
 # Changelog
 
+## v1.0.6 - 2025-09-13 (The Thematic Intelligence Update)
+
+This update focuses on two core principles: **intelligence and elegance**. We're introducing the revolutionary Advanced Notice Coloring system, adding a new layer of interactive intelligence to your workspace. This comes alongside a comprehensive UI overhaul and precise enhancements to every corner of the plugin, making your experience smoother and more professional than ever.
+
+### New Features & Major Improvements
+
+* **Introducing Advanced Notice Coloring!** 
+* For the first time, you can now control the background and text color of notices based on their content. Create prioritized rules using keywords or Regex to make your workspace more dynamic and informative. 
+* The user interface for creating rules has been redesigned with an intuitive tag-based input for keywords, smart duplicate detection, and smooth animations for adding/deleting rules. 
+* Includes a new “Test Rule” button (🔔) to instantly preview how a notice will look.
+
+* **Full Right-to-Left (RTL) Language Support:** 
+* The plugin now has foundational support for RTL languages, starting with a complete **Arabic** translation. 
+* All UI components, including new mods and controls, have been re-engineered to display perfectly in both LTR and RTL layouts. This centralized architecture makes adding new languages ​​in the future incredibly simple.
+
+* **Expanded Markdown Color Control:** 
+* Added several new color variables for finer control over your notes' appearance, including: 
+* `--blockquote-bg`: A brand new variable to control the background color of blockquotes. 
+* `--hr-color`: For horizontal styling rules. 
+* `--code-normal` & `--code-background`: For inline code blocks. 
+* `--text-highlight-bg`: For highlighted text.
+
+### UI/UX Enhancements & Polish
+
+* **Massive Search & Filtering Overhaul:** 
+* **Deeper Search:** The search function is now more powerful and searches within variable **descriptions**, not just their names. 
+* **Animated Highlighting:** Search terms are now highlighted with a beautiful, animated wave gradient wherever they appear, making results easy to spot. 
+* The search bar has been enhanced with a new search icon for a cleaner look.
+
+* **Smarter & Safer Profile Importing:** 
+* Importing a profile with a name that already exists will now open a new dialog prompting you for a different name, preventing you from accidentally overwriting your work.
+
+* **Polished & Redesigned Modals:** 
+* The "Advanced Notice Rules" and "Duplicate Profile Name" modals have been completely redesigned with a modern, clean, and more intuitive interface.
+
+### Behind the Scenes
+
+* **Architectural Upgrade: Profile-Specific Rules:** 
+* Notice rules are no longer a global setting. They are now an integral part of each profile and are **automatically exported and imported** with them.
+
+* **Professional Development Workflow:** 
+* The project has now officially integrated the `SortableJS` library for smooth drag-and-drop functionality and has adopted a professional `npm run build` workflow, enhancing stability and maintainability.
+
+> and many other important fixes, performance and interface improvements! ...
+
 ## v1.0.5 - 2025-09-08 (The Snippet & Polish Update)
 
 ### New Features & Major Improvements
