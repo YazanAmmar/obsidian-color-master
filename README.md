@@ -161,7 +161,7 @@ If you want to customize the plugin or contribute to its development, you can ea
 
 1.  **Clone the Repository:**
     ```bash
-    git clone [https://github.com/YazanAmmar/obsidian-color-master.git](https://github.com/YazanAmmar/obsidian-color-master.git)
+    git clone https://github.com/YazanAmmar/obsidian-color-master.git
     cd obsidian-color-master
     ```
 
