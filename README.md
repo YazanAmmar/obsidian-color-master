@@ -14,24 +14,24 @@ Color Master is packed with features designed for both beginners and power-users
 
 #### 🏛️ Foundational Features
 * **Live Color Editor**: An intuitive UI with color pickers and text inputs to see your changes instantly.
-* **Full Profile Management**: Create, delete, and switch between multiple color profiles. Each profile can have its own colors, snippets, and theme settings.
-* **Bilingual Interface**: Full support for both English and Arabic (العربية), with automatic Right-to-Left (RTL) mode.
+* **Full Profile Management**: Create, delete, and switch between multiple color profiles. Each profile is a self-contained unit that holds its own colors, snippets, notice rules, and theme settings.
+* **Bilingual & RTL Ready**: Full support for English and Arabic (العربية), with a foundational architecture built to handle Right-to-Left layouts perfectly.
 * **Beautiful Default Themes**: Comes with five stunning, ready-to-use profiles to get you started.
 
 #### 🚀 Power-User Tools
-* **NEW - Per-Profile CSS Snippets!**: The "Paste CSS" feature has evolved! Snippets are **no longer global** and are now saved directly to the active profile. This means your small CSS tweaks are perfectly organized and are **exported automatically** with your theme.
-* **NEW - Powerful Import/Export**:
-    * **Create New Profile from JSON**: Easily import a `.json` file to create a brand new profile instantly, without needing to create an empty one first.
-    * **Complete Profile Sync**: The "Replace" function now updates *everything* from the imported file—colors, snippets, and the Dark/Light mode theme setting.
-* **NEW - One-Click Restore**: A new **Restore (`history`) button** appears next to the default profiles. If you've modified a built-in theme, you can instantly revert it back to its original state, including any future default snippets.
-* **Reliable Profile Snapshots**: Safely experiment with your colors! The **Pin** button now saves a complete snapshot of your profile (colors, CSS, and snippets). When you rename a profile, its snapshot is intelligently renamed with it.
+* **NEW - Advanced Notice Coloring**: A revolutionary system to control the background and text color of pop-up notices based on their content (keywords or Regex). These rules are now saved **per-profile** and are included in exports!
+* **Per-Profile CSS Snippets**: Snippets are no longer global and are now saved directly to the active profile. This means your small CSS tweaks are perfectly organized and are **exported automatically** with your theme.
+* **Powerful Import/Export**:
+    * **Create New Profile from JSON**: Easily import a `.json` file to create a brand new profile instantly.
+    * **Smarter Import**: If you import a profile with a name that already exists, a new dialog will prompt you for a different name, preventing accidental overwrites.
+* **Reliable Profile Snapshots**: Safely experiment with your colors! The **Pin** button now saves a complete snapshot of your profile, including **colors, CSS, snippets, and notice rules**.
 * **Multi-Step Color Undo**: The "Undo" button (`reset` icon) remembers the last 5 changes you made to each color.
 * **Profile-Specific Themes**: Force Obsidian into **Dark Mode** or **Light Mode** automatically when you activate a specific profile.
 
-####  workflow & UI
+#### workflow & UI
+* **NEW - Deep Search & Highlighting**: The search bar is now more powerful than ever, searching through variable **descriptions** (not just names) and highlighting matches with a beautiful animated gradient.
 * **Full CSS Editing**: Create and **edit** your CSS-based profiles and snippets at any time.
-* **Smart Search UI**: A powerful search bar to filter colors and snippets, with toggles for case-sensitivity and Regular Expressions.
-* **NEW - Eraser Tool**: A handy **Eraser (`eraser`) button** has been added to every color picker to instantly set any color to `transparent`.
+* **Eraser Tool**: A handy **Eraser (`eraser`) button** has been added to every color picker to instantly set any color to `transparent`.
 * **Workflow Hotkeys**: Assign hotkeys to toggle the plugin on/off or instantly cycle to your next profile.
 * **Performance Control (FPS Slider)**: Adjust the live preview frame rate to ensure a smooth experience.
 * **Plugin Integrations**: Full color control for the **Iconize** plugin, with an automated cleanup system.
@@ -79,7 +79,7 @@ For advanced users who want to know exactly what they're changing, here is a com
 | Variable | Description |
 |---|---|
 | **Plugin Integrations** | |
-| `--iconize-icon-color` | Sets the color for all icons added by the Iconize plugin, overriding its native color settings for a unified look.<br><br>This entire feature is controlled by the **"Override Iconize Plugin Colors"** toggle in the settings. This override is completely non-destructive:<br>- When turned **ON**, Color Master applies this custom color to the icons.<br>- When turned **OFF**, Color Master stops managing the colors, and your original settings from the Iconize plugin are instantly restored without any permanent changes to your configuration. |
+| `--iconize-icon-color` | Sets the color for all icons added by the Iconize plugin, overriding its native color settings. |
 | **Backgrounds** | |
 | `--background-primary` | Main background color for the entire app, especially for editor and note panes. |
 | `--background-primary-alt` | An alternate background color, often used for the active line in the editor. |
@@ -99,17 +99,28 @@ For advanced users who want to know exactly what they're changing, here is a com
 | `--text-accent` | The primary accent color for text, used for links and highlighted UI elements. |
 | `--text-accent-hover` | The color of accent text (like links) when you hover over it. |
 | `--text-selection` | The background color of text that you have selected with your cursor. |
-| `--text-highlight-bg` | The background color for text highlighted with `==highlight==` syntax. |
+| **Headings** | |
+| `--h1-color` | The color of H1 heading text. |
+| `--h2-color` | The color of H2 heading text. |
+| `--h3-color` | The color of H3 heading text. |
+| `--h4-color` | The color of H4 heading text. |
+| `--h5-color` | The color of H5 heading text. |
+| `--h6-color` | The color of H6 heading text. |
+| **Markdown Elements** | |
+| `--hr-color` | The color of the horizontal rule line created with `---`. |
+| `--blockquote-border-color` | The color of the vertical border on the left side of a blockquote. |
+| `--blockquote-color` | The text color for content inside of a blockquote. |
+| `--blockquote-bg` | The background color for content inside of a blockquote. |
 | `--tag-color` | Sets the text color of #tags. |
 | `--tag-color-hover` | Sets the text color of #tags when hovering over them. |
 | `--tag-bg` | Sets the background color of #tags, allowing for a 'pill' shape. |
-| **Headings** | |
-| `-h1-color` | The color of H1 heading text. |
-| `-h2-color` | The color of H2 heading text. |
-| `-h3-color` | The color of H3 heading text. |
-| `-h4-color` | The color of H4 heading text. |
-| `-h5-color` | The color of H5 heading text. |
-| `-h6-color` | The color of H6 heading text. |
+| `--checklist-done-color` | The color of the checkmark and text for a completed to-do item. |
+| `--code-normal` | Sets the text color inside inline code (between backticks). |
+| `--code-background` | Sets the background color for inline code blocks. |
+| `--text-highlight-bg` | Sets the background color for highlighted text (`==like this==`). |
+| **Notices** | |
+| `--cm-notice-bg-default` | Sets the default background color for all notices, unless overridden by a rule. |
+| `--cm-notice-text-default` | Sets the default text color for all notices, unless overridden by a rule. |
 | **Interactive Elements** | |
 | `--interactive-normal` | The background color for interactive elements like buttons. |
 | `--interactive-hover` | The background color for interactive elements when hovered. |
@@ -138,17 +149,43 @@ For advanced users who want to know exactly what they're changing, here is a com
 | **Misc** | |
 | `--scrollbar-thumb-bg` | The color of the draggable part of the scrollbar. |
 | `--scrollbar-bg` | The color of the scrollbar track (the background). |
-| `--divider-color` | The color of horizontal lines (`---`) and other dividers in the UI. |
-| `--checklist-done-color` | The color of the checkmark and text for a completed to-do item. |
+| `--divider-color` | The color for general UI separator lines. |
 
 </details>
 
 ---
 
+## 🛠️ Building from Source
+
+If you want to customize the plugin or contribute to its development, you can easily build it from the source code.
+
+1.  **Clone the Repository:**
+    ```bash
+    git clone [https://github.com/YazanAmmar/obsidian-color-master.git](https://github.com/YazanAmmar/obsidian-color-master.git)
+    cd obsidian-color-master
+    ```
+
+2.  **Install Dependencies:**
+    Make sure you have Node.js installed. Then, run the following command in the project's root directory. This will download all necessary development libraries like `esbuild` and `sortablejs`.
+    ```bash
+    npm install
+    ```
+
+3.  **Build the Plugin:**
+    To compile the TypeScript code and package the plugin for Obsidian, run the build command:
+    ```bash
+    npm run build
+    ```
+
+4.  **Load into Obsidian:**
+    The compiled plugin files (`main.js`, `styles.css`, `manifest.json`) will be available in the project's root directory. Copy these files into your Obsidian vault's plugin folder: `<YourVault>/.obsidian/plugins/color-master/`.
+
+---
+
 ## Installation
 
-1.  Download the latest release from the [GitHub Releases page](https://github.com/yazanammar/obsidian-color-master/releases).
-2.  Extract the `color-master` folder into your vault's plugins folder: `<YourVault>/.obsidian/plugins/`.
+1.  Download the latest release from the [GitHub Releases page](https://github.com/YazanAmmar/obsidian-color-master/releases).
+2.  Extract the plugin folder into your vault's plugins folder: `<YourVault>/.obsidian/plugins/`.
 3.  In Obsidian, go to `Settings` -> `Community plugins`.
 4.  Enable the "Color Master" plugin.
 5.  Open the plugin settings to start customizing!
