@@ -30,6 +30,42 @@
   text-align: right;
 }
 
+/* --- Global RTL Notice --- */
+
+body.color-master-rtl .notice {
+  direction: rtl;
+  text-align: right;
+}
+
+/* --- Force LTR for English UI in RTL Obsidian --- */
+
+.is-ltr {
+  direction: ltr !important;
+}
+
+.is-ltr h2,
+.is-ltr h3,
+.is-ltr .setting-item-name,
+.is-ltr .setting-item-description {
+  text-align: left !important;
+}
+
+.is-ltr .setting-item {
+  flex-direction: row !important;
+}
+
+.is-ltr .modal-content .setting-item {
+  flex-direction: row !important;
+}
+
+/* ======================================================= */
+
+.is-ltr .modal-content .setting-item-info {
+  text-align: left !important;
+  margin-right: 10px;
+  margin-left: 0;
+}
+
 .setting-item-control input[type="color"] {
   -webkit-appearance: none;
   width: 28px;
@@ -122,15 +158,6 @@
   border-color: #dc354580;
 }
 
-.cm-search-input {
-  width: 100%;
-  padding: 8px 12px;
-  background-color: var(--background-secondary);
-  border: 1px solid var(--background-modifier-border);
-  border-radius: 5px;
-  color: var(--text-normal);
-}
-
 /* Color Master — Search UI */
 .cm-search-container {
   display: flex;
@@ -164,14 +191,27 @@
 .cm-var-row .cm-var-name {
   font-weight: 600;
 }
-.cm-highlight {
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 0, 0.25),
-    rgba(255, 255, 0, 0.05)
+/* --- Text shading with a moving color gradient --- */
+
+.color-master-settings-tab .cm-highlight {
+  background-image: linear-gradient(
+    to right,
+    #0ea5e9,
+    #8b5cf6,
+    #d946ef,
+    #0ea5e9
   );
-  padding: 0 2px;
-  border-radius: 2px;
+  background-size: 200% auto;
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: textShine 1s linear infinite;
+}
+
+@keyframes textShine {
+  to {
+    background-position: 200% center;
+  }
 }
 
 .cm-filter-badge {
@@ -339,7 +379,7 @@
   right: -18px;
   top: -30px;
   font-size: 11px;
-  font-weight: 500; /* Normal weight */
+  font-weight: 500;
   color: var(--text-on-accent);
   padding: 2px 6px;
   border-radius: 4px;
@@ -651,3 +691,659 @@
 }
 
 /* =================================================================== */
+
+.cm-section-heading {
+  margin-top: 24px;
+}
+
+/* --- Add Underline to Modal Titles --- */
+
+.color-master-modal .modal-content h3 {
+  border-bottom: 1px solid var(--background-modifier-border);
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+/* ======================================================= */
+
+.color-master-modal .modal-content .setting-item:first-of-type {
+  border-top: none;
+}
+
+.color-master-modal .modal-content h3 {
+  margin-bottom: 3px;
+}
+.color-master-modal .setting-item-description {
+  white-space: normal !important;
+  max-width: 80%;
+}
+
+/* --- Adjust HR (Divider Line) Spacing --- */
+
+.cm-static-sections > hr {
+  margin-top: 3px;
+  margin-bottom: 30px;
+}
+
+/* --- Adjust HR Spacing Inside Modals --- */
+
+.color-master-modal .modal-content > hr {
+  margin-top: 0px;
+  margin-bottom: 0px;
+}
+
+/* ======= Robust LTR/RTL fix for Color Master (place at END of styles.css) ======= */
+
+.color-master-modal,
+.color-master-modal .modal-content,
+.cm-plugin-modal,
+.cm-modal {
+  display: block;
+  box-sizing: border-box;
+}
+
+.color-master-modal .setting-item:not(.cm-hidden),
+.cm-plugin-modal .setting-item:not(.cm-hidden),
+.modal-content .setting-item:not(.cm-hidden),
+.modal-content .setting-row:not(.cm-hidden) {
+  display: flex !important;
+  width: 100% !important;
+  align-items: center !important;
+  gap: 10px !important;
+  margin-bottom: 0px !important;
+  box-sizing: border-box !important;
+  min-width: 0 !important;
+}
+
+:dir(ltr) .color-master-modal .setting-item,
+:dir(ltr) .cm-plugin-modal .setting-item {
+  flex-direction: row !important;
+}
+:dir(ltr) .color-master-modal .setting-item > .setting-label,
+:dir(ltr) .cm-plugin-modal .setting-item > .setting-label {
+  order: 1 !important;
+}
+:dir(ltr) .color-master-modal .setting-item > .setting-item-control,
+:dir(ltr) .cm-plugin-modal .setting-item > .setting-item-control {
+  order: 2 !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+}
+
+:dir(rtl) .color-master-modal .setting-item,
+:dir(rtl) .cm-plugin-modal .setting-item {
+  flex-direction: row !important;
+}
+:dir(rtl) .color-master-modal .setting-item > .setting-label,
+:dir(rtl) .cm-plugin-modal .setting-item > .setting-label {
+  order: 2 !important;
+}
+:dir(rtl) .color-master-modal .setting-item > .setting-item-control,
+:dir(rtl) .cm-plugin-modal .setting-item > .setting-item-control {
+  order: 1 !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+}
+
+.color-master-modal .modal-content h3,
+.color-master-modal .modal-content p,
+.color-master-modal .modal-content label,
+.color-master-modal .setting-item .setting-item-description,
+.cm-plugin-modal .modal-content h3,
+.cm-plugin-modal .modal-content p {
+  unicode-bidi: isolate !important;
+}
+
+:dir(rtl) .color-master-modal .modal-content h3,
+:dir(rtl) .color-master-modal .modal-content p,
+:dir(rtl) .color-master-modal .modal-content label,
+:dir(rtl) .color-master-modal .setting-item .setting-item-description {
+  direction: rtl !important;
+  text-align: right !important;
+}
+
+:dir(ltr) .color-master-modal .modal-content h3,
+:dir(ltr) .color-master-modal .modal-content p,
+:dir(ltr) .color-master-modal .modal-content label,
+:dir(ltr) .color-master-modal .setting-item .setting-item-description {
+  direction: ltr !important;
+  text-align: left !important;
+}
+
+.color-master-modal .modal-button-container,
+.cm-plugin-modal .modal-button-container,
+.modal-button-container,
+.modal-footer,
+.modal-actions,
+.modal-buttons {
+  display: flex !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  gap: 8px !important;
+  margin-top: 12px !important;
+  padding-top: 6px !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+}
+
+:dir(ltr) .modal-button-container,
+:dir(ltr) .modal-footer,
+:dir(ltr) .modal-actions,
+:dir(ltr) .modal-buttons {
+  justify-content: flex-end !important;
+}
+
+:dir(rtl) .modal-button-container,
+:dir(rtl) .modal-footer,
+:dir(rtl) .modal-actions,
+:dir(rtl) .modal-buttons {
+  justify-content: flex-start !important;
+}
+
+.modal-button-container button,
+.modal-footer button,
+.modal-actions button,
+.modal-buttons button {
+  min-width: 84px !important;
+  padding: 6px 10px !important;
+  white-space: nowrap !important;
+  align-self: center !important;
+}
+
+body.color-master-rtl .color-master-modal .modal-content h3,
+body.color-master-rtl .color-master-modal .modal-content p,
+body.color-master-rtl
+  .color-master-modal
+  .setting-item
+  .setting-item-description {
+  direction: rtl !important;
+  unicode-bidi: isolate !important;
+  text-align: right !important;
+}
+
+body.color-master-rtl .color-master-modal .modal-content {
+  direction: rtl;
+}
+
+body.color-master-rtl .color-master-modal .modal-content h3,
+body.color-master-rtl .color-master-modal .modal-content p {
+  text-align: right;
+}
+
+/* ---  Notification Rules Window Formats --- */
+
+.cm-rules-modal .setting-item {
+  border: none;
+}
+
+.cm-rules-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+  border-top: 1px solid var(--background-modifier-border);
+  padding-top: 16px;
+}
+
+.cm-rule-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border-radius: 6px;
+  background-color: var(--background-secondary);
+}
+
+.cm-rule-item .text-input {
+  flex-grow: 1;
+}
+
+.cm-regex-container {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--font-ui-smaller);
+  color: var(--text-muted);
+}
+
+/* ===== Color Master: Base Notice Styling ===== */
+
+.notice,
+.toast {
+  padding: 8px 12px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  max-width: 300px;
+  border-radius: 6px !important;
+  min-width: 120px !important;
+  box-sizing: border-box !important;
+}
+
+/* --- Final Styles for Rule Actions (Compact Version) --- */
+.cm-rule-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-right: 8px;
+  margin-right: 8px;
+  border-right: 1px solid var(--background-modifier-border);
+}
+
+.cm-rule-action-buttons {
+  display: flex;
+  flex-direction: row;
+  gap: 3px;
+}
+
+.cm-rule-action-buttons button.clickable-icon {
+  height: 20px;
+  width: 20px;
+  padding: 0;
+}
+
+.cm-rule-action-buttons button.clickable-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.cm-rule-action-buttons button.clickable-icon:not(:disabled):hover {
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+
+.cm-rule-order-number {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-muted);
+  font-family: monospace;
+}
+
+.cm-color-container {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.cm-color-container .setting-item-control button {
+  height: 24px;
+  width: 24px;
+}
+/* ======================================================= */
+
+/* --- Styles for the new Tag Input --- */
+
+.cm-tag-input-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  border-radius: 5px;
+  border: 1px solid var(--background-modifier-border);
+  background-color: var(--background-primary);
+  cursor: text;
+  min-height: 36px; /* Ensures it has a consistent height */
+  width: 100%;
+}
+
+.cm-tag-input-container:focus-within {
+  border-color: var(--background-modifier-border-focus);
+  box-shadow: 0 0 0 1px var(--background-modifier-border-focus);
+}
+
+.cm-tag-item {
+  display: flex;
+  align-items: center;
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+  padding: 3px 4px 3px 8px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.cm-tag-remove {
+  margin-left: 6px;
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 14px;
+  line-height: 1;
+  transition: background-color 0.2s ease;
+}
+
+.cm-tag-remove:hover {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.cm-tag-input-field {
+  flex-grow: 1;
+  border: none;
+  outline: none;
+  background-color: transparent;
+  padding: 4px 2px;
+  min-width: 120px; /* Gives space for typing */
+  color: var(--text-normal);
+}
+
+.cm-tag-input-field:focus {
+  box-shadow: none;
+}
+
+.cm-rule-input-wrapper {
+  flex-grow: 1;
+}
+
+/* --- Fix for Transparent Swatch inside Rules Modal --- */
+
+/* This targets the color input ONLY inside the rules modal when it's transparent */
+.cm-rules-modal .cm-rule-item input[type="color"].is-transparent {
+  background-color: transparent;
+}
+
+.cm-rules-modal
+  .cm-rule-item
+  input[type="color"].is-transparent::-webkit-color-swatch {
+  background-image: linear-gradient(45deg, #808080 25%, transparent 25%),
+    linear-gradient(-45deg, #808080 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #808080 75%),
+    linear-gradient(-45deg, transparent 75%, #808080 75%);
+  background-size: 8px 8px;
+  background-position: 0 0, 0 4px, 4px -4px, -4px 0px;
+  border: 1px solid var(--text-faint);
+}
+
+/* --- Cleaner, Borderless Icons for Rules Modal --- */
+
+.cm-rule-icon-button {
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 4px !important;
+  cursor: pointer;
+  color: var(--text-muted);
+  border-radius: 4px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.cm-rule-icon-button:hover:not(.mod-warning) {
+  background-color: var(--background-modifier-hover) !important;
+  color: var(--text-normal);
+}
+
+.cm-rule-icon-button.mod-warning:hover {
+  background-color: var(--interactive-error) !important;
+  color: var(--text-on-accent) !important;
+}
+
+.cm-rule-icon-button.mod-warning {
+  color: var(--text-muted);
+}
+/* ======================================================= */
+
+/* Drag handle (three lines) */
+.cm-drag-handle {
+  cursor: grab;
+  color: var(--text-faint);
+  display: flex;
+  align-items: center;
+  padding: 6px;
+  border-radius: 6px;
+  font-weight: 600;
+  user-select: none;
+}
+
+.cm-drag-handle:hover {
+  color: var(--text-normal);
+  background-color: var(--background-modifier-hover);
+}
+
+.cm-rule-ghost {
+  opacity: 0.75;
+  transform: scale(0.99);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+  transition: transform 0.12s ease;
+}
+
+.cm-rule-item.newly-added {
+  animation: fadeInScale 0.35s ease-out;
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.cm-rule-item.removing {
+  animation: fadeOutSlide 0.12s ease-in forwards;
+}
+
+@keyframes fadeOutSlide {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+}
+
+/* ==================================================== */
+
+.cm-drag-handle {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  opacity: 0.6;
+  cursor: grab;
+}
+
+.cm-drag-handle:hover {
+  opacity: 1;
+}
+
+/* ==================================================== */
+
+/* Ensure official variables apply in editor & preview */
+
+/* Inline code */
+.cm-s-obsidian span.cm-inline-code,
+.markdown-preview-view code:not(pre code) {
+  color: var(--code-normal) !important;
+  background-color: var(--code-background) !important;
+}
+
+/* Highlighted text */
+.cm-s-obsidian span.cm-highlight,
+.markdown-preview-view mark,
+.markdown-preview-view .highlight {
+  background-color: var(--text-highlight-bg, #ffff0066) !important;
+}
+
+/* ==================================================== */
+
+.cm-search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.cm-search-icon {
+  position: absolute;
+  left: 10px;
+  color: var(--text-muted);
+  pointer-events: none;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+}
+
+.cm-search-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.cm-search-wrapper .cm-search-input {
+  width: 100%;
+  padding: 8px 12px 8px 38px !important;
+  background-color: var(--background-secondary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 8px;
+  color: var(--text-normal);
+  font-size: 14px;
+  transition: all 0.2s ease-in-out;
+}
+
+.cm-search-wrapper .cm-search-input:focus {
+  outline: none;
+  border-color: var(--interactive-accent);
+  box-shadow: 0 0 0 2px rgba(0, 170, 255, 0.2);
+}
+
+/* ==================================================== */
+
+.cm-duplicate-modal-icon {
+  position: relative;
+  top: -2px;
+}
+
+.cm-duplicate-modal-icon svg {
+  width: 22px;
+  height: 22px;
+  color: var(--interactive-warning);
+}
+
+.cm-duplicate-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid var(--background-modifier-border);
+  padding-bottom: 10px;
+  margin-bottom: 5px;
+}
+
+.cm-duplicate-modal .setting-item {
+  margin-top: -10px;
+  border-top: none;
+}
+
+.color-master-modal .cm-duplicate-modal-header h3 {
+  margin-top: 0;
+  margin-bottom: 0;
+  border-bottom: none;
+}
+
+.cm-duplicate-modal-content h3 {
+  margin-top: 0;
+  margin-bottom: 8px;
+}
+
+.cm-duplicate-modal strong {
+  color: var(--text-accent);
+  font-weight: 600;
+}
+
+.cm-duplicate-modal .setting-item-description {
+  line-height: 1.4;
+  margin-bottom: 5px;
+}
+
+.cm-duplicate-modal .setting-item {
+  border-top: none;
+}
+
+/* --- New layout for the Notification Rules window --- */
+
+.cm-rules-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid var(--background-modifier-border);
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+}
+
+.color-master-modal .cm-rules-modal-header h3 {
+  border-bottom: none;
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.cm-rules-modal-header-icon svg {
+  width: 22px;
+  height: 22px;
+  color: var(--text-accent);
+}
+
+.cm-rules-modal-header-icon {
+  position: relative;
+  top: 3.5px;
+}
+
+.cm-rules-modal-desc {
+  font-size: var(--font-ui-smaller);
+  color: var(--text-muted);
+  margin-top: -5px;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+/* --- Animation to alert the user when typing a duplicate word --- */
+
+.cm-tag-item.cm-tag-duplicate-flash {
+  animation: cm-flash-red 1s ease-out, cm-shake 0.5s ease-in-out;
+}
+
+@keyframes cm-flash-red {
+  0% {
+    background-color: var(--interactive-error);
+  }
+  100% {
+    background-color: var(--interactive-accent);
+  }
+}
+
+/* Definition of light vibration animation */
+@keyframes cm-shake {
+  10%,
+  90% {
+    transform: translateX(-1px);
+  }
+  20%,
+  80% {
+    transform: translateX(1px);
+  }
+  30%,
+  50%,
+  70% {
+    transform: translateX(-3px);
+  }
+  40%,
+  60% {
+    transform: translateX(3px);
+  }
+}
+
+/* ==================================================== */
+
+/* --- Color Master: Blockquote Background Support --- */
+.markdown-preview-view blockquote,
+.cm-s-obsidian span.cm-quote {
+  background-color: var(--blockquote-bg) !important;
+}
+
+/* ==================================================== */
