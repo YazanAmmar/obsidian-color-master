@@ -43,7 +43,7 @@ This update focuses on two core principles: **intelligence and elegance**. We're
 * **Professional Development Workflow:** 
 * The project has now officially integrated the `SortableJS` library for smooth drag-and-drop functionality and has adopted a professional `npm run build` workflow, enhancing stability and maintainability.
 
-> and many other important fixes, performance and interface improvements! ...
+> and many other important fixes, performance and interface improvements!
 
 ## v1.0.5 - 2025-09-08 (The Snippet & Polish Update)
 
