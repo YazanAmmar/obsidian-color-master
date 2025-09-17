@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.0.6 - 2025-09-13 (The Thematic Intelligence Update)
+## [v1.0.6](https://github.com/YazanAmmar/obsidian-color-master/releases/tag/1.0.6) - 2025-09-13 (The Thematic Intelligence Update)
 
 This update focuses on two core principles: **intelligence and elegance**. We're introducing the revolutionary Advanced Notice Coloring system, adding a new layer of interactive intelligence to your workspace. This comes alongside a comprehensive UI overhaul and precise enhancements to every corner of the plugin, making your experience smoother and more professional than ever.
 
@@ -45,7 +45,7 @@ This update focuses on two core principles: **intelligence and elegance**. We're
 
 > and many other important fixes, performance and interface improvements!
 
-## v1.0.5 - 2025-09-08 (The Snippet & Polish Update)
+## [v1.0.5](https://github.com/YazanAmmar/obsidian-color-master/releases/tag/1.0.5) - 2025-09-08 (The Snippet & Polish Update)
 
 ### New Features & Major Improvements
 
@@ -86,7 +86,7 @@ This update focuses on two core principles: **intelligence and elegance**. We're
     * The "Paste CSS" button has been renamed to **"Paste / Import (CSS)..."** to better reflect its ability to Import and paste `.css` files.
     * Fixed a minor bug where updating a CSS profile with the same name would show two notifications. Now, it correctly shows only "Profile updated."
 
-## v1.0.4 - 2025-09-04 (The CSS Freedom Update)
+## [v1.0.4](https://github.com/YazanAmmar/obsidian-color-master/releases/tag/1.0.4) - 2025-09-04 (The CSS Freedom Update)
 
 ### New Features & Major Improvements
 
@@ -109,7 +109,7 @@ This update focuses on two core principles: **intelligence and elegance**. We're
 * **Redesigned Support Area**: The "Like the Plugin?" section has been visually updated for a cleaner and more engaging look.
 * **New 'My GitHub' Button**: Added a new button that links directly to Yazan Ammar's GitHub profile, making it easier to connect.
 
-## v1.0.3 - 2025-09-03 (The Power User Update) 
+## [v1.0.3](https://github.com/YazanAmmar/obsidian-color-master/releases/tag/1.0.3) - 2025-09-03 (The Power User Update) 
 
 ### New Features & Major Improvements
 
@@ -129,7 +129,7 @@ This update focuses on two core principles: **intelligence and elegance**. We're
 * **Intuitive Hide Behavior:** Closing the settings window while editing Graph View colors now correctly and automatically cancels the changes, preventing accidental saves.
 * **True Live Previews for Iconize:** Fixed a bug where Iconize plugin colors would not update instantly while dragging the color picker. Previews are now perfectly live.
 
-## v1.0.2 - 2025-08-30
+## [v1.0.2](https://github.com/YazanAmmar/obsidian-color-master/releases/tag/1.0.2) - 2025-08-30
 
 ### New Features & Major Improvements
 
@@ -153,13 +153,13 @@ This update focuses on two core principles: **intelligence and elegance**. We're
 
 -   **Fixed: Graph View colors not updating!** The biggest fix of this release. The old issue where colors on existing Graph View tabs wouldn't update has been definitively solved with the new instant refresh system.
 
-## v1.0.1 - 2025-08-28
+## [v1.0.1](https://github.com/YazanAmmar/obsidian-color-master/releases/tag/1.0.1) - 2025-08-28
 
 - **New Feature:** Added integration with the Iconize plugin, allowing full control over its icon colors from within Color Master.
 - **Fixed:** Resolved a bug where Iconize colors would persist after the main plugin was disabled.
 - **Improved:** Relocated the "Override Iconize Colors" toggle to a more logical position in the settings for a better user experience.
 
-## v1.0.0 - 2025-08-22
+## [v1.0.0](https://github.com/YazanAmmar/obsidian-color-master/releases/tag/1.0.0) - 2025-08-22
 
 - Initial release of Color Master!
 - Live color editor for all core Obsidian CSS variables.
