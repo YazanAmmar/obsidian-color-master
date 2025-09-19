@@ -1,0 +1,938 @@
+import type ColorMaster from "./main";
+
+let T: ColorMaster;
+
+// A function to set the instance from main.ts
+export function initializeT(plugin: ColorMaster) {
+  T = plugin;
+}
+
+export const STRINGS = {
+  en: {
+    PLUGIN_NAME: "Color Master",
+    ENABLE_PLUGIN: "Enable Color Master",
+    ENABLE_PLUGIN_DESC:
+      "Turn this off to temporarily disable all custom colors and revert to your active Obsidian theme.",
+    PLUGIN_ENABLED_NOTICE: "Color Master Enabled",
+    PLUGIN_DISABLED_NOTICE: "Color Master Disabled",
+    LANGUAGE: "Language",
+    LANGUAGE_DESC: "Set the interface language for the plugin.",
+    PROFILE_MANAGER: "Profile Manager",
+    RESET_CONFIRM_TITLE: "Reset Profile Confirmation",
+    RESET_CONFIRM_DESC:
+      "Are you sure you want to reset this profile to the last pinned snapshot? This will overwrite your current colors and cannot be undone.",
+    ACTIVE_PROFILE: "Active Profile",
+    ACTIVE_PROFILE_DESC: "Manage and switch between color profiles.",
+    NEW_BUTTON: "New",
+    DELETE_BUTTON: "Delete",
+    OPTIONS_HEADING: "Options",
+    UPDATE_FREQUENCY_NAME: "Live Update FPS",
+    UPDATE_FREQUENCY_DESC:
+      "Sets how many times per second the UI previews color changes while dragging (0 = disable live preview). Lower values can improve performance.",
+    OVERRIDE_ICONIZE: "Override Iconize Plugin Colors",
+    OVERRIDE_ICONIZE_DESC:
+      "Let Color Master control all icon colors from the Iconize plugin. For best results, disable the color settings within Iconize itself.",
+    ICONIZE_NOT_FOUND_NOTICE:
+      "Iconize plugin not found. Please install and enable it to use this feature.",
+    BACKGROUNDS: "Backgrounds",
+    TEXT: "Text",
+    INTERACTIVE_ELEMENTS: "Interactive Elements",
+    UI_ELEMENTS: "UI Elements",
+    MISC: "Misc",
+    NEW_PROFILE_TITLE: "Create New Profile",
+    PROFILE_NAME_LABEL: "Profile Name",
+    PROFILE_NAME_PLACEHOLDER: "Enter profile name...",
+    CREATE_BUTTON: "Create",
+    EMPTY_PROFILE_NAME_NOTICE: "Profile name cannot be empty.",
+    PROFILE_EXISTS_NOTICE: (name: string) =>
+      `Profile "${name}" already exists.`,
+    DELETE_PROFILE_TITLE: "Delete Profile",
+    DELETE_PROFILE_CONFIRMATION: (name: string) =>
+      `Are you sure you want to delete the profile "${name}"? This action cannot be undone.`,
+    SNIPPETS_HEADING: "CSS Snippets",
+    SAVE_AS_TYPE: "Save as Type",
+    SAVE_AS_PROFILE: "Profile",
+    SAVE_AS_SNIPPET: "Snippet",
+    EDIT_SNIPPET_TITLE: "Edit CSS Snippet",
+    EDIT_PROFILE_TITLE: "Edit CSS Profile",
+    PROFILE_DELETED_NOTICE: "Profile deleted.",
+    CANNOT_DELETE_LAST_PROFILE: "Cannot delete the last profile.",
+    PROFILE_THEME_TYPE: "Profile Theme Type",
+    PROFILE_THEME_TYPE_DESC:
+      "Set whether this profile should force a specific theme (Dark/Light) when activated.",
+    THEME_TYPE_AUTO: "Obsidian's Default Theme",
+    THEME_TYPE_DARK: "Force Dark Mode",
+    THEME_TYPE_LIGHT: "Force Light Mode",
+    RESTORE_BUTTON: "Restore",
+    RESET_BUTTON: "Reset",
+    UPDATE_BUTTON: "Update",
+    SEARCH_PLACEHOLDER: "Search variables (name or value)...",
+    CLEAR_BUTTON: "Clear",
+    SEARCH_RESULTS_FOUND: (count: number) => `${count} found`,
+    ALL_SECTIONS: "All Sections",
+    EXPORT_FILE_BUTTON: "Export File",
+    COPY_JSON_BUTTON: "Copy JSON",
+    IMPORT_PASTE_CSS_BUTTON: "Import / Paste (.css)",
+    IMPORT_PASTE_JSON_BUTTON: "Import / Paste (.json)",
+    CREATE_SNIPPET_BUTTON: "Create New Snippet",
+    NO_SNIPPETS_DESC: "No CSS snippets created for this profile yet.",
+    CLEANUP_INTERVAL_NAME: "Cleanup Interval",
+    CLEANUP_INTERVAL_DESC:
+      "Sets how often (in seconds) the plugin checks for uninstalled Iconize plugin to clean up its icons.",
+    PLUGIN_INTEGRATIONS: "Plugin Integrations",
+    GRAPH_VIEW: "Graph View",
+    LIKE_CARD_PROFILES_STAT: (p: number, s: number) =>
+      `Profiles: ${p} & Snippets: ${s}`,
+    LIKE_CARD_COLORS_STAT: "Customizable Colors",
+    LIKE_CARD_INTEGRATIONS_STAT: "Plugin Integrations",
+    LIKE_CARD_DAYS_STAT: "Days of Use",
+    LIKE_CARD_STAR_BUTTON: "Star on GitHub",
+    LIKE_CARD_ISSUE_BUTTON: "Report an Issue",
+    LIKE_CARD_SYNC_BUTTON: "Sync Your Vault",
+    LIKE_CARD_GITHUB_BUTTON: "My GitHub",
+    PASTE_CSS_MODAL_TITLE: "Import / Paste CSS",
+    PASTE_CSS_MODAL_NOTE:
+      "Note : Pasted CSS can affect UI, proceed only with trusted CSS.",
+    IMPORT_FROM_FILE: "Import from File",
+    IMPORT_FROM_FILE_DESC: "Select a (.css) file from your computer.",
+    CHOOSE_FILE_BUTTON: "Choose File...",
+    CSS_TEXTAREA_PLACEHOLDER: "Or, paste your CSS here...",
+    SNIPPET_NAME_LABEL: "Snippet Name",
+    CREATE_SNIPPET_TITLE: "Create New CSS Snippet",
+    IMPORT_PROFILE_TITLE: "Import / Paste CSS and create profile",
+    SNIPPET_NAME_PLACEHOLDER: "Enter snippet name...",
+    NOTICE_PROFILE_PINNED: "Profile colors pinned successfully!",
+    NOTICE_PROFILE_RESET: "Profile has been reset to the pinned snapshot.",
+    NOTICE_NO_PINNED_SNAPSHOT: "No pinned snapshot found for this profile.",
+    NOTICE_PROFILE_NOT_FOUND: "Active profile could not be found.",
+    NOTICE_NO_PROFILES_FOUND: "No profiles found.",
+    NOTICE_ACTIVE_PROFILE_SWITCHED: (name: string) => `Active profile: ${name}`,
+    NOTICE_CANNOT_FIND_ORIGINAL_PROFILE:
+      "Could not find original data for this profile.",
+    NOTICE_PROFILE_RESTORED: (name: string) =>
+      `Profile "${name}" has been restored to its default state.`,
+    NOTICE_UI_REFRESHED: "UI Refreshed!",
+    NOTICE_GRAPH_COLORS_APPLIED: "Graph colors applied!",
+    NOTICE_INVALID_JSON: "Invalid JSON.",
+    NOTICE_JSON_MUST_HAVE_NAME:
+      "The imported JSON must have a 'name' property to create a new profile.",
+    NOTICE_PROFILE_CREATED_SUCCESS: (name: string) =>
+      `Profile "${name}" was created successfully.`,
+    NOTICE_PROFILE_IMPORTED_SUCCESS: (mode: string) =>
+      `Profile ${mode}d successfully.`,
+    NOTICE_NO_ACTIVE_PROFILE_TO_COPY: "No active profile to copy.",
+    NOTICE_NO_ACTIVE_PROFILE_TO_EXPORT: "No active profile to export.",
+    NOTICE_SNIPPET_CSS_COPIED: "Snippet CSS copied to clipboard!",
+    NOTICE_SNIPPET_EMPTY: "This snippet is empty.",
+    NOTICE_CSS_CONTENT_EMPTY: "CSS content cannot be empty.",
+    NOTICE_SNIPPET_NAME_EXISTS: (name: string) =>
+      `Snippet name "${name}" already exists.`,
+    NOTICE_PROFILE_NAME_EXISTS: (name: string) =>
+      `Profile name "${name}" already exists.`,
+    NOTICE_PROFILE_UPDATED: (name: string) => `Profile "${name}" updated.`,
+    NOTICE_SNIPPET_UPDATED: (name: string) => `Snippet "${name}" updated.`,
+    NOTICE_SNIPPET_CREATED: (name: string) =>
+      `Snippet "${name}" has been created successfully!`,
+    NOTICE_PROFILE_CREATED_FROM_CSS: (name: string) =>
+      `Profile "${name}" has been created successfully!`,
+    NOTICE_NO_COLOR_HISTORY: "No color history to restore.",
+    NOTICE_COLOR_RESTORED: (color: string) => `Restored: ${color}`,
+    NOTICE_TEXTBOX_EMPTY:
+      "The text box is empty. Paste some JSON or import a file first.",
+    IMPORT_JSON_MODAL_TITLE: "Paste or Import Profile JSON",
+    IMPORT_JSON_MODAL_DESC_1: "You can paste a profile JSON in the box below.",
+    IMPORT_JSON_MODAL_PLACEHOLDER: '{ "name": "...", "profile": { ... } }',
+    IMPORT_JSON_MODAL_DESC_2: "Or, you can import directly from a file:",
+    IMPORT_JSON_MODAL_SETTING_NAME: "Import from File",
+    IMPORT_JSON_MODAL_SETTING_DESC:
+      "Select a (.json) profile file from your computer.",
+    REPLACE_ACTIVE_BUTTON: "Replace Active",
+    CREATE_NEW_BUTTON: "Create New",
+    NOTICE_FILE_LOADED: (fileName: string) =>
+      `File "${fileName}" loaded into the text area.`,
+    NOTICE_EXPORT_SUCCESS: "Profile exported successfully!",
+    TOOLTIP_RESTORE_BUILTIN: "Restore to original built-in colors",
+    TOOLTIP_EDIT_CSS_PROFILE: "Edit CSS Profile",
+    TOOLTIP_PIN_SNAPSHOT: "Pin current colors as a snapshot",
+    TOOLTIP_PIN_SNAPSHOT_DATE: (date: string) =>
+      `Colors pinned on ${date}. Click to re-pin.`,
+    TOOLTIP_RESET_TO_PINNED: "Reset to pinned colors",
+    TOOLTIP_EDIT_SNIPPET: "Edit Snippet",
+    TOOLTIP_COPY_SNIPPET_CSS: "Copy CSS to clipboard",
+    TOOLTIP_DELETE_SNIPPET: "Delete Snippet",
+    TOOLTIP_SET_TRANSPARENT: "Set to transparent",
+    TOOLTIP_UNDO_CHANGE: "Undo last change",
+    ARIA_LABEL_CASE_SENSITIVE: "Case-sensitive search",
+    ARIA_LABEL_REGEX_SEARCH: "Use regular expression",
+    NOTICE_JSON_COPIED_CLIPBOARD: "Profile JSON copied to clipboard.",
+    MODAL_DELETE_SNIPPET_TITLE: (name: string) => `Delete Snippet: ${name}`,
+    MODAL_DELETE_SNIPPET_DESC:
+      "Are you sure you want to delete this snippet? This action cannot be undone.",
+    NOTICE_FPS_UPDATED: (value: number) => `Live Update FPS set to: ${value}`,
+    NOTICE_SNIPPET_COPIED: "Snippet CSS copied to clipboard!",
+    NOTICE_INVALID_PROFILE_OBJECT:
+      "JSON does not appear to be a valid profile object.",
+    NEW_PROFILE: "New",
+    RESTORE_PROFILE_MODAL_TITLE: (name: string) => `Restore Profile: ${name}`,
+    RESTORE_PROFILE_MODAL_DESC: (name: string) =>
+      `Are you sure you want to restore "${name}" to its original colors? All your customizations for this profile will be lost.`,
+    NOTICE_PROFILE_CREATED: (name: string) =>
+      `Profile "${name}" created successfully!`,
+    MARKDOWN: "Markdown",
+    NOTICES: "Notices",
+    ADVANCED_NOTICE_TEXT_RULES_TITLE: "Advanced Text Color Rules",
+    ADVANCED_NOTICE_BG_RULES_TITLE: "Advanced Background Color Rules",
+    ADD_NEW_RULE: "Add New Rule",
+    KEYWORD_PLACEHOLDER: "Type a keyword and press Space...",
+    USE_REGEX_LABEL: "Regex",
+    DRAG_RULE_TOOLTIP: "Drag to reorder",
+    APPLY_BUTTON: "Apply",
+    CANCEL_BUTTON: "Cancel",
+    SETTINGS_SAVED: "Settings applied successfully!",
+    MOVE_RULE_UP_TOOLTIP: "Move rule up",
+    MOVE_RULE_DOWN_TOOLTIP: "Move rule down",
+    DRAG_HANDLE_TOOLTIP: "Drag to reorder",
+    TOOLTIP_TEST_RULE: "Test this rule with a random keyword",
+    NOTICE_TEST_SENTENCE: (word: string) =>
+      `Notice color for "${word}" looks like this:`,
+    DUPLICATE_PROFILE_TITLE: "Duplicate Profile Name",
+    DUPLICATE_PROFILE_DESC_PARTS: [
+      `The profile name "`,
+      `" already exists. Please choose a different name.`,
+    ],
+    DUPLICATE_PROFILE_PLACEHOLDER: "Enter new profile name...",
+    NOTICE_RULES_DESC:
+      "Create prioritized rules to color notices based on their content. The first matching rule from top to bottom will be applied.",
+    CUSTOM_VARIABLES_HEADING: "Custom Variables",
+    CUSTOM_VARIABLE_DESC: "Variable added by the user.",
+    TOOLTIP_DELETE_CUSTOM_VARIABLE: "Delete Custom Variable",
+    ADD_CUSTOM_VARIABLE_NAME: "Add Custom Variable",
+    ADD_CUSTOM_VARIABLE_DESC:
+      "Add a new CSS variable that isn't in the default list. The name must start with '--'.",
+    ADD_NEW_VARIABLE_BUTTON: "Add New Variable...",
+    VARIABLE_NAME_LABEL: "Variable Name",
+    VARIABLE_NAME_DESC: "The technical CSS name, e.g., --my-custom-color.",
+    COLOR_LABEL: "Color Value",
+    VARIABLE_NAME_PLACEHOLDER: "--variable-name",
+    NOTICE_VAR_NAME_EMPTY: "Variable name cannot be empty.",
+    NOTICE_VAR_NAME_FORMAT: "Variable name must start with '--'.",
+    NOTICE_VAR_EXISTS: (name: string) => `Variable "${name}" already exists.`,
+    NOTICE_VAR_ADDED: (name: string) =>
+      `Variable "${name}" added successfully.`,
+    HELP_TEXT_PRE_LINK: "Can't find the variable you're looking for? ",
+    HELP_TEXT_LINK: "Browse the official list of Obsidian CSS variables.",
+    MODAL_CUSTOM_VAR_TITLE: "Add Custom Variable Details",
+    DISPLAY_NAME_LABEL: "Display Name",
+    DISPLAY_NAME_DESC:
+      "This is the user-friendly name that will appear in the settings list.",
+    DESCRIPTION_LABEL: "Description",
+    DESCRIPTION_DESC: "Describe what this color variable is used for.",
+    SAVE_BUTTON: "Save Variable",
+    PLACEHOLDER_DISPLAY_NAME: "e.g., Main Background Color",
+    PLACEHOLDER_DESCRIPTION: "e.g., Used to change the font size...",
+  },
+  ar: {
+    PLUGIN_NAME: "متحكم الألوان",
+    ENABLE_PLUGIN: "تفعيل متحكم الألوان",
+    ENABLE_PLUGIN_DESC:
+      "أطفئ هذا الخيار لتعطيل جميع الألوان المخصصة مؤقتاً والعودة إلى ثيم Obsidian النشط.",
+    PLUGIN_ENABLED_NOTICE: "تم تفعيل متحكم الألوان",
+    PLUGIN_DISABLED_NOTICE: "تم تعطيل متحكم الألوان",
+    LANGUAGE: "اللغة",
+    LANGUAGE_DESC: "اختر لغة واجهة الإضافة.",
+    PROFILE_MANAGER: "إدارة الملفّات الشخصيّة",
+    RESET_CONFIRM_TITLE: "تأكيد استرجاع الملف الشخصي",
+    RESET_CONFIRM_DESC:
+      "هل أنت متأكد من رغبتك في استرجاع هذا الملف الشخصي لآخر لقطة تم تثبيتها؟ سيتم الكتابة فوق الألوان الحالية ولا يمكن التراجع عن هذا الإجراء.",
+    ACTIVE_PROFILE: "الملف الشخصي النشط",
+    ACTIVE_PROFILE_DESC: "تنقل بين الملفّات الشخصيّة أو أنشئ واحد جديد.",
+    NEW_BUTTON: "جديد",
+    DELETE_BUTTON: "حذف",
+    OPTIONS_HEADING: "الخيارات",
+    UPDATE_FREQUENCY_NAME: "معدل التحديث المباشر (إطار بالثانية)",
+    UPDATE_FREQUENCY_DESC:
+      "يحدد عدد مرات تحديث معاينة الألوان في الثانية أثناء السحب (0 = تعطيل المعاينة). القيم المنخفضة تحسن الأداء.",
+    OVERRIDE_ICONIZE: "تجاوز ألوان إضافة Iconize",
+    OVERRIDE_ICONIZE_DESC:
+      "اسمح لـ Color Master بالتحكم في كل ألوان أيقونات Iconize. لأفضل النتائج، قم بتعطيل إعدادات الألوان في إضافة Iconize نفسها.",
+    ICONIZE_NOT_FOUND_NOTICE:
+      "إضافة Iconize غير موجودة. يرجى تثبيتها وتفعيلها لاستخدام هذه الميزة.",
+    BACKGROUNDS: "الخلفيات",
+    TEXT: "النصوص",
+    INTERACTIVE_ELEMENTS: "العناصر التفاعلية",
+    UI_ELEMENTS: "عناصر الواجهة",
+    MISC: "متنوع",
+    NEW_PROFILE_TITLE: "إنشاء ملف شخصي جديد",
+    PROFILE_NAME_LABEL: "اسم الملف الشخصي",
+    PROFILE_NAME_PLACEHOLDER: "أدخل اسم الملف الشخصي...",
+    CREATE_BUTTON: "إنشاء",
+    EMPTY_PROFILE_NAME_NOTICE: "لا يمكن ترك اسم الملف الشخصي فارغاً.",
+    PROFILE_EXISTS_NOTICE: (name: string) =>
+      `الملف الشخصي "${name}" موجودة بالفعل.`,
+    DELETE_PROFILE_TITLE: "حذف الملف الشخصي",
+    DELETE_PROFILE_CONFIRMATION: (name: string) =>
+      `هل أنت متأكد من رغبتك في حذف الملف الشخصي "${name}"؟ لا يمكن التراجع عن هذا الإجراء.`,
+    SNIPPETS_HEADING: "قصاصات CSS",
+    SAVE_AS_TYPE: "حفظ كـ :",
+    SAVE_AS_PROFILE: "ملف شخصي",
+    SAVE_AS_SNIPPET: "قصاصة",
+    EDIT_SNIPPET_TITLE: "تعديل قصاصة CSS",
+    EDIT_PROFILE_TITLE: "تعديل الملف الشخصي",
+    PROFILE_DELETED_NOTICE: "تم حذف الملف الشخصي.",
+    CANNOT_DELETE_LAST_PROFILE: "لا يمكن حذف آخر ملف شخصي.",
+    PROFILE_THEME_TYPE: "نوع ثيم الملف الشخصي",
+    PROFILE_THEME_TYPE_DESC:
+      "حدد ما إذا كانت هذا الملف الشخصي سيفرض ثيماً معيناً (غامق/فاتح) عند تفعيله.",
+    THEME_TYPE_AUTO: "الثيم الافتراضي لأوبسيديان",
+    THEME_TYPE_DARK: "فرض الوضع الغامق",
+    THEME_TYPE_LIGHT: "فرض الوضع الفاتح",
+    RESTORE_BUTTON: "استعادة",
+    RESET_BUTTON: "إعادة تعيين",
+    UPDATE_BUTTON: "تحديث",
+    SEARCH_PLACEHOLDER: "ابحث عن المتغيرات (بالاسم أو القيمة)...",
+    CLEAR_BUTTON: "تنظيف",
+    SEARCH_RESULTS_FOUND: (count: number) => `تم العثور على ${count}`,
+    ALL_SECTIONS: "كل الأقسام",
+    EXPORT_FILE_BUTTON: "تصدير ملف",
+    COPY_JSON_BUTTON: "نسخ JSON",
+    IMPORT_PASTE_CSS_BUTTON: "استيراد / لصق (.css)",
+    IMPORT_PASTE_JSON_BUTTON: "استيراد / لصق (.json)",
+    CREATE_SNIPPET_BUTTON: "إنشاء قصاصة جديدة",
+    NO_SNIPPETS_DESC: "لم يتم إنشاء أي قصاصات CSS لهذا الملف الشخصي بعد.",
+    CLEANUP_INTERVAL_NAME: "فترة التنظيف",
+    CLEANUP_INTERVAL_DESC:
+      "تحدد عدد المرات (بالثواني) التي تتحقق فيها الإضافة من إلغاء تثبيت إضافة Iconize لتنظيف أيقوناتها.",
+    PLUGIN_INTEGRATIONS: "تكامل الإضافات",
+    GRAPH_VIEW: "عرض الرسم البياني",
+    LIKE_CARD_PROFILES_STAT: (p: number, s: number) =>
+      `ملفّات شخصيّة: ${p} & قصاصات: ${s}`,
+    LIKE_CARD_COLORS_STAT: "ألوان قابلة للتخصيص",
+    LIKE_CARD_INTEGRATIONS_STAT: "تكامل الإضافات",
+    LIKE_CARD_DAYS_STAT: "أيام الاستخدام",
+    LIKE_CARD_STAR_BUTTON: "أضف  ★ على GitHub",
+    LIKE_CARD_ISSUE_BUTTON: "أبلغ عن مشكلة",
+    LIKE_CARD_SYNC_BUTTON: "مزامنة خزنتك",
+    LIKE_CARD_GITHUB_BUTTON: "حسابي على GitHub",
+    PASTE_CSS_MODAL_TITLE: "استيراد / لصق CSS",
+    PASTE_CSS_MODAL_NOTE:
+      "ملاحظة : كود CSS الذي تلصقه قد يؤثر على واجهة البرنامج، استخدم فقط الأكواد الموثوقة.",
+    IMPORT_FROM_FILE: "استيراد من ملف",
+    IMPORT_FROM_FILE_DESC: "اختر ملف (.css) من جهازك.",
+    CHOOSE_FILE_BUTTON: "اختر ملف...",
+    CSS_TEXTAREA_PLACEHOLDER: "أو الصق كود CSS هنا...",
+    SNIPPET_NAME_LABEL: "اسم القصاصة",
+    CREATE_SNIPPET_TITLE: "إنشاء قصاصة CSS جديدة",
+    IMPORT_PROFILE_TITLE: "استيراد / لصق CSS وإنشاء ملف شخصي",
+    SNIPPET_NAME_PLACEHOLDER: "أدخل اسم القصاصة...",
+    NOTICE_PROFILE_PINNED: "تم تثبيت ألوان الملف الشخصي بنجاح!",
+    NOTICE_PROFILE_RESET: "تمت إعادة تعيين الملف الشخصي إلى اللقطة المثبتة.",
+    NOTICE_NO_PINNED_SNAPSHOT: "لا توجد لقطة مثبتة لهذا الملف الشخصي.",
+    NOTICE_PROFILE_NOT_FOUND: "تعذر العثور على الملف الشخصي النشط.",
+    NOTICE_NO_PROFILES_FOUND: "لا توجد أيّة ملفات شخصيّة.",
+    NOTICE_ACTIVE_PROFILE_SWITCHED: (name: string) =>
+      `الملف الشخصي النشط: ${name}`,
+    NOTICE_CANNOT_FIND_ORIGINAL_PROFILE:
+      "تعذر العثور على البيانات الأصلية لهذا الملف الشخصي.",
+    NOTICE_PROFILE_RESTORED: (name: string) =>
+      `تمت استعادة الملف الشخصي "${name}" إلى حالته الافتراضية.`,
+    NOTICE_UI_REFRESHED: "تم تحديث الواجهة!",
+    NOTICE_GRAPH_COLORS_APPLIED: "تم تطبيق ألوان الرسم البياني!",
+    NOTICE_INVALID_JSON: "ملف JSON غير صالح.",
+    NOTICE_JSON_MUST_HAVE_NAME:
+      "يجب أن يحتوي ملف JSON المستورد على خاصية 'name' لإنشاء ملف شخصي جديد.",
+    NOTICE_PROFILE_CREATED_SUCCESS: (name: string) =>
+      `تم إنشاء الملف الشخصي "${name}" بنجاح.`,
+    NOTICE_PROFILE_IMPORTED_SUCCESS: (mode: string) =>
+      `تم استيراد الملف الشخصي بنجاح.`,
+    NOTICE_NO_ACTIVE_PROFILE_TO_COPY: "لا يوجد ملف شخصي نشط لنسخه",
+    NOTICE_NO_ACTIVE_PROFILE_TO_EXPORT: "لا يوجد ملف شخصي نشط لتصديره.",
+    NOTICE_SNIPPET_CSS_COPIED: "تم نسخ CSS القصاصة إلى الحافظة!",
+    NOTICE_SNIPPET_EMPTY: "هذه القصاصة فارغة.",
+    NOTICE_CSS_CONTENT_EMPTY: "لا يمكن أن يكون محتوى CSS فارغاً.",
+    NOTICE_SNIPPET_NAME_EXISTS: (name: string) =>
+      `اسم القصاصة "${name}" موجود بالفعل.`,
+    NOTICE_PROFILE_NAME_EXISTS: (name: string) =>
+      `اسم الملف الشخصي "${name}" موجود بالفعل.`,
+    NOTICE_PROFILE_UPDATED: (name: string) =>
+      `تم تحديث الملف الشخصي "${name}".`,
+    NOTICE_SNIPPET_UPDATED: (name: string) => `تم تحديث القصاصة "${name}".`,
+    NOTICE_SNIPPET_CREATED: (name: string) =>
+      `تم إنشاء القصاصة "${name}" بنجاح!`,
+    NOTICE_PROFILE_CREATED_FROM_CSS: (name: string) =>
+      `تم إنشاء الملف الشخصي "${name}" بنجاح!`,
+    NOTICE_NO_COLOR_HISTORY: "لا يوجد سجل ألوان لاستعادته.",
+    NOTICE_COLOR_RESTORED: (color: string) => `تمت الاستعادة: ${color}`,
+    NOTICE_TEXTBOX_EMPTY:
+      "صندوق النص فارغ. الصق بعض بيانات JSON أو استورد ملفاً أولاً.",
+    IMPORT_JSON_MODAL_TITLE: "لصق أو استيراد ملف JSON للملف شخصي",
+    IMPORT_JSON_MODAL_DESC_1:
+      "يمكنك لصق بيانات الملف الشخصي (JSON) في الصندوق أدناه.",
+    IMPORT_JSON_MODAL_PLACEHOLDER: '{ "name": "...", "profile": { ... } }',
+    IMPORT_JSON_MODAL_DESC_2: "أو يمكنك الاستيراد مباشرة من ملف:",
+    IMPORT_JSON_MODAL_SETTING_NAME: "استيراد من ملف",
+    IMPORT_JSON_MODAL_SETTING_DESC: "اختر ملف شخصي (.json) من جهازك.",
+    REPLACE_ACTIVE_BUTTON: "استبدال النشط",
+    CREATE_NEW_BUTTON: "إنشاء جديدة",
+    NOTICE_FILE_LOADED: (fileName: string) =>
+      `تم تحميل الملف "${fileName}" في منطقة النص.`,
+    NOTICE_EXPORT_SUCCESS: "تم تصدير الملف الشخصي بنجاح!",
+    TOOLTIP_RESTORE_BUILTIN: "استعادة الألوان الأساسية المدمجة",
+    TOOLTIP_EDIT_CSS_PROFILE: "تعديل تشكيلة CSS",
+    TOOLTIP_PIN_SNAPSHOT: "تثبيت الألوان الحالية كلقطة",
+    TOOLTIP_PIN_SNAPSHOT_DATE: (date: string) =>
+      `تم تثبيت الألوان بتاريخ ${date}. انقر لإعادة التثبيت.`,
+    TOOLTIP_RESET_TO_PINNED: "إعادة التعيين إلى الألوان المثبتة",
+    TOOLTIP_EDIT_SNIPPET: "تعديل القصاصة",
+    TOOLTIP_COPY_SNIPPET_CSS: "نسخ كود CSS إلى الحافظة",
+    TOOLTIP_DELETE_SNIPPET: "حذف القصاصة",
+    TOOLTIP_SET_TRANSPARENT: "تعيين إلى شفاف",
+    TOOLTIP_UNDO_CHANGE: "تراجع عن آخر تغيير",
+    ARIA_LABEL_CASE_SENSITIVE: "بحث حساس لحالة الأحرف",
+    ARIA_LABEL_REGEX_SEARCH: "استخدام التعابير النمطية (Regex)",
+    NOTICE_JSON_COPIED_CLIPBOARD:
+      "تم نسخ الملف الشخصي بصيغة (.json) إلى الحافظة",
+    MODAL_DELETE_SNIPPET_TITLE: (name: string) => `حذف القصاصة: ${name}`,
+    MODAL_DELETE_SNIPPET_DESC:
+      "هل أنت متأكد من رغبتك في حذف هذه القصاصة؟ لا يمكن التراجع عن هذا الإجراء.",
+    NOTICE_FPS_UPDATED: (value: number) =>
+      `تم تعيين معدل التحديث المباشر إلى: ${value}`,
+    NOTICE_SNIPPET_COPIED: "تم نسخ كود القصاصة إلى الحافظة!",
+    NOTICE_INVALID_PROFILE_OBJECT: "لا يبدو أن ملف JSON هو كائن ملف شخصي صالح.",
+    NEW_PROFILE: "جديد",
+    RESTORE_PROFILE_MODAL_TITLE: (name: string) =>
+      `استعادة الملف الشخصي: ${name}`,
+    RESTORE_PROFILE_MODAL_DESC: (name: string) =>
+      `هل أنت متأكد من رغبتك في استعادة "${name}" إلى ألوانه الأصلية؟ ستفقد جميع تخصيصاتك للملف الشخصي هذا.`,
+    NOTICE_PROFILE_CREATED: (name: string) =>
+      `تم إنشاء الملف الشخصي "${name}" بنجاح!`,
+    MARKDOWN: "عناصر الماركدوان",
+    NOTICES: "الإشعارات",
+    ADVANCED_NOTICE_TEXT_RULES_TITLE: "قواعد لون النص المتقدمة",
+    ADVANCED_NOTICE_BG_RULES_TITLE: "قواعد لون الخلفية المتقدمة",
+    ADD_NEW_RULE: "إضافة قاعدة جديدة",
+    KEYWORD_PLACEHOLDER: "اكتب كلمة ثم اضغط مسافة...",
+    USE_REGEX_LABEL: "Regex",
+    DRAG_RULE_TOOLTIP: "اسحب لإعادة الترتيب",
+    APPLY_BUTTON: "تطبيق",
+    CANCEL_BUTTON: "إلغاء",
+    SETTINGS_SAVED: "تم تطبيق الإعدادات بنجاح!",
+    MOVE_RULE_UP_TOOLTIP: "تحريك القاعدة للأعلى",
+    MOVE_RULE_DOWN_TOOLTIP: "تحريك القاعدة للأسفل",
+    DRAG_HANDLE_TOOLTIP: "اسحب لإعادة الترتيب",
+    TOOLTIP_TEST_RULE: "تجربة القاعدة بكلمة عشوائية",
+    NOTICE_TEST_SENTENCE: (word: string) =>
+      `هكذا سيبدو لون إشعار يحتوي على كلمة "${word}"`,
+    DUPLICATE_PROFILE_TITLE: "اسم الملف الشخصي مكرر",
+    DUPLICATE_PROFILE_DESC_PARTS: [
+      `الملف الشخصي "`,
+      `" موجود بالفعل. الرجاء اختيار اسم مختلف.`,
+    ],
+    DUPLICATE_PROFILE_PLACEHOLDER: "أدخل اسم الملف الشخصي الجديد...",
+    NOTICE_RULES_DESC:
+      "أنشئ قواعد ذات أولوية لتلوين الإشعارات بناءً على محتواها. سيتم تطبيق أول قاعدة مطابقة من الأعلى إلى الأسفل.",
+    CUSTOM_VARIABLES_HEADING: "المتغيرات المخصصة",
+    CUSTOM_VARIABLE_DESC: "متغير مضاف من قبل المستخدم.",
+    TOOLTIP_DELETE_CUSTOM_VARIABLE: "حذف المتغير المخصص",
+    ADD_CUSTOM_VARIABLE_NAME: "إضافة متغير مخصص",
+    ADD_CUSTOM_VARIABLE_DESC:
+      "أضف متغير CSS جديد غير موجود بالقائمة الافتراضية. يجب أن يبدأ الاسم بـ '--'.",
+    ADD_NEW_VARIABLE_BUTTON: "إضافة متغير جديد...",
+    VARIABLE_NAME_LABEL: "اسم المتغير",
+    VARIABLE_NAME_DESC:
+      "الاسم التقني للمتغير في CSS، مثلاً: --my-custom-color.",
+    COLOR_LABEL: "قيمة اللون",
+    VARIABLE_NAME_PLACEHOLDER: "--اسم-المتغير",
+    NOTICE_VAR_NAME_EMPTY: "اسم المتغير لا يمكن أن يكون فارغاً.",
+    NOTICE_VAR_NAME_FORMAT: "يجب أن يبدأ اسم المتغير بـ '--'.",
+    NOTICE_VAR_EXISTS: (name: string) => `المتغير "${name}" موجود بالفعل.`,
+    NOTICE_VAR_ADDED: (name: string) => `تمت إضافة المتغير "${name}" بنجاح.`,
+    HELP_TEXT_PRE_LINK: "لم تجد المتغير الذي تبحث عنه؟ ",
+    HELP_TEXT_LINK: "تصفح قائمة متغيرات CSS الرسمية في Obsidian.",
+    MODAL_CUSTOM_VAR_TITLE: "إضافة تفاصيل المتغير المخصص",
+    DISPLAY_NAME_LABEL: "اسم العرض",
+    DISPLAY_NAME_DESC: "هذا هو الاسم السهل الذي سيظهر في قائمة الإعدادات.",
+    DESCRIPTION_LABEL: "الوصف",
+    DESCRIPTION_DESC: "اشرح الغرض من استخدام متغير اللون هذا.",
+    SAVE_BUTTON: "حفظ المتغير",
+    PLACEHOLDER_DISPLAY_NAME: "مثلاً: لون الخلفية الأساسي",
+    PLACEHOLDER_DESCRIPTION: "مثلاً: يستخدم لخلفية المحرر الرئيسية...",
+  },
+  fa: {
+    PLUGIN_NAME: "استاد رنگ",
+    ENABLE_PLUGIN: "فعال کردن استاد رنگ",
+    ENABLE_PLUGIN_DESC:
+      "این گزینه را برای غیرفعال کردن موقت تمام رنگ‌های سفارشی و بازگشت به تم فعال Obsidian خود خاموش کنید.",
+    PLUGIN_ENABLED_NOTICE: "استاد رنگ فعال شد",
+    PLUGIN_DISABLED_NOTICE: "استاد رنگ غیرفعال شد",
+    LANGUAGE: "زبان",
+    LANGUAGE_DESC: "زبان رابط کاربری افزونه را تنظیم کنید.",
+    PROFILE_MANAGER: "مدیریت پروفایل",
+    RESET_CONFIRM_TITLE: "تأیید بازنشانی پروفایل",
+    RESET_CONFIRM_DESC:
+      "آیا مطمئن هستید که می‌خواهید این پروفایل را به آخرین عکس فوری پین شده بازنشانی کنید؟ این کار رنگ‌های فعلی شما را بازنویسی می‌کند و قابل بازگشت نیست.",
+    ACTIVE_PROFILE: "پروفایل فعال",
+    ACTIVE_PROFILE_DESC: "مدیریت و جابجایی بین پروفایل‌های رنگ.",
+    NEW_BUTTON: "جدید",
+    DELETE_BUTTON: "حذف",
+    OPTIONS_HEADING: "گزینه‌ها",
+    UPDATE_FREQUENCY_NAME: "فریم در ثانیه به‌روزرسانی زنده",
+    UPDATE_FREQUENCY_DESC:
+      "تعداد دفعاتی که رابط کاربری در هر ثانیه پیش‌نمایش تغییرات رنگ را هنگام کشیدن نشان می‌دهد تنظیم می‌کند (0 = غیرفعال کردن پیش‌نمایش زنده). مقادیر کمتر می‌تواند عملکرد را بهبود بخشد.",
+    OVERRIDE_ICONIZE: "نادیده گرفتن رنگ‌های افزونه Iconize",
+    OVERRIDE_ICONIZE_DESC:
+      "اجازه دهید استاد رنگ تمام رنگ‌های آیکون‌های افزونه Iconize را کنترل کند. برای بهترین نتایج، تنظیمات رنگ را در خود Iconize غیرفعال کنید.",
+    ICONIZE_NOT_FOUND_NOTICE:
+      "افزونه Iconize یافت نشد. لطفاً برای استفاده از این ویژگی آن را نصب و فعال کنید.",
+    BACKGROUNDS: "پس‌زمینه‌ها",
+    TEXT: "متن",
+    INTERACTIVE_ELEMENTS: "عناصر تعاملی",
+    UI_ELEMENTS: "عناصر رابط کاربری",
+    MISC: "متفرقه",
+    NEW_PROFILE_TITLE: "ایجاد پروفایل جدید",
+    PROFILE_NAME_LABEL: "نام پروفایل",
+    PROFILE_NAME_PLACEHOLDER: "نام پروفایل را وارد کنید...",
+    CREATE_BUTTON: "ایجاد",
+    EMPTY_PROFILE_NAME_NOTICE: "نام پروفایل نمی‌تواند خالی باشد.",
+    PROFILE_EXISTS_NOTICE: (name: string) =>
+      `پروفایل "${name}" از قبل وجود دارد.`,
+    DELETE_PROFILE_TITLE: "حذف پروفایل",
+    DELETE_PROFILE_CONFIRMATION: (name: string) =>
+      `آیا مطمئن هستید که می‌خواهید پروفایل "${name}" را حذف کنید؟ این عمل قابل بازگشت نیست.`,
+    SNIPPETS_HEADING: "قطعه کدهای CSS",
+    SAVE_AS_TYPE: "ذخیره به عنوان",
+    SAVE_AS_PROFILE: "پروفایل",
+    SAVE_AS_SNIPPET: "قطعه کد",
+    EDIT_SNIPPET_TITLE: "ویرایش قطعه کد CSS",
+    EDIT_PROFILE_TITLE: "ویرایش پروفایل CSS",
+    PROFILE_DELETED_NOTICE: "پروفایل حذف شد.",
+    CANNOT_DELETE_LAST_PROFILE: "نمی‌توان آخرین پروفایل را حذف کرد.",
+    PROFILE_THEME_TYPE: "نوع تم پروفایل",
+    PROFILE_THEME_TYPE_DESC:
+      "تنظیم کنید که آیا این پروفایل باید هنگام فعال شدن یک تم خاص (تاریک/روشن) را اعمال کند.",
+    THEME_TYPE_AUTO: "تم پیش‌فرض Obsidian",
+    THEME_TYPE_DARK: "اعمال حالت تاریک",
+    THEME_TYPE_LIGHT: "اعمال حالت روشن",
+    RESTORE_BUTTON: "بازیابی",
+    RESET_BUTTON: "بازنشانی",
+    UPDATE_BUTTON: "به‌روزرسانی",
+    SEARCH_PLACEHOLDER: "جستجوی متغیرها (نام یا مقدار)...",
+    CLEAR_BUTTON: "پاک کردن",
+    SEARCH_RESULTS_FOUND: (count: number) => `${count} مورد یافت شد`,
+    ALL_SECTIONS: "همه بخش‌ها",
+    EXPORT_FILE_BUTTON: "خروجی گرفتن از فایل",
+    COPY_JSON_BUTTON: "کپی کردن JSON",
+    IMPORT_PASTE_CSS_BUTTON: "وارد کردن / چسباندن (.css)",
+    IMPORT_PASTE_JSON_BUTTON: "وارد کردن / چسباندن (.json)",
+    CREATE_SNIPPET_BUTTON: "ایجاد قطعه کد جدید",
+    NO_SNIPPETS_DESC: "هنوز هیچ قطعه کد CSS برای این پروفایل ایجاد نشده است.",
+    CLEANUP_INTERVAL_NAME: "فاصله زمانی پاکسازی",
+    CLEANUP_INTERVAL_DESC:
+      "هر چند ثانیه یکبار افزونه برای پاکسازی آیکون‌های افزونه حذف شده Iconize بررسی می‌کند.",
+    PLUGIN_INTEGRATIONS: "ادغام با افزونه‌ها",
+    GRAPH_VIEW: "نمای گراف",
+    LIKE_CARD_PROFILES_STAT: (p: number, s: number) =>
+      `پروفایل‌ها: ${p} و قطعه کدها: ${s}`,
+    LIKE_CARD_COLORS_STAT: "رنگ‌های قابل تنظیم",
+    LIKE_CARD_INTEGRATIONS_STAT: "ادغام با افزونه‌ها",
+    LIKE_CARD_DAYS_STAT: "روزهای استفاده",
+    LIKE_CARD_STAR_BUTTON: "ستاره در گیت‌هاب",
+    LIKE_CARD_ISSUE_BUTTON: "گزارش مشکل",
+    LIKE_CARD_SYNC_BUTTON: "همگام‌سازی صندوق شما",
+    LIKE_CARD_GITHUB_BUTTON: "گیت‌هاب من",
+    PASTE_CSS_MODAL_TITLE: "وارد کردن / چسباندن CSS",
+    PASTE_CSS_MODAL_NOTE:
+      "توجه: CSS چسبانده شده می‌تواند بر رابط کاربری تأثیر بگذارد، فقط با CSS معتبر ادامه دهید.",
+    IMPORT_FROM_FILE: "وارد کردن از فایل",
+    IMPORT_FROM_FILE_DESC: "یک فایل (.css) از رایانه خود انتخاب کنید.",
+    CHOOSE_FILE_BUTTON: "انتخاب فایل...",
+    CSS_TEXTAREA_PLACEHOLDER: "یا CSS خود را اینجا بچسبانید...",
+    SNIPPET_NAME_LABEL: "نام قطعه کد",
+    CREATE_SNIPPET_TITLE: "ایجاد قطعه کد CSS جدید",
+    IMPORT_PROFILE_TITLE: "وارد کردن / چسباندن CSS و ایجاد پروفایل",
+    SNIPPET_NAME_PLACEHOLDER: "نام قطعه کد را وارد کنید...",
+    NOTICE_PROFILE_PINNED: "رنگ‌های پروفایل با موفقیت پین شدند!",
+    NOTICE_PROFILE_RESET: "پروفایل به عکس فوری پین شده بازنشانی شد.",
+    NOTICE_NO_PINNED_SNAPSHOT:
+      "هیچ عکس فوری پین شده‌ای برای این پروفایل یافت نشد.",
+    NOTICE_PROFILE_NOT_FOUND: "پروفایل فعال یافت نشد.",
+    NOTICE_NO_PROFILES_FOUND: "هیچ پروفایلی یافت نشد.",
+    NOTICE_ACTIVE_PROFILE_SWITCHED: (name: string) => `پروفایل فعال: ${name}`,
+    NOTICE_CANNOT_FIND_ORIGINAL_PROFILE:
+      "داده‌های اصلی برای این پروفایل یافت نشد.",
+    NOTICE_PROFILE_RESTORED: (name: string) =>
+      `پروفایل "${name}" به حالت پیش‌فرض خود بازگردانده شد.`,
+    NOTICE_UI_REFRESHED: "رابط کاربری تازه‌سازی شد!",
+    NOTICE_GRAPH_COLORS_APPLIED: "رنگ‌های گراف اعمال شد!",
+    NOTICE_INVALID_JSON: "JSON نامعتبر است.",
+    NOTICE_JSON_MUST_HAVE_NAME:
+      "JSON وارد شده برای ایجاد پروفایل جدید باید دارای ویژگی 'name' باشد.",
+    NOTICE_PROFILE_CREATED_SUCCESS: (name: string) =>
+      `پروفایل "${name}" با موفقیت ایجاد شد.`,
+    NOTICE_PROFILE_IMPORTED_SUCCESS: (mode: string) =>
+      `پروفایل با موفقیت ${mode} شد.`,
+    NOTICE_NO_ACTIVE_PROFILE_TO_COPY: "هیچ پروفایل فعالی برای کپی وجود ندارد.",
+    NOTICE_NO_ACTIVE_PROFILE_TO_EXPORT:
+      "هیچ پروفایل فعالی برای خروجی گرفتن وجود ندارد.",
+    NOTICE_SNIPPET_CSS_COPIED: "CSS قطعه کد در کلیپ‌بورد کپی شد!",
+    NOTICE_SNIPPET_EMPTY: "این قطعه کد خالی است.",
+    NOTICE_CSS_CONTENT_EMPTY: "محتوای CSS نمی‌تواند خالی باشد.",
+    NOTICE_SNIPPET_NAME_EXISTS: (name: string) =>
+      `نام قطعه کد "${name}" از قبل وجود دارد.`,
+    NOTICE_PROFILE_NAME_EXISTS: (name: string) =>
+      `نام پروفایل "${name}" از قبل وجود دارد.`,
+    NOTICE_PROFILE_UPDATED: (name: string) =>
+      `پروفایل "${name}" به‌روزرسانی شد.`,
+    NOTICE_SNIPPET_UPDATED: (name: string) =>
+      `قطعه کد "${name}" به‌روزرسانی شد.`,
+    NOTICE_SNIPPET_CREATED: (name: string) =>
+      `قطعه کد "${name}" با موفقیت ایجاد شد!`,
+    NOTICE_PROFILE_CREATED_FROM_CSS: (name: string) =>
+      `پروفایل "${name}" با موفقیت ایجاد شد!`,
+    NOTICE_NO_COLOR_HISTORY: "هیچ تاریخچه رنگی برای بازیابی وجود ندارد.",
+    NOTICE_COLOR_RESTORED: (color: string) => `بازیابی شد: ${color}`,
+    NOTICE_TEXTBOX_EMPTY:
+      "کادر متنی خالی است. ابتدا مقداری JSON بچسبانید یا یک فایل وارد کنید.",
+    IMPORT_JSON_MODAL_TITLE: "چسباندن یا وارد کردن JSON پروفایل",
+    IMPORT_JSON_MODAL_DESC_1:
+      "می‌توانید یک JSON پروفایل را در کادر زیر بچسبانید.",
+    IMPORT_JSON_MODAL_PLACEHOLDER: '{ "name": "...", "profile": { ... } }',
+    IMPORT_JSON_MODAL_DESC_2: "یا، می‌توانید مستقیماً از یک فایل وارد کنید:",
+    IMPORT_JSON_MODAL_SETTING_NAME: "وارد کردن از فایل",
+    IMPORT_JSON_MODAL_SETTING_DESC:
+      "یک فایل پروفایل (.json) از رایانه خود انتخاب کنید.",
+    REPLACE_ACTIVE_BUTTON: "جایگزینی فعال",
+    CREATE_NEW_BUTTON: "ایجاد جدید",
+    NOTICE_FILE_LOADED: (fileName: string) =>
+      `فایل "${fileName}" در ناحیه متنی بارگذاری شد.`,
+    NOTICE_EXPORT_SUCCESS: "پروفایل با موفقیت خروجی گرفته شد!",
+    TOOLTIP_RESTORE_BUILTIN: "بازیابی به رنگ‌های اصلی داخلی",
+    TOOLTIP_EDIT_CSS_PROFILE: "ویرایش پروفایل CSS",
+    TOOLTIP_PIN_SNAPSHOT: "پین کردن رنگ‌های فعلی به عنوان یک عکس فوری",
+    TOOLTIP_PIN_SNAPSHOT_DATE: (date: string) =>
+      `رنگ‌ها در تاریخ ${date} پین شدند. برای پین مجدد کلیک کنید.`,
+    TOOLTIP_RESET_TO_PINNED: "بازنشانی به رنگ‌های پین شده",
+    TOOLTIP_EDIT_SNIPPET: "ویرایش قطعه کد",
+    TOOLTIP_COPY_SNIPPET_CSS: "کپی کردن CSS در کلیپ‌بورد",
+    TOOLTIP_DELETE_SNIPPET: "حذف قطعه کد",
+    TOOLTIP_SET_TRANSPARENT: "تنظیم به شفاف",
+    TOOLTIP_UNDO_CHANGE: "لغو آخرین تغییر",
+    ARIA_LABEL_CASE_SENSITIVE: "جستجوی حساس به حروف بزرگ و کوچک",
+    ARIA_LABEL_REGEX_SEARCH: "استفاده از عبارت منظم",
+    NOTICE_JSON_COPIED_CLIPBOARD: "JSON پروفایل در کلیپ‌بورد کپی شد.",
+    MODAL_DELETE_SNIPPET_TITLE: (name: string) => `حذف قطعه کد: ${name}`,
+    MODAL_DELETE_SNIPPET_DESC:
+      "آیا مطمئن هستید که می‌خواهید این قطعه کد را حذف کنید؟ این عمل قابل بازگشت نیست.",
+    NOTICE_FPS_UPDATED: (value: number) =>
+      `فریم در ثانیه به‌روزرسانی زنده روی ${value} تنظیم شد`,
+    NOTICE_SNIPPET_COPIED: "CSS قطعه کد در کلیپ‌بورد کپی شد!",
+    NOTICE_INVALID_PROFILE_OBJECT:
+      "JSON به نظر نمی‌رسد یک شی پروفایل معتبر باشد.",
+    NEW_PROFILE: "جدید",
+    RESTORE_PROFILE_MODAL_TITLE: (name: string) => `بازیابی پروفایل: ${name}`,
+    RESTORE_PROFILE_MODAL_DESC: (name: string) =>
+      `آیا مطمئن هستید که می‌خواهید "${name}" را به رنگ‌های اصلی خود بازگردانید؟ تمام سفارشی‌سازی‌های شما برای این پروفایل از بین خواهد رفت.`,
+    NOTICE_PROFILE_CREATED: (name: string) =>
+      `پروفایل "${name}" با موفقیت ایجاد شد!`,
+    MARKDOWN: "مارک‌داون",
+    NOTICES: "اعلان‌ها",
+    ADVANCED_NOTICE_TEXT_RULES_TITLE: "قوانین پیشرفته رنگ متن",
+    ADVANCED_NOTICE_BG_RULES_TITLE: "قوانین پیشرفته رنگ پس‌زمینه",
+    ADD_NEW_RULE: "افزودن قانون جدید",
+    KEYWORD_PLACEHOLDER: "یک کلمه کلیدی تایپ کنید و فاصله را فشار دهید...",
+    USE_REGEX_LABEL: "عبارت منظم",
+    DRAG_RULE_TOOLTIP: "برای ترتیب مجدد بکشید",
+    APPLY_BUTTON: "اعمال",
+    CANCEL_BUTTON: "لغو",
+    SETTINGS_SAVED: "تنظیمات با موفقیت اعمال شد!",
+    MOVE_RULE_UP_TOOLTIP: "قانون را به بالا ببرید",
+    MOVE_RULE_DOWN_TOOLTIP: "قانون را به پایین ببرید",
+    DRAG_HANDLE_TOOLTIP: "برای ترتیب مجدد بکشید",
+    TOOLTIP_TEST_RULE: "این قانون را با یک کلمه کلیدی تصادفی آزمایش کنید",
+    NOTICE_TEST_SENTENCE: (word: string) =>
+      `رنگ اعلان برای "${word}" به این شکل است:`,
+    DUPLICATE_PROFILE_TITLE: "نام پروفایل تکراری",
+    DUPLICATE_PROFILE_DESC_PARTS: [
+      `نام پروفایل "`,
+      `" از قبل وجود دارد. لطفاً نام دیگری انتخاب کنید.`,
+    ],
+    DUPLICATE_PROFILE_PLACEHOLDER: "نام پروفایل جدید را وارد کنید...",
+    NOTICE_RULES_DESC:
+      "قوانین اولویت‌بندی شده برای رنگ‌آمیزی اعلان‌ها بر اساس محتوای آنها ایجاد کنید. اولین قانون منطبق از بالا به پایین اعمال خواهد شد.",
+    CUSTOM_VARIABLES_HEADING: "متغیرهای سفارشی",
+    CUSTOM_VARIABLE_DESC: "متغیر اضافه شده توسط کاربر.",
+    TOOLTIP_DELETE_CUSTOM_VARIABLE: "حذف متغیر سفارشی",
+    ADD_CUSTOM_VARIABLE_NAME: "افزودن متغیر سفارشی",
+    ADD_CUSTOM_VARIABLE_DESC:
+      "یک متغیر CSS جدید که در لیست پیش‌فرض نیست اضافه کنید. نام باید با '--' شروع شود.",
+    ADD_NEW_VARIABLE_BUTTON: "افزودن متغیر جدید...",
+    VARIABLE_NAME_LABEL: "نام متغیر",
+    VARIABLE_NAME_DESC: "نام فنی CSS، به عنوان مثال --my-custom-color.",
+    COLOR_LABEL: "مقدار رنگ",
+    VARIABLE_NAME_PLACEHOLDER: "--variable-name",
+    NOTICE_VAR_NAME_EMPTY: "نام متغیر نمی‌تواند خالی باشد.",
+    NOTICE_VAR_NAME_FORMAT: "نام متغیر باید با '--' شروع شود.",
+    NOTICE_VAR_EXISTS: (name: string) => `متغیر "${name}" از قبل وجود دارد.`,
+    NOTICE_VAR_ADDED: (name: string) => `متغیر "${name}" با موفقیت اضافه شد.`,
+    HELP_TEXT_PRE_LINK: "متغیری که به دنبال آن هستید را پیدا نمی‌کنید؟ ",
+    HELP_TEXT_LINK: "لیست رسمی متغیرهای CSS Obsidian را مرور کنید.",
+    MODAL_CUSTOM_VAR_TITLE: "افزودن جزئیات متغیر سفارشی",
+    DISPLAY_NAME_LABEL: "نام نمایشی",
+    DISPLAY_NAME_DESC: "این نام کاربرپسندی است که در لیست تنظیمات ظاهر می‌شود.",
+    DESCRIPTION_LABEL: "توضیحات",
+    DESCRIPTION_DESC: "توضیح دهید که این متغیر رنگ برای چه استفاده می‌شود.",
+    SAVE_BUTTON: "ذخیره متغیر",
+    PLACEHOLDER_DISPLAY_NAME: "مثلاً: رنگ پس‌زمینه اصلی",
+    PLACEHOLDER_DESCRIPTION: "مثلاً: برای تغییر اندازه فونت استفاده می‌شود...",
+  },
+  fr: {
+    PLUGIN_NAME: "Maître des Couleurs",
+    ENABLE_PLUGIN: "Activer Maître des Couleurs",
+    ENABLE_PLUGIN_DESC:
+      "Désactivez cette option pour désactiver temporairement toutes les couleurs personnalisées et revenir à votre thème Obsidian actif.",
+    PLUGIN_ENABLED_NOTICE: "Maître des Couleurs activé",
+    PLUGIN_DISABLED_NOTICE: "Maître des Couleurs désactivé",
+    LANGUAGE: "Langue",
+    LANGUAGE_DESC: "Définissez la langue de l'interface pour le plugin.",
+    PROFILE_MANAGER: "Gestionnaire de Profils",
+    RESET_CONFIRM_TITLE: "Confirmation de la réinitialisation du profil",
+    RESET_CONFIRM_DESC:
+      "Êtes-vous sûr de vouloir réinitialiser ce profil à la dernière capture épinglée ? Cela écrasera vos couleurs actuelles et ne pourra pas être annulé.",
+    ACTIVE_PROFILE: "Profil Actif",
+    ACTIVE_PROFILE_DESC: "Gérez et basculez entre les profils de couleurs.",
+    NEW_BUTTON: "Nouveau",
+    DELETE_BUTTON: "Supprimer",
+    OPTIONS_HEADING: "Options",
+    UPDATE_FREQUENCY_NAME: "FPS de la mise à jour en direct",
+    UPDATE_FREQUENCY_DESC:
+      "Définit le nombre de fois par seconde où l'interface prévisualise les changements de couleur lors du glissement (0 = désactiver l'aperçu en direct). Des valeurs plus basses peuvent améliorer les performances.",
+    OVERRIDE_ICONIZE: "Outrepasser les couleurs du plugin Iconize",
+    OVERRIDE_ICONIZE_DESC:
+      "Laissez Maître des Couleurs contrôler toutes les couleurs d'icônes du plugin Iconize. Pour de meilleurs résultats, désactivez les paramètres de couleur dans Iconize lui-même.",
+    ICONIZE_NOT_FOUND_NOTICE:
+      "Plugin Iconize non trouvé. Veuillez l'installer et l'activer pour utiliser cette fonctionnalité.",
+    BACKGROUNDS: "Arrière-plans",
+    TEXT: "Texte",
+    INTERACTIVE_ELEMENTS: "Éléments Interactifs",
+    UI_ELEMENTS: "Éléments d'Interface",
+    MISC: "Divers",
+    NEW_PROFILE_TITLE: "Créer un nouveau profil",
+    PROFILE_NAME_LABEL: "Nom du profil",
+    PROFILE_NAME_PLACEHOLDER: "Entrez le nom du profil...",
+    CREATE_BUTTON: "Créer",
+    EMPTY_PROFILE_NAME_NOTICE: "Le nom du profil ne peut pas être vide.",
+    PROFILE_EXISTS_NOTICE: (name: string) => `Le profil "${name}" existe déjà.`,
+    DELETE_PROFILE_TITLE: "Supprimer le profil",
+    DELETE_PROFILE_CONFIRMATION: (name: string) =>
+      `Êtes-vous sûr de vouloir supprimer le profil "${name}" ? Cette action est irréversible.`,
+    SNIPPETS_HEADING: "Extraits CSS",
+    SAVE_AS_TYPE: "Enregistrer en tant que",
+    SAVE_AS_PROFILE: "Profil",
+    SAVE_AS_SNIPPET: "Extrait",
+    EDIT_SNIPPET_TITLE: "Modifier l'extrait CSS",
+    EDIT_PROFILE_TITLE: "Modifier le profil CSS",
+    PROFILE_DELETED_NOTICE: "Profil supprimé.",
+    CANNOT_DELETE_LAST_PROFILE: "Impossible de supprimer le dernier profil.",
+    PROFILE_THEME_TYPE: "Type de thème du profil",
+    PROFILE_THEME_TYPE_DESC:
+      "Définissez si ce profil doit forcer un thème spécifique (Sombre/Clair) lors de son activation.",
+    THEME_TYPE_AUTO: "Thème par défaut d'Obsidian",
+    THEME_TYPE_DARK: "Forcer le mode sombre",
+    THEME_TYPE_LIGHT: "Forcer le mode clair",
+    RESTORE_BUTTON: "Restaurer",
+    RESET_BUTTON: "Réinitialiser",
+    UPDATE_BUTTON: "Mettre à jour",
+    SEARCH_PLACEHOLDER: "Rechercher des variables (nom ou valeur)...",
+    CLEAR_BUTTON: "Effacer",
+    SEARCH_RESULTS_FOUND: (count: number) => `${count} trouvé(s)`,
+    ALL_SECTIONS: "Toutes les sections",
+    EXPORT_FILE_BUTTON: "Exporter le fichier",
+    COPY_JSON_BUTTON: "Copier JSON",
+    IMPORT_PASTE_CSS_BUTTON: "Importer / Coller (.css)",
+    IMPORT_PASTE_JSON_BUTTON: "Importer / Coller (.json)",
+    CREATE_SNIPPET_BUTTON: "Créer un nouvel extrait",
+    NO_SNIPPETS_DESC: "Aucun extrait CSS n'a encore été créé pour ce profil.",
+    CLEANUP_INTERVAL_NAME: "Intervalle de nettoyage",
+    CLEANUP_INTERVAL_DESC:
+      "Définit la fréquence (en secondes) à laquelle le plugin recherche un plugin Iconize désinstallé pour nettoyer ses icônes.",
+    PLUGIN_INTEGRATIONS: "Intégrations de plugins",
+    GRAPH_VIEW: "Vue Graphique",
+    LIKE_CARD_PROFILES_STAT: (p: number, s: number) =>
+      `Profils: ${p} & Extraits: ${s}`,
+    LIKE_CARD_COLORS_STAT: "Couleurs personnalisables",
+    LIKE_CARD_INTEGRATIONS_STAT: "Intégrations de plugins",
+    LIKE_CARD_DAYS_STAT: "Jours d'utilisation",
+    LIKE_CARD_STAR_BUTTON: "Étoile sur GitHub",
+    LIKE_CARD_ISSUE_BUTTON: "Signaler un problème",
+    LIKE_CARD_SYNC_BUTTON: "Synchronisez votre coffre",
+    LIKE_CARD_GITHUB_BUTTON: "Mon GitHub",
+    PASTE_CSS_MODAL_TITLE: "Importer / Coller CSS",
+    PASTE_CSS_MODAL_NOTE:
+      "Remarque : Le CSS collé peut affecter l'interface utilisateur, n'utilisez que du CSS de confiance.",
+    IMPORT_FROM_FILE: "Importer depuis un fichier",
+    IMPORT_FROM_FILE_DESC:
+      "Sélectionnez un fichier (.css) depuis votre ordinateur.",
+    CHOOSE_FILE_BUTTON: "Choisir un fichier...",
+    CSS_TEXTAREA_PLACEHOLDER: "Ou collez votre CSS ici...",
+    SNIPPET_NAME_LABEL: "Nom de l'extrait",
+    CREATE_SNIPPET_TITLE: "Créer un nouvel extrait CSS",
+    IMPORT_PROFILE_TITLE: "Importer / Coller du CSS et créer un profil",
+    SNIPPET_NAME_PLACEHOLDER: "Entrez le nom de l'extrait...",
+    NOTICE_PROFILE_PINNED: "Couleurs du profil épinglées avec succès !",
+    NOTICE_PROFILE_RESET: "Le profil a été réinitialisé à la capture épinglée.",
+    NOTICE_NO_PINNED_SNAPSHOT:
+      "Aucune capture épinglée trouvée pour ce profil.",
+    NOTICE_PROFILE_NOT_FOUND: "Le profil actif n'a pas pu être trouvé.",
+    NOTICE_NO_PROFILES_FOUND: "Aucun profil trouvé.",
+    NOTICE_ACTIVE_PROFILE_SWITCHED: (name: string) => `Profil actif : ${name}`,
+    NOTICE_CANNOT_FIND_ORIGINAL_PROFILE:
+      "Impossible de trouver les données originales pour ce profil.",
+    NOTICE_PROFILE_RESTORED: (name: string) =>
+      `Le profil "${name}" a été restauré à son état par défaut.`,
+    NOTICE_UI_REFRESHED: "Interface utilisateur actualisée !",
+    NOTICE_GRAPH_COLORS_APPLIED: "Couleurs du graphique appliquées !",
+    NOTICE_INVALID_JSON: "JSON invalide.",
+    NOTICE_JSON_MUST_HAVE_NAME:
+      "Le JSON importé doit avoir une propriété 'name' pour créer un nouveau profil.",
+    NOTICE_PROFILE_CREATED_SUCCESS: (name: string) =>
+      `Le profil "${name}" a été créé avec succès.`,
+    NOTICE_PROFILE_IMPORTED_SUCCESS: (mode: string) =>
+      `Profil ${mode} avec succès.`,
+    NOTICE_NO_ACTIVE_PROFILE_TO_COPY: "Aucun profil actif à copier.",
+    NOTICE_NO_ACTIVE_PROFILE_TO_EXPORT: "Aucun profil actif à exporter.",
+    NOTICE_SNIPPET_CSS_COPIED:
+      "CSS de l'extrait copié dans le presse-papiers !",
+    NOTICE_SNIPPET_EMPTY: "Cet extrait est vide.",
+    NOTICE_CSS_CONTENT_EMPTY: "Le contenu CSS ne peut pas être vide.",
+    NOTICE_SNIPPET_NAME_EXISTS: (name: string) =>
+      `Le nom d'extrait "${name}" existe déjà.`,
+    NOTICE_PROFILE_NAME_EXISTS: (name: string) =>
+      `Le nom de profil "${name}" existe déjà.`,
+    NOTICE_PROFILE_UPDATED: (name: string) => `Profil "${name}" mis à jour.`,
+    NOTICE_SNIPPET_UPDATED: (name: string) => `Extrait "${name}" mis à jour.`,
+    NOTICE_SNIPPET_CREATED: (name: string) =>
+      `L'extrait "${name}" a été créé avec succès !`,
+    NOTICE_PROFILE_CREATED_FROM_CSS: (name: string) =>
+      `Le profil "${name}" a été créé avec succès !`,
+    NOTICE_NO_COLOR_HISTORY: "Aucun historique de couleur à restaurer.",
+    NOTICE_COLOR_RESTORED: (color: string) => `Restauré : ${color}`,
+    NOTICE_TEXTBOX_EMPTY:
+      "La zone de texte est vide. Collez du JSON ou importez d'abord un fichier.",
+    IMPORT_JSON_MODAL_TITLE: "Coller ou Importer le JSON du Profil",
+    IMPORT_JSON_MODAL_DESC_1:
+      "Vous pouvez coller un JSON de profil dans la case ci-dessous.",
+    IMPORT_JSON_MODAL_PLACEHOLDER: '{ "name": "...", "profile": { ... } }',
+    IMPORT_JSON_MODAL_DESC_2:
+      "Ou, vous pouvez importer directement depuis un fichier :",
+    IMPORT_JSON_MODAL_SETTING_NAME: "Importer depuis un fichier",
+    IMPORT_JSON_MODAL_SETTING_DESC:
+      "Sélectionnez un fichier de profil (.json) depuis votre ordinateur.",
+    REPLACE_ACTIVE_BUTTON: "Remplacer l'actuel",
+    CREATE_NEW_BUTTON: "Créer un nouveau",
+    NOTICE_FILE_LOADED: (fileName: string) =>
+      `Fichier "${fileName}" chargé dans la zone de texte.`,
+    NOTICE_EXPORT_SUCCESS: "Profil exporté avec succès !",
+    TOOLTIP_RESTORE_BUILTIN: "Restaurer les couleurs d'origine intégrées",
+    TOOLTIP_EDIT_CSS_PROFILE: "Modifier le profil CSS",
+    TOOLTIP_PIN_SNAPSHOT: "Épingler les couleurs actuelles comme une capture",
+    TOOLTIP_PIN_SNAPSHOT_DATE: (date: string) =>
+      `Couleurs épinglées le ${date}. Cliquez pour ré-épingler.`,
+    TOOLTIP_RESET_TO_PINNED: "Réinitialiser aux couleurs épinglées",
+    TOOLTIP_EDIT_SNIPPET: "Modifier l'extrait",
+    TOOLTIP_COPY_SNIPPET_CSS: "Copier le CSS dans le presse-papiers",
+    TOOLTIP_DELETE_SNIPPET: "Supprimer l'extrait",
+    TOOLTIP_SET_TRANSPARENT: "Rendre transparent",
+    TOOLTIP_UNDO_CHANGE: "Annuler la dernière modification",
+    ARIA_LABEL_CASE_SENSITIVE: "Recherche sensible à la casse",
+    ARIA_LABEL_REGEX_SEARCH: "Utiliser une expression régulière",
+    NOTICE_JSON_COPIED_CLIPBOARD:
+      "JSON du profil copié dans le presse-papiers.",
+    MODAL_DELETE_SNIPPET_TITLE: (name: string) =>
+      `Supprimer l'extrait : ${name}`,
+    MODAL_DELETE_SNIPPET_DESC:
+      "Êtes-vous sûr de vouloir supprimer cet extrait ? Cette action est irréversible.",
+    NOTICE_FPS_UPDATED: (value: number) =>
+      `FPS de la mise à jour en direct défini sur : ${value}`,
+    NOTICE_SNIPPET_COPIED: "CSS de l'extrait copié dans le presse-papiers !",
+    NOTICE_INVALID_PROFILE_OBJECT:
+      "Le JSON ne semble pas être un objet de profil valide.",
+    NEW_PROFILE: "Nouveau",
+    RESTORE_PROFILE_MODAL_TITLE: (name: string) =>
+      `Restaurer le profil : ${name}`,
+    RESTORE_PROFILE_MODAL_DESC: (name: string) =>
+      `Êtes-vous sûr de vouloir restaurer "${name}" à ses couleurs d'origine ? Toutes vos personnalisations pour ce profil seront perdues.`,
+    NOTICE_PROFILE_CREATED: (name: string) =>
+      `Le profil "${name}" a été créé avec succès !`,
+    MARKDOWN: "Markdown",
+    NOTICES: "Notifications",
+    ADVANCED_NOTICE_TEXT_RULES_TITLE:
+      "Règles avancées pour la couleur du texte",
+    ADVANCED_NOTICE_BG_RULES_TITLE: "Règles avancées pour la couleur de fond",
+    ADD_NEW_RULE: "Ajouter une nouvelle règle",
+    KEYWORD_PLACEHOLDER: "Tapez un mot-clé et appuyez sur Espace...",
+    USE_REGEX_LABEL: "Regex",
+    DRAG_RULE_TOOLTIP: "Glisser pour réorganiser",
+    APPLY_BUTTON: "Appliquer",
+    CANCEL_BUTTON: "Annuler",
+    SETTINGS_SAVED: "Paramètres appliqués avec succès !",
+    MOVE_RULE_UP_TOOLTIP: "Déplacer la règle vers le haut",
+    MOVE_RULE_DOWN_TOOLTIP: "Déplacer la règle vers le bas",
+    DRAG_HANDLE_TOOLTIP: "Glisser pour réorganiser",
+    TOOLTIP_TEST_RULE: "Tester cette règle avec un mot-clé aléatoire",
+    NOTICE_TEST_SENTENCE: (word: string) =>
+      `La couleur de notification pour "${word}" ressemble à ceci :`,
+    DUPLICATE_PROFILE_TITLE: "Nom de profil en double",
+    DUPLICATE_PROFILE_DESC_PARTS: [
+      `Le nom de profil "`,
+      `" existe déjà. Veuillez choisir un nom différent.`,
+    ],
+    DUPLICATE_PROFILE_PLACEHOLDER: "Entrez un nouveau nom de profil...",
+    NOTICE_RULES_DESC:
+      "Créez des règles priorisées pour colorer les notifications en fonction de leur contenu. La première règle correspondante de haut en bas sera appliquée.",
+    CUSTOM_VARIABLES_HEADING: "Variables personnalisées",
+    CUSTOM_VARIABLE_DESC: "Variable ajoutée par l'utilisateur.",
+    TOOLTIP_DELETE_CUSTOM_VARIABLE: "Supprimer la variable personnalisée",
+    ADD_CUSTOM_VARIABLE_NAME: "Ajouter une variable personnalisée",
+    ADD_CUSTOM_VARIABLE_DESC:
+      "Ajoutez une nouvelle variable CSS qui n'est pas dans la liste par défaut. Le nom doit commencer par '--'.",
+    ADD_NEW_VARIABLE_BUTTON: "Ajouter une nouvelle variable...",
+    VARIABLE_NAME_LABEL: "Nom de la variable",
+    VARIABLE_NAME_DESC: "Le nom technique CSS, ex: --ma-couleur-perso.",
+    COLOR_LABEL: "Valeur de la couleur",
+    VARIABLE_NAME_PLACEHOLDER: "--nom-variable",
+    NOTICE_VAR_NAME_EMPTY: "Le nom de la variable ne peut pas être vide.",
+    NOTICE_VAR_NAME_FORMAT: "Le nom de la variable doit commencer par '--'.",
+    NOTICE_VAR_EXISTS: (name: string) => `La variable "${name}" existe déjà.`,
+    NOTICE_VAR_ADDED: (name: string) =>
+      `La variable "${name}" a été ajoutée avec succès.`,
+    HELP_TEXT_PRE_LINK: "Vous ne trouvez pas la variable que vous cherchez ? ",
+    HELP_TEXT_LINK:
+      "Parcourez la liste officielle des variables CSS d'Obsidian.",
+    MODAL_CUSTOM_VAR_TITLE: "Ajouter les détails de la variable personnalisée",
+    DISPLAY_NAME_LABEL: "Nom d'affichage",
+    DISPLAY_NAME_DESC:
+      "C'est le nom convivial qui apparaîtra dans la liste des paramètres.",
+    DESCRIPTION_LABEL: "Description",
+    DESCRIPTION_DESC: "Décrivez à quoi sert cette variable de couleur.",
+    SAVE_BUTTON: "Enregistrer la variable",
+    PLACEHOLDER_DISPLAY_NAME: "ex: Couleur de fond principale",
+    PLACEHOLDER_DESCRIPTION:
+      "ex: Utilisé pour changer la taille de la police...",
+  },
+};
+
+export const t = (key: string, ...args: (string | number)[]): string => {
+  if (!T) {
+    console.error("ColorMaster: 'T' is not initialized yet.");
+    return key; // Return key as a fallback
+  }
+  const lang = T.settings?.language || "en";
+  const stringsForLang = STRINGS[lang as keyof typeof STRINGS] || STRINGS.en;
+  const string =
+    stringsForLang[key as keyof typeof stringsForLang] ||
+    STRINGS.en[key as keyof (typeof STRINGS)["en"]];
+
+  if (typeof string === "function") {
+    return string.apply(null, args);
+  }
+  return string as string;
+};
