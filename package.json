@@ -10,7 +10,6 @@
   "author": "Yazan Ammar",
   "license": "MIT",
   "dependencies": {
-    "coloris": "^0.1.0",
     "sortablejs": "^1.15.6",
     "tslib": "^2.8.1"
   },
