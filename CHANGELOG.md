@@ -1,5 +1,44 @@
 # Changelog
 
+## [v1.0.7](https://github.com/YazanAmmar/obsidian-color-master/releases/tag/1.0.7) - 2025-09-19 (TypeScript)
+
+### Major Milestone: The TypeScript Rewrite!
+
+The entire Color Master codebase has been successfully migrated from JavaScript to **TypeScript**! This is a massive step forward for the project's health, stability, and future development.
+
+-   **Enhanced Stability:** TypeScript's static typing catches common errors during development, significantly reducing the chance of bugs making it into a release.
+-   **Easier Maintenance:** A strongly-typed codebase is easier to read, refactor, and build upon.
+-   **Faster Future Development:** This migration paves the way for adding more complex features with greater confidence and speed.
+
+> **A personal note from the developer:** I sincerely apologize for the delay in this migration (spanning several versions). As I was learning TypeScript from scratch with limited time, I wanted to ensure the transition was done right. Thank you for your patience! The foundation is now rock-solid for the future.
+
+### New Features
+
+* **Drag & Drop to Reorder CSS Snippets**
+    -   You can now drag and drop snippets in the list to control their execution order. This gives you precise control over the CSS cascade; rules in snippets lower in the list will override those above them in case of a conflict.
+    -   *Example:* If Snippet A makes `h1` blue and Snippet B makes `h1` red, placing Snippet B *after* Snippet A will result in a red `h1`.
+
+* **Add Custom CSS Variables**
+    -   A new feature that allows you to add any CSS variable from Obsidian's official documentation directly into the plugin.
+    -   Your custom variables are saved with your profile and are included when you export or share it.
+
+* **Session-Persistent Undo/Redo for Editors**
+    -   The CSS editor for snippets and profiles now remembers your changes for the entire Obsidian session.
+    -   You can now close the editor modal, test your changes, and re-open it to continue using **Ctrl+Z** (Undo) and **Ctrl+Y** (Redo) without losing your history. The history is cleared when Obsidian is closed.
+
+* **New Languages**
+    -   Added full UI translations for **French** and **Persian**.
+
+### Improvements & Fixes
+
+* **RTL/LTR:** Vastly improved Right-to-Left (RTL) language support. Fixed major UI layout issues that occurred when using an LTR plugin language (like English) inside an RTL Obsidian interface (like Arabic), and vice-versa.
+* **Notice Rules:**
+    -   Rules are now **case-insensitive**. A keyword like "Success" will now match "success" and "SUCCESS".
+    -   Fixed a critical bug where notice rules failed to match non-Latin keywords (e.g., Arabic, Persian) due to incorrect Regex logic.
+* **Custom Variables:** Custom variables are now correctly included in the statistics card count.
+* **UI:** The "Create New Snippet" button is now always visible at the top of the snippets list for quicker access.
+* **And many other minor bug fixes and performance enhancements.**
+
 ## [v1.0.6](https://github.com/YazanAmmar/obsidian-color-master/releases/tag/1.0.6) - 2025-09-13 (The Thematic Intelligence Update)
 
 This update focuses on two core principles: **intelligence and elegance**. We're introducing the revolutionary Advanced Notice Coloring system, adding a new layer of interactive intelligence to your workspace. This comes alongside a comprehensive UI overhaul and precise enhancements to every corner of the plugin, making your experience smoother and more professional than ever.
