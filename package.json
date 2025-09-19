@@ -1,18 +1,24 @@
 {
   "name": "obsidian-color-master",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Full control of Obsidian color CSS variables with profiles, import/export, bilingual UI, and Force Mode to override themes.",
   "main": "main.js",
   "scripts": {
-    "build": "esbuild src/main.js --bundle --platform=browser --format=cjs --outfile=main.js --minify --external:obsidian"
+    "build": "esbuild src/main.ts --bundle --platform=browser --format=cjs --outfile=main.js --minify --external:obsidian"
   },
   "keywords": [],
   "author": "Yazan Ammar",
   "license": "MIT",
   "dependencies": {
-    "sortablejs": "^1.15.6"
+    "coloris": "^0.1.0",
+    "sortablejs": "^1.15.6",
+    "tslib": "^2.8.1"
   },
   "devDependencies": {
-    "esbuild": "^0.25.9"
+    "@types/node": "^24.5.2",
+    "@types/sortablejs": "^1.15.8",
+    "esbuild": "^0.25.9",
+    "obsidian": "^1.8.7",
+    "typescript": "^5.9.2"
   }
 }
