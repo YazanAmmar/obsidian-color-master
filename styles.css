@@ -656,7 +656,7 @@ body.color-master-rtl .notice {
   color: var(--tag-color-hover) !important;
 }
 
-/* 2. Styling for Editor View (NOW WITH RTL SUPPORT) */
+/* 2. Styling for Editor View */
 
 .cm-s-obsidian span.cm-hashtag-begin,
 .cm-s-obsidian span.cm-hashtag-end {
@@ -730,180 +730,6 @@ body.color-master-rtl .notice {
 .color-master-modal .modal-content > hr {
   margin-top: 0px;
   margin-bottom: 0px;
-}
-
-/* ======= Robust LTR/RTL fix for Color Master (place at END of styles.css) ======= */
-
-.color-master-modal,
-.color-master-modal .modal-content,
-.cm-plugin-modal,
-.cm-modal {
-  display: block;
-  box-sizing: border-box;
-}
-
-.color-master-modal .setting-item:not(.cm-hidden),
-.cm-plugin-modal .setting-item:not(.cm-hidden),
-.modal-content .setting-item:not(.cm-hidden),
-.modal-content .setting-row:not(.cm-hidden) {
-  display: flex !important;
-  width: 100% !important;
-  align-items: center !important;
-  gap: 10px !important;
-  margin-bottom: 0px !important;
-  box-sizing: border-box !important;
-  min-width: 0 !important;
-}
-
-:dir(ltr) .color-master-modal .setting-item,
-:dir(ltr) .cm-plugin-modal .setting-item {
-  flex-direction: row !important;
-}
-:dir(ltr) .color-master-modal .setting-item > .setting-label,
-:dir(ltr) .cm-plugin-modal .setting-item > .setting-label {
-  order: 1 !important;
-}
-:dir(ltr) .color-master-modal .setting-item > .setting-item-control,
-:dir(ltr) .cm-plugin-modal .setting-item > .setting-item-control {
-  order: 2 !important;
-  flex: 1 1 auto !important;
-  min-width: 0 !important;
-}
-
-:dir(rtl) .color-master-modal .setting-item,
-:dir(rtl) .cm-plugin-modal .setting-item {
-  flex-direction: row !important;
-}
-:dir(rtl) .color-master-modal .setting-item > .setting-label,
-:dir(rtl) .cm-plugin-modal .setting-item > .setting-label {
-  order: 2 !important;
-}
-:dir(rtl) .color-master-modal .setting-item > .setting-item-control,
-:dir(rtl) .cm-plugin-modal .setting-item > .setting-item-control {
-  order: 1 !important;
-  flex: 1 1 auto !important;
-  min-width: 0 !important;
-}
-
-.color-master-modal .modal-content h3,
-.color-master-modal .modal-content p,
-.color-master-modal .modal-content label,
-.color-master-modal .setting-item .setting-item-description,
-.cm-plugin-modal .modal-content h3,
-.cm-plugin-modal .modal-content p {
-  unicode-bidi: isolate !important;
-}
-
-:dir(rtl) .color-master-modal .modal-content h3,
-:dir(rtl) .color-master-modal .modal-content p,
-:dir(rtl) .color-master-modal .modal-content label,
-:dir(rtl) .color-master-modal .setting-item .setting-item-description {
-  direction: rtl !important;
-  text-align: right !important;
-}
-
-:dir(ltr) .color-master-modal .modal-content h3,
-:dir(ltr) .color-master-modal .modal-content p,
-:dir(ltr) .color-master-modal .modal-content label,
-:dir(ltr) .color-master-modal .setting-item .setting-item-description {
-  direction: ltr !important;
-  text-align: left !important;
-}
-
-.color-master-modal .modal-button-container,
-.cm-plugin-modal .modal-button-container,
-.modal-button-container,
-.modal-footer,
-.modal-actions,
-.modal-buttons {
-  display: flex !important;
-  width: 100% !important;
-  box-sizing: border-box !important;
-  gap: 8px !important;
-  margin-top: 12px !important;
-  padding-top: 6px !important;
-  flex-wrap: wrap !important;
-  align-items: center !important;
-}
-
-:dir(ltr) .modal-button-container,
-:dir(ltr) .modal-footer,
-:dir(ltr) .modal-actions,
-:dir(ltr) .modal-buttons {
-  justify-content: flex-end !important;
-}
-
-:dir(rtl) .modal-button-container,
-:dir(rtl) .modal-footer,
-:dir(rtl) .modal-actions,
-:dir(rtl) .modal-buttons {
-  justify-content: flex-start !important;
-}
-
-.modal-button-container button,
-.modal-footer button,
-.modal-actions button,
-.modal-buttons button {
-  min-width: 84px !important;
-  padding: 6px 10px !important;
-  white-space: nowrap !important;
-  align-self: center !important;
-}
-
-body.color-master-rtl .color-master-modal .modal-content h3,
-body.color-master-rtl .color-master-modal .modal-content p,
-body.color-master-rtl
-  .color-master-modal
-  .setting-item
-  .setting-item-description {
-  direction: rtl !important;
-  unicode-bidi: isolate !important;
-  text-align: right !important;
-}
-
-body.color-master-rtl .color-master-modal .modal-content {
-  direction: rtl;
-}
-
-body.color-master-rtl .color-master-modal .modal-content h3,
-body.color-master-rtl .color-master-modal .modal-content p {
-  text-align: right;
-}
-
-/* ---  Notification Rules Window Formats --- */
-
-.cm-rules-modal .setting-item {
-  border: none;
-}
-
-.cm-rules-container {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-top: 16px;
-  border-top: 1px solid var(--background-modifier-border);
-  padding-top: 16px;
-}
-
-.cm-rule-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px;
-  border-radius: 6px;
-  background-color: var(--background-secondary);
-}
-
-.cm-rule-item .text-input {
-  flex-grow: 1;
-}
-
-.cm-regex-container {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: var(--font-ui-smaller);
-  color: var(--text-muted);
 }
 
 /* ===== Color Master: Base Notice Styling ===== */
@@ -1154,8 +980,6 @@ body.color-master-rtl .color-master-modal .modal-content p {
   opacity: 1;
 }
 
-/* ==================================================== */
-
 /* Ensure official variables apply in editor & preview */
 
 /* Inline code */
@@ -1338,12 +1162,452 @@ body.color-master-rtl .color-master-modal .modal-content p {
   }
 }
 
-/* ==================================================== */
-
 /* --- Color Master: Blockquote Background Support --- */
 .markdown-preview-view blockquote,
 .cm-s-obsidian span.cm-quote {
   background-color: var(--blockquote-bg) !important;
 }
 
-/* ==================================================== */
+/* --- Variables to control the size of the clip list --- */
+:root {
+  --cm-snippet-row-min-height: 40px;
+  --cm-snippet-toggle-scale: 0.85;
+  --cm-snippet-icon-size: 18px;
+  --cm-snippet-drag-area-spacing: 4px;
+  --cm-snippet-handle-vertical-nudge: 2px;
+}
+/* -------------------------------------------------- */
+
+/* --- Final formatting improvements to the Snippets and Rules lists --- */
+
+.cm-rule-item {
+  align-items: center !important;
+}
+
+.color-master-settings-tab .cm-snippet-item.setting-item {
+  align-items: center !important;
+  min-height: var(--cm-snippet-row-min-height);
+  padding-top: 4px !important;
+  padding-bottom: 4px !important;
+  transition: transform 0.16s ease;
+  gap: 4px !important;
+}
+
+.cm-snippet-item .setting-item-info {
+  display: flex;
+  align-items: center;
+}
+
+/* Snippet specific edit to add space to handle */
+
+.cm-snippet-item {
+  padding-left: 10px !important;
+}
+
+/* --- (Modified) Control the size of the icons and the activation button --- */
+
+.cm-snippet-item .checkbox-container {
+  transform: scale(var(--cm-snippet-toggle-scale));
+}
+.cm-snippet-item .setting-item-control button .svg-icon {
+  width: var(--cm-snippet-icon-size);
+  height: var(--cm-snippet-icon-size);
+}
+/* ------------------------------------------------- */
+
+/* Make the background of icon buttons transparent and consistent */
+.cm-snippet-item .setting-item-control button {
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+  color: var(--text-muted);
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  width: 28px;
+}
+
+.cm-snippet-item .setting-item-control button:hover {
+  background-color: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+/* Drag handle container formats (for clippings) */
+.cm-snippet-drag-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: var(--cm-snippet-drag-area-spacing);
+}
+
+/* Vertical line layout */
+.cm-snippet-divider {
+  color: var(--background-modifier-border);
+  font-size: 16px;
+  opacity: 0.8;
+}
+
+/* Serial Number Format (for Clips) */
+.cm-snippet-order-number {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  width: auto;
+  padding-left: 6px;
+  text-align: center;
+}
+
+/* Drag icon format (for clippings) */
+.cm-snippet-drag-handle {
+  cursor: grab;
+  color: var(--text-faint);
+  opacity: 0.7;
+  position: relative;
+  top: var(--cm-snippet-handle-vertical-nudge);
+}
+.cm-snippet-drag-handle:hover {
+  opacity: 1;
+  color: var(--text-normal);
+}
+
+/* Format the "ghost" element while dragging (for clippings) */
+.cm-snippet-ghost {
+  opacity: 0.75;
+  transform: scale(0.99);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+  transition: transform 0.12s ease;
+}
+
+/* To remove the white background while dragging the clip */
+.cm-snippet-item.cm-snippet-dragged {
+  background-color: var(--background-secondary) !important;
+}
+
+/* --- Notification Rules Window Fixes --- */
+.cm-rule-item .cm-rule-actions {
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+}
+.cm-rule-item .cm-rule-input-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+/* --- Other formats for clippings --- */
+.cm-snippets-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  margin-bottom: 16px;
+}
+.cm-snippets-header h3 {
+  margin: 0;
+  white-space: nowrap;
+}
+.cm-snippets-header .setting-item.cm-snippets-add-button {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+.cm-snippets-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.cm-snippets-empty-state {
+  color: var(--text-muted);
+  font-style: italic;
+  padding: 10px;
+  text-align: center;
+}
+
+/* ======================================================= */
+
+.cm-snippet-item .setting-item-control button,
+.cm-snippet-item .setting-item-control button .svg-icon {
+  transition: all 0.2s ease-in-out;
+}
+
+.cm-snippet-item .setting-item-control button.is-success {
+  color: #00ff08;
+}
+
+.cm-snippet-item .setting-item-control button.is-success .svg-icon {
+  transform: scale(1.2);
+}
+
+.cm-snippet-item .setting-item-info {
+  flex: 1;
+  min-width: 0;
+  margin-right: 10px;
+}
+
+.cm-snippet-item .setting-item-control {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ======================================================= */
+
+.cm-add-variable-setting.setting-item {
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.color-master-settings-tab > hr {
+  border: none;
+  height: 1px;
+  background-color: var(--background-modifier-border);
+  margin: -1px 0px;
+}
+
+/* ======================================================= */
+/* --- Fixed some RTL support bugs in new languages. --- */
+/* ======================================================= */
+
+.modal-container:has(.color-master-settings-tab[dir="rtl"]) .modal,
+.modal-container:has(.color-master-modal[dir="rtl"]) .modal {
+  direction: rtl;
+}
+
+[dir="rtl"] .modal-content h3,
+[dir="rtl"] .modal-content p,
+[dir="rtl"] .modal-content label,
+[dir="rtl"] .setting-item-name,
+[dir="rtl"] .setting-item-description {
+  text-align: right !important;
+}
+
+[dir="rtl"] .modal-content .setting-item {
+  flex-direction: row-reverse !important;
+}
+
+[dir="rtl"] .modal-button-container {
+  flex-direction: row-reverse !important;
+  justify-content: flex-end !important;
+}
+
+[dir="rtl"] .color-master-text-input {
+  margin-right: 8px;
+  margin-left: 0;
+}
+/* ======= Robust LTR/RTL fix for Color Master (place at END of styles.css) ======= */
+
+.color-master-modal,
+.color-master-modal .modal-content,
+.cm-plugin-modal,
+.cm-modal {
+  display: block;
+  box-sizing: border-box;
+}
+
+.color-master-modal .setting-item:not(.cm-hidden),
+.cm-plugin-modal .setting-item:not(.cm-hidden),
+.modal-content .setting-item:not(.cm-hidden),
+.modal-content .setting-row:not(.cm-hidden) {
+  display: flex !important;
+  width: 100% !important;
+  align-items: center !important;
+  gap: 10px !important;
+  margin-bottom: 0px !important;
+  box-sizing: border-box !important;
+  min-width: 0 !important;
+}
+
+:dir(ltr) .color-master-modal .setting-item,
+:dir(ltr) .cm-plugin-modal .setting-item {
+  flex-direction: row !important;
+}
+:dir(ltr) .color-master-modal .setting-item > .setting-label,
+:dir(ltr) .cm-plugin-modal .setting-item > .setting-label {
+  order: 1 !important;
+}
+:dir(ltr) .color-master-modal .setting-item > .setting-item-control,
+:dir(ltr) .cm-plugin-modal .setting-item > .setting-item-control {
+  order: 2 !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+}
+
+:dir(rtl) .color-master-modal .setting-item,
+:dir(rtl) .cm-plugin-modal .setting-item {
+  flex-direction: row !important;
+}
+:dir(rtl) .color-master-modal .setting-item > .setting-label,
+:dir(rtl) .cm-plugin-modal .setting-item > .setting-label {
+  order: 2 !important;
+}
+:dir(rtl) .color-master-modal .setting-item > .setting-item-control,
+:dir(rtl) .cm-plugin-modal .setting-item > .setting-item-control {
+  order: 1 !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+}
+
+.color-master-modal .modal-content h3,
+.color-master-modal .modal-content p,
+.color-master-modal .modal-content label,
+.color-master-modal .setting-item .setting-item-description,
+.cm-plugin-modal .modal-content h3,
+.cm-plugin-modal .modal-content p {
+  unicode-bidi: isolate !important;
+}
+
+:dir(rtl) .color-master-modal .modal-content h3,
+:dir(rtl) .color-master-modal .modal-content p,
+:dir(rtl) .color-master-modal .modal-content label,
+:dir(rtl) .color-master-modal .setting-item .setting-item-description {
+  direction: rtl !important;
+  text-align: right !important;
+}
+
+:dir(ltr) .color-master-modal .modal-content h3,
+:dir(ltr) .color-master-modal .modal-content p,
+:dir(ltr) .color-master-modal .modal-content label,
+:dir(ltr) .color-master-modal .setting-item .setting-item-description {
+  direction: ltr !important;
+  text-align: left !important;
+}
+
+.color-master-modal .modal-button-container,
+.cm-plugin-modal .modal-button-container,
+.modal-button-container,
+.modal-footer,
+.modal-actions,
+.modal-buttons {
+  display: flex !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  gap: 8px !important;
+  margin-top: 12px !important;
+  padding-top: 6px !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+}
+
+:dir(ltr) .modal-button-container,
+:dir(ltr) .modal-footer,
+:dir(ltr) .modal-actions,
+:dir(ltr) .modal-buttons {
+  justify-content: flex-end !important;
+}
+
+:dir(rtl) .modal-button-container,
+:dir(rtl) .modal-footer,
+:dir(rtl) .modal-actions,
+:dir(rtl) .modal-buttons {
+  justify-content: flex-start !important;
+}
+
+.modal-button-container button,
+.modal-footer button,
+.modal-actions button,
+.modal-buttons button {
+  min-width: 84px !important;
+  padding: 6px 10px !important;
+  white-space: nowrap !important;
+  align-self: center !important;
+}
+
+body.color-master-rtl .color-master-modal .modal-content h3,
+body.color-master-rtl .color-master-modal .modal-content p,
+body.color-master-rtl
+  .color-master-modal
+  .setting-item
+  .setting-item-description {
+  direction: rtl !important;
+  unicode-bidi: isolate !important;
+  text-align: right !important;
+}
+
+body.color-master-rtl .color-master-modal .modal-content {
+  direction: rtl;
+}
+
+body.color-master-rtl .color-master-modal .modal-content h3,
+body.color-master-rtl .color-master-modal .modal-content p {
+  text-align: right;
+}
+
+/* ---  Notification Rules Window Formats --- */
+
+.cm-rules-modal .setting-item {
+  border: none;
+}
+
+.cm-rules-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+  border-top: 1px solid var(--background-modifier-border);
+  padding-top: 16px;
+}
+
+.cm-rule-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border-radius: 6px;
+  background-color: var(--background-secondary);
+}
+
+.cm-rule-item .text-input {
+  flex-grow: 1;
+}
+
+.cm-regex-container {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--font-ui-smaller);
+  color: var(--text-muted);
+}
+
+/* Corrected the interface layout for the LTR language in Obsidian Arabic. */
+
+.color-master-settings-tab[dir="ltr"] {
+  direction: ltr !important;
+}
+
+.color-master-settings-tab[dir="ltr"] .setting-item {
+  flex-direction: row !important;
+}
+
+.color-master-settings-tab[dir="ltr"] h2,
+.color-master-settings-tab[dir="ltr"] h3,
+.color-master-settings-tab[dir="ltr"] .setting-item-name,
+.color-master-settings-tab[dir="ltr"] .setting-item-description {
+  text-align: left !important;
+}
+
+.color-master-settings-tab[dir="ltr"] .setting-item-info {
+  margin-right: 10px !important;
+  margin-left: 0 !important;
+}
+
+.color-master-settings-tab[dir="ltr"] .cm-search-container,
+.color-master-settings-tab[dir="ltr"] .cm-profile-actions,
+.color-master-settings-tab[dir="ltr"] .cm-snippets-header {
+  flex-direction: row !important;
+}
+
+.color-master-settings-tab[dir="ltr"] .cm-search-icon {
+  left: 10px !important;
+  right: auto !important;
+}
+
+.color-master-settings-tab[dir="ltr"] .cm-search-input {
+  padding: 8px 12px 8px 38px !important;
+}
+
+.color-master-settings-tab[dir="ltr"] .cm-accessibility-checker {
+  margin-left: 10px !important;
+  margin-right: 0 !important;
+}
