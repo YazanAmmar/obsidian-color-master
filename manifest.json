@@ -4,7 +4,7 @@
   "version": "1.0.7",
   "minAppVersion": "1.5.0",
   "description": "Full control of Obsidian color CSS variables with profiles, import/export, bilingual UI, and Force Mode to override themes.",
-  "author": "YazanAmmar",
+  "author": "Yazan Ammar",
   "authorUrl": "https://github.com/YazanAmmar",
   "isDesktopOnly": false
 }
