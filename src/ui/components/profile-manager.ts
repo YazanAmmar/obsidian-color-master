@@ -26,9 +26,10 @@ export function drawProfileManager(
   );
   const isCssProfile = activeProfile?.isCssProfile;
 
-  new Setting(containerEl)
+  const profileSetting = new Setting(containerEl)
     .setName(t("ACTIVE_PROFILE"))
     .setDesc(t("ACTIVE_PROFILE_DESC"))
+    .setClass("cm-profile-manager-controls")
     .addDropdown((dropdown) => {
       for (const profileName in plugin.settings.profiles) {
         let displayName = profileName;
@@ -40,7 +41,6 @@ export function drawProfileManager(
       dropdown.setValue(activeProfileName);
       dropdown.onChange(async (value) => {
         plugin.removeInjectedCustomCss();
-
         plugin.settings.activeProfile = value;
         await plugin.saveSettings();
         settingTab.display();
@@ -98,7 +98,10 @@ export function drawProfileManager(
       } else {
         button.buttonEl.style.display = "none";
       }
+
+      button.buttonEl.classList.add("cm-control-button");
     })
+
     .addButton((button) => {
       settingTab.pinBtn = button;
       button
@@ -109,12 +112,14 @@ export function drawProfileManager(
           new Notice(t("NOTICE_PROFILE_PINNED"));
           settingTab._updatePinButtons();
         });
+      button.buttonEl.classList.add("cm-control-button");
     })
     .addButton((button) => {
       settingTab.resetPinBtn = button;
       button
         .setIcon("reset")
         .setTooltip(t("TOOLTIP_RESET_TO_PINNED"))
+
         .onClick(() => {
           const name = plugin.settings.activeProfile;
           new ConfirmationModal(
@@ -130,6 +135,7 @@ export function drawProfileManager(
             { buttonText: t("RESET_BUTTON"), buttonClass: "mod-cta" }
           ).open();
         });
+      button.buttonEl.classList.add("cm-control-button");
     })
     .addButton((button) => {
       button.setButtonText(t("NEW_BUTTON")).onClick(() => {
@@ -159,11 +165,10 @@ export function drawProfileManager(
           }
         }).open();
       });
+      button.buttonEl.classList.add("cm-control-button");
     })
     .addButton((button) => {
       button.setButtonText(t("DELETE_BUTTON")).onClick(() => {
-        plugin.removeInjectedCustomCss();
-
         if (Object.keys(plugin.settings.profiles).length <= 1) {
           new Notice(t("CANNOT_DELETE_LAST_PROFILE"));
           return;
@@ -178,6 +183,7 @@ export function drawProfileManager(
           t("DELETE_PROFILE_TITLE"),
           message,
           () => {
+            plugin.removeInjectedCustomCss();
             delete plugin.settings.profiles[plugin.settings.activeProfile];
             plugin.settings.activeProfile = Object.keys(
               plugin.settings.profiles
@@ -188,7 +194,9 @@ export function drawProfileManager(
           }
         ).open();
       });
+      button.buttonEl.classList.add("cm-control-button");
     });
 
+  profileSetting.settingEl.classList.add("cm-active-profile-controls");
   settingTab._updatePinButtons();
 }

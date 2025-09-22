@@ -32,10 +32,9 @@ export class ProfileJsonImportModal extends Modal {
 
   onOpen() {
     const lang = this.plugin.settings.language;
-    this.modalEl.setAttribute(
-      "dir",
-      lang === "ar" || lang === "fa" ? "rtl" : "ltr"
-    );
+    const isRTL =
+      (lang === "ar" || lang === "fa") && this.plugin.settings.useRtlLayout;
+    this.modalEl.setAttribute("dir", isRTL ? "rtl" : "ltr");
 
     const { contentEl } = this;
     contentEl.empty();
@@ -235,10 +234,9 @@ export class NewProfileModal extends Modal {
 
   onOpen() {
     const lang = this.plugin.settings.language;
-    this.modalEl.setAttribute(
-      "dir",
-      lang === "ar" || lang === "fa" ? "rtl" : "ltr"
-    );
+    const isRTL =
+      (lang === "ar" || lang === "fa") && this.plugin.settings.useRtlLayout;
+    this.modalEl.setAttribute("dir", isRTL ? "rtl" : "ltr");
 
     const { contentEl } = this;
     contentEl.empty();
@@ -337,10 +335,9 @@ export class ConfirmationModal extends Modal {
 
   onOpen() {
     const lang = this.plugin.settings.language;
-    this.modalEl.setAttribute(
-      "dir",
-      lang === "ar" || lang === "fa" ? "rtl" : "ltr"
-    );
+    const isRTL =
+      (lang === "ar" || lang === "fa") && this.plugin.settings.useRtlLayout;
+    this.modalEl.setAttribute("dir", isRTL ? "rtl" : "ltr");
 
     const { contentEl } = this;
     contentEl.empty();
@@ -375,19 +372,18 @@ export class ConfirmationModal extends Modal {
 export class PasteCssModal extends Modal {
   plugin: ColorMaster;
   settingTab: ColorMasterSettingTab;
-  existingSnippet: {
+  existingProfileData: {
     name: string;
     css: string;
     id?: string;
     isProfile?: boolean;
   } | null;
   isEditing: boolean;
-  saveType: "Profile" | "Snippet";
   modalTitleEl: HTMLHeadingElement;
   nameSetting: Setting;
   nameInput: TextComponent;
   cssTextarea: HTMLTextAreaElement;
-  snippetName: string;
+  profileName: string;
 
   _debounce(func: (...args: any[]) => void, delay: number) {
     let timeout: number;
@@ -401,40 +397,20 @@ export class PasteCssModal extends Modal {
     app: App,
     plugin: ColorMaster,
     settingTab: ColorMasterSettingTab,
-    existingSnippet: {
+    existingProfileData: {
       name: string;
       css: string;
       id?: string;
       isProfile?: boolean;
-    } | null = null,
-    defaultSaveType: "Profile" | "Snippet" = "Profile"
+    } | null = null
   ) {
     super(app);
     this.modalEl.classList.add("color-master-modal");
     this.plugin = plugin;
     this.settingTab = settingTab;
-    this.existingSnippet = existingSnippet;
-    this.isEditing = !!existingSnippet;
-    this.saveType = defaultSaveType;
-    this.snippetName = existingSnippet ? existingSnippet.name : "";
-  }
-
-  _updateUIForSaveType(saveType: "Profile" | "Snippet") {
-    if (this.isEditing) return;
-
-    const isSnippet = saveType === "Snippet";
-    const titleText = isSnippet
-      ? t("CREATE_SNIPPET_TITLE")
-      : t("IMPORT_PROFILE_TITLE");
-    const nameLabel = isSnippet
-      ? t("SNIPPET_NAME_LABEL")
-      : t("PROFILE_NAME_LABEL");
-    const namePlaceholder = isSnippet
-      ? t("SNIPPET_NAME_PLACEHOLDER")
-      : t("PROFILE_NAME_PLACEHOLDER");
-    if (this.modalTitleEl) this.modalTitleEl.setText(titleText);
-    if (this.nameSetting) this.nameSetting.setName(nameLabel);
-    if (this.nameInput) this.nameInput.setPlaceholder(namePlaceholder);
+    this.existingProfileData = existingProfileData;
+    this.isEditing = !!existingProfileData;
+    this.profileName = existingProfileData ? existingProfileData.name : "";
   }
 
   _handleFileImport() {
@@ -456,102 +432,40 @@ export class PasteCssModal extends Modal {
 
   onOpen() {
     const lang = this.plugin.settings.language;
-    this.modalEl.setAttribute(
-      "dir",
-      lang === "ar" || lang === "fa" ? "rtl" : "ltr"
-    );
+    const isRTL =
+      (lang === "ar" || lang === "fa") && this.plugin.settings.useRtlLayout;
+    this.modalEl.setAttribute("dir", isRTL ? "rtl" : "ltr");
 
     const { contentEl } = this;
     contentEl.empty();
 
     const titleContainer = contentEl.createDiv({ cls: "cm-title-container" });
 
-    let titleText = t("PASTE_CSS_MODAL_TITLE");
-    if (this.isEditing && this.existingSnippet) {
-      titleText = this.existingSnippet.isProfile
-        ? t("EDIT_PROFILE_TITLE")
-        : t("EDIT_SNIPPET_TITLE");
-    }
+    const titleText = this.isEditing
+      ? t("EDIT_PROFILE_TITLE")
+      : t("IMPORT_PROFILE_TITLE");
 
     this.modalTitleEl = titleContainer.createEl("h3", { text: titleText });
+
     contentEl.createEl("p", { text: t("PASTE_CSS_MODAL_NOTE") });
 
-    let saveType: "Profile" | "Snippet" = this.saveType || "Profile";
-
-    if (!this.isEditing) {
-      new Setting(contentEl)
-        .setName(t("SAVE_AS_TYPE"))
-        .setClass("cm-segmented-control-setting")
-        .then((setting) => {
-          const profileButton = setting.controlEl.createEl("button", {
-            text: t("SAVE_AS_PROFILE"),
-          });
-          const snippetButton = setting.controlEl.createEl("button", {
-            text: t("SAVE_AS_SNIPPET"),
-          });
-
-          setting.controlEl.classList.add("cm-segmented-control");
-          const updateActiveButton = (activeType: "Profile" | "Snippet") => {
-            profileButton.classList.toggle(
-              "is-active",
-              activeType === "Profile"
-            );
-            snippetButton.classList.toggle(
-              "is-active",
-              activeType === "Snippet"
-            );
-          };
-
-          profileButton.addEventListener("click", () => {
-            saveType = "Profile";
-            updateActiveButton(saveType);
-            this._updateUIForSaveType(saveType);
-          });
-
-          snippetButton.addEventListener("click", () => {
-            saveType = "Snippet";
-            updateActiveButton(saveType);
-            this._updateUIForSaveType(saveType);
-          });
-
-          updateActiveButton(saveType);
-        });
-    }
-
     let nameLabelText = t("PROFILE_NAME_LABEL");
-    if (
-      this.isEditing &&
-      this.existingSnippet &&
-      !this.existingSnippet.isProfile
-    ) {
-      nameLabelText = t("SNIPPET_NAME_LABEL");
-    }
 
     this.nameSetting = new Setting(contentEl)
       .setName(nameLabelText)
       .addText((text) => {
         this.nameInput = text;
         let placeholderText = t("PROFILE_NAME_PLACEHOLDER");
-        if (this.isEditing && this.existingSnippet) {
-          placeholderText = this.existingSnippet.isProfile
-            ? t("PROFILE_NAME_PLACEHOLDER")
-            : t("SNIPPET_NAME_PLACEHOLDER");
-        } else if (!this.isEditing) {
-          placeholderText =
-            this.saveType === "Snippet"
-              ? t("SNIPPET_NAME_PLACEHOLDER")
-              : t("PROFILE_NAME_PLACEHOLDER");
-        }
 
         text
           .setValue(
-            this.isEditing && this.existingSnippet
-              ? this.existingSnippet.name
+            this.isEditing && this.existingProfileData
+              ? this.existingProfileData.name
               : ""
           )
           .setPlaceholder(placeholderText)
           .onChange((value) => {
-            this.snippetName = value.trim();
+            this.profileName = value.trim();
           });
       });
 
@@ -570,24 +484,20 @@ export class PasteCssModal extends Modal {
     });
     this.cssTextarea.style.width = "100%";
 
-    // Specify a unique identifier for the history (profile name or snippet id)
     const historyId =
-      this.isEditing && this.existingSnippet
-        ? this.existingSnippet.isProfile
-          ? `profile-${this.existingSnippet.name}`
-          : this.existingSnippet.id
+      this.isEditing && this.existingProfileData
+        ? `profile-${this.existingProfileData.name}`
         : null;
 
     const initialCss =
-      this.isEditing && this.existingSnippet ? this.existingSnippet.css : "";
+      this.isEditing && this.existingProfileData
+        ? this.existingProfileData.css
+        : "";
 
-    // If there is an ID, it means we are modifying something that exists.
     if (historyId) {
-      // Get the latest copy from memory, or use the saved copy if there is nothing in memory
       const lastState = this.plugin.cssHistory[historyId]?.undoStack.last();
       this.cssTextarea.value = lastState ?? initialCss;
 
-      // If it was previously in a register, add the initial state to memory
       if (
         !this.plugin.cssHistory[historyId] ||
         this.plugin.cssHistory[historyId].undoStack.length === 0
@@ -600,16 +510,14 @@ export class PasteCssModal extends Modal {
 
     const debouncedPushHistory = this._debounce((id, value) => {
       this.plugin.pushCssHistory(id, value);
-    }, 500); // Wait 500ms after writing stops
+    }, 500);
 
-    // Observe the writing inside the box
     this.cssTextarea.addEventListener("input", () => {
       if (historyId) {
         debouncedPushHistory(historyId, this.cssTextarea.value);
       }
     });
 
-    // Monitor keyboard shortcuts
     this.cssTextarea.addEventListener("keydown", (e) => {
       if (historyId && e.ctrlKey) {
         if (e.key.toLowerCase() === "z") {
@@ -619,7 +527,7 @@ export class PasteCssModal extends Modal {
             this.cssTextarea.value = prevState;
           }
         } else if (e.key.toLowerCase() === "y") {
-          e.preventDefault(); // Prevent default browser behavior
+          e.preventDefault();
           const nextState = this.plugin.redoCssHistory(historyId);
           if (nextState !== null) {
             this.cssTextarea.value = nextState;
@@ -641,13 +549,11 @@ export class PasteCssModal extends Modal {
         text: this.isEditing ? t("UPDATE_BUTTON") : t("CREATE_BUTTON"),
         cls: "mod-cta",
       })
-      .addEventListener("click", () => this.handleSave(saveType));
-
-    this._updateUIForSaveType(saveType);
+      .addEventListener("click", () => this.handleSave());
   }
 
-  handleSave(saveType: "Profile" | "Snippet") {
-    if (this.isEditing && !this.existingSnippet) {
+  handleSave() {
+    if (this.isEditing && !this.existingProfileData) {
       console.error(
         "Attempted to save in editing mode without an existing snippet."
       );
@@ -655,13 +561,263 @@ export class PasteCssModal extends Modal {
     }
 
     const cssText = this.cssTextarea.value.trim();
-    let name = (this.snippetName || "").trim();
+    let name = (this.profileName || "").trim();
 
     if (!name) {
       new Notice(t("EMPTY_PROFILE_NAME_NOTICE"));
       return;
     }
-    if (!cssText && saveType === "Snippet") {
+
+    const activeProfile =
+      this.plugin.settings.profiles[this.plugin.settings.activeProfile];
+    if (!activeProfile) return;
+
+    const isNameTaken = Object.keys(this.plugin.settings.profiles || {}).some(
+      (profileName) =>
+        profileName.toLowerCase() === name.toLowerCase() &&
+        (!this.isEditing ||
+          (this.existingProfileData &&
+            this.existingProfileData.name.toLowerCase() !== name.toLowerCase()))
+    );
+    if (isNameTaken) {
+      new Notice(t("NOTICE_PROFILE_NAME_EXISTS", name));
+      return;
+    }
+
+    if (this.isEditing && this.existingProfileData) {
+      // Logic for editing a CSS-based profile
+      const oldName = this.existingProfileData.name;
+      const oldProfileData = this.plugin.settings.profiles[oldName] || {};
+
+      if (oldName !== name) {
+        if (this.plugin.settings.pinnedSnapshots[oldName]) {
+          this.plugin.settings.pinnedSnapshots[name] =
+            this.plugin.settings.pinnedSnapshots[oldName];
+          delete this.plugin.settings.pinnedSnapshots[oldName];
+        }
+
+        delete this.plugin.settings.profiles[oldName];
+      }
+      this.plugin.settings.profiles[name] = {
+        ...oldProfileData,
+        isCssProfile: true,
+        customCss: cssText,
+      };
+      this.plugin.settings.activeProfile = name;
+      new Notice(t("NOTICE_PROFILE_UPDATED", name));
+    } else {
+      // Logic for creating a new CSS-based profile
+      this.plugin.settings.profiles[name] = {
+        vars: {},
+        themeType: "auto",
+        isCssProfile: true,
+        customCss: cssText,
+        snippets: [],
+      };
+      this.plugin.settings.activeProfile = name;
+      new Notice(t("NOTICE_PROFILE_CREATED_FROM_CSS", name));
+    }
+
+    this.plugin.saveSettings().then(() => {
+      this.plugin.applyCssSnippets();
+      this.settingTab.display();
+      this.close();
+    });
+  }
+
+  onClose() {
+    this.contentEl.empty();
+  }
+}
+
+export class SnippetCssModal extends Modal {
+  plugin: ColorMaster;
+  settingTab: ColorMasterSettingTab;
+  existingSnippet: Snippet | null;
+  isEditing: boolean;
+  modalTitleEl: HTMLHeadingElement;
+  nameSetting: Setting;
+  nameInput: TextComponent;
+  cssTextarea: TextAreaComponent;
+  snippetName: string;
+  isGlobalSnippet: boolean;
+
+  _debounce(func: (...args: any[]) => void, delay: number) {
+    let timeout: number;
+    return (...args: any[]) => {
+      clearTimeout(timeout);
+      timeout = window.setTimeout(() => func.apply(this, args), delay);
+    };
+  }
+
+  constructor(
+    app: App,
+    plugin: ColorMaster,
+    settingTab: ColorMasterSettingTab,
+    existingSnippet: Snippet | null = null
+  ) {
+    super(app);
+    this.modalEl.classList.add("color-master-modal");
+    this.plugin = plugin;
+    this.settingTab = settingTab;
+    this.existingSnippet = existingSnippet;
+    this.isEditing = !!existingSnippet;
+    this.snippetName = existingSnippet ? existingSnippet.name : "";
+    this.isGlobalSnippet = existingSnippet ? !!existingSnippet.isGlobal : false;
+  }
+
+  _handleFileImport() {
+    const input = createEl("input", {
+      type: "file",
+      attr: { accept: ".css" },
+    });
+    input.onchange = () => {
+      (async () => {
+        if (!input.files || input.files.length === 0) return;
+        const file = input.files[0];
+        const content = await file.text();
+        this.cssTextarea.inputEl.value = content;
+        new Notice(t("NOTICE_FILE_LOADED", file.name));
+      })();
+    };
+    input.click();
+  }
+
+  onOpen() {
+    const lang = this.plugin.settings.language;
+    const isRTL =
+      (lang === "ar" || lang === "fa") && this.plugin.settings.useRtlLayout;
+    this.modalEl.setAttribute("dir", isRTL ? "rtl" : "ltr");
+
+    const { contentEl } = this;
+    contentEl.empty();
+
+    const titleContainer = contentEl.createDiv({ cls: "cm-title-container" });
+
+    let titleText = this.isEditing
+      ? t("EDIT_SNIPPET_TITLE")
+      : t("CREATE_SNIPPET_TITLE");
+
+    this.modalTitleEl = titleContainer.createEl("h3", { text: titleText });
+    contentEl.createEl("p", { text: t("PASTE_CSS_MODAL_NOTE") });
+
+    const nameLabelText = t("SNIPPET_NAME_LABEL");
+
+    this.nameSetting = new Setting(contentEl)
+      .setName(nameLabelText)
+      .addText((text) => {
+        this.nameInput = text;
+        let placeholderText = t("SNIPPET_NAME_PLACEHOLDER");
+
+        text
+          .setValue(
+            this.isEditing && this.existingSnippet
+              ? this.existingSnippet.name
+              : ""
+          )
+          .setPlaceholder(placeholderText)
+          .onChange((value) => {
+            this.snippetName = value.trim();
+          });
+      });
+
+    new Setting(contentEl)
+      .setName(t("SAVE_AS_GLOBAL_SNIPPET_NAME"))
+      .setDesc(t("SAVE_AS_GLOBAL_SNIPPET_DESC"))
+      .addToggle((toggle) => {
+        toggle.setValue(this.isGlobalSnippet).onChange((value) => {
+          this.isGlobalSnippet = value;
+        });
+      });
+
+    new Setting(contentEl)
+      .setName(t("IMPORT_FROM_FILE"))
+      .setDesc(t("IMPORT_FROM_FILE_DESC"))
+      .addButton((button) => {
+        button.setButtonText(t("CHOOSE_FILE_BUTTON")).onClick(() => {
+          this._handleFileImport();
+        });
+      });
+
+    this.cssTextarea = new TextAreaComponent(contentEl);
+    this.cssTextarea.inputEl.classList.add("cm-search-input");
+    this.cssTextarea.inputEl.rows = 12;
+    this.cssTextarea.setPlaceholder(t("CSS_TEXTAREA_PLACEHOLDER"));
+    this.cssTextarea.inputEl.style.width = "100%";
+
+    const historyId =
+      this.isEditing && this.existingSnippet ? this.existingSnippet.id : null;
+
+    const initialCss =
+      this.isEditing && this.existingSnippet ? this.existingSnippet.css : "";
+
+    if (historyId) {
+      const lastState = this.plugin.cssHistory[historyId]?.undoStack.last();
+      this.cssTextarea.setValue(lastState ?? initialCss);
+
+      if (
+        !this.plugin.cssHistory[historyId] ||
+        this.plugin.cssHistory[historyId].undoStack.length === 0
+      ) {
+        this.plugin.pushCssHistory(historyId, initialCss);
+      }
+    } else {
+      this.cssTextarea.setValue(initialCss);
+    }
+
+    const debouncedPushHistory = this._debounce((id, value) => {
+      this.plugin.pushCssHistory(id, value);
+    }, 500);
+
+    this.cssTextarea.onChange((value: string) => {
+      if (historyId) {
+        debouncedPushHistory(historyId, value);
+      }
+    });
+
+    this.cssTextarea.inputEl.addEventListener("keydown", (e: KeyboardEvent) => {
+      if (historyId && e.ctrlKey) {
+        if (e.key.toLowerCase() === "z") {
+          e.preventDefault();
+          const prevState = this.plugin.undoCssHistory(historyId);
+          if (prevState !== null) {
+            this.cssTextarea.setValue(prevState);
+          }
+        } else if (e.key.toLowerCase() === "y") {
+          e.preventDefault();
+          const nextState = this.plugin.redoCssHistory(historyId);
+          if (nextState !== null) {
+            this.cssTextarea.setValue(nextState);
+          }
+        }
+      }
+    });
+    const buttonContainer = contentEl.createDiv({
+      cls: "modal-button-container",
+      attr: { style: "justify-content: flex-end;" },
+    });
+
+    buttonContainer
+      .createEl("button", { text: t("CANCEL_BUTTON") })
+      .addEventListener("click", () => this.close());
+
+    buttonContainer
+      .createEl("button", {
+        text: this.isEditing ? t("UPDATE_BUTTON") : t("CREATE_BUTTON"),
+        cls: "mod-cta",
+      })
+      .addEventListener("click", () => this.handleSave());
+  }
+
+  handleSave() {
+    const cssText = this.cssTextarea.getValue().trim();
+    const name = (this.snippetName || "").trim();
+
+    if (!name) {
+      new Notice(t("EMPTY_PROFILE_NAME_NOTICE"));
+      return;
+    }
+    if (!cssText) {
       new Notice(t("NOTICE_CSS_CONTENT_EMPTY"));
       return;
     }
@@ -670,90 +826,56 @@ export class PasteCssModal extends Modal {
       this.plugin.settings.profiles[this.plugin.settings.activeProfile];
     if (!activeProfile) return;
 
-    if (!Array.isArray(activeProfile.snippets)) {
-      activeProfile.snippets = [];
+    if (!Array.isArray(this.plugin.settings.globalSnippets)) {
+      this.plugin.settings.globalSnippets = [];
     }
-    const snippetsArray = activeProfile.snippets;
 
-    let isNameTaken = false;
-    if (saveType === "Snippet") {
-      isNameTaken = snippetsArray.some(
-        (s) =>
-          s.name.toLowerCase() === name.toLowerCase() &&
-          (!this.isEditing ||
-            (this.existingSnippet &&
-              this.existingSnippet.name.toLowerCase() !== name.toLowerCase()))
-      );
-      if (isNameTaken) {
-        new Notice(t("NOTICE_SNIPPET_NAME_EXISTS", name));
-        return;
-      }
-    } else {
-      isNameTaken = Object.keys(this.plugin.settings.profiles || {}).some(
-        (profileName) =>
-          profileName.toLowerCase() === name.toLowerCase() &&
-          (!this.isEditing ||
-            (this.existingSnippet &&
-              this.existingSnippet.name.toLowerCase() !== name.toLowerCase()))
-      );
-      if (isNameTaken) {
-        new Notice(t("NOTICE_PROFILE_NAME_EXISTS", name));
-        return;
-      }
+    const targetList = this.isGlobalSnippet
+      ? this.plugin.settings.globalSnippets
+      : activeProfile.snippets;
+
+    const isNameTaken = targetList.some(
+      (s) =>
+        s.name.toLowerCase() === name.toLowerCase() &&
+        (!this.isEditing ||
+          (this.existingSnippet && this.existingSnippet.id !== s.id))
+    );
+
+    if (isNameTaken) {
+      new Notice(t("NOTICE_SNIPPET_NAME_EXISTS", name));
+      return;
     }
 
     if (this.isEditing && this.existingSnippet) {
-      if (this.existingSnippet.isProfile) {
-        const oldName = this.existingSnippet.name;
-        const oldProfileData = this.plugin.settings.profiles[oldName] || {};
+      const originalIsGlobal = !!this.existingSnippet.isGlobal;
+      let listToSearch = originalIsGlobal
+        ? this.plugin.settings.globalSnippets
+        : activeProfile.snippets;
 
-        if (oldName !== name) {
-          if (this.plugin.settings.pinnedSnapshots[oldName]) {
-            this.plugin.settings.pinnedSnapshots[name] =
-              this.plugin.settings.pinnedSnapshots[oldName];
-            delete this.plugin.settings.pinnedSnapshots[oldName];
-          }
+      const snippetIndex = listToSearch.findIndex(
+        (s) => s.id === this.existingSnippet!.id
+      );
 
-          delete this.plugin.settings.profiles[oldName];
-        }
-        this.plugin.settings.profiles[name] = {
-          ...oldProfileData,
-          isCssProfile: true,
-          customCss: cssText,
-        };
-        this.plugin.settings.activeProfile = name;
-        new Notice(t("NOTICE_PROFILE_UPDATED", name));
-      } else {
-        const existing = snippetsArray.find(
-          (s) => s.id === this.existingSnippet!.id // Using non-null assertion here is safe due to the check
-        );
-        if (existing) {
-          existing.name = name;
-          existing.css = cssText;
-        }
+      if (snippetIndex > -1) {
+        const [snippetToUpdate] = listToSearch.splice(snippetIndex, 1);
+        snippetToUpdate.name = name;
+        snippetToUpdate.css = cssText;
+        snippetToUpdate.isGlobal = this.isGlobalSnippet;
+
+        targetList.push(snippetToUpdate);
         new Notice(t("NOTICE_SNIPPET_UPDATED", name));
       }
     } else {
-      if (saveType === "Snippet") {
-        snippetsArray.push({
-          id: `snippet-${Date.now()}`,
-          name: name,
-          css: cssText,
-          enabled: true,
-        });
-        new Notice(t("NOTICE_SNIPPET_CREATED", name));
-      } else {
-        this.plugin.settings.profiles[name] = {
-          vars: {},
-          themeType: "auto",
-          isCssProfile: true,
-          customCss: cssText,
-          snippets: [],
-        };
-        this.plugin.settings.activeProfile = name;
-        new Notice(t("NOTICE_PROFILE_CREATED_FROM_CSS", name));
-      }
+      targetList.push({
+        id: `snippet-${Date.now()}`,
+        name: name,
+        css: cssText,
+        enabled: true,
+        isGlobal: this.isGlobalSnippet,
+      });
+      new Notice(t("NOTICE_SNIPPET_CREATED", name));
     }
+
     this.plugin.saveSettings().then(() => {
       this.plugin.applyCssSnippets();
       this.settingTab.display();
@@ -802,10 +924,9 @@ export class NoticeRulesModal extends Modal {
 
   onOpen() {
     const lang = this.plugin.settings.language;
-    this.modalEl.setAttribute(
-      "dir",
-      lang === "ar" || lang === "fa" ? "rtl" : "ltr"
-    );
+    const isRTL =
+      (lang === "ar" || lang === "fa") && this.plugin.settings.useRtlLayout;
+    this.modalEl.setAttribute("dir", isRTL ? "rtl" : "ltr");
 
     const { contentEl } = this;
     contentEl.empty();
@@ -1231,10 +1352,9 @@ export class DuplicateProfileModal extends Modal {
 
   onOpen() {
     const lang = this.plugin.settings.language;
-    this.modalEl.setAttribute(
-      "dir",
-      lang === "ar" || lang === "fa" ? "rtl" : "ltr"
-    );
+    const isRTL =
+      (lang === "ar" || lang === "fa") && this.plugin.settings.useRtlLayout;
+    this.modalEl.setAttribute("dir", isRTL ? "rtl" : "ltr");
 
     const { contentEl } = this;
     contentEl.empty();
@@ -1333,10 +1453,9 @@ export class CustomVariableMetaModal extends Modal {
 
   onOpen() {
     const lang = this.plugin.settings.language;
-    this.modalEl.setAttribute(
-      "dir",
-      lang === "ar" || lang === "fa" ? "rtl" : "ltr"
-    );
+    const isRTL =
+      (lang === "ar" || lang === "fa") && this.plugin.settings.useRtlLayout;
+    this.modalEl.setAttribute("dir", isRTL ? "rtl" : "ltr");
 
     const { contentEl } = this;
     contentEl.empty();
@@ -1445,5 +1564,117 @@ export class CustomVariableMetaModal extends Modal {
 
   onClose() {
     this.contentEl.empty();
+  }
+}
+
+export class LanguageSettingsModal extends Modal {
+  plugin: ColorMaster;
+
+  constructor(app: App, plugin: ColorMaster) {
+    super(app);
+    this.plugin = plugin;
+  }
+
+  onOpen() {
+    this.modalEl.classList.add("color-master-modal");
+    const { contentEl } = this;
+    const lang = this.plugin.settings.language;
+    this.modalEl.setAttribute(
+      "dir",
+      (lang === "ar" || lang === "fa") && this.plugin.settings.useRtlLayout
+        ? "rtl"
+        : "ltr"
+    );
+
+    contentEl.empty();
+    contentEl.createEl("h3", { text: t("LANGUAGE_SETTINGS_TITLE") });
+
+    new Setting(contentEl)
+      .setName(t("RTL_LAYOUT_NAME"))
+      .setDesc(t("RTL_LAYOUT_DESC"))
+      .addToggle((toggle) => {
+        toggle
+          .setValue(this.plugin.settings.useRtlLayout)
+          .onChange(async (value) => {
+            this.plugin.settings.useRtlLayout = value;
+            await this.plugin.saveSettings();
+            // Refresh the main settings tab to reflect the change
+            this.plugin.settingTabInstance?.display();
+          });
+      });
+  }
+
+  onClose() {
+    const { contentEl } = this;
+    contentEl.empty();
+  }
+}
+
+export class IconizeSettingsModal extends Modal {
+  plugin: ColorMaster;
+
+  constructor(app: App, plugin: ColorMaster) {
+    super(app);
+    this.plugin = plugin;
+  }
+
+  onOpen() {
+    this.modalEl.classList.add("color-master-modal");
+    const { contentEl } = this;
+    const lang = this.plugin.settings.language;
+    this.modalEl.setAttribute(
+      "dir",
+      (lang === "ar" || lang === "fa") && this.plugin.settings.useRtlLayout
+        ? "rtl"
+        : "ltr"
+    );
+
+    contentEl.empty();
+    contentEl.createEl("h3", { text: t("ICONIZE_SETTINGS_MODAL_TITLE") });
+
+    new Setting(contentEl)
+      .setName(t("OVERRIDE_ICONIZE"))
+      .setDesc(t("OVERRIDE_ICONIZE_DESC"))
+      .addToggle((toggle) => {
+        toggle
+          .setValue(this.plugin.settings.overrideIconizeColors)
+          .onChange(async (value) => {
+            if (value) {
+              const iconizeIDs = ["obsidian-icon-folder", "iconize"];
+              const pluginManager = (this.app as any).plugins;
+              const isIconizeInstalled = iconizeIDs.some(
+                (id: string) => !!pluginManager.getPlugin(id)
+              );
+
+              if (!isIconizeInstalled) {
+                new Notice(t("ICONIZE_NOT_FOUND_NOTICE"));
+                toggle.setValue(false);
+                return;
+              }
+            }
+            this.plugin.settings.overrideIconizeColors = value;
+            await this.plugin.saveSettings();
+          });
+      });
+
+    new Setting(contentEl)
+      .setName(t("CLEANUP_INTERVAL_NAME"))
+      .setDesc(t("CLEANUP_INTERVAL_DESC"))
+      .addSlider((slider) => {
+        slider
+          .setLimits(1, 10, 1)
+          .setValue(this.plugin.settings.cleanupInterval)
+          .setDynamicTooltip()
+          .onChange(async (value) => {
+            this.plugin.settings.cleanupInterval = value;
+            await this.plugin.saveSettings();
+            this.plugin.resetIconizeWatcher();
+          });
+      });
+  }
+
+  onClose() {
+    const { contentEl } = this;
+    contentEl.empty();
   }
 }

@@ -1,6 +1,6 @@
 /*
  * Color Master - Obsidian Plugin
- * Version: 1.0.7
+ * Version: 1.0.8
  * Author: Yazan Ammar (GitHub : https://github.com/YazanAmmar )
  * Description: Provides a comprehensive UI to control all Obsidian CSS color variables directly,
  * removing the need for Force Mode and expanding customization options.
@@ -129,13 +129,19 @@ export default class ColorMaster extends Plugin {
     const activeProfile = this.settings.profiles[this.settings.activeProfile];
     if (!activeProfile) return;
 
-    const snippets = Array.isArray(activeProfile.snippets)
+    const globalSnippets = this.settings.globalSnippets || [];
+    const profileSnippets = Array.isArray(activeProfile.snippets)
       ? activeProfile.snippets
       : [];
 
-    const enabledCss = snippets
+    const allSnippets = [...globalSnippets, ...profileSnippets].filter(Boolean);
+
+    const enabledCss = allSnippets
       .filter((s) => s.enabled && s.css)
-      .map((s) => `/* Snippet: ${s.name} */\n${s.css}`)
+      .map(
+        (s) =>
+          `/* Snippet: ${s.name} ${s.isGlobal ? "(Global)" : ""} */\n${s.css}`
+      )
       .join("\n\n");
 
     if (enabledCss) {
@@ -265,7 +271,6 @@ export default class ColorMaster extends Plugin {
     await this.loadSettings();
     this.liveNoticeRules = null;
     this.liveNoticeRuleType = null;
-    // --- New code: for automatic language detection ---
     if (this.settings.language === "auto") {
       const obsidianLang = moment.locale();
       if (obsidianLang === "ar") {
@@ -292,8 +297,8 @@ export default class ColorMaster extends Plugin {
     });
 
     this.addCommand({
-      id: "cycle-color-profile",
-      name: "Cycle Color Master Profile",
+      id: "cycle-next-color-profile",
+      name: "Color Master: Cycle to next profile",
       callback: async () => {
         const names = Object.keys(this.settings.profiles || {});
         if (names.length === 0) {
@@ -308,6 +313,49 @@ export default class ColorMaster extends Plugin {
       },
     });
 
+    this.addCommand({
+      id: "cycle-previous-color-profile",
+      name: "Color Master: Cycle to previous profile",
+      callback: () => {
+        (async () => {
+          const names = Object.keys(this.settings.profiles || {});
+          if (names.length === 0) {
+            new Notice(t("NOTICE_NO_PROFILES_FOUND"));
+            return;
+          }
+          const currentIndex = names.indexOf(this.settings.activeProfile);
+          // This formula calculates the previous index, wrapping around from 0 to the end
+          const previousIndex =
+            (currentIndex - 1 + names.length) % names.length;
+          const previousProfile = names[previousIndex];
+
+          this.settings.activeProfile = previousProfile;
+          await this.saveSettings();
+          new Notice(t("NOTICE_ACTIVE_PROFILE_SWITCHED", previousProfile));
+        })();
+      },
+    });
+
+    this.addCommand({
+      id: "open-color-master-settings-tab",
+      name: "Color Master: Open settings tab",
+      callback: () => {
+        (this.app as any).setting.open();
+        (this.app as any).setting.openTabById(this.manifest.id);
+      },
+    });
+
+    // Add a ribbon icon to the left gutter
+    this.addRibbonIcon(
+      "paint-bucket",
+      "Color Master Settings",
+      (evt: MouseEvent) => {
+        // Open the settings tab when the icon is clicked
+        (this.app as any).setting.open();
+        (this.app as any).setting.openTabById(this.manifest.id);
+      }
+    );
+
     // Store a reference to the settings tab and add it
     this.settingTabInstance = new ColorMasterSettingTab(this.app, this);
     this.addSettingTab(this.settingTabInstance);
@@ -318,7 +366,6 @@ export default class ColorMaster extends Plugin {
 
       // Start the update engine
       this.startColorUpdateLoop();
-
       this.iconizeObserver = new MutationObserver(() => {
         if (
           this.settings.pluginEnabled &&
@@ -328,47 +375,64 @@ export default class ColorMaster extends Plugin {
         }
       });
 
-      this.iconizeObserver.observe(document.body, {
-        childList: true,
-        subtree: true,
-      });
+      this.noticeObserver = new MutationObserver((mutations) => {
+        if (!this.settings.pluginEnabled) return;
+        mutations.forEach((mutation) => {
+          mutation.addedNodes.forEach((node) => {
+            if (node.nodeType !== 1) return;
 
-      this.register(() => this.iconizeObserver.disconnect());
-    });
-    this.resetIconizeWatcher();
-    this.noticeObserver = new MutationObserver((mutations) => {
-      if (!this.settings.pluginEnabled) return;
-      mutations.forEach((mutation) => {
-        mutation.addedNodes.forEach((node) => {
-          if (node.nodeType !== 1) return;
-
-          if ((node as Element).matches(".notice, .toast")) {
-            this.processNotice(node as HTMLElement);
-          }
-          (node as Element)
-            .querySelectorAll(".notice, .toast")
-            .forEach(this.processNotice.bind(this));
+            if ((node as Element).matches(".notice, .toast")) {
+              this.processNotice(node as HTMLElement);
+            }
+            (node as Element)
+              .querySelectorAll(".notice, .toast")
+              .forEach(this.processNotice.bind(this));
+          });
         });
       });
-    });
 
-    this.noticeObserver.observe(document.body, {
-      childList: true,
-      subtree: true,
-    });
+      if (this.settings.pluginEnabled) {
+        this.enableObservers();
+      }
 
-    document
-      .querySelectorAll(".notice, .toast")
-      .forEach(this.processNotice.bind(this));
-    console.log("Color Master loaded with smart Iconize cleanup.");
+      this.register(() => this.disableObservers());
+    });
+    this.resetIconizeWatcher();
   }
 
   onunload() {
     if (this.noticeObserver) this.noticeObserver.disconnect();
+    if (this.iconizeObserver) this.iconizeObserver.disconnect();
     this.clearStyles();
     this.removeInjectedCustomCss();
     this.stopColorUpdateLoop();
-    console.log("Color Master v1.0.7 unloaded.");
+    console.log("Color Master v1.0.8 unloaded.");
+  }
+
+  public enableObservers(): void {
+    try {
+      this.iconizeObserver.observe(document.body, {
+        childList: true,
+        subtree: true,
+      });
+      this.noticeObserver.observe(document.body, {
+        childList: true,
+        subtree: true,
+      });
+      console.log("Color Master Observers: Enabled");
+    } catch (e) {
+      console.error("Color Master: Failed to enable observers", e);
+    }
+  }
+
+  public disableObservers(): void {
+    try {
+      this.iconizeObserver.disconnect();
+      this.noticeObserver.disconnect();
+      console.log("Color Master Observers: Disabled");
+    } catch (e) {
+      console.error("Color Master: Failed to disable observers", e);
+    }
   }
 
   async refreshOpenGraphViews() {
@@ -597,19 +661,7 @@ export default class ColorMaster extends Plugin {
       );
       await this.saveData(this.settings);
     }
-    // --- Migration logic for existing users ---
-    let settingsChanged = false;
-    if (!this.settings.noticeRules) {
-      this.settings.noticeRules = {
-        text: [],
-        background: [],
-      };
-      settingsChanged = true;
-    }
 
-    if (settingsChanged) {
-      await this.saveData(this.settings);
-    }
     // --- End of migration logic ---
     if (!this.settings.installDate) {
       this.settings.installDate = new Date().toISOString();

@@ -1102,11 +1102,13 @@ export const BUILT_IN_PROFILES_DATA = {
 export const DEFAULT_SETTINGS: PluginSettings = {
   pluginEnabled: true,
   language: "auto",
+  useRtlLayout: true,
   overrideIconizeColors: true,
   cleanupInterval: 5,
   colorUpdateFPS: 10,
   activeProfile: "Default",
   profiles: JSON.parse(JSON.stringify(BUILT_IN_PROFILES_DATA)),
+  globalSnippets: [],
   pinnedSnapshots: {},
 };
 
@@ -1131,6 +1133,6 @@ export const TEXT_TO_BG_MAP = {
   "--checklist-done-color": "--background-primary",
   "--text-highlight-bg": "--text-normal",
   "--tag-color": "--tag-bg",
-  "--iconize-icon-color": "--background-secondary",
+  // "--iconize-icon-color": "--background-secondary",
   // "--cm-notice-text-default": "--cm-notice-bg-default",
 };

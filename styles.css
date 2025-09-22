@@ -581,21 +581,24 @@ body.color-master-rtl .notice {
   }
 }
 
-/* Paste CSS button + badges */
+/* Paste CSS button + badges (Flexbox Fix) */
 .cm-paste-css-btn {
-  position: relative;
-  padding-right: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
 .cm-paste-css-btn .cm-badge-new {
-  position: absolute;
-  right: 6px;
-  top: 6px;
   background: #16a34a;
   color: white;
   font-size: 11px;
   padding: 2px 6px;
   border-radius: 8px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+.color-master-settings-tab .cm-paste-css-btn:hover .cm-badge-new {
+  background-color: var(--interactive-success);
+  color: var(--text-on-accent);
 }
 .cm-profile-badge-css {
   display: inline-block;
@@ -793,7 +796,6 @@ body.color-master-rtl .notice {
   height: 24px;
   width: 24px;
 }
-/* ======================================================= */
 
 /* --- Styles for the new Tag Input --- */
 
@@ -909,7 +911,6 @@ body.color-master-rtl .notice {
 .cm-rule-icon-button.mod-warning {
   color: var(--text-muted);
 }
-/* ======================================================= */
 
 /* Drag handle (three lines) */
 .cm-drag-handle {
@@ -1610,4 +1611,190 @@ body.color-master-rtl .color-master-modal .modal-content p {
 .color-master-settings-tab[dir="ltr"] .cm-accessibility-checker {
   margin-left: 10px !important;
   margin-right: 0 !important;
+}
+
+/*
+    Makes the search clear button a transparent icon,
+    matching the style of its neighbors.
+*/
+.cm-search-icon-button {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 4px !important;
+  opacity: 0.7;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.cm-search-icon-button:hover {
+  opacity: 1;
+  background-color: var(--background-modifier-hover) !important;
+}
+/* Makes all icons in the profile line transparent and with a uniform design. */
+.setting-item-control .cm-control-button {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: var(--text-muted);
+  opacity: 0.8;
+  transition: all 0.2s ease-in-out;
+}
+
+.setting-item-control .cm-control-button:hover {
+  background-color: var(--background-modifier-hover) !important;
+  color: var(--text-normal);
+  opacity: 1;
+}
+
+/* --- Modify to make controls transparent and uniform design --- */
+
+/* Target all required buttons and dropdowns to make transparent */
+.color-master-settings-tab .cm-profile-action-btn,
+.color-master-settings-tab .cm-add-variable-setting button,
+.color-master-settings-tab .setting-item-control select,
+.color-master-settings-tab .cm-search-small {
+  background-color: transparent;
+  border: 1px solid var(--background-modifier-border); /* Light border for clarity */
+  box-shadow: none;
+  transition: all 0.2s ease-in-out;
+}
+
+/* * Add a simple effect when the mouse is hovered over elements. */
+.color-master-settings-tab .cm-profile-action-btn:hover,
+.color-master-settings-tab .cm-add-variable-setting button:hover,
+.color-master-settings-tab .setting-item-control select:hover,
+.color-master-settings-tab .cm-search-small:hover {
+  background-color: var(--background-modifier-hover);
+  border-color: var(--background-modifier-border-hover);
+}
+/* Special formatting for dropdowns to look better without their default design */
+.color-master-settings-tab .setting-item-control select,
+.color-master-settings-tab .cm-search-small select {
+  -webkit-appearance: none; /* Hide the default browser layout */
+  appearance: none;
+  padding-right: 24px; /* Enough space for the custom menu arrow to appear */
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+}
+
+/* * A special modification for buttons with a distinct color (blue and green)
+* To preserve their color, we'll make them transparent
+*/
+.color-master-settings-tab .cm-profile-action-btn.mod-cta {
+  border-color: var(--interactive-accent);
+  color: var(--interactive-accent);
+}
+
+.color-master-settings-tab .cm-profile-action-btn.mod-cta:hover {
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+
+.color-master-settings-tab .cm-badge-new {
+  border: 1px solid var(--interactive-success);
+  background-color: transparent;
+  color: var(--interactive-success);
+}
+
+/* Make the Create Snippet button transparent */
+.cm-snippets-header .cm-snippets-add-button button {
+  background-color: transparent;
+  border: 1px solid var(--interactive-accent);
+  color: var(--interactive-accent);
+  transition: all 0.2s ease-in-out;
+}
+.cm-snippets-header .cm-snippets-add-button button:hover {
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+
+/* Make color input fields transparent. */
+.color-master-text-input {
+  background-color: transparent;
+  border: 1px solid var(--background-modifier-border);
+}
+.color-master-text-input:focus {
+  border-color: var(--background-modifier-border-focus);
+}
+
+/* Slider design */
+.color-master-settings-tab input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+  width: 100px;
+}
+/* --- Track following slider --- */
+.color-master-settings-tab input[type="range"]::-webkit-slider-runnable-track {
+  background-color: var(--background-modifier-border);
+  height: 4px;
+  border-radius: 4px;
+}
+.color-master-settings-tab input[type="range"]::-moz-range-track {
+  background-color: var(--background-modifier-border);
+  height: 4px;
+  border-radius: 4px;
+}
+/* --- Slider handle --- */
+.color-master-settings-tab input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  margin-top: 0px;
+  background-color: var(--text-muted);
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--background-primary);
+}
+.color-master-settings-tab input[type="range"]::-webkit-slider-thumb:hover {
+  background-color: var(--text-normal);
+}
+.color-master-settings-tab input[type="range"]::-moz-range-thumb {
+  background-color: var(--text-muted);
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--background-primary);
+}
+.color-master-settings-tab input[type="range"]::-moz-range-thumb:hover {
+  background-color: var(--text-normal);
+}
+
+/* Make color input fields transparent */
+
+.color-master-settings-tab .color-master-text-input {
+  background-color: transparent !important;
+  border: 1px solid var(--background-modifier-border) !important;
+  box-shadow: none !important;
+}
+
+/* --- Styles to bring Profile Manager buttons closer --- */
+.cm-profile-manager-controls .setting-item-control button {
+  margin-left: -2px;
+  margin-right: -2px;
+}
+
+/* --- Snippet Name Container --- */
+.cm-snippet-item .setting-item-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* --- Global Snippet Badge --- */
+.cm-snippet-global-badge {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--text-accent);
+  padding: 1px 6px;
+  border-radius: 10px;
+  border: 1px solid var(--interactive-accent-hover);
+  background: rgba(14, 165, 233, 0.1);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: relative;
+  top: 1px;
 }

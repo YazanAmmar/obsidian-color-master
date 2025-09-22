@@ -1,6 +1,6 @@
 {
   "name": "obsidian-color-master",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Full control of Obsidian color CSS variables with profiles, import/export, bilingual UI, and Force Mode to override themes.",
   "main": "main.js",
   "scripts": {

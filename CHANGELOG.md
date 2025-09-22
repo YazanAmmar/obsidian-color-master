@@ -1,5 +1,24 @@
 # Changelog
 
+## [v1.0.8](https://github.com/YazanAmmar/obsidian-color-master/releases/tag/1.0.8) - 2025-09-22
+
+This version introduces powerful new features like **Global CSS Snippets** and a suite of workflow enhancements, including new hotkeys and a complete UI redesign for a more intuitive and polished user experience.
+
+### New Features
+
+- **Global CSS Snippets:**
+    - A major new feature that allows you to create **Global Snippets**. These are special CSS snippets that remain active across **all** of your profiles.
+    - **Use Case:** Perfect for applying universal styles—like a custom font, a small UI tweak, or hiding an element—that you want to persist regardless of which color theme is active.
+    - **Implementation:** A "Save as Global Snippet" toggle has been added to the snippet creation modal. Global snippets are clearly distinguished in the UI with a "Global" badge and are listed separately above profile-specific snippets.
+- **New Hotkeys for Faster Workflow:**
+    - **Cycle Previous Profile**: A new command, Color Master: Cycle to previous profile, has been added. You can now assign a hotkey to navigate backward through your profile list, complementing the existing command for cycling forward.
+    - **Open Settings Hotkey:** A new command, `Color Master: Open settings tab`, lets you assign a hotkey to instantly jump to the plugin's settings panel.
+- **Quick Access Ribbon Icon:**
+    - A paint bucket icon has been added to the app ribbon, providing one-click access to the Color Master settings from anywhere in your workspace.
+- **Flexible RTL Layout Option:**
+    - A new settings modal, accessible via a gear icon next to the language dropdown, now appears for users of RTL languages (Arabic, Persian).
+    - This contains a toggle to **Enable Right-to-Left (RTL) Layout**, giving users the freedom to disable the flipped interface if they prefer the standard LTR layout even while using an RTL language.
+
 ## [v1.0.7](https://github.com/YazanAmmar/obsidian-color-master/releases/tag/1.0.7) - 2025-09-19 (TypeScript)
 
 ### Major Milestone: The TypeScript Rewrite!

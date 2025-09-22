@@ -14,9 +14,10 @@ import {
   flattenVars,
 } from "../../utils";
 import type { ColorMasterSettingTab } from "../settingsTab";
-import { NoticeRulesModal, CustomVariableMetaModal } from "../modals";
+import { CustomVariableMetaModal } from "../modals";
 import { COLOR_NAMES_FR, COLOR_DESCRIPTIONS_FR } from "../../constants";
 import { COLOR_NAMES_FA, COLOR_DESCRIPTIONS_FA } from "../../constants";
+import { IconizeSettingsModal, NoticeRulesModal } from "../modals";
 
 export function drawColorPickers(
   containerEl: HTMLElement,
@@ -78,6 +79,17 @@ export function drawColorPickers(
             : COLOR_NAMES[varName as keyof typeof COLOR_NAMES] || varName
         )
         .setDesc(description);
+
+      if (varName === "--iconize-icon-color") {
+        setting.addExtraButton((button) => {
+          button
+            .setIcon("settings")
+            .setTooltip(t("TOOLTIP_ICONIZE_SETTINGS"))
+            .onClick(() => {
+              new IconizeSettingsModal(settingTab.app, plugin).open();
+            });
+        });
+      }
 
       if (category === "Notices") {
         setting.addExtraButton((button) => {

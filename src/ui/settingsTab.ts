@@ -32,6 +32,7 @@ import { drawLikePluginCard } from "./components/like-plugin-card";
 import Sortable = require("sortablejs");
 import { COLOR_NAMES_FR, COLOR_DESCRIPTIONS_FR } from "../constants";
 import { COLOR_NAMES_FA, COLOR_DESCRIPTIONS_FA } from "../constants";
+import { LanguageSettingsModal } from "./modals";
 
 export class ColorMasterSettingTab extends PluginSettingTab {
   plugin: ColorMaster;
@@ -121,19 +122,28 @@ export class ColorMasterSettingTab extends PluginSettingTab {
       });
     } catch (e) {}
 
-    this.sectionSelect.createEl("option", {
-      value: "Custom",
-      text: t("CUSTOM_VARIABLES_HEADING"),
-    });
+    const activeProfile =
+      this.plugin.settings.profiles[this.plugin.settings.activeProfile];
+    if (
+      activeProfile?.customVarMetadata &&
+      Object.keys(activeProfile.customVarMetadata).length > 0
+    ) {
+      this.sectionSelect.createEl("option", {
+        value: "Custom",
+        text: t("CUSTOM_VARIABLES_HEADING"),
+      });
+    }
 
     this.searchInfo = right.createEl("div", {
       cls: "cm-search-info",
       text: " ",
     });
     this.clearBtn = right.createEl("button", {
-      cls: "cm-search-small",
-      text: t("CLEAR_BUTTON"),
+      cls: "cm-search-small cm-search-icon-button",
     });
+    const brushIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-brush-cleaning-icon lucide-brush-cleaning"><path d="m16 22-1-4"/><path d="M19 13.99a1 1 0 0 0 1-1V12a2 2 0 0 0-2-2h-3a1 1 0 0 1-1-1V4a2 2 0 0 0-4 0v5a1 1 0 0 1-1 1H6a2 2 0 0 0-2 2v.99a1 1 0 0 0 1 1"/><path d="M5 14h14l1.973 6.767A1 1 0 0 1 20 22H4a1 1 0 0 1-.973-1.233z"/><path d="m8 22 1-4"/></svg>`;
+    this.clearBtn.innerHTML = brushIconSvg;
+    this.clearBtn.setAttr("aria-label", t("CLEAR_BUTTON"));
 
     this._searchState = {
       query: "",
@@ -450,7 +460,8 @@ export class ColorMasterSettingTab extends PluginSettingTab {
     containerEl.empty();
 
     const lang = this.plugin.settings.language;
-    const isRTL = lang === "ar" || lang === "fa";
+    const isRTL =
+      (lang === "ar" || lang === "fa") && this.plugin.settings.useRtlLayout;
     this.containerEl.setAttribute("dir", isRTL ? "rtl" : "ltr");
 
     containerEl.createEl("h2", { text: t("PLUGIN_NAME") });
@@ -463,6 +474,13 @@ export class ColorMasterSettingTab extends PluginSettingTab {
           .setValue(this.plugin.settings.pluginEnabled)
           .onChange(async (value) => {
             this.plugin.settings.pluginEnabled = value;
+
+            if (value) {
+              this.plugin.enableObservers();
+            } else {
+              this.plugin.disableObservers();
+            }
+
             await this.plugin.saveSettings();
             this.plugin.restartColorUpdateLoop();
             new Notice(
@@ -471,10 +489,24 @@ export class ColorMasterSettingTab extends PluginSettingTab {
           });
       });
 
-    new Setting(containerEl)
+    const languageSetting = new Setting(containerEl)
       .setName(t("LANGUAGE"))
-      .setDesc(t("LANGUAGE_DESC"))
-      .addDropdown((dropdown) => {
+      .setDesc(t("LANGUAGE_DESC"));
+
+    if (
+      this.plugin.settings.language === "ar" ||
+      this.plugin.settings.language === "fa"
+    ) {
+      languageSetting.addExtraButton((button) => {
+        button
+          .setIcon("settings-2")
+          .setTooltip("Language Settings")
+          .onClick(() => {
+            new LanguageSettingsModal(this.app, this.plugin).open();
+          });
+      });
+
+      languageSetting.addDropdown((dropdown) => {
         dropdown.addOption("en", "English");
         dropdown.addOption("ar", "العَرَبيَّةُ");
         dropdown.addOption("fa", "فارسی");
@@ -486,6 +518,20 @@ export class ColorMasterSettingTab extends PluginSettingTab {
           this.display();
         });
       });
+    } else {
+      languageSetting.addDropdown((dropdown) => {
+        dropdown.addOption("en", "English");
+        dropdown.addOption("ar", "العَرَبيَّةُ");
+        dropdown.addOption("fa", "فارسی");
+        dropdown.addOption("fr", "Français");
+        dropdown.setValue(this.plugin.settings.language);
+        dropdown.onChange(async (value) => {
+          this.plugin.settings.language = value;
+          await this.plugin.saveSettings();
+          this.display();
+        });
+      });
+    }
 
     this.initSearchUI(containerEl);
     this.staticContentContainer = containerEl.createDiv({

@@ -9,7 +9,7 @@ export function initializeT(plugin: ColorMaster) {
 
 export const STRINGS = {
   en: {
-    PLUGIN_NAME: "Color Master",
+    PLUGIN_NAME: "Color Master - v1.0.8",
     ENABLE_PLUGIN: "Enable Color Master",
     ENABLE_PLUGIN_DESC:
       "Turn this off to temporarily disable all custom colors and revert to your active Obsidian theme.",
@@ -230,9 +230,20 @@ export const STRINGS = {
     SAVE_BUTTON: "Save Variable",
     PLACEHOLDER_DISPLAY_NAME: "e.g., Main Background Color",
     PLACEHOLDER_DESCRIPTION: "e.g., Used to change the font size...",
+    RTL_LAYOUT_NAME: "Enable Right-to-Left (RTL) Layout",
+    RTL_LAYOUT_DESC:
+      "When enabled, the plugin's interface is flipped to properly support languages written from right to left.",
+    LANGUAGE_SETTINGS_TITLE: "Language Settings",
+    SAVE_AS_GLOBAL_SNIPPET_NAME: "Save as Global Snippet",
+    SAVE_AS_GLOBAL_SNIPPET_DESC:
+      "A global snippet is applied to all of your profiles.",
+    NOTICE_MOVE_SNIPPET_SCOPE:
+      "Use the edit modal to move a snippet between scopes.",
+    ICONIZE_SETTINGS_MODAL_TITLE: "Iconize Integration Settings",
+    TOOLTIP_ICONIZE_SETTINGS: "Iconize Settings",
   },
   ar: {
-    PLUGIN_NAME: "متحكم الألوان",
+    PLUGIN_NAME: "متحكم الألوان - v1.0.8",
     ENABLE_PLUGIN: "تفعيل متحكم الألوان",
     ENABLE_PLUGIN_DESC:
       "أطفئ هذا الخيار لتعطيل جميع الألوان المخصصة مؤقتاً والعودة إلى ثيم Obsidian النشط.",
@@ -456,9 +467,19 @@ export const STRINGS = {
     SAVE_BUTTON: "حفظ المتغير",
     PLACEHOLDER_DISPLAY_NAME: "مثلاً: لون الخلفية الأساسي",
     PLACEHOLDER_DESCRIPTION: "مثلاً: يستخدم لخلفية المحرر الرئيسية...",
+    RTL_LAYOUT_NAME: "تفعيل تنسيق اليمين لليسار (RTL)",
+    RTL_LAYOUT_DESC:
+      "عند تفعيله، يتم قلب واجهة الإضافة لتتناسب مع اللغات التي تكتب من اليمين لليسار.",
+    LANGUAGE_SETTINGS_TITLE: "إعدادات اللغة",
+    SAVE_AS_GLOBAL_SNIPPET_NAME: "حفظ كقصاصة عامة",
+    SAVE_AS_GLOBAL_SNIPPET_DESC:
+      "القصاصة العامة يتم تطبيقها على جميع ملفاتك الشخصية.",
+    NOTICE_MOVE_SNIPPET_SCOPE: "استخدم نافذة التعديل لنقل القصاصة بين الأقسام.",
+    ICONIZE_SETTINGS_MODAL_TITLE: "إعدادات تكامل Iconize",
+    TOOLTIP_ICONIZE_SETTINGS: "إعدادات Iconize",
   },
   fa: {
-    PLUGIN_NAME: "استاد رنگ",
+    PLUGIN_NAME: "استاد رنگ - v1.0.8",
     ENABLE_PLUGIN: "فعال کردن استاد رنگ",
     ENABLE_PLUGIN_DESC:
       "این گزینه را برای غیرفعال کردن موقت تمام رنگ‌های سفارشی و بازگشت به تم فعال Obsidian خود خاموش کنید.",
@@ -683,9 +704,20 @@ export const STRINGS = {
     SAVE_BUTTON: "ذخیره متغیر",
     PLACEHOLDER_DISPLAY_NAME: "مثلاً: رنگ پس‌زمینه اصلی",
     PLACEHOLDER_DESCRIPTION: "مثلاً: برای تغییر اندازه فونت استفاده می‌شود...",
+    RTL_LAYOUT_NAME: "فعال کردن چیدمان راست به چپ (RTL)",
+    RTL_LAYOUT_DESC:
+      "هنگامی که فعال باشد، رابط کاربری افزونه برای پشتیبانی صحیح از زبان‌های راست به چپ برعکس می‌شود.",
+    LANGUAGE_SETTINGS_TITLE: "تنظیمات زبان",
+    SAVE_AS_GLOBAL_SNIPPET_NAME: "ذخیره به عنوان قطعه کد سراسری",
+    SAVE_AS_GLOBAL_SNIPPET_DESC:
+      "یک قطعه کد سراسری بر روی تمام پروفایل‌های شما اعمال می‌شود.",
+    NOTICE_MOVE_SNIPPET_SCOPE:
+      "برای جابجایی قطعه کد بین بخش‌ها از پنجره ویرایش استفاده کنید.",
+    ICONIZE_SETTINGS_MODAL_TITLE: "تنظیمات ادغام Iconize",
+    TOOLTIP_ICONIZE_SETTINGS: "تنظیمات Iconize",
   },
   fr: {
-    PLUGIN_NAME: "Maître des Couleurs",
+    PLUGIN_NAME: "Maître des Couleurs - v1.0.8",
     ENABLE_PLUGIN: "Activer Maître des Couleurs",
     ENABLE_PLUGIN_DESC:
       "Désactivez cette option pour désactiver temporairement toutes les couleurs personnalisées et revenir à votre thème Obsidian actif.",
@@ -917,6 +949,17 @@ export const STRINGS = {
     PLACEHOLDER_DISPLAY_NAME: "ex: Couleur de fond principale",
     PLACEHOLDER_DESCRIPTION:
       "ex: Utilisé pour changer la taille de la police...",
+    RTL_LAYOUT_NAME: "Activer la disposition de droite à gauche (RTL)",
+    RTL_LAYOUT_DESC:
+      "Lorsque cette option est activée, l'interface du plugin est inversée pour prendre en charge correctement les langues écrites de droite à gauche.",
+    LANGUAGE_SETTINGS_TITLE: "Paramètres de langue",
+    SAVE_AS_GLOBAL_SNIPPET_NAME: "Enregistrer comme extrait global",
+    SAVE_AS_GLOBAL_SNIPPET_DESC:
+      "Un extrait global est appliqué à tous vos profils.",
+    NOTICE_MOVE_SNIPPET_SCOPE:
+      "Utilisez la fenêtre de modification pour déplacer un extrait.",
+    ICONIZE_SETTINGS_MODAL_TITLE: "Paramètres d'intégration d'Iconize",
+    TOOLTIP_ICONIZE_SETTINGS: "Paramètres d'Iconize",
   },
 };
 

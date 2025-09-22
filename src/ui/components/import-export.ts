@@ -39,8 +39,7 @@ export function drawImportExport(
       settingTab.app,
       settingTab.plugin,
       settingTab,
-      null,
-      "Profile"
+      null
     ).open();
   });
 

@@ -3,6 +3,7 @@ export interface Snippet {
   name: string;
   css: string;
   enabled: boolean;
+  isGlobal?: boolean;
 }
 
 export interface NoticeRule {
@@ -40,6 +41,8 @@ export interface PluginSettings {
   colorUpdateFPS: number;
   activeProfile: string;
   profiles: { [key: string]: Profile };
+  globalSnippets: Snippet[];
   pinnedSnapshots: { [key: string]: any };
+  useRtlLayout: boolean;
   installDate?: string;
 }
