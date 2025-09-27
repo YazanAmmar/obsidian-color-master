@@ -1,0 +1,14 @@
+node_modules/
+
+.vscode/
+build/
+
+.DS_Store
+
+*.rar
+*.zip
+*.log
+*.local
+.env
+.env.*
+*.bak

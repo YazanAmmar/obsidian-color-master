@@ -142,9 +142,14 @@ export class ColorMasterSettingTab extends PluginSettingTab {
       cls: "cm-search-small cm-search-icon-button",
     });
     const brushIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-brush-cleaning-icon lucide-brush-cleaning"><path d="m16 22-1-4"/><path d="M19 13.99a1 1 0 0 0 1-1V12a2 2 0 0 0-2-2h-3a1 1 0 0 1-1-1V4a2 2 0 0 0-4 0v5a1 1 0 0 1-1 1H6a2 2 0 0 0-2 2v.99a1 1 0 0 0 1 1"/><path d="M5 14h14l1.973 6.767A1 1 0 0 1 20 22H4a1 1 0 0 1-.973-1.233z"/><path d="m8 22 1-4"/></svg>`;
-    this.clearBtn.innerHTML = brushIconSvg;
-    this.clearBtn.setAttr("aria-label", t("CLEAR_BUTTON"));
+    const parser = new DOMParser();
+    const iconDoc = parser.parseFromString(brushIconSvg, "image/svg+xml");
 
+    if (iconDoc.documentElement) {
+      this.clearBtn.appendChild(iconDoc.documentElement);
+    }
+
+    this.clearBtn.setAttr("aria-label", t("CLEAR_BUTTON"));
     this._searchState = {
       query: "",
       regex: false,
@@ -320,12 +325,16 @@ export class ColorMasterSettingTab extends PluginSettingTab {
 
     const highlightElement = (element: HTMLElement | null) => {
       if (!element) return;
-      const originalText =
-        element.dataset.originalText || element.textContent || "";
-      element.dataset.originalText = originalText;
+
+      if (!element.dataset.originalText) {
+        element.dataset.originalText = element.textContent || "";
+      }
+      const originalText = element.dataset.originalText;
+
+      element.empty();
 
       if (!query) {
-        element.innerHTML = originalText;
+        element.setText(originalText);
         return;
       }
 
@@ -336,12 +345,23 @@ export class ColorMasterSettingTab extends PluginSettingTab {
         regex = state.regex
           ? new RegExp(query, flags)
           : new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), flags);
-        element.innerHTML = originalText.replace(
-          regex,
-          (match) => `<span class="cm-highlight">${match}</span>`
-        );
+
+        let lastIndex = 0;
+        let match;
+
+        while ((match = regex.exec(originalText)) !== null) {
+          if (match.index > lastIndex) {
+            element.appendText(originalText.substring(lastIndex, match.index));
+          }
+          element.createSpan({ cls: "cm-highlight", text: match[0] });
+          lastIndex = regex.lastIndex;
+        }
+
+        if (lastIndex < originalText.length) {
+          element.appendText(originalText.substring(lastIndex));
+        }
       } catch (e) {
-        element.innerHTML = originalText;
+        element.setText(originalText);
       }
     };
 

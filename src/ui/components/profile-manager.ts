@@ -96,7 +96,7 @@ export function drawProfileManager(
             ).open();
           });
       } else {
-        button.buttonEl.style.display = "none";
+        button.buttonEl.hide();
       }
 
       button.buttonEl.classList.add("cm-control-button");

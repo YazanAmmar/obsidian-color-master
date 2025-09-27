@@ -284,7 +284,7 @@ export default class ColorMaster extends Plugin {
     T = this;
     this.addCommand({
       id: "toggle-color-master",
-      name: "Toggle Color Master",
+      name: "Enable & Disable",
       callback: async () => {
         this.settings.pluginEnabled = !this.settings.pluginEnabled;
         await this.saveSettings();
@@ -298,7 +298,7 @@ export default class ColorMaster extends Plugin {
 
     this.addCommand({
       id: "cycle-next-color-profile",
-      name: "Color Master: Cycle to next profile",
+      name: "Cycle to next profile",
       callback: async () => {
         const names = Object.keys(this.settings.profiles || {});
         if (names.length === 0) {
@@ -315,7 +315,7 @@ export default class ColorMaster extends Plugin {
 
     this.addCommand({
       id: "cycle-previous-color-profile",
-      name: "Color Master: Cycle to previous profile",
+      name: "Cycle to previous profile",
       callback: () => {
         (async () => {
           const names = Object.keys(this.settings.profiles || {});
@@ -338,7 +338,7 @@ export default class ColorMaster extends Plugin {
 
     this.addCommand({
       id: "open-color-master-settings-tab",
-      name: "Color Master: Open settings tab",
+      name: "Open settings tab",
       callback: () => {
         (this.app as any).setting.open();
         (this.app as any).setting.openTabById(this.manifest.id);
@@ -662,9 +662,17 @@ export default class ColorMaster extends Plugin {
       await this.saveData(this.settings);
     }
 
-    // --- End of migration logic ---
     if (!this.settings.installDate) {
       this.settings.installDate = new Date().toISOString();
+
+      // Check the current Obsidian theme to set a smart default profile.
+      const isDarkMode = document.body.classList.contains("theme-dark");
+      if (isDarkMode) {
+        this.settings.activeProfile = "Default";
+      } else {
+        this.settings.activeProfile = "Citrus Zest";
+      }
+
       await this.saveData(this.settings);
     }
     if (!this.settings.pinnedSnapshots) {
@@ -819,11 +827,57 @@ export default class ColorMaster extends Plugin {
           break;
         }
       }
-      el.style.setProperty("background-color", finalBgColor, "important");
-      el.style.setProperty("color", finalTextColor, "important");
+
+      if (finalBgColor) {
+        el.dataset.cmNoticeBg = finalBgColor;
+      }
+      if (finalTextColor) {
+        el.dataset.cmNoticeText = finalTextColor;
+      }
+      this.updateNoticeStyles();
     } catch (e) {
       console.warn("Color Master: processNotice failed", e);
     }
+  }
+
+  updateNoticeStyles() {
+    const styleId = "cm-dynamic-notice-styles";
+    let styleEl = document.getElementById(styleId) as HTMLStyleElement | null;
+
+    const notices = document.querySelectorAll<HTMLElement>(
+      "[data-cm-notice-bg], [data-cm-notice-text]"
+    );
+    if (notices.length === 0) {
+      if (styleEl) styleEl.remove();
+      return;
+    }
+
+    if (!styleEl) {
+      styleEl = document.createElement("style");
+      styleEl.id = styleId;
+      document.head.appendChild(styleEl);
+    }
+
+    const cssRules: string[] = [];
+    notices.forEach((notice, i) => {
+      const uniqueId = notice.dataset.cmNoticeId || `cm-notice-${i}`;
+      notice.dataset.cmNoticeId = uniqueId;
+
+      const bgColor = notice.dataset.cmNoticeBg;
+      const textColor = notice.dataset.cmNoticeText;
+
+      let rule = `[data-cm-notice-id="${uniqueId}"] {`;
+      if (bgColor) {
+        rule += ` background-color: ${bgColor} !important;`;
+      }
+      if (textColor) {
+        rule += ` color: ${textColor} !important;`;
+      }
+      rule += " }";
+      cssRules.push(rule);
+    });
+
+    styleEl.textContent = cssRules.join("\n");
   }
 
   /**

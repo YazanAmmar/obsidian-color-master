@@ -4,7 +4,8 @@
   "description": "Full control of Obsidian color CSS variables with profiles, import/export, bilingual UI, and Force Mode to override themes.",
   "main": "main.js",
   "scripts": {
-    "build": "esbuild src/main.ts --bundle --platform=browser --format=cjs --outfile=main.js --minify --external:obsidian"
+    "build": "esbuild src/main.ts --bundle --platform=browser --format=cjs --outfile=main.js --minify --external:obsidian",
+    "dev": "npm run build && copy main.js \"C:\\Users\\user\\Documents\\Obsidian\\My Notes\\.obsidian\\plugins\\obsidian-color-master\" && copy styles.css \"C:\\Users\\user\\Documents\\Obsidian\\My Notes\\.obsidian\\plugins\\obsidian-color-master\" && copy manifest.json \"C:\\Users\\user\\Documents\\Obsidian\\My Notes\\.obsidian\\plugins\\obsidian-color-master\""
   },
   "keywords": [],
   "author": "Yazan Ammar",

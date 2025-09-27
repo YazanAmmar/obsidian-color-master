@@ -15,9 +15,10 @@ function createStatBar(
   header.createEl("span", { cls: "value", text: String(value) });
   const skillBar = skillBox.createDiv("skill-bar");
   const percentage = Math.min(100, Math.round((value / max) * 100));
-  const skillPer = skillBar.createEl("span", { cls: "skill-per" });
-  skillPer.style.width = `${percentage}%`;
-  skillPer.style.background = `linear-gradient(115deg, #33ff00, #ffcc00, #8000ff, #00b7ff, #00ff66)`;
+  const skillPer = skillBar.createEl("span", {
+    cls: "skill-per cm-skill-gradient",
+  });
+  skillPer.style.setProperty("--skill-percentage", `${percentage}%`);
 }
 
 function calcProfilesCount(settingTab: ColorMasterSettingTab): number {
@@ -25,12 +26,17 @@ function calcProfilesCount(settingTab: ColorMasterSettingTab): number {
 }
 
 function calcSnippetsCount(settingTab: ColorMasterSettingTab): number {
-  const profiles = settingTab.plugin.settings.profiles || {};
-  let totalSnippets = 0;
+  const settings = settingTab.plugin.settings;
+  const profiles = settings.profiles || {};
+
+  let totalSnippets = settings.globalSnippets
+    ? settings.globalSnippets.length
+    : 0;
+
   for (const profileName in profiles) {
     const profile = profiles[profileName];
-    if (profile && profile.snippets) {
-      totalSnippets += Object.keys(profile.snippets).length;
+    if (profile && Array.isArray(profile.snippets)) {
+      totalSnippets += profile.snippets.length;
     }
   }
   return totalSnippets;
@@ -65,8 +71,8 @@ export function drawLikePluginCard(
 ) {
   const likeCardEl = containerEl.createDiv("cm-like-card");
   const bannerContainer = likeCardEl.createDiv("cm-banner-container");
-  bannerContainer.innerHTML = `
-<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="240" viewBox="0 0 1280 240" role="img" aria-label="Color Master banner" class="cm-banner-svg">
+  const bannerSvgString = `
+  <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="240" viewBox="0 0 1280 240" role="img" aria-label="Color Master banner" class="cm-banner-svg">
   <defs>
     <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
       <stop offset="0%" stop-color="#0066FF"/> <stop offset="14%" stop-color="#7A00FF"/> <stop offset="28%" stop-color="#FF1E56"/>
@@ -91,7 +97,14 @@ export function drawLikePluginCard(
   <text x="50%" y="84%" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="18" fill="#FFFFFF" opacity="0.95"> Color Master for Obsidian — control themes &amp; color schemes </text>
 </svg>`;
 
+  const parser = new DOMParser();
+  const svgDoc = parser.parseFromString(bannerSvgString, "image/svg+xml");
+  const svgElement = svgDoc.documentElement;
+
+  bannerContainer.appendChild(svgElement);
+
   const contentWrapper = likeCardEl.createDiv("cm-content-wrapper");
+
   const statsContainer = contentWrapper.createDiv("cm-like-stats");
   const profilesCount = calcProfilesCount(settingTab);
   const snippetsCount = calcSnippetsCount(settingTab);

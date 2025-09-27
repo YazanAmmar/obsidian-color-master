@@ -43,11 +43,9 @@ export class ProfileJsonImportModal extends Modal {
       text: t("IMPORT_JSON_MODAL_DESC_1"),
     });
     this.textarea = contentEl.createEl("textarea", {
-      cls: "cm-search-input",
+      cls: "cm-search-input cm-import-textarea",
       attr: { rows: "8", placeholder: t("IMPORT_JSON_MODAL_PLACEHOLDER") },
     });
-    this.textarea.style.width = "100%";
-    this.textarea.style.marginBottom = "15px";
 
     // File import button
     contentEl.createEl("p", {
@@ -266,7 +264,6 @@ export class NewProfileModal extends Modal {
 
     const buttonContainer = contentEl.createDiv({
       cls: "modal-button-container",
-      attr: { style: "justify-content: flex-end;" },
     });
 
     const cancelButton = buttonContainer.createEl("button", {
@@ -346,7 +343,6 @@ export class ConfirmationModal extends Modal {
 
     const buttonContainer = contentEl.createDiv({
       cls: "modal-button-container",
-      attr: { style: "justify-content: flex-end;" },
     });
 
     const cancelButton = buttonContainer.createEl("button", {
@@ -479,10 +475,9 @@ export class PasteCssModal extends Modal {
       });
 
     this.cssTextarea = contentEl.createEl("textarea", {
-      cls: "cm-search-input",
+      cls: "cm-search-input cm-large-textarea",
       attr: { rows: "12", placeholder: t("CSS_TEXTAREA_PLACEHOLDER") },
     });
-    this.cssTextarea.style.width = "100%";
 
     const historyId =
       this.isEditing && this.existingProfileData
@@ -537,7 +532,6 @@ export class PasteCssModal extends Modal {
     });
     const buttonContainer = contentEl.createDiv({
       cls: "modal-button-container",
-      attr: { style: "justify-content: flex-end;" },
     });
 
     buttonContainer
@@ -740,10 +734,12 @@ export class SnippetCssModal extends Modal {
       });
 
     this.cssTextarea = new TextAreaComponent(contentEl);
-    this.cssTextarea.inputEl.classList.add("cm-search-input");
+    this.cssTextarea.inputEl.classList.add(
+      "cm-search-input",
+      "cm-large-textarea"
+    );
     this.cssTextarea.inputEl.rows = 12;
     this.cssTextarea.setPlaceholder(t("CSS_TEXTAREA_PLACEHOLDER"));
-    this.cssTextarea.inputEl.style.width = "100%";
 
     const historyId =
       this.isEditing && this.existingSnippet ? this.existingSnippet.id : null;
@@ -794,7 +790,6 @@ export class SnippetCssModal extends Modal {
     });
     const buttonContainer = contentEl.createDiv({
       cls: "modal-button-container",
-      attr: { style: "justify-content: flex-end;" },
     });
 
     buttonContainer
@@ -946,18 +941,12 @@ export class NoticeRulesModal extends Modal {
     setIcon(iconEl, "bell");
     headerContainer.createEl("h3", { text: title });
     const descAndButtonContainer = contentEl.createDiv({
-      attr: {
-        style:
-          "display: flex; align-items: center; gap: 16px; margin-bottom: 15px;",
-      },
+      cls: "cm-rules-header",
     });
 
     descAndButtonContainer.createEl("p", {
       text: t("NOTICE_RULES_DESC"),
       cls: "cm-rules-modal-desc",
-      attr: {
-        style: "margin-bottom: 0; flex-grow: 1;",
-      },
     });
     const buttonSettingContainer = descAndButtonContainer.createDiv();
     const settingEl = new Setting(buttonSettingContainer).addButton(
@@ -981,8 +970,7 @@ export class NoticeRulesModal extends Modal {
       }
     );
 
-    settingEl.settingEl.style.padding = "0";
-    settingEl.settingEl.style.borderTop = "none";
+    settingEl.settingEl.classList.add("cm-rules-add-button-setting");
 
     this.rulesContainer = contentEl.createDiv("cm-rules-container");
     this.displayRules();
@@ -1173,7 +1161,7 @@ export class NoticeRulesModal extends Modal {
     const container = parentEl.createDiv({ cls: "cm-tag-input-container" });
 
     const renderTags = () => {
-      container.innerHTML = "";
+      container.empty();
       const keywords =
         typeof rule.keywords === "string" && rule.keywords
           ? rule.keywords

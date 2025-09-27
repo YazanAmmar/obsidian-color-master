@@ -67,6 +67,7 @@ body.color-master-rtl .notice {
 }
 
 .setting-item-control input[type="color"] {
+  appearance: none;
   -webkit-appearance: none;
   width: 28px;
   height: 28px;
@@ -371,6 +372,10 @@ body.color-master-rtl .notice {
     width: 0;
   }
   to {
+    opacity: 1;
+  }
+  to {
+    width: var(--skill-percentage);
     opacity: 1;
   }
 }
@@ -1797,4 +1802,36 @@ body.color-master-rtl .color-master-modal .modal-content p {
   letter-spacing: 0.5px;
   position: relative;
   top: 1px;
+}
+/* ======================== */
+
+.cm-import-textarea {
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+.modal-button-container {
+  justify-content: flex-end;
+}
+
+/* For modals.ts */
+.cm-large-textarea {
+  width: 100%;
+}
+
+.cm-rules-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 15px;
+}
+
+.cm-rules-header p.cm-rules-modal-desc {
+  margin-bottom: 0;
+  flex-grow: 1;
+}
+
+.cm-rules-add-button-setting {
+  padding: 0;
+  border-top: none;
 }
