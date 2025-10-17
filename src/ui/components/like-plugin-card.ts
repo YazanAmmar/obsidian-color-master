@@ -1,5 +1,5 @@
-import { t } from "../../i18n";
 import { DEFAULT_VARS } from "../../constants";
+import { t } from "../../i18n";
 import { flattenVars } from "../../utils";
 import type { ColorMasterSettingTab } from "../settingsTab";
 

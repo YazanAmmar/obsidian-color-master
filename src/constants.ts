@@ -1,5 +1,5 @@
-import { flattenVars } from "./utils";
 import { PluginSettings } from "./types";
+import { flattenVars } from "./utils";
 
 // A comprehensive list of Obsidian's themeable color variables.
 
@@ -893,7 +893,7 @@ const OLED_MATRIX_PROFILE = {
     "--graph-node-tag": "#000000",
     "--graph-node-attachment": "#54ee20",
     "--blockquote-color": "#54ee20",
-    "--tag-color": "#8AB4F8",
+    "--tag-color": "#0bd62d",
   },
   themeType: "dark",
   snippets: [

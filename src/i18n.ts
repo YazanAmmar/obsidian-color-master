@@ -9,7 +9,7 @@ export function initializeT(plugin: ColorMaster) {
 
 export const STRINGS = {
   en: {
-    PLUGIN_NAME: "Color Master - v1.0.8",
+    PLUGIN_NAME: "Color Master - v1.0.9",
     ENABLE_PLUGIN: "Enable Color Master",
     ENABLE_PLUGIN_DESC:
       "Turn this off to temporarily disable all custom colors and revert to your active Obsidian theme.",
@@ -25,7 +25,7 @@ export const STRINGS = {
     ACTIVE_PROFILE_DESC: "Manage and switch between color profiles.",
     NEW_BUTTON: "New",
     DELETE_BUTTON: "Delete",
-    OPTIONS_HEADING: "Options",
+    OPTIONS_HEADING: "Advanced Settings",
     UPDATE_FREQUENCY_NAME: "Live Update FPS",
     UPDATE_FREQUENCY_DESC:
       "Sets how many times per second the UI previews color changes while dragging (0 = disable live preview). Lower values can improve performance.",
@@ -94,9 +94,9 @@ export const STRINGS = {
     PASTE_CSS_MODAL_NOTE:
       "Note : Pasted CSS can affect UI, proceed only with trusted CSS.",
     IMPORT_FROM_FILE: "Import from File",
-    IMPORT_FROM_FILE_DESC: "Select a (.css) file from your computer.",
+    IMPORT_FROM_FILE_DESC: "Or, select a (.css) file from your computer.",
     CHOOSE_FILE_BUTTON: "Choose File...",
-    CSS_TEXTAREA_PLACEHOLDER: "Or, paste your CSS here...",
+    CSS_TEXTAREA_PLACEHOLDER: "Paste your CSS here...",
     SNIPPET_NAME_LABEL: "Snippet Name",
     CREATE_SNIPPET_TITLE: "Create New CSS Snippet",
     IMPORT_PROFILE_TITLE: "Import / Paste CSS and create profile",
@@ -111,7 +111,6 @@ export const STRINGS = {
       "Could not find original data for this profile.",
     NOTICE_PROFILE_RESTORED: (name: string) =>
       `Profile "${name}" has been restored to its default state.`,
-    NOTICE_UI_REFRESHED: "UI Refreshed!",
     NOTICE_GRAPH_COLORS_APPLIED: "Graph colors applied!",
     NOTICE_INVALID_JSON: "Invalid JSON.",
     NOTICE_JSON_MUST_HAVE_NAME:
@@ -142,10 +141,9 @@ export const STRINGS = {
     IMPORT_JSON_MODAL_TITLE: "Paste or Import Profile JSON",
     IMPORT_JSON_MODAL_DESC_1: "You can paste a profile JSON in the box below.",
     IMPORT_JSON_MODAL_PLACEHOLDER: '{ "name": "...", "profile": { ... } }',
-    IMPORT_JSON_MODAL_DESC_2: "Or, you can import directly from a file:",
     IMPORT_JSON_MODAL_SETTING_NAME: "Import from File",
     IMPORT_JSON_MODAL_SETTING_DESC:
-      "Select a (.json) profile file from your computer.",
+      "Or, select a (.json) profile file from your computer.",
     REPLACE_ACTIVE_BUTTON: "Replace Active",
     CREATE_NEW_BUTTON: "Create New",
     NOTICE_FILE_LOADED: (fileName: string) =>
@@ -168,6 +166,16 @@ export const STRINGS = {
     MODAL_DELETE_SNIPPET_TITLE: (name: string) => `Delete Snippet: ${name}`,
     MODAL_DELETE_SNIPPET_DESC:
       "Are you sure you want to delete this snippet? This action cannot be undone.",
+    RESET_PLUGIN_NAME: "Reset Plugin Settings",
+    RESET_PLUGIN_DESC:
+      "This will delete all profiles, snippets, and settings, resetting the plugin to its original state. This action requires an app reload and cannot be undone.",
+    RESET_PLUGIN_BUTTON: "Reset All Data...",
+    RESET_CONFIRM_MODAL_TITLE: "Are you sure?",
+    RESET_CONFIRM_MODAL_DESC:
+      "This will permanently delete all your Color Master data (profiles, snippets, settings). This is irreversible.",
+    RESET_SUCCESS_NOTICE:
+      "Color Master data has been deleted. Please reload Obsidian to apply the changes.",
+    RELOAD_BUTTON: "Reload",
     NOTICE_FPS_UPDATED: (value: number) => `Live Update FPS set to: ${value}`,
     NOTICE_SNIPPET_COPIED: "Snippet CSS copied to clipboard!",
     NOTICE_INVALID_PROFILE_OBJECT:
@@ -188,6 +196,27 @@ export const STRINGS = {
     DRAG_RULE_TOOLTIP: "Drag to reorder",
     APPLY_BUTTON: "Apply",
     CANCEL_BUTTON: "Cancel",
+    MODAL_ADD_VAR_TITLE: "Add New Custom CSS Variable",
+    MODAL_ADD_VAR_DESC:
+      "Define a new CSS variable (e.g., --my-color: #f00). This variable will be added to your active profile.",
+    MODAL_VAR_DISPLAY_NAME: "Display Name",
+    MODAL_VAR_DISPLAY_NAME_DESC:
+      "A friendly name for your variable (e.g., 'My Custom Primary Color').",
+    MODAL_VAR_DISPLAY_NAME_PLACEHOLDER: "e.g., My Primary Color",
+    MODAL_VAR_NAME: "Variable Name",
+    MODAL_VAR_NAME_DESC:
+      "The actual CSS variable name. Must start with '--' (e.g., '--my-primary-color').",
+    MODAL_VAR_NAME_PLACEHOLDER: "e.g., --my-primary-color",
+    MODAL_VAR_VALUE: "Variable Value",
+    MODAL_VAR_VALUE_DESC:
+      "The value of the CSS variable (e.g., 'red', '#ff0000', 'rgb(255,0,0)').",
+    MODAL_VAR_VALUE_PLACEHOLDER: "e.g., #FF0000 or red",
+    MODAL_VAR_DESCRIPTION: "Description (Optional)",
+    MODAL_VAR_DESCRIPTION_DESC:
+      "A brief description of what this variable controls.",
+    MODAL_VAR_DESCRIPTION_PLACEHOLDER: "e.g., Main color for headings",
+    ERROR_VAR_NAME_PREFIX: "Variable name must start with '--'",
+
     SETTINGS_SAVED: "Settings applied successfully!",
     MOVE_RULE_UP_TOOLTIP: "Move rule up",
     MOVE_RULE_DOWN_TOOLTIP: "Move rule down",
@@ -222,6 +251,7 @@ export const STRINGS = {
     HELP_TEXT_PRE_LINK: "Can't find the variable you're looking for? ",
     HELP_TEXT_LINK: "Browse the official list of Obsidian CSS variables.",
     MODAL_CUSTOM_VAR_TITLE: "Add Custom Variable Details",
+    ADD_BUTTON: "Add",
     DISPLAY_NAME_LABEL: "Display Name",
     DISPLAY_NAME_DESC:
       "This is the user-friendly name that will appear in the settings list.",
@@ -241,9 +271,45 @@ export const STRINGS = {
       "Use the edit modal to move a snippet between scopes.",
     ICONIZE_SETTINGS_MODAL_TITLE: "Iconize Integration Settings",
     TOOLTIP_ICONIZE_SETTINGS: "Iconize Settings",
+    THEME_WARNING_TOOLTIP: (currentTheme: string) =>
+      `The community theme "${currentTheme}" is active, which may interfere with the profile's appearance. For best results, switch to Obsidian's default theme, or import "${currentTheme}" as a new CSS profile to customize it directly.`,
+    IMPORT_FROM_INSTALLED_THEME: "Import from installed theme",
+    IMPORT_FROM_INSTALLED_THEME_DESC:
+      "Quickly load the CSS from one of your installed community themes.",
+    IMPORT_BUTTON: "Import",
+    NOTICE_THEME_CSS_LOADED: (theme: string) =>
+      `Successfully loaded CSS from "${theme}" theme.`,
+    NOTICE_THEME_READ_FAILED: (theme: string) =>
+      `Could not read the theme file for "${theme}". It might be protected or missing.`,
+    IMPORT_FROM_INSTALLED_SNIPPET: "Import from installed snippet",
+    IMPORT_FROM_INSTALLED_SNIPPET_DESC:
+      "Quickly load the CSS from one of your enabled Obsidian snippets.",
+    NOTICE_SNIPPET_LOADED: (snippet: string) =>
+      `Successfully loaded CSS from "${snippet}" snippet.`,
+    NOTICE_SNIPPET_READ_FAILED: (snippet: string) =>
+      `Could not read the snippet file for "${snippet}".`,
+    NO_THEMES_INSTALLED: "No community themes installed",
+    NO_SNIPPETS_INSTALLED: "No snippets installed",
+    TOOLTIP_THEME_LIGHT: "Theme: Force Light Mode (Click to switch to Dark)",
+    TOOLTIP_THEME_DARK: "Theme: Force Dark Mode (Click to switch to Auto)",
+    TOOLTIP_THEME_AUTO:
+      "Theme: Auto (Follows Obsidian) (Click to switch to Light)",
+    TOOLTIP_EXPORT_PROFILE: "Export current profile as JSON file",
+    TOOLTIP_COPY_JSON: "Copy current profile JSON to clipboard",
+    NOTICE_JSON_COPIED: "Profile JSON copied to clipboard successfully!",
+    TOGGLE_THEME_COMMAND: "Cycle active profile theme",
+    NOTICE_THEME_SWITCHED_LIGHT: "Switched to Light Mode",
+    NOTICE_THEME_SWITCHED_DARK: "Switched to Dark Mode",
+    NOTICE_THEME_SWITCHED_AUTO: "Switched to Auto Mode",
+    COMMAND_ENABLE_DISABLE: "Enable & Disable",
+    COMMAND_CYCLE_NEXT: "Cycle to next profile",
+    COMMAND_CYCLE_PREVIOUS: "Cycle to previous profile",
+    COMMAND_OPEN_SETTINGS: "Open settings tab",
+    RIBBON_TOOLTIP_SETTINGS: "Color Master Settings",
+    REGEX_PLACEHOLDER: "Enter Regex and press Enter...",
   },
   ar: {
-    PLUGIN_NAME: "متحكم الألوان - v1.0.8",
+    PLUGIN_NAME: "متحكم الألوان - v1.0.9",
     ENABLE_PLUGIN: "تفعيل متحكم الألوان",
     ENABLE_PLUGIN_DESC:
       "أطفئ هذا الخيار لتعطيل جميع الألوان المخصصة مؤقتاً والعودة إلى ثيم Obsidian النشط.",
@@ -259,7 +325,7 @@ export const STRINGS = {
     ACTIVE_PROFILE_DESC: "تنقل بين الملفّات الشخصيّة أو أنشئ واحد جديد.",
     NEW_BUTTON: "جديد",
     DELETE_BUTTON: "حذف",
-    OPTIONS_HEADING: "الخيارات",
+    OPTIONS_HEADING: "إعدادات متقدمة",
     UPDATE_FREQUENCY_NAME: "معدل التحديث المباشر (إطار بالثانية)",
     UPDATE_FREQUENCY_DESC:
       "يحدد عدد مرات تحديث معاينة الألوان في الثانية أثناء السحب (0 = تعطيل المعاينة). القيم المنخفضة تحسن الأداء.",
@@ -328,9 +394,9 @@ export const STRINGS = {
     PASTE_CSS_MODAL_NOTE:
       "ملاحظة : كود CSS الذي تلصقه قد يؤثر على واجهة البرنامج، استخدم فقط الأكواد الموثوقة.",
     IMPORT_FROM_FILE: "استيراد من ملف",
-    IMPORT_FROM_FILE_DESC: "اختر ملف (.css) من جهازك.",
+    IMPORT_FROM_FILE_DESC: "أو، اختر ملف (.css) من جهاز الكمبيوتر الخاص بك.",
     CHOOSE_FILE_BUTTON: "اختر ملف...",
-    CSS_TEXTAREA_PLACEHOLDER: "أو الصق كود CSS هنا...",
+    CSS_TEXTAREA_PLACEHOLDER: "الصق كود CSS الخاص بك هنا...",
     SNIPPET_NAME_LABEL: "اسم القصاصة",
     CREATE_SNIPPET_TITLE: "إنشاء قصاصة CSS جديدة",
     IMPORT_PROFILE_TITLE: "استيراد / لصق CSS وإنشاء ملف شخصي",
@@ -346,7 +412,6 @@ export const STRINGS = {
       "تعذر العثور على البيانات الأصلية لهذا الملف الشخصي.",
     NOTICE_PROFILE_RESTORED: (name: string) =>
       `تمت استعادة الملف الشخصي "${name}" إلى حالته الافتراضية.`,
-    NOTICE_UI_REFRESHED: "تم تحديث الواجهة!",
     NOTICE_GRAPH_COLORS_APPLIED: "تم تطبيق ألوان الرسم البياني!",
     NOTICE_INVALID_JSON: "ملف JSON غير صالح.",
     NOTICE_JSON_MUST_HAVE_NAME:
@@ -379,9 +444,9 @@ export const STRINGS = {
     IMPORT_JSON_MODAL_DESC_1:
       "يمكنك لصق بيانات الملف الشخصي (JSON) في الصندوق أدناه.",
     IMPORT_JSON_MODAL_PLACEHOLDER: '{ "name": "...", "profile": { ... } }',
-    IMPORT_JSON_MODAL_DESC_2: "أو يمكنك الاستيراد مباشرة من ملف:",
     IMPORT_JSON_MODAL_SETTING_NAME: "استيراد من ملف",
-    IMPORT_JSON_MODAL_SETTING_DESC: "اختر ملف شخصي (.json) من جهازك.",
+    IMPORT_JSON_MODAL_SETTING_DESC:
+      "أو، اختر ملف الملف الشخصي (.json) من جهاز الكمبيوتر الخاص بك.",
     REPLACE_ACTIVE_BUTTON: "استبدال النشط",
     CREATE_NEW_BUTTON: "إنشاء جديدة",
     NOTICE_FILE_LOADED: (fileName: string) =>
@@ -405,6 +470,16 @@ export const STRINGS = {
     MODAL_DELETE_SNIPPET_TITLE: (name: string) => `حذف القصاصة: ${name}`,
     MODAL_DELETE_SNIPPET_DESC:
       "هل أنت متأكد من رغبتك في حذف هذه القصاصة؟ لا يمكن التراجع عن هذا الإجراء.",
+    RESET_PLUGIN_NAME: "إعادة تعيين الإضافة",
+    RESET_PLUGIN_DESC:
+      "سيؤدي هذا إلى حذف جميع الملفات الشخصية والقصاصات والإعدادات، وإعادة الإضافة إلى حالتها الأصلية. يتطلب هذا الإجراء إعادة تحميل Obsidian ولا يمكن التراجع عنه.",
+    RESET_PLUGIN_BUTTON: "إعادة تعيين كل البيانات...",
+    RESET_CONFIRM_MODAL_TITLE: "هل أنت متأكد؟",
+    RESET_CONFIRM_MODAL_DESC:
+      "سيتم حذف جميع بيانات Color Master بشكل دائم (الملفات الشخصية، القصاصات، الإعدادات). هذا الإجراء لا يمكن التراجع عنه.",
+    RESET_SUCCESS_NOTICE:
+      "تم حذف بيانات Color Master. يرجى إعادة تحميل Obsidian لتطبيق التغييرات.",
+    RELOAD_BUTTON: "إعادة تحميل",
     NOTICE_FPS_UPDATED: (value: number) =>
       `تم تعيين معدل التحديث المباشر إلى: ${value}`,
     NOTICE_SNIPPET_COPIED: "تم نسخ كود القصاصة إلى الحافظة!",
@@ -426,6 +501,25 @@ export const STRINGS = {
     DRAG_RULE_TOOLTIP: "اسحب لإعادة الترتيب",
     APPLY_BUTTON: "تطبيق",
     CANCEL_BUTTON: "إلغاء",
+    MODAL_ADD_VAR_TITLE: "إضافة متغير CSS مخصص جديد",
+    MODAL_ADD_VAR_DESC:
+      "حدد متغير CSS جديد (مثال: --my-color: #f00). سيتم إضافة هذا المتغير إلى ملفك الشخصي النشط.",
+    MODAL_VAR_DISPLAY_NAME: "اسم العرض",
+    MODAL_VAR_DISPLAY_NAME_DESC:
+      "اسم ودي للمتغير الخاص بك (مثال: 'لون أساسي مخصص لي').",
+    MODAL_VAR_DISPLAY_NAME_PLACEHOLDER: "مثال: لوني الأساسي",
+    MODAL_VAR_NAME: "اسم المتغير",
+    MODAL_VAR_NAME_DESC:
+      "الاسم الفعلي لمتغير CSS. يجب أن يبدأ بـ '--' (مثال: '--my-primary-color').",
+    MODAL_VAR_NAME_PLACEHOLDER: "مثال: --my-primary-color",
+    MODAL_VAR_VALUE: "قيمة المتغير",
+    MODAL_VAR_VALUE_DESC:
+      "قيمة متغير CSS (مثال: 'red', '#ff0000', 'rgb(255,0,0)').",
+    MODAL_VAR_VALUE_PLACEHOLDER: "مثال: #FF0000 أو أحمر",
+    MODAL_VAR_DESCRIPTION: "الوصف (اختياري)",
+    MODAL_VAR_DESCRIPTION_DESC: "وصف موجز لما يتحكم فيه هذا المتغير.",
+    MODAL_VAR_DESCRIPTION_PLACEHOLDER: "مثال: اللون الأساسي للعناوين",
+    ERROR_VAR_NAME_PREFIX: "يجب أن يبدأ اسم المتغير بـ '--'",
     SETTINGS_SAVED: "تم تطبيق الإعدادات بنجاح!",
     MOVE_RULE_UP_TOOLTIP: "تحريك القاعدة للأعلى",
     MOVE_RULE_DOWN_TOOLTIP: "تحريك القاعدة للأسفل",
@@ -460,6 +554,7 @@ export const STRINGS = {
     HELP_TEXT_PRE_LINK: "لم تجد المتغير الذي تبحث عنه؟ ",
     HELP_TEXT_LINK: "تصفح قائمة متغيرات CSS الرسمية في Obsidian.",
     MODAL_CUSTOM_VAR_TITLE: "إضافة تفاصيل المتغير المخصص",
+    ADD_BUTTON: "إضافة",
     DISPLAY_NAME_LABEL: "اسم العرض",
     DISPLAY_NAME_DESC: "هذا هو الاسم السهل الذي سيظهر في قائمة الإعدادات.",
     DESCRIPTION_LABEL: "الوصف",
@@ -477,9 +572,44 @@ export const STRINGS = {
     NOTICE_MOVE_SNIPPET_SCOPE: "استخدم نافذة التعديل لنقل القصاصة بين الأقسام.",
     ICONIZE_SETTINGS_MODAL_TITLE: "إعدادات تكامل Iconize",
     TOOLTIP_ICONIZE_SETTINGS: "إعدادات Iconize",
+    THEME_WARNING_TOOLTIP: (currentTheme: string) =>
+      `الثيم "${currentTheme}" مطبّق حالياً، وقد يتعارض مع مظهر الملف الشخصي. للحصول على أفضل النتائج، ننصح بالتبديل إلى الثيم الافتراضي لأوبسيديان، أو يمكنك استيراد ثيم "${currentTheme}" كملف شخصي جديد لتعديله مباشرةً.`,
+    IMPORT_FROM_INSTALLED_THEME: "استيراد من ثيم مثبّت",
+    IMPORT_FROM_INSTALLED_THEME_DESC:
+      "قم بتحميل CSS مباشرة من أحد الثيمات المثبتة لديك.",
+    IMPORT_BUTTON: "استيراد",
+    NOTICE_THEME_CSS_LOADED: (theme: string) =>
+      `تم تحميل CSS بنجاح من ثيم "${theme}".`,
+    NOTICE_THEME_READ_FAILED: (theme: string) =>
+      `تعذّر قراءة ملف الثيم "${theme}". قد يكون الملف محمياً أو مفقوداً.`,
+    IMPORT_FROM_INSTALLED_SNIPPET: "استيراد من قصاصة مثبتة",
+    IMPORT_FROM_INSTALLED_SNIPPET_DESC:
+      "قم بتحميل CSS مباشرة من إحدى قصاصات Obsidian المثبتة لديك.",
+    NOTICE_SNIPPET_LOADED: (snippet: string) =>
+      `تم تحميل CSS بنجاح من قصاصة "${snippet}".`,
+    NOTICE_SNIPPET_READ_FAILED: (snippet: string) =>
+      `تعذّرت قراءة ملف القصاصة "${snippet}".`,
+    NO_THEMES_INSTALLED: "لا يوجد ثيمات مثبتة",
+    NO_SNIPPETS_INSTALLED: "لا يوجد قصاصات مثبتة",
+    TOOLTIP_THEME_LIGHT: "الثيم: فرض الوضع الفاتح (اضغط للتبديل للغامق)",
+    TOOLTIP_THEME_DARK: "الثيم: فرض الوضع الغامق (اضغط للتبديل للتلقائي)",
+    TOOLTIP_THEME_AUTO: "الثيم: تلقائي (يتبع أوبسيديان) (اضغط للتبديل للفاتح)",
+    TOOLTIP_EXPORT_PROFILE: "تصدير الملف الشخصي الحالي كملف JSON",
+    TOOLTIP_COPY_JSON: "نسخ JSON للملف الشخصي الحالي إلى الحافظة",
+    NOTICE_JSON_COPIED: "تم نسخ JSON للملف الشخصي إلى الحافظة بنجاح!",
+    TOGGLE_THEME_COMMAND: "تبديل ثيم الملف الشخصي النشط",
+    NOTICE_THEME_SWITCHED_LIGHT: "تم التبديل إلى الوضع الفاتح",
+    NOTICE_THEME_SWITCHED_DARK: "تم التبديل إلى الوضع الغامق",
+    NOTICE_THEME_SWITCHED_AUTO: "تم التبديل إلى الوضع التلقائي",
+    COMMAND_ENABLE_DISABLE: "تفعيل وتعطيل",
+    COMMAND_CYCLE_NEXT: "الانتقال للبروفايل التالي",
+    COMMAND_CYCLE_PREVIOUS: "الانتقال للبروفايل السابق",
+    COMMAND_OPEN_SETTINGS: "فتح نافذة الإعدادات",
+    RIBBON_TOOLTIP_SETTINGS: "إعدادات Color Master",
+    REGEX_PLACEHOLDER: "أدخل التعبير النمطي واضغط Enter...",
   },
   fa: {
-    PLUGIN_NAME: "استاد رنگ - v1.0.8",
+    PLUGIN_NAME: "استاد رنگ - v1.0.9",
     ENABLE_PLUGIN: "فعال کردن استاد رنگ",
     ENABLE_PLUGIN_DESC:
       "این گزینه را برای غیرفعال کردن موقت تمام رنگ‌های سفارشی و بازگشت به تم فعال Obsidian خود خاموش کنید.",
@@ -495,7 +625,7 @@ export const STRINGS = {
     ACTIVE_PROFILE_DESC: "مدیریت و جابجایی بین پروفایل‌های رنگ.",
     NEW_BUTTON: "جدید",
     DELETE_BUTTON: "حذف",
-    OPTIONS_HEADING: "گزینه‌ها",
+    OPTIONS_HEADING: "تنظیمات پیشرفته",
     UPDATE_FREQUENCY_NAME: "فریم در ثانیه به‌روزرسانی زنده",
     UPDATE_FREQUENCY_DESC:
       "تعداد دفعاتی که رابط کاربری در هر ثانیه پیش‌نمایش تغییرات رنگ را هنگام کشیدن نشان می‌دهد تنظیم می‌کند (0 = غیرفعال کردن پیش‌نمایش زنده). مقادیر کمتر می‌تواند عملکرد را بهبود بخشد.",
@@ -564,9 +694,9 @@ export const STRINGS = {
     PASTE_CSS_MODAL_NOTE:
       "توجه: CSS چسبانده شده می‌تواند بر رابط کاربری تأثیر بگذارد، فقط با CSS معتبر ادامه دهید.",
     IMPORT_FROM_FILE: "وارد کردن از فایل",
-    IMPORT_FROM_FILE_DESC: "یک فایل (.css) از رایانه خود انتخاب کنید.",
+    IMPORT_FROM_FILE_DESC: "یا، یک فایل (.css) را از کامپیوتر خود انتخاب کنید.",
     CHOOSE_FILE_BUTTON: "انتخاب فایل...",
-    CSS_TEXTAREA_PLACEHOLDER: "یا CSS خود را اینجا بچسبانید...",
+    CSS_TEXTAREA_PLACEHOLDER: "کد CSS خود را اینجا جایگذاری کنید...",
     SNIPPET_NAME_LABEL: "نام قطعه کد",
     CREATE_SNIPPET_TITLE: "ایجاد قطعه کد CSS جدید",
     IMPORT_PROFILE_TITLE: "وارد کردن / چسباندن CSS و ایجاد پروفایل",
@@ -582,7 +712,6 @@ export const STRINGS = {
       "داده‌های اصلی برای این پروفایل یافت نشد.",
     NOTICE_PROFILE_RESTORED: (name: string) =>
       `پروفایل "${name}" به حالت پیش‌فرض خود بازگردانده شد.`,
-    NOTICE_UI_REFRESHED: "رابط کاربری تازه‌سازی شد!",
     NOTICE_GRAPH_COLORS_APPLIED: "رنگ‌های گراف اعمال شد!",
     NOTICE_INVALID_JSON: "JSON نامعتبر است.",
     NOTICE_JSON_MUST_HAVE_NAME:
@@ -617,10 +746,9 @@ export const STRINGS = {
     IMPORT_JSON_MODAL_DESC_1:
       "می‌توانید یک JSON پروفایل را در کادر زیر بچسبانید.",
     IMPORT_JSON_MODAL_PLACEHOLDER: '{ "name": "...", "profile": { ... } }',
-    IMPORT_JSON_MODAL_DESC_2: "یا، می‌توانید مستقیماً از یک فایل وارد کنید:",
     IMPORT_JSON_MODAL_SETTING_NAME: "وارد کردن از فایل",
     IMPORT_JSON_MODAL_SETTING_DESC:
-      "یک فایل پروفایل (.json) از رایانه خود انتخاب کنید.",
+      "یا، یک فایل پروفایل (.json) را از کامپیوتر خود انتخاب کنید.",
     REPLACE_ACTIVE_BUTTON: "جایگزینی فعال",
     CREATE_NEW_BUTTON: "ایجاد جدید",
     NOTICE_FILE_LOADED: (fileName: string) =>
@@ -643,6 +771,16 @@ export const STRINGS = {
     MODAL_DELETE_SNIPPET_TITLE: (name: string) => `حذف قطعه کد: ${name}`,
     MODAL_DELETE_SNIPPET_DESC:
       "آیا مطمئن هستید که می‌خواهید این قطعه کد را حذف کنید؟ این عمل قابل بازگشت نیست.",
+    RESET_PLUGIN_NAME: "بازنشانی تنظیمات افزونه",
+    RESET_PLUGIN_DESC:
+      "این کار تمام پروفایل‌ها، قطعه کدها و تنظیمات را حذف کرده و افزونه را به حالت اولیه بازنشانی می‌کند. این عمل نیاز به بارگذاری مجدد برنامه دارد و قابل بازگشت نیست.",
+    RESET_PLUGIN_BUTTON: "بازنشانی تمام داده‌ها...",
+    RESET_CONFIRM_MODAL_TITLE: "آیا مطمئن هستید؟",
+    RESET_CONFIRM_MODAL_DESC:
+      "این کار تمام داده‌های استاد رنگ شما (پروفایل‌ها، قطعه کدها، تنظیمات) را برای همیشه حذف می‌کند. این عمل غیرقابل بازگشت است.",
+    RESET_SUCCESS_NOTICE:
+      "داده‌های استاد رنگ حذف شد. لطفاً برای اعمال تغییرات Obsidian را مجدداً بارگذاری کنید.",
+    RELOAD_BUTTON: "بارگذاری مجدد",
     NOTICE_FPS_UPDATED: (value: number) =>
       `فریم در ثانیه به‌روزرسانی زنده روی ${value} تنظیم شد`,
     NOTICE_SNIPPET_COPIED: "CSS قطعه کد در کلیپ‌بورد کپی شد!",
@@ -664,6 +802,26 @@ export const STRINGS = {
     DRAG_RULE_TOOLTIP: "برای ترتیب مجدد بکشید",
     APPLY_BUTTON: "اعمال",
     CANCEL_BUTTON: "لغو",
+    MODAL_ADD_VAR_TITLE: "افزودن متغیر جدید CSS سفارشی",
+    MODAL_ADD_VAR_DESC:
+      "یک متغیر CSS جدید تعریف کنید (مانند --my-color: #f00). این متغیر به پروفایل فعال شما اضافه خواهد شد.",
+    MODAL_VAR_DISPLAY_NAME: "نام نمایشی",
+    MODAL_VAR_DISPLAY_NAME_DESC:
+      "یک نام دوستانه برای متغیر شما (مانند 'رنگ اصلی سفارشی من').",
+    MODAL_VAR_DISPLAY_NAME_PLACEHOLDER: "مثال: رنگ اصلی من",
+    MODAL_VAR_NAME: "نام متغیر",
+    MODAL_VAR_NAME_DESC:
+      "نام واقعی متغیر CSS. باید با '--' شروع شود (مانند '--my-primary-color').",
+    MODAL_VAR_NAME_PLACEHOLDER: "مثال: --my-primary-color",
+    MODAL_VAR_VALUE: "مقدار متغیر",
+    MODAL_VAR_VALUE_DESC:
+      "مقدار متغیر CSS (مانند 'red', '#ff0000', 'rgb(255,0,0)').",
+    MODAL_VAR_VALUE_PLACEHOLDER: "مثال: #FF0000 یا قرمز",
+    MODAL_VAR_DESCRIPTION: "توضیحات (اختیاری)",
+    MODAL_VAR_DESCRIPTION_DESC:
+      "توضیح مختصری در مورد آنچه این متغیر کنترل می‌کند.",
+    MODAL_VAR_DESCRIPTION_PLACEHOLDER: "مثال: رنگ اصلی برای عناوین",
+    ERROR_VAR_NAME_PREFIX: "نام متغیر باید با '--' شروع شود",
     SETTINGS_SAVED: "تنظیمات با موفقیت اعمال شد!",
     MOVE_RULE_UP_TOOLTIP: "قانون را به بالا ببرید",
     MOVE_RULE_DOWN_TOOLTIP: "قانون را به پایین ببرید",
@@ -697,6 +855,7 @@ export const STRINGS = {
     HELP_TEXT_PRE_LINK: "متغیری که به دنبال آن هستید را پیدا نمی‌کنید؟ ",
     HELP_TEXT_LINK: "لیست رسمی متغیرهای CSS Obsidian را مرور کنید.",
     MODAL_CUSTOM_VAR_TITLE: "افزودن جزئیات متغیر سفارشی",
+    ADD_BUTTON: "افزودن",
     DISPLAY_NAME_LABEL: "نام نمایشی",
     DISPLAY_NAME_DESC: "این نام کاربرپسندی است که در لیست تنظیمات ظاهر می‌شود.",
     DESCRIPTION_LABEL: "توضیحات",
@@ -715,9 +874,45 @@ export const STRINGS = {
       "برای جابجایی قطعه کد بین بخش‌ها از پنجره ویرایش استفاده کنید.",
     ICONIZE_SETTINGS_MODAL_TITLE: "تنظیمات ادغام Iconize",
     TOOLTIP_ICONIZE_SETTINGS: "تنظیمات Iconize",
+    THEME_WARNING_TOOLTIP: (currentTheme: string) =>
+      `تم انجمن "${currentTheme}" فعال است که ممکن است با ظاهر پروفایل تداخل داشته باشد. برای بهترین نتیجه، به تم پیش‌فرض Obsidian بروید یا تم "${currentTheme}" را به عنوان یک پروفایل CSS جدید وارد کرده و مستقیماً آن را ویرایش کنید.`,
+    IMPORT_FROM_INSTALLED_THEME: "وارد کردن از تم نصب شده",
+    IMPORT_FROM_INSTALLED_THEME_DESC:
+      "به سرعت CSS را از یکی از تم‌های نصب شده خود بارگیری کنید.",
+    IMPORT_BUTTON: "وارد کردن",
+    NOTICE_THEME_CSS_LOADED: (theme: string) =>
+      `CSS با موفقیت از تم "${theme}" بارگیری شد.`,
+    NOTICE_THEME_READ_FAILED: (theme: string) =>
+      `فایل تم "${theme}" خوانده نشد. ممکن است فایل محافظت شده یا موجود نباشد.`,
+    IMPORT_FROM_INSTALLED_SNIPPET: "وارد کردن از قطعه کد نصب شده",
+    IMPORT_FROM_INSTALLED_SNIPPET_DESC:
+      "به سرعت CSS را از یکی از قطعه کدهای نصب شده Obsidian خود بارگیری کنید.",
+    NOTICE_SNIPPET_LOADED: (snippet: string) =>
+      `CSS با موفقیت از قطعه کد "${snippet}" بارگیری شد.`,
+    NOTICE_SNIPPET_READ_FAILED: (snippet: string) =>
+      `فایل قطعه کد "${snippet}" خوانده نشد.`,
+    NO_THEMES_INSTALLED: "هیچ تمی نصب نشده است",
+    NO_SNIPPETS_INSTALLED: "هیچ قطعه کدی نصب نشده است",
+    TOOLTIP_THEME_LIGHT: "تم: اعمال حالت روشن (برای تغییر به تاریک کلیک کنید)",
+    TOOLTIP_THEME_DARK: "تم: اعمال حالت تاریک (برای تغییر به خودکار کلیک کنید)",
+    TOOLTIP_THEME_AUTO:
+      "تم: خودکار (مطابق با Obsidian) (برای تغییر به روشن کلیک کنید)",
+    TOOLTIP_EXPORT_PROFILE: "صادر کردن نمایه (پروفایل) فعلی به صورت فایل JSON",
+    TOOLTIP_COPY_JSON: "کپی کردن JSON نمایه فعلی در کلیپ‌بورد",
+    NOTICE_JSON_COPIED: "JSON نمایه با موفقیت در کلیپ‌بورد کپی شد!",
+    TOGGLE_THEME_COMMAND: "تغییر تم پروفایل فعال",
+    NOTICE_THEME_SWITCHED_LIGHT: "به حالت روشن تغییر کرد",
+    NOTICE_THEME_SWITCHED_DARK: "به حالت تاریک تغییر کرد",
+    NOTICE_THEME_SWITCHED_AUTO: "به حالت خودکار تغییر کرد",
+    COMMAND_ENABLE_DISABLE: "فعال/غیرفعال کردن",
+    COMMAND_CYCLE_NEXT: "رفتن به پروفایل بعدی",
+    COMMAND_CYCLE_PREVIOUS: "رفتن به پروفایل قبلی",
+    COMMAND_OPEN_SETTINGS: "باز کردن تنظیمات",
+    RIBBON_TOOLTIP_SETTINGS: "تنظیمات استاد رنگ",
+    REGEX_PLACEHOLDER: "عبارت منظم را وارد کنید و Enter را بزنید...",
   },
   fr: {
-    PLUGIN_NAME: "Maître des Couleurs - v1.0.8",
+    PLUGIN_NAME: "Maître des Couleurs - v1.0.9",
     ENABLE_PLUGIN: "Activer Maître des Couleurs",
     ENABLE_PLUGIN_DESC:
       "Désactivez cette option pour désactiver temporairement toutes les couleurs personnalisées et revenir à votre thème Obsidian actif.",
@@ -733,7 +928,7 @@ export const STRINGS = {
     ACTIVE_PROFILE_DESC: "Gérez et basculez entre les profils de couleurs.",
     NEW_BUTTON: "Nouveau",
     DELETE_BUTTON: "Supprimer",
-    OPTIONS_HEADING: "Options",
+    OPTIONS_HEADING: "Paramètres avancés",
     UPDATE_FREQUENCY_NAME: "FPS de la mise à jour en direct",
     UPDATE_FREQUENCY_DESC:
       "Définit le nombre de fois par seconde où l'interface prévisualise les changements de couleur lors du glissement (0 = désactiver l'aperçu en direct). Des valeurs plus basses peuvent améliorer les performances.",
@@ -802,9 +997,9 @@ export const STRINGS = {
       "Remarque : Le CSS collé peut affecter l'interface utilisateur, n'utilisez que du CSS de confiance.",
     IMPORT_FROM_FILE: "Importer depuis un fichier",
     IMPORT_FROM_FILE_DESC:
-      "Sélectionnez un fichier (.css) depuis votre ordinateur.",
+      "Ou, sélectionnez un fichier (.css) depuis votre ordinateur.",
     CHOOSE_FILE_BUTTON: "Choisir un fichier...",
-    CSS_TEXTAREA_PLACEHOLDER: "Ou collez votre CSS ici...",
+    CSS_TEXTAREA_PLACEHOLDER: "Collez votre code CSS ici...",
     SNIPPET_NAME_LABEL: "Nom de l'extrait",
     CREATE_SNIPPET_TITLE: "Créer un nouvel extrait CSS",
     IMPORT_PROFILE_TITLE: "Importer / Coller du CSS et créer un profil",
@@ -820,7 +1015,6 @@ export const STRINGS = {
       "Impossible de trouver les données originales pour ce profil.",
     NOTICE_PROFILE_RESTORED: (name: string) =>
       `Le profil "${name}" a été restauré à son état par défaut.`,
-    NOTICE_UI_REFRESHED: "Interface utilisateur actualisée !",
     NOTICE_GRAPH_COLORS_APPLIED: "Couleurs du graphique appliquées !",
     NOTICE_INVALID_JSON: "JSON invalide.",
     NOTICE_JSON_MUST_HAVE_NAME:
@@ -853,11 +1047,9 @@ export const STRINGS = {
     IMPORT_JSON_MODAL_DESC_1:
       "Vous pouvez coller un JSON de profil dans la case ci-dessous.",
     IMPORT_JSON_MODAL_PLACEHOLDER: '{ "name": "...", "profile": { ... } }',
-    IMPORT_JSON_MODAL_DESC_2:
-      "Ou, vous pouvez importer directement depuis un fichier :",
     IMPORT_JSON_MODAL_SETTING_NAME: "Importer depuis un fichier",
     IMPORT_JSON_MODAL_SETTING_DESC:
-      "Sélectionnez un fichier de profil (.json) depuis votre ordinateur.",
+      "Ou, sélectionnez un fichier de profil (.json) depuis votre ordinateur.",
     REPLACE_ACTIVE_BUTTON: "Remplacer l'actuel",
     CREATE_NEW_BUTTON: "Créer un nouveau",
     NOTICE_FILE_LOADED: (fileName: string) =>
@@ -882,6 +1074,16 @@ export const STRINGS = {
       `Supprimer l'extrait : ${name}`,
     MODAL_DELETE_SNIPPET_DESC:
       "Êtes-vous sûr de vouloir supprimer cet extrait ? Cette action est irréversible.",
+    RESET_PLUGIN_NAME: "Réinitialiser les paramètres du plugin",
+    RESET_PLUGIN_DESC:
+      "Cela supprimera tous les profils, extraits et paramètres, réinitialisant le plugin à son état d'origine. Cette action nécessite un rechargement de l'application et est irréversible.",
+    RESET_PLUGIN_BUTTON: "Réinitialiser toutes les données...",
+    RESET_CONFIRM_MODAL_TITLE: "Êtes-vous sûr ?",
+    RESET_CONFIRM_MODAL_DESC:
+      "Cela supprimera définitivement toutes vos données de Color Master (profils, extraits, paramètres). Ceci est irréversible.",
+    RESET_SUCCESS_NOTICE:
+      "Les données de Color Master ont été supprimées. Veuillez recharger Obsidian pour appliquer les changements.",
+    RELOAD_BUTTON: "Recharger",
     NOTICE_FPS_UPDATED: (value: number) =>
       `FPS de la mise à jour en direct défini sur : ${value}`,
     NOTICE_SNIPPET_COPIED: "CSS de l'extrait copié dans le presse-papiers !",
@@ -905,6 +1107,26 @@ export const STRINGS = {
     DRAG_RULE_TOOLTIP: "Glisser pour réorganiser",
     APPLY_BUTTON: "Appliquer",
     CANCEL_BUTTON: "Annuler",
+    MODAL_ADD_VAR_TITLE: "Ajouter une nouvelle variable CSS personnalisée",
+    MODAL_ADD_VAR_DESC:
+      "Définissez une nouvelle variable CSS (ex: --my-color: #f00). Cette variable sera ajoutée à votre profil actif.",
+    MODAL_VAR_DISPLAY_NAME: "Nom d'affichage",
+    MODAL_VAR_DISPLAY_NAME_DESC:
+      "Un nom convivial pour votre variable (ex: 'Ma couleur primaire personnalisée').",
+    MODAL_VAR_DISPLAY_NAME_PLACEHOLDER: "Ex: Ma couleur primaire",
+    MODAL_VAR_NAME: "Nom de la variable",
+    MODAL_VAR_NAME_DESC:
+      "Le nom réel de la variable CSS. Doit commencer par '--' (ex: '--ma-couleur-primaire').",
+    MODAL_VAR_NAME_PLACEHOLDER: "Ex: --ma-couleur-primaire",
+    MODAL_VAR_VALUE: "Valeur de la variable",
+    MODAL_VAR_VALUE_DESC:
+      "La valeur de la variable CSS (ex: 'red', '#ff0000', 'rgb(255,0,0)').",
+    MODAL_VAR_VALUE_PLACEHOLDER: "Ex: #FF0000 ou rouge",
+    MODAL_VAR_DESCRIPTION: "Description (Optionnel)",
+    MODAL_VAR_DESCRIPTION_DESC:
+      "Une brève description de ce que cette variable contrôle.",
+    MODAL_VAR_DESCRIPTION_PLACEHOLDER: "Ex: Couleur principale des titres",
+    ERROR_VAR_NAME_PREFIX: "Le nom de la variable doit commencer par '--'",
     SETTINGS_SAVED: "Paramètres appliqués avec succès !",
     MOVE_RULE_UP_TOOLTIP: "Déplacer la règle vers le haut",
     MOVE_RULE_DOWN_TOOLTIP: "Déplacer la règle vers le bas",
@@ -940,6 +1162,7 @@ export const STRINGS = {
     HELP_TEXT_LINK:
       "Parcourez la liste officielle des variables CSS d'Obsidian.",
     MODAL_CUSTOM_VAR_TITLE: "Ajouter les détails de la variable personnalisée",
+    ADD_BUTTON: "Ajouter",
     DISPLAY_NAME_LABEL: "Nom d'affichage",
     DISPLAY_NAME_DESC:
       "C'est le nom convivial qui apparaîtra dans la liste des paramètres.",
@@ -960,6 +1183,46 @@ export const STRINGS = {
       "Utilisez la fenêtre de modification pour déplacer un extrait.",
     ICONIZE_SETTINGS_MODAL_TITLE: "Paramètres d'intégration d'Iconize",
     TOOLTIP_ICONIZE_SETTINGS: "Paramètres d'Iconize",
+    THEME_WARNING_TOOLTIP: (currentTheme: string) =>
+      `Le thème communautaire "${currentTheme}" est actif, ce qui peut interférer avec l'apparence du profil. Pour de meilleurs résultats, passez au thème par défaut d'Obsidian, ou importez "${currentTheme}" comme un nouveau profil CSS pour le personnaliser directement.`,
+    IMPORT_FROM_INSTALLED_THEME: "Importer depuis un thème installé",
+    IMPORT_FROM_INSTALLED_THEME_DESC:
+      "Chargez rapidement le CSS de l'un de vos thèmes communautaires installés.",
+    IMPORT_BUTTON: "Importer",
+    NOTICE_THEME_CSS_LOADED: (theme: string) =>
+      `CSS du thème "${theme}" chargé avec succès.`,
+    NOTICE_THEME_READ_FAILED: (theme: string) =>
+      `Impossible de lire le fichier du thème "${theme}". Il est peut-être protégé ou manquant.`,
+    IMPORT_FROM_INSTALLED_SNIPPET: "Importer depuis un extrait installé",
+    IMPORT_FROM_INSTALLED_SNIPPET_DESC:
+      "Chargez rapidement le CSS de l'un de vos extraits Obsidian installés.",
+    NOTICE_SNIPPET_LOADED: (snippet: string) =>
+      `CSS de l'extrait "${snippet}" chargé avec succès.`,
+    NOTICE_SNIPPET_READ_FAILED: (snippet: string) =>
+      `Impossible de lire le fichier de l'extrait "${snippet}".`,
+    NO_THEMES_INSTALLED: "Aucun thème installé",
+    NO_SNIPPETS_INSTALLED: "Aucun extrait installé",
+    TOOLTIP_THEME_LIGHT:
+      "Thème : Forcer le mode Clair (Cliquer pour passer au Sombre)",
+    TOOLTIP_THEME_DARK:
+      "Thème : Forcer le mode Sombre (Cliquer pour passer en Auto)",
+    TOOLTIP_THEME_AUTO:
+      "Thème : Auto (Suit Obsidian) (Cliquer pour passer au Clair)",
+    TOOLTIP_EXPORT_PROFILE:
+      "Exporter le profil actuel en tant que fichier JSON",
+    TOOLTIP_COPY_JSON: "Copier le JSON du profil actuel dans le presse-papiers",
+    NOTICE_JSON_COPIED:
+      "JSON du profil copié dans le presse-papiers avec succès !",
+    TOGGLE_THEME_COMMAND: "Changer le thème du profil actif",
+    NOTICE_THEME_SWITCHED_LIGHT: "Passage en mode Clair",
+    NOTICE_THEME_SWITCHED_DARK: "Passage en mode Sombre",
+    NOTICE_THEME_SWITCHED_AUTO: "Passage en mode Auto",
+    COMMAND_ENABLE_DISABLE: "Activer & Désactiver",
+    COMMAND_CYCLE_NEXT: "Profil suivant",
+    COMMAND_CYCLE_PREVIOUS: "Profil précédent",
+    COMMAND_OPEN_SETTINGS: "Ouvrir les paramètres",
+    RIBBON_TOOLTIP_SETTINGS: "Paramètres de Color Master",
+    REGEX_PLACEHOLDER: "Entrez Regex et appuyez sur Entrée...",
   },
 };
 

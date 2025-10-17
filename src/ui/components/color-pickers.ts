@@ -1,23 +1,24 @@
-import { Setting, Notice } from "obsidian";
-import { t } from "../../i18n";
+import { Notice, Setting } from "obsidian";
 import {
-  DEFAULT_VARS,
-  COLOR_DESCRIPTIONS_AR,
-  COLOR_NAMES_AR,
   COLOR_DESCRIPTIONS,
+  COLOR_DESCRIPTIONS_AR,
+  COLOR_DESCRIPTIONS_FA,
+  COLOR_DESCRIPTIONS_FR,
   COLOR_NAMES,
+  COLOR_NAMES_AR,
+  COLOR_NAMES_FA,
+  COLOR_NAMES_FR,
+  DEFAULT_VARS,
   TEXT_TO_BG_MAP,
 } from "../../constants";
+import { t } from "../../i18n";
 import {
+  flattenVars,
   getAccessibilityRating,
   getContrastRatio,
-  flattenVars,
 } from "../../utils";
-import type { ColorMasterSettingTab } from "../settingsTab";
-import { CustomVariableMetaModal } from "../modals";
-import { COLOR_NAMES_FR, COLOR_DESCRIPTIONS_FR } from "../../constants";
-import { COLOR_NAMES_FA, COLOR_DESCRIPTIONS_FA } from "../../constants";
 import { IconizeSettingsModal, NoticeRulesModal } from "../modals";
+import type { ColorMasterSettingTab } from "../settingsTab";
 
 export function drawColorPickers(
   containerEl: HTMLElement,

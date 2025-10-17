@@ -1,13 +1,19 @@
-import { Setting, Notice } from "obsidian";
-import { t } from "../../i18n";
+import { App, Notice, setIcon, Setting } from "obsidian";
 import {
-  BUILT_IN_PROFILES_VARS,
   BUILT_IN_PROFILES_DATA,
+  BUILT_IN_PROFILES_VARS,
   DEFAULT_VARS,
 } from "../../constants";
+import { t } from "../../i18n";
 import { flattenVars } from "../../utils";
-import type { ColorMasterSettingTab } from "../settingsTab";
 import { ConfirmationModal, NewProfileModal, PasteCssModal } from "../modals";
+import type { ColorMasterSettingTab } from "../settingsTab";
+
+interface AppWithCustomCss extends App {
+  customCss: {
+    theme: string;
+  };
+}
 
 export function drawProfileManager(
   containerEl: HTMLElement,
@@ -46,6 +52,60 @@ export function drawProfileManager(
         settingTab.display();
       });
     })
+
+.addButton((button) => {
+  const activeProfile = plugin.settings.profiles[plugin.settings.activeProfile];
+  if (!activeProfile) {
+    button.buttonEl.hide();
+    return;
+  }
+
+  button.buttonEl.classList.add("cm-control-button");
+
+  // Helper function to update the button's appearance
+  const updateButtonAppearance = (themeType: 'auto' | 'dark' | 'light') => {
+    switch (themeType) {
+      case 'light':
+        button
+          .setIcon('sun')
+          .setTooltip(t('TOOLTIP_THEME_LIGHT'));
+        break;
+      case 'dark':
+        button
+          .setIcon('moon')
+          .setTooltip(t('TOOLTIP_THEME_DARK'));
+        break;
+      case 'auto':
+      default:
+        button
+          .setIcon('sun-moon')
+          .setTooltip(t('TOOLTIP_THEME_AUTO'));
+        break;
+    }
+  };
+
+  // Set the initial state of the button on load
+  updateButtonAppearance(activeProfile.themeType);
+
+  // Add the click logic to cycle through themes
+  button.onClick(async () => {
+    const currentType = activeProfile.themeType;
+    let nextType: 'auto' | 'dark' | 'light';
+
+    if (currentType === 'light') {
+      nextType = 'dark';
+    } else if (currentType === 'dark') {
+      nextType = 'auto';
+    } else { // 'auto'
+      nextType = 'light';
+    }
+
+    activeProfile.themeType = nextType;
+    updateButtonAppearance(nextType); // Update UI instantly
+    await plugin.saveSettings(); // Save and apply styles
+  });
+})
+
     .addButton((button) => {
       if (isBuiltInProfile) {
         button
@@ -98,7 +158,6 @@ export function drawProfileManager(
       } else {
         button.buttonEl.hide();
       }
-
       button.buttonEl.classList.add("cm-control-button");
     })
 
@@ -196,6 +255,17 @@ export function drawProfileManager(
       });
       button.buttonEl.classList.add("cm-control-button");
     });
+
+  const currentTheme = (plugin.app as AppWithCustomCss).customCss.theme;
+
+  if (currentTheme) {
+    const iconEl = profileSetting.nameEl.createSpan({
+      cls: "cm-theme-warning-icon",
+    });
+
+    setIcon(iconEl, "alert-triangle");
+    iconEl.setAttr("aria-label", t("THEME_WARNING_TOOLTIP", currentTheme));
+  }
 
   profileSetting.settingEl.classList.add("cm-active-profile-controls");
   settingTab._updatePinButtons();

@@ -29,10 +29,6 @@ export function drawImportExport(
     text: t("IMPORT_PASTE_CSS_BUTTON"),
     cls: "cm-profile-action-btn cm-paste-css-btn",
   });
-  pasteCssBtn.createSpan({
-    cls: "cm-badge-new",
-    text: t("NEW_PROFILE"),
-  });
 
   pasteCssBtn.addEventListener("click", () => {
     new PasteCssModal(

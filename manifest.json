@@ -1,9 +1,9 @@
 {
   "id": "color-master",
   "name": "Color Master",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "minAppVersion": "1.5.0",
-  "description": "Full control of Obsidian color CSS variables with profiles, import/export, bilingual UI, and Force Mode to override themes.",
+  "description": "Full control of Obsidian's appearance. Create and share color profiles, use advanced CSS snippets, and override any theme with a powerful, live UI.",
   "author": "Yazan Ammar",
   "authorUrl": "https://github.com/YazanAmmar",
   "isDesktopOnly": false

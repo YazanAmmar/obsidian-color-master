@@ -18,6 +18,8 @@ export class ProfileJsonImportModal extends Modal {
   plugin: ColorMaster;
   settingTab: ColorMasterSettingTab;
   textarea: HTMLTextAreaElement;
+  nameInput: TextComponent;
+  profileName: string = "";
 
   constructor(
     app: App,
@@ -39,19 +41,23 @@ export class ProfileJsonImportModal extends Modal {
     const { contentEl } = this;
     contentEl.empty();
     contentEl.createEl("h3", { text: t("IMPORT_JSON_MODAL_TITLE") });
+    new Setting(contentEl).setName(t("PROFILE_NAME_LABEL")).addText((text) => {
+      this.nameInput = text;
+      text.setPlaceholder(t("PROFILE_NAME_PLACEHOLDER")).onChange((value) => {
+        this.profileName = value.trim();
+      });
+    });
+    contentEl.createEl("hr");
+
     contentEl.createEl("p", {
       text: t("IMPORT_JSON_MODAL_DESC_1"),
     });
     this.textarea = contentEl.createEl("textarea", {
       cls: "cm-search-input cm-import-textarea",
-      attr: { rows: "8", placeholder: t("IMPORT_JSON_MODAL_PLACEHOLDER") },
+      attr: { rows: "12", placeholder: t("IMPORT_JSON_MODAL_PLACEHOLDER") },
     });
 
     // File import button
-    contentEl.createEl("p", {
-      text: t("IMPORT_JSON_MODAL_DESC_2"),
-    });
-    contentEl.createEl("hr");
     new Setting(contentEl)
       .setName(t("IMPORT_JSON_MODAL_SETTING_NAME"))
       .setDesc(t("IMPORT_JSON_MODAL_SETTING_DESC"))
@@ -66,7 +72,6 @@ export class ProfileJsonImportModal extends Modal {
     ctrl.createDiv({ cls: "cm-profile-action-spacer" });
     const replaceBtn = ctrl.createEl("button", {
       text: t("REPLACE_ACTIVE_BUTTON"),
-      cls: "cm-profile-action-btn",
     });
     const createBtn = ctrl.createEl("button", {
       text: t("CREATE_NEW_BUTTON"),
@@ -91,6 +96,17 @@ export class ProfileJsonImportModal extends Modal {
         const file = input.files[0];
         const content = await file.text();
         this.textarea.value = content;
+        try {
+          const parsed = JSON.parse(content);
+          const profileNameFromJson =
+            parsed.name ||
+            file.name.replace(".profile.json", "").replace(".json", "");
+          this.nameInput.setValue(profileNameFromJson);
+          this.profileName = profileNameFromJson;
+        } catch (e) {
+          /* ignore json parsing errors here */
+        }
+
         new Notice(t("NOTICE_FILE_LOADED", file.name));
       })();
     };
@@ -102,11 +118,23 @@ export class ProfileJsonImportModal extends Modal {
   }
 
   async _applyCreate() {
+    const name = this.profileName;
+    if (!name) {
+      new Notice(t("EMPTY_PROFILE_NAME_NOTICE"));
+      return;
+    }
+
+    if (this.plugin.settings.profiles[name]) {
+      new Notice(t("NOTICE_PROFILE_NAME_EXISTS", name));
+      return;
+    }
+
     const raw = this.textarea.value.trim();
     if (!raw) {
       new Notice(t("NOTICE_TEXTBOX_EMPTY"));
       return;
     }
+
     let parsed;
     try {
       parsed = JSON.parse(raw);
@@ -115,47 +143,20 @@ export class ProfileJsonImportModal extends Modal {
       return;
     }
 
-    const newProfileName = parsed.name;
     const profileObj: Profile = parsed.profile ? parsed.profile : parsed;
-
-    if (!newProfileName) {
-      new Notice(t("NOTICE_JSON_MUST_HAVE_NAME"));
-      return;
-    }
-
-    if (this.plugin.settings.profiles[newProfileName]) {
-      new DuplicateProfileModal(
-        this.app,
-        this.plugin,
-        newProfileName,
-        profileObj,
-        this.settingTab,
-        (newName) => {
-          this.plugin.settings.profiles[newName] = profileObj;
-          this.plugin.settings.activeProfile = newName;
-          this.plugin.saveSettings();
-          this.settingTab.display();
-          new Notice(t("NOTICE_PROFILE_CREATED_SUCCESS", newName));
-        }
-      ).open();
-
-      this.close();
-      return;
-    }
-
     profileObj.noticeRules = profileObj.noticeRules || {
       text: [],
       background: [],
     };
-    this.plugin.settings.profiles[newProfileName] = profileObj;
-    this.plugin.settings.activeProfile = newProfileName;
+
+    this.plugin.settings.profiles[name] = profileObj;
+    this.plugin.settings.activeProfile = name;
 
     await this.plugin.saveSettings();
     this.settingTab.display();
     this.close();
-    new Notice(t("NOTICE_PROFILE_CREATED_SUCCESS", newProfileName));
+    new Notice(t("NOTICE_PROFILE_CREATED_SUCCESS", name));
   }
-
   async _applyImport(mode: "replace") {
     const raw = this.textarea.value.trim();
     if (!raw) {
@@ -372,7 +373,6 @@ export class PasteCssModal extends Modal {
     name: string;
     css: string;
     id?: string;
-    isProfile?: boolean;
   } | null;
   isEditing: boolean;
   modalTitleEl: HTMLHeadingElement;
@@ -380,6 +380,7 @@ export class PasteCssModal extends Modal {
   nameInput: TextComponent;
   cssTextarea: HTMLTextAreaElement;
   profileName: string;
+  isSaving: boolean = false;
 
   _debounce(func: (...args: any[]) => void, delay: number) {
     let timeout: number;
@@ -397,7 +398,6 @@ export class PasteCssModal extends Modal {
       name: string;
       css: string;
       id?: string;
-      isProfile?: boolean;
     } | null = null
   ) {
     super(app);
@@ -443,10 +443,54 @@ export class PasteCssModal extends Modal {
 
     this.modalTitleEl = titleContainer.createEl("h3", { text: titleText });
 
-    contentEl.createEl("p", { text: t("PASTE_CSS_MODAL_NOTE") });
+    const installedThemes = (this.app as any).customCss.themes || {};
+    const themeNames = Object.keys(installedThemes);
+    let selectedTheme = themeNames.length > 0 ? themeNames[0] : "";
+
+    const themeImporterEl = new Setting(contentEl)
+      .setName(t("IMPORT_FROM_INSTALLED_THEME"))
+      .setDesc(t("IMPORT_FROM_INSTALLED_THEME_DESC"));
+    themeImporterEl.settingEl.addClass("cm-theme-importer-setting");
+
+    themeImporterEl.addDropdown((dropdown) => {
+      if (themeNames.length > 0) {
+        themeNames.forEach((themeName) => {
+          dropdown.addOption(themeName, themeName);
+        });
+        dropdown.onChange((value) => {
+          selectedTheme = value;
+        });
+      } else {
+        dropdown.addOption("", t("NO_THEMES_INSTALLED"));
+        dropdown.setDisabled(true);
+      }
+    });
+
+    themeImporterEl.addButton((button) => {
+      button
+        .setButtonText(t("IMPORT_BUTTON"))
+        .setCta()
+        .setDisabled(themeNames.length === 0)
+        .onClick(async () => {
+          if (!selectedTheme) return;
+          const themePath = `${this.app.vault.configDir}/themes/${selectedTheme}/theme.css`;
+          try {
+            const cssContent = await this.app.vault.adapter.read(themePath);
+            this.cssTextarea.value = cssContent;
+            this.nameInput.setValue(selectedTheme);
+            this.profileName = selectedTheme;
+            new Notice(t("NOTICE_THEME_CSS_LOADED", selectedTheme));
+          } catch (error) {
+            new Notice(t("NOTICE_THEME_READ_FAILED", selectedTheme));
+            console.error(
+              `Color Master: Failed to read theme CSS at ${themePath}`,
+              error
+            );
+          }
+        });
+    });
 
     let nameLabelText = t("PROFILE_NAME_LABEL");
-
     this.nameSetting = new Setting(contentEl)
       .setName(nameLabelText)
       .addText((text) => {
@@ -465,6 +509,15 @@ export class PasteCssModal extends Modal {
           });
       });
 
+    this.cssTextarea = contentEl.createEl("textarea", {
+      cls: "cm-search-input cm-large-textarea",
+      attr: { rows: "12", placeholder: t("CSS_TEXTAREA_PLACEHOLDER") },
+    });
+
+    contentEl.createDiv({
+      text: t("PASTE_CSS_MODAL_NOTE"),
+      cls: "cm-modal-warning-note",
+    });
     new Setting(contentEl)
       .setName(t("IMPORT_FROM_FILE"))
       .setDesc(t("IMPORT_FROM_FILE_DESC"))
@@ -473,11 +526,6 @@ export class PasteCssModal extends Modal {
           this._handleFileImport();
         });
       });
-
-    this.cssTextarea = contentEl.createEl("textarea", {
-      cls: "cm-search-input cm-large-textarea",
-      attr: { rows: "12", placeholder: t("CSS_TEXTAREA_PLACEHOLDER") },
-    });
 
     const historyId =
       this.isEditing && this.existingProfileData
@@ -544,6 +592,7 @@ export class PasteCssModal extends Modal {
         cls: "mod-cta",
       })
       .addEventListener("click", () => this.handleSave());
+    setTimeout(() => this.nameInput.inputEl.focus(), 0);
   }
 
   handleSave() {
@@ -612,6 +661,7 @@ export class PasteCssModal extends Modal {
       new Notice(t("NOTICE_PROFILE_CREATED_FROM_CSS", name));
     }
 
+    this.isSaving = true;
     this.plugin.saveSettings().then(() => {
       this.plugin.applyCssSnippets();
       this.settingTab.display();
@@ -620,6 +670,17 @@ export class PasteCssModal extends Modal {
   }
 
   onClose() {
+    // If the save button is not pressed
+    if (!this.isSaving) {
+      const historyId =
+        this.isEditing && this.existingProfileData
+          ? `profile-${this.existingProfileData.name}`
+          : null;
+      // If there is a temporary date delete it.
+      if (historyId && this.plugin.cssHistory[historyId]) {
+        delete this.plugin.cssHistory[historyId];
+      }
+    }
     this.contentEl.empty();
   }
 }
@@ -635,6 +696,7 @@ export class SnippetCssModal extends Modal {
   cssTextarea: TextAreaComponent;
   snippetName: string;
   isGlobalSnippet: boolean;
+  isSaving: boolean = false;
 
   _debounce(func: (...args: any[]) => void, delay: number) {
     let timeout: number;
@@ -693,7 +755,53 @@ export class SnippetCssModal extends Modal {
       : t("CREATE_SNIPPET_TITLE");
 
     this.modalTitleEl = titleContainer.createEl("h3", { text: titleText });
-    contentEl.createEl("p", { text: t("PASTE_CSS_MODAL_NOTE") });
+
+    const installedSnippets = (this.app as any).customCss.snippets || [];
+    let selectedSnippet =
+      installedSnippets.length > 0 ? installedSnippets[0] : "";
+
+    const snippetImporterEl = new Setting(contentEl)
+      .setName(t("IMPORT_FROM_INSTALLED_SNIPPET"))
+      .setDesc(t("IMPORT_FROM_INSTALLED_SNIPPET_DESC"));
+    snippetImporterEl.settingEl.addClass("cm-theme-importer-setting");
+
+    snippetImporterEl.addDropdown((dropdown) => {
+      if (installedSnippets.length > 0) {
+        installedSnippets.forEach((snippetName: string) => {
+          dropdown.addOption(snippetName, snippetName);
+        });
+        dropdown.onChange((value) => {
+          selectedSnippet = value;
+        });
+      } else {
+        dropdown.addOption("", t("NO_SNIPPETS_INSTALLED"));
+        dropdown.setDisabled(true);
+      }
+    });
+
+    snippetImporterEl.addButton((button) => {
+      button
+        .setButtonText(t("IMPORT_BUTTON"))
+        .setCta()
+        .setDisabled(installedSnippets.length === 0)
+        .onClick(async () => {
+          if (!selectedSnippet) return;
+          const snippetPath = `${this.app.vault.configDir}/snippets/${selectedSnippet}.css`;
+          try {
+            const cssContent = await this.app.vault.adapter.read(snippetPath);
+            this.cssTextarea.setValue(cssContent);
+            this.nameInput.setValue(selectedSnippet);
+            this.snippetName = selectedSnippet;
+            new Notice(t("NOTICE_SNIPPET_LOADED", selectedSnippet));
+          } catch (error) {
+            new Notice(t("NOTICE_SNIPPET_READ_FAILED", selectedSnippet));
+            console.error(
+              `Color Master: Failed to read snippet CSS at ${snippetPath}`,
+              error
+            );
+          }
+        });
+    });
 
     const nameLabelText = t("SNIPPET_NAME_LABEL");
 
@@ -724,6 +832,12 @@ export class SnippetCssModal extends Modal {
         });
       });
 
+    this.cssTextarea = new TextAreaComponent(contentEl);
+    contentEl.createDiv({
+      text: t("PASTE_CSS_MODAL_NOTE"),
+      cls: "cm-modal-warning-note",
+    });
+
     new Setting(contentEl)
       .setName(t("IMPORT_FROM_FILE"))
       .setDesc(t("IMPORT_FROM_FILE_DESC"))
@@ -733,7 +847,6 @@ export class SnippetCssModal extends Modal {
         });
       });
 
-    this.cssTextarea = new TextAreaComponent(contentEl);
     this.cssTextarea.inputEl.classList.add(
       "cm-search-input",
       "cm-large-textarea"
@@ -802,6 +915,7 @@ export class SnippetCssModal extends Modal {
         cls: "mod-cta",
       })
       .addEventListener("click", () => this.handleSave());
+    setTimeout(() => this.nameInput.inputEl.focus(), 0);
   }
 
   handleSave() {
@@ -843,21 +957,37 @@ export class SnippetCssModal extends Modal {
 
     if (this.isEditing && this.existingSnippet) {
       const originalIsGlobal = !!this.existingSnippet.isGlobal;
-      let listToSearch = originalIsGlobal
+      const originalList = originalIsGlobal
+        ? this.plugin.settings.globalSnippets
+        : activeProfile.snippets;
+      const targetList = this.isGlobalSnippet
         ? this.plugin.settings.globalSnippets
         : activeProfile.snippets;
 
-      const snippetIndex = listToSearch.findIndex(
+      const snippetIndex = originalList.findIndex(
         (s) => s.id === this.existingSnippet!.id
       );
 
       if (snippetIndex > -1) {
-        const [snippetToUpdate] = listToSearch.splice(snippetIndex, 1);
-        snippetToUpdate.name = name;
-        snippetToUpdate.css = cssText;
-        snippetToUpdate.isGlobal = this.isGlobalSnippet;
+        // First case If the clip type does not change (remains public or private)
+        if (originalIsGlobal === this.isGlobalSnippet) {
+          // Update directly in the same place
+          originalList[snippetIndex].name = name;
+          originalList[snippetIndex].css = cssText;
+        }
+        // Second case If the clip type changes (from public to private or vice versa)
+        else {
+          // delete from the old list
+          const [snippetToMove] = originalList.splice(snippetIndex, 1);
 
-        targetList.push(snippetToUpdate);
+          // ...and modify its data
+          snippetToMove.name = name;
+          snippetToMove.css = cssText;
+          snippetToMove.isGlobal = this.isGlobalSnippet;
+
+          // ...and add it to the new list
+          targetList.push(snippetToMove);
+        }
         new Notice(t("NOTICE_SNIPPET_UPDATED", name));
       }
     } else {
@@ -871,6 +1001,7 @@ export class SnippetCssModal extends Modal {
       new Notice(t("NOTICE_SNIPPET_CREATED", name));
     }
 
+    this.isSaving = true;
     this.plugin.saveSettings().then(() => {
       this.plugin.applyCssSnippets();
       this.settingTab.display();
@@ -879,6 +1010,15 @@ export class SnippetCssModal extends Modal {
   }
 
   onClose() {
+    // If the save button is not pressed
+    if (!this.isSaving) {
+      const historyId =
+        this.isEditing && this.existingSnippet ? this.existingSnippet.id : null;
+      // If there is a temporary date delete it.
+      if (historyId && this.plugin.cssHistory[historyId]) {
+        delete this.plugin.cssHistory[historyId];
+      }
+    }
     this.contentEl.empty();
   }
 }
@@ -1440,114 +1580,83 @@ export class CustomVariableMetaModal extends Modal {
   }
 
   onOpen() {
-    const lang = this.plugin.settings.language;
-    const isRTL =
-      (lang === "ar" || lang === "fa") && this.plugin.settings.useRtlLayout;
-    this.modalEl.setAttribute("dir", isRTL ? "rtl" : "ltr");
-
     const { contentEl } = this;
     contentEl.empty();
-    this.modalEl.classList.add("color-master-modal");
-    contentEl.createEl("h3", { text: t("MODAL_CUSTOM_VAR_TITLE") });
 
-    let displayNameInput: TextComponent;
-
-    const varNameSetting = new Setting(contentEl)
-      .setName(t("VARIABLE_NAME_LABEL"))
-      .addText((text) => {
-        text.setPlaceholder("--variable-name").onChange((value) => {
-          this.varName = value.trim();
-          const suggestedName = this.varName
-            .replace(/^--/, "")
-            .replace(/-/g, " ")
-            .replace(/\b\w/g, (l) => l.toUpperCase());
-          if (displayNameInput) {
-            displayNameInput.setValue(suggestedName);
-          }
-          this.displayName = suggestedName;
-        });
-      });
-
-    varNameSetting.descEl.appendText(t("VARIABLE_NAME_DESC"));
-    varNameSetting.descEl.createEl("br");
-    const modalHelpContainer = varNameSetting.descEl.createEl("div", {
-      cls: "cm-docs-link-container",
-    });
-    modalHelpContainer.appendText(t("HELP_TEXT_PRE_LINK"));
-    modalHelpContainer.createEl("a", {
-      href: "https://docs.obsidian.md/Reference/CSS+variables/Foundations/Colors",
-      text: t("HELP_TEXT_LINK"),
-      cls: "cm-docs-link",
-      attr: {
-        target: "_blank",
-        rel: "noopener noreferrer",
-      },
-    });
-
-    new Setting(contentEl).setName(t("COLOR_LABEL")).addColorPicker((color) => {
-      color.setValue(this.varValue).onChange((value) => {
-        this.varValue = value;
-      });
-    });
+    contentEl.createEl("h3", { text: t("MODAL_ADD_VAR_TITLE") });
+    contentEl.createEl("p", { text: t("MODAL_ADD_VAR_DESC") });
 
     new Setting(contentEl)
-      .setName(t("DISPLAY_NAME_LABEL"))
-      .setDesc(t("DISPLAY_NAME_DESC"))
-      .addText((text) => {
-        displayNameInput = text;
-        text.setPlaceholder(t("PLACEHOLDER_DISPLAY_NAME")).onChange((value) => {
-          this.displayName = value.trim();
-        });
-      });
+      .setName(t("MODAL_VAR_DISPLAY_NAME"))
+      .setDesc(t("MODAL_VAR_DISPLAY_NAME_DESC"))
+      .addText((text) =>
+        text
+          .setPlaceholder(t("MODAL_VAR_DISPLAY_NAME_PLACEHOLDER"))
+          .setValue(this.displayName)
+          .onChange((value) => {
+            this.displayName = value;
+          })
+      );
 
     new Setting(contentEl)
-      .setName(t("DESCRIPTION_LABEL"))
-      .setDesc(t("DESCRIPTION_DESC"))
-      .addTextArea((text) => {
-        text.setPlaceholder(t("PLACEHOLDER_DESCRIPTION")).onChange((value) => {
-          this.description = value.trim();
-        });
-        text.inputEl.rows = 3;
-      });
+      .setName(t("MODAL_VAR_NAME"))
+      .setDesc(t("MODAL_VAR_NAME_DESC"))
+      .addText((text) =>
+        text
+          .setPlaceholder(t("MODAL_VAR_NAME_PLACEHOLDER"))
+          .setValue(this.varName)
+          .onChange((value) => {
+            this.varName = value.startsWith("--") ? value : `--${value}`;
+          })
+      );
 
-    const buttonContainer = contentEl.createDiv({
-      cls: "modal-button-container",
-    });
+    new Setting(contentEl)
+      .setName(t("MODAL_VAR_VALUE"))
+      .setDesc(t("MODAL_VAR_VALUE_DESC"))
+      .addText((text) =>
+        text
+          .setPlaceholder(t("MODAL_VAR_VALUE_PLACEHOLDER"))
+          .setValue(this.varValue)
+          .onChange((value) => {
+            this.varValue = value;
+          })
+      );
 
-    new ButtonComponent(buttonContainer)
-      .setButtonText(t("CANCEL_BUTTON"))
-      .onClick(() => this.close());
+    new Setting(contentEl)
+      .setName(t("MODAL_VAR_DESCRIPTION"))
+      .setDesc(t("MODAL_VAR_DESCRIPTION_DESC"))
+      .addTextArea((text) =>
+        text
+          .setPlaceholder(t("MODAL_VAR_DESCRIPTION_PLACEHOLDER"))
+          .setValue(this.description)
+          .onChange((value) => {
+            this.description = value;
+          })
+      );
 
-    new ButtonComponent(buttonContainer)
-      .setButtonText(t("SAVE_BUTTON"))
-      .setCta()
-      .onClick(() => {
-        const activeProfile =
-          this.plugin.settings.profiles[this.plugin.settings.activeProfile];
-
-        if (!this.varName) {
-          new Notice(t("NOTICE_VAR_NAME_EMPTY"));
-          return;
-        }
-        if (!this.varName.startsWith("--")) {
-          new Notice(t("NOTICE_VAR_NAME_FORMAT"));
-          return;
-        }
-        if (activeProfile.vars[this.varName]) {
-          new Notice(t("NOTICE_VAR_EXISTS", this.varName));
-          return;
-        }
-
-        const finalDisplayName = this.displayName || this.varName;
-
-        this.onSubmit({
-          varName: this.varName,
-          varValue: this.varValue,
-          displayName: finalDisplayName,
-          description: this.description,
-        });
-        this.close();
-      });
+    new Setting(contentEl)
+      .setClass("modal-button-container")
+      .addButton((button) =>
+        button.setButtonText(t("CANCEL_BUTTON")).onClick(() => this.close())
+      )
+      .addButton((button) =>
+        button
+          .setButtonText(t("ADD_BUTTON"))
+          .setCta()
+          .onClick(() => {
+            if (!this.varName.startsWith("--")) {
+              new Notice(t("ERROR_VAR_NAME_PREFIX"));
+              return;
+            }
+            this.onSubmit({
+              displayName: this.displayName,
+              varName: this.varName,
+              varValue: this.varValue,
+              description: this.description,
+            });
+            this.close();
+          })
+      );
   }
 
   onClose() {

@@ -1,15 +1,15 @@
 import {
-  Setting,
   ButtonComponent,
   Notice,
+  Setting,
   ToggleComponent,
   setIcon,
 } from "obsidian";
-import Sortable = require("sortablejs");
 import { t } from "../../i18n";
-import type { ColorMasterSettingTab } from "../settingsTab";
-import { ConfirmationModal, SnippetCssModal } from "../modals";
 import type { Snippet } from "../../types";
+import { ConfirmationModal, SnippetCssModal } from "../modals";
+import type { ColorMasterSettingTab } from "../settingsTab";
+import Sortable = require("sortablejs");
 
 function initSnippetDrag(
   containerEl: HTMLElement,

@@ -1,7 +1,7 @@
 {
   "name": "obsidian-color-master",
-  "version": "1.0.8",
-  "description": "Full control of Obsidian color CSS variables with profiles, import/export, bilingual UI, and Force Mode to override themes.",
+  "version": "1.0.9",
+  "description": "Full control of Obsidian's appearance. Create and share color profiles, use advanced CSS snippets, and override any theme with a powerful, live UI.",
   "main": "main.js",
   "scripts": {
     "build": "esbuild src/main.ts --bundle --platform=browser --format=cjs --outfile=main.js --minify --external:obsidian",

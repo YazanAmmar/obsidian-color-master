@@ -1,38 +1,39 @@
 import {
   App,
   ButtonComponent,
+  DropdownComponent,
+  Notice,
   PluginSettingTab,
   Setting,
-  ToggleComponent,
   setIcon,
-  Notice,
 } from "obsidian";
-import type ColorMaster from "../main";
-import { t } from "../i18n";
 import {
-  BUILT_IN_PROFILES_VARS,
+  COLOR_DESCRIPTIONS,
+  COLOR_DESCRIPTIONS_AR,
+  COLOR_DESCRIPTIONS_FA,
+  COLOR_DESCRIPTIONS_FR,
+  COLOR_NAMES,
+  COLOR_NAMES_AR,
+  COLOR_NAMES_FA,
+  COLOR_NAMES_FR,
   DEFAULT_VARS,
   TEXT_TO_BG_MAP,
-  COLOR_NAMES_AR,
-  COLOR_NAMES,
-  COLOR_DESCRIPTIONS_AR,
-  COLOR_DESCRIPTIONS,
 } from "../constants";
+import { t } from "../i18n";
+import type ColorMaster from "../main";
 import {
-  getContrastRatio,
-  getAccessibilityRating,
   flattenVars,
+  getAccessibilityRating,
+  getContrastRatio,
 } from "../utils";
-import { drawProfileManager } from "./components/profile-manager";
-import { drawImportExport } from "./components/import-export";
-import { drawOptionsSection } from "./components/options-section";
-import { drawCssSnippetsUI } from "./components/snippets-ui";
 import { drawColorPickers } from "./components/color-pickers";
+import { drawImportExport } from "./components/import-export";
 import { drawLikePluginCard } from "./components/like-plugin-card";
-import Sortable = require("sortablejs");
-import { COLOR_NAMES_FR, COLOR_DESCRIPTIONS_FR } from "../constants";
-import { COLOR_NAMES_FA, COLOR_DESCRIPTIONS_FA } from "../constants";
+import { drawOptionsSection } from "./components/options-section";
+import { drawProfileManager } from "./components/profile-manager";
+import { drawCssSnippetsUI } from "./components/snippets-ui";
 import { LanguageSettingsModal } from "./modals";
+import Sortable = require("sortablejs");
 
 export class ColorMasterSettingTab extends PluginSettingTab {
   plugin: ColorMaster;
@@ -77,48 +78,92 @@ export class ColorMasterSettingTab extends PluginSettingTab {
     }
   }
 
-  initSearchUI(containerEl: HTMLElement) {
-    this.searchContainer = containerEl.createDiv({
-      cls: "cm-search-container",
-    });
-    const left = this.searchContainer.createDiv({ cls: "cm-search-left" });
-    const right = this.searchContainer.createDiv({ cls: "cm-search-controls" });
-    const searchWrapper = left.createDiv({ cls: "cm-search-wrapper" });
-    const iconEl = searchWrapper.createDiv({ cls: "cm-search-icon" });
-    setIcon(iconEl, "search");
+  _clearSearchAndFilters() {
+    if (!this.searchInput || !this.sectionSelect) return;
 
-    this.searchInput = searchWrapper.createEl("input", {
+    // 1. Clear the search field and reset the drop-down list
+    this.searchInput.value = "";
+    this.sectionSelect.value = "";
+
+    // 2. Reset the search "state".
+    this._searchState.query = "";
+    this._searchState.section = "";
+
+    // 3. Update the interface: hide filters and deactivate buttons
+    const filterButton = this.containerEl.querySelector(
+      'button[data-cm-action="filter"]'
+    );
+    const filterOptionsContainer = this.containerEl.querySelector(
+      ".cm-search-filter-options"
+    );
+
+    if (filterButton) filterButton.classList.remove("is-active");
+    if (filterOptionsContainer)
+      filterOptionsContainer.classList.add("is-hidden");
+
+    // 4. Reapply the filter to display everything again
+    this._applySearchFilter();
+  }
+
+  initSearchUI(containerEl: HTMLElement) {
+    const searchBarContainer = containerEl.createDiv({
+      cls: "cm-search-bar-container",
+    });
+    const originalPlaceholder = t("SEARCH_PLACEHOLDER");
+
+    //---1. Input field section---
+    const searchInputContainer = searchBarContainer.createDiv({
+      cls: "cm-search-input-container",
+    });
+    const searchIcon = searchInputContainer.createDiv({
+      cls: "cm-search-input-icon",
+    });
+    setIcon(searchIcon, "search");
+    this.searchInput = searchInputContainer.createEl("input", {
       cls: "cm-search-input",
       type: "search",
-      placeholder: t("SEARCH_PLACEHOLDER"),
+      placeholder: originalPlaceholder,
     });
 
-    this.caseToggle = right.createEl("button", {
-      cls: "cm-search-small",
-      text: "Aa",
+    // --- 2. Control buttons section ---
+    const searchActions = searchBarContainer.createDiv({
+      cls: "cm-search-actions",
     });
+
+    this.caseToggle = searchActions.createEl("button", {
+      cls: "cm-search-action-btn",
+    });
+    this.caseToggle.textContent = "Aa";
     this.caseToggle.setAttr("aria-label", t("ARIA_LABEL_CASE_SENSITIVE"));
 
-    this.regexToggle = right.createEl("button", {
-      cls: "cm-search-small",
-      text: "/ /",
+    this.regexToggle = searchActions.createEl("button", {
+      cls: "cm-search-action-btn",
     });
+    setIcon(this.regexToggle, "regex");
     this.regexToggle.setAttr("aria-label", t("ARIA_LABEL_REGEX_SEARCH"));
 
-    this.sectionSelect = right.createEl("select", { cls: "cm-search-small" });
-    this.sectionSelect.createEl("option", {
-      value: "",
-      text: t("ALL_SECTIONS"),
+    const filterOptionsContainer = searchActions.createDiv({
+      cls: "cm-search-filter-options is-hidden", // We start by hiding it
     });
 
+    // --- New code using the official component ---
+    const dropdown = new DropdownComponent(filterOptionsContainer)
+      .addOption("", t("ALL_SECTIONS"))
+      .onChange(async (value) => {
+        this._searchState.section = value;
+        filterOptionsContainer.classList.toggle(
+          "is-filter-active",
+          value !== ""
+        );
+        debouncedFilter();
+      });
+
+    // Add the rest of the options to the list
     try {
       Object.keys(DEFAULT_VARS || {}).forEach((category) => {
         const translatedCategory =
           t(category.toUpperCase().replace(/ /g, "_")) || category;
-        this.sectionSelect.createEl("option", {
-          value: category,
-          text: translatedCategory,
-        });
+        dropdown.addOption(category, translatedCategory);
       });
     } catch (e) {}
 
@@ -128,73 +173,99 @@ export class ColorMasterSettingTab extends PluginSettingTab {
       activeProfile?.customVarMetadata &&
       Object.keys(activeProfile.customVarMetadata).length > 0
     ) {
-      this.sectionSelect.createEl("option", {
-        value: "Custom",
-        text: t("CUSTOM_VARIABLES_HEADING"),
-      });
+      dropdown.addOption("Custom", t("CUSTOM_VARIABLES_HEADING"));
     }
 
-    this.searchInfo = right.createEl("div", {
-      cls: "cm-search-info",
-      text: " ",
-    });
-    this.clearBtn = right.createEl("button", {
-      cls: "cm-search-small cm-search-icon-button",
-    });
-    const brushIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-brush-cleaning-icon lucide-brush-cleaning"><path d="m16 22-1-4"/><path d="M19 13.99a1 1 0 0 0 1-1V12a2 2 0 0 0-2-2h-3a1 1 0 0 1-1-1V4a2 2 0 0 0-4 0v5a1 1 0 0 1-1 1H6a2 2 0 0 0-2 2v.99a1 1 0 0 0 1 1"/><path d="M5 14h14l1.973 6.767A1 1 0 0 1 20 22H4a1 1 0 0 1-.973-1.233z"/><path d="m8 22 1-4"/></svg>`;
-    const parser = new DOMParser();
-    const iconDoc = parser.parseFromString(brushIconSvg, "image/svg+xml");
+    // Add our own format and maintain a reference to the element
+    dropdown.selectEl.classList.add("cm-search-small");
+    this.sectionSelect = dropdown.selectEl;
 
-    if (iconDoc.documentElement) {
-      this.clearBtn.appendChild(iconDoc.documentElement);
-    }
-
+    this.clearBtn = filterOptionsContainer.createEl("button", {
+      cls: "cm-search-action-btn",
+    });
+    setIcon(this.clearBtn, "x");
     this.clearBtn.setAttr("aria-label", t("CLEAR_BUTTON"));
+
+    const filterButton = searchActions.createEl("button", {
+      cls: "cm-search-action-btn",
+    });
+    setIcon(filterButton, "filter");
+    filterButton.dataset.cmAction = "filter";
+
+    this.searchInfo = searchActions.createEl("div", { cls: "cm-search-info" });
+    this.searchInfo.style.display = "none";
+
     this._searchState = {
       query: "",
       regex: false,
       caseSensitive: false,
       section: "",
     };
-
     const debouncedFilter = this._debounce(
       () => this._applySearchFilter(),
       180
     );
 
     this.searchInput.addEventListener("input", (e: Event) => {
+      // If Regex mode is enabled, do nothing and wait for Enter to be pressed.
+      if (this._searchState.regex) return;
+
       this._searchState.query = (e.target as HTMLInputElement).value;
       debouncedFilter();
     });
+
+    this.searchInput.addEventListener("keydown", (e: KeyboardEvent) => {
+      if (e.key === "Enter") {
+        // Make sure we are in Regex mode before performing the search.
+        if (this._searchState.regex) {
+          this._searchState.query = (e.target as HTMLInputElement).value;
+          debouncedFilter();
+        }
+      }
+    });
+
     this.caseToggle.addEventListener("click", () => {
       this._searchState.caseSensitive = !this._searchState.caseSensitive;
       this.caseToggle.toggleClass("is-active", this._searchState.caseSensitive);
       debouncedFilter();
     });
+
     this.regexToggle.addEventListener("click", () => {
+      // Toggle Regex State
       this._searchState.regex = !this._searchState.regex;
       this.regexToggle.toggleClass("is-active", this._searchState.regex);
+
+      // Check Regex State to Change Temporary Text
+      if (this._searchState.regex) {
+        // If Regex is enabled, change the temporary text
+        this.searchInput.placeholder = t("REGEX_PLACEHOLDER");
+      } else {
+        // If Regex is deactivated, return the original temporary text
+        this.searchInput.placeholder = originalPlaceholder;
+      }
+
+      // Reapply filter immediately if text exists
+      this._searchState.query = this.searchInput.value;
       debouncedFilter();
     });
+
+    filterButton.addEventListener("click", () => {
+      if (filterButton.classList.contains("is-active")) {
+        this._clearSearchAndFilters();
+      } else {
+        filterOptionsContainer.classList.remove("is-hidden");
+        filterButton.classList.add("is-active");
+      }
+    });
+
     this.sectionSelect.addEventListener("change", (e: Event) => {
       this._searchState.section = (e.target as HTMLSelectElement).value;
       debouncedFilter();
     });
-    this.clearBtn.addEventListener("click", () => {
-      this.searchInput.value = "";
-      this.sectionSelect.value = "";
-      this._searchState = {
-        query: "",
-        regex: false,
-        caseSensitive: false,
-        section: "",
-      };
-      this.caseToggle.removeClass("is-active");
-      this.regexToggle.removeClass("is-active");
-      this._applySearchFilter();
-    });
 
-    this._applySearchFilter();
+    this.clearBtn.addEventListener("click", () => {
+      this._clearSearchAndFilters();
+    });
   }
 
   _debounce(fn: (...args: any[]) => void, ms = 200) {
@@ -317,7 +388,18 @@ export class ColorMasterSettingTab extends PluginSettingTab {
         heading.classList.add("cm-hidden");
       }
     });
-    this.searchInfo.setText(t("SEARCH_RESULTS_FOUND", visibleCount));
+
+    const query = this._searchState.query.trim();
+
+    // If in search text, show the number of results
+    if (query) {
+      this.searchInfo.setText(t("SEARCH_RESULTS_FOUND", visibleCount));
+      this.searchInfo.style.display = "inline-block"; // Make sure it is shown
+    } else {
+      // If the search field is empty, hide the counter
+      this.searchInfo.setText("");
+      this.searchInfo.style.display = "none";
+    }
   }
 
   _highlightRowMatches(row: HTMLElement, state: typeof this._searchState) {
@@ -513,6 +595,12 @@ export class ColorMasterSettingTab extends PluginSettingTab {
       .setName(t("LANGUAGE"))
       .setDesc(t("LANGUAGE_DESC"));
 
+    const langIcon = languageSetting.nameEl.createSpan({
+      cls: "cm-setting-icon",
+    });
+    setIcon(langIcon, "languages");
+    languageSetting.nameEl.prepend(langIcon);
+
     if (
       this.plugin.settings.language === "ar" ||
       this.plugin.settings.language === "fa"
@@ -560,6 +648,7 @@ export class ColorMasterSettingTab extends PluginSettingTab {
     drawProfileManager(this.staticContentContainer, this);
     drawImportExport(this.staticContentContainer, this);
     drawOptionsSection(this.staticContentContainer, this);
+    this.staticContentContainer.createEl("hr");
     drawCssSnippetsUI(this.staticContentContainer, this);
     drawColorPickers(this.containerEl, this);
     containerEl.createEl("hr");

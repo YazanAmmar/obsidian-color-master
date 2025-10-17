@@ -1,35 +1,17 @@
 /*
  * Color Master - Obsidian Plugin
- * Version: 1.0.8
+ * Version: 1.0.9
  * Author: Yazan Ammar (GitHub : https://github.com/YazanAmmar )
  * Description: Provides a comprehensive UI to control all Obsidian CSS color variables directly,
  * removing the need for Force Mode and expanding customization options.
  */
-import { flattenVars } from "./utils";
+import { ButtonComponent, moment, Notice, Plugin } from "obsidian";
+import { registerCommands } from "./commands";
+import { DEFAULT_SETTINGS, DEFAULT_VARS } from "./constants";
 import { initializeT, t } from "./i18n";
-import {
-  Plugin,
-  moment,
-  PluginSettingTab,
-  Setting,
-  Notice,
-  Modal,
-  ButtonComponent,
-  setIcon,
-} from "obsidian";
 import { PluginSettings } from "./types";
-import {
-  DEFAULT_VARS,
-  DEFAULT_SETTINGS,
-  TEXT_TO_BG_MAP,
-  BUILT_IN_PROFILES_VARS,
-  BUILT_IN_PROFILES_DATA,
-  COLOR_DESCRIPTIONS,
-  COLOR_DESCRIPTIONS_AR,
-  COLOR_NAMES,
-  COLOR_NAMES_AR,
-} from "./constants";
 import { ColorMasterSettingTab } from "./ui/settingsTab";
+import { flattenVars } from "./utils";
 
 let T: ColorMaster;
 
@@ -138,10 +120,15 @@ export default class ColorMaster extends Plugin {
 
     const enabledCss = allSnippets
       .filter((s) => s.enabled && s.css)
-      .map(
-        (s) =>
-          `/* Snippet: ${s.name} ${s.isGlobal ? "(Global)" : ""} */\n${s.css}`
-      )
+      .map((s) => {
+        const upgradedCss = s.css.replace(
+          /\bbody\s*(?=\{)/g,
+          "body.theme-dark, body.theme-light"
+        );
+        return `/* Snippet: ${s.name} ${
+          s.isGlobal ? "(Global)" : ""
+        } */\n${upgradedCss}`;
+      })
       .join("\n\n");
 
     if (enabledCss) {
@@ -282,73 +269,12 @@ export default class ColorMaster extends Plugin {
     }
 
     T = this;
-    this.addCommand({
-      id: "toggle-color-master",
-      name: "Enable & Disable",
-      callback: async () => {
-        this.settings.pluginEnabled = !this.settings.pluginEnabled;
-        await this.saveSettings();
-        new Notice(
-          this.settings.pluginEnabled
-            ? t("PLUGIN_ENABLED_NOTICE")
-            : t("PLUGIN_DISABLED_NOTICE")
-        );
-      },
-    });
-
-    this.addCommand({
-      id: "cycle-next-color-profile",
-      name: "Cycle to next profile",
-      callback: async () => {
-        const names = Object.keys(this.settings.profiles || {});
-        if (names.length === 0) {
-          new Notice(t("NOTICE_NO_PROFILES_FOUND"));
-          return;
-        }
-        const idx = names.indexOf(this.settings.activeProfile);
-        const next = names[(idx + 1) % names.length];
-        this.settings.activeProfile = next;
-        await this.saveSettings();
-        new Notice(t("NOTICE_ACTIVE_PROFILE_SWITCHED", next));
-      },
-    });
-
-    this.addCommand({
-      id: "cycle-previous-color-profile",
-      name: "Cycle to previous profile",
-      callback: () => {
-        (async () => {
-          const names = Object.keys(this.settings.profiles || {});
-          if (names.length === 0) {
-            new Notice(t("NOTICE_NO_PROFILES_FOUND"));
-            return;
-          }
-          const currentIndex = names.indexOf(this.settings.activeProfile);
-          // This formula calculates the previous index, wrapping around from 0 to the end
-          const previousIndex =
-            (currentIndex - 1 + names.length) % names.length;
-          const previousProfile = names[previousIndex];
-
-          this.settings.activeProfile = previousProfile;
-          await this.saveSettings();
-          new Notice(t("NOTICE_ACTIVE_PROFILE_SWITCHED", previousProfile));
-        })();
-      },
-    });
-
-    this.addCommand({
-      id: "open-color-master-settings-tab",
-      name: "Open settings tab",
-      callback: () => {
-        (this.app as any).setting.open();
-        (this.app as any).setting.openTabById(this.manifest.id);
-      },
-    });
+    registerCommands(this);
 
     // Add a ribbon icon to the left gutter
     this.addRibbonIcon(
       "paint-bucket",
-      "Color Master Settings",
+      t("RIBBON_TOOLTIP_SETTINGS"),
       (evt: MouseEvent) => {
         // Open the settings tab when the icon is clicked
         (this.app as any).setting.open();
@@ -406,7 +332,7 @@ export default class ColorMaster extends Plugin {
     this.clearStyles();
     this.removeInjectedCustomCss();
     this.stopColorUpdateLoop();
-    console.log("Color Master v1.0.8 unloaded.");
+    console.log("Color Master v1.0.9 unloaded.");
   }
 
   public enableObservers(): void {
@@ -554,14 +480,26 @@ export default class ColorMaster extends Plugin {
       return;
     }
 
+    // ...
     const profile = this.settings.profiles[this.settings.activeProfile];
     if (!profile) {
       console.error("Color Master: Active profile not found!");
       return;
     }
 
-    for (const [key, value] of Object.entries(profile.vars)) {
-      document.body.style.setProperty(key, value);
+    const profileVars = Object.entries(profile.vars);
+    if (profileVars.length > 0) {
+      const cssString = `body.theme-dark, body.theme-light {
+    ${profileVars
+      .map(([key, value]) => `${key}: ${value};`)
+      .join("\n            ")}
+}`;
+
+      const styleEl = document.createElement("style");
+      styleEl.id = "cm-profile-variables";
+      styleEl.textContent = cssString;
+
+      document.head.appendChild(styleEl);
     }
 
     this.forceIconizeColors();
@@ -587,18 +525,21 @@ export default class ColorMaster extends Plugin {
   }
 
   clearStyles() {
+    const profileStyleEl = document.getElementById("cm-profile-variables");
+    if (profileStyleEl) {
+      profileStyleEl.remove();
+    }
+
     this.removeCssSnippets();
+
     const allVars = new Set();
-
     Object.keys(flattenVars(DEFAULT_VARS)).forEach((key) => allVars.add(key));
-
     for (const profileName in this.settings.profiles) {
       const profile = this.settings.profiles[profileName];
       if (profile && profile.vars) {
         Object.keys(profile.vars).forEach((key) => allVars.add(key));
       }
     }
-
     allVars.forEach((key: string) => {
       document.body.style.removeProperty(key);
     });
@@ -679,55 +620,33 @@ export default class ColorMaster extends Plugin {
       this.settings.pinnedSnapshots = {};
     }
 
-    // Seed pinned snapshots for up to the first 5 profiles if they don't have one
-    try {
-      const profileNames = Object.keys(this.settings.profiles || {});
-      let changed = false;
-      for (let i = 0; i < Math.min(5, profileNames.length); i++) {
-        const name = profileNames[i];
-        if (!this.settings.pinnedSnapshots[name]) {
-          const vars = this.settings.profiles[name]?.vars || {};
-          this.settings.pinnedSnapshots[name] = {
-            pinnedAt: new Date().toISOString(),
-            vars: JSON.parse(JSON.stringify(vars)),
-          };
-          changed = true;
-        }
-      }
-      if (changed) {
-        console.log("Color Master: Seeding initial pinned snapshots.");
-        await this.saveData(this.settings);
-      }
-      let snippetsMigrationNeeded = false;
-      for (const profileName in this.settings.profiles) {
-        const profile = this.settings.profiles[profileName];
-        if (
-          profile &&
-          profile.snippets &&
-          !Array.isArray(profile.snippets) &&
-          typeof profile.snippets === "object"
-        ) {
-          snippetsMigrationNeeded = true;
-          const snippetsArray = Object.entries(profile.snippets).map(
-            ([name, data]: [string, any]) => ({
-              id: `snippet-${Date.now()}-${Math.random()}`,
-              name: name,
-              css: data.css || "",
-              enabled: data.enabled !== false,
-            })
-          );
-          profile.snippets = snippetsArray;
-        }
-      }
-
-      if (snippetsMigrationNeeded) {
-        console.log(
-          "Color Master: The clipping data structure is being migrated to the new format (array)."
+    let snippetsMigrationNeeded = false;
+    for (const profileName in this.settings.profiles) {
+      const profile = this.settings.profiles[profileName];
+      if (
+        profile &&
+        profile.snippets &&
+        !Array.isArray(profile.snippets) &&
+        typeof profile.snippets === "object"
+      ) {
+        snippetsMigrationNeeded = true;
+        const snippetsArray = Object.entries(profile.snippets).map(
+          ([name, data]: [string, any]) => ({
+            id: `snippet-${Date.now()}-${Math.random()}`,
+            name: name,
+            css: data.css || "",
+            enabled: data.enabled !== false,
+          })
         );
-        await this.saveData(this.settings);
+        profile.snippets = snippetsArray;
       }
-    } catch (e) {
-      console.warn("Color Master: failed to seed pinnedSnapshots", e);
+    }
+
+    if (snippetsMigrationNeeded) {
+      console.log(
+        "Color Master: The clipping data structure is being migrated to the new format (array)."
+      );
+      await this.saveData(this.settings);
     }
   }
 
@@ -736,6 +655,34 @@ export default class ColorMaster extends Plugin {
     this.applyStyles();
     await this.refreshOpenGraphViews();
     this.app.workspace.trigger("css-change");
+  }
+
+  async resetPluginData() {
+    const pluginDataPath = `${this.manifest.dir}/data.json`;
+
+    // Delete the file using the Obsidian API
+    try {
+      await this.app.vault.adapter.remove(pluginDataPath);
+
+      // Create a notification with a reload button
+      const notice = new Notice(t("RESET_SUCCESS_NOTICE"), 0); // The notification will remain visible.
+      const noticeEl = notice.noticeEl;
+
+      const buttonContainer = noticeEl.createDiv({
+        cls: "modal-button-container",
+      });
+      new ButtonComponent(buttonContainer)
+        .setButtonText(t("RELOAD_BUTTON"))
+        .setCta()
+        .onClick(() => {
+          // Call the Obsidian reload command
+          (this.app as any).commands.executeCommandById("app:reload");
+        });
+    } catch (e) {
+      // If an error occurs and the file is not deleted
+      new Notice(`Failed to delete plugin data: ${e.message}`);
+      console.error("Color Master: Failed to reset plugin data.", e);
+    }
   }
 
   processNotice(el: HTMLElement) {
