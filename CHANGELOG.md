@@ -6,6 +6,7 @@ This is a massive quality-of-life update focused on professional workflows, UI p
 
 ### New Features
 
+-   **Import from Installed Themes & Snippets**: You can now directly import CSS from your installed community themes and local snippets to create new, editable CSS-based profiles. This is a powerful way to start customizing your favorite themes without needing to find the source code manually.
 - **Quick Theme Toggle for Profiles**: A new icon button (`sun`/`moon`/`sun-moon`) has been added to the Profile Manager. It allows you to instantly cycle the active profile's theme setting between "Force Light," "Force Dark," and "Auto (follows Obsidian)" without needing to create a new profile.
 - **New Command: Cycle Profile Theme**: A new command, `Color Master: Cycle active profile theme`, has been added. You can assign a hotkey to it for rapid switching between light, dark, and auto modes, with a confirmation notice for each change.
 - **Reset Plugin Settings**: A powerful and safe "Reset Plugin Settings" option has been added to the Advanced Settings. It allows you to completely reset the plugin to its factory state by deleting the `data.json` file, which is useful for troubleshooting or starting fresh.
