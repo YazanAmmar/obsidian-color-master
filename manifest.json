@@ -3,7 +3,7 @@
   "name": "Color Master",
   "version": "1.1.0",
   "minAppVersion": "1.5.0",
-  "description": "Full control of Obsidian's appearance. Create and share color profiles, use advanced CSS snippets, and override any theme with a powerful, live UI.",
+  "description": "Fully customize and control the app's appearance. Create and share color profiles, use advanced CSS snippets, and override any theme with a powerful, live UI.",
   "author": "Yazan Ammar",
   "authorUrl": "https://github.com/YazanAmmar",
   "isDesktopOnly": false
