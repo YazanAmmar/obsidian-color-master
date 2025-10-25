@@ -162,8 +162,8 @@ body.color-master-rtl .notice {
 .cm-search-info {
   font-size: 12px;
   font-weight: 500;
-  color: var(--text-muted); 
-  background-color: var(--background-secondary); 
+  color: var(--text-muted);
+  background-color: var(--background-secondary);
   padding: 4px 8px;
   border-radius: 5px;
   border: 1px solid var(--background-modifier-border);
@@ -1905,7 +1905,7 @@ body.color-master-rtl .color-master-modal .modal-content p {
   background-color: transparent !important;
   border: none !important;
   box-shadow: none !important;
-  color: var(--interactive-error) !important;
+  color: var(--text-muted) !important;
   padding: 4px !important;
   display: flex;
   align-items: center;
@@ -2025,27 +2025,19 @@ body.color-master-rtl .color-master-modal .modal-content p {
 }
 
 .cm-search-action-btn:hover {
-  background-color: var(
-    --background-modifier-hover
-  ) !important;
+  background-color: var(--background-modifier-hover) !important;
   color: var(--text-normal) !important;
   opacity: 1;
 }
 
 .cm-search-action-btn.is-active {
-  background-color: var(
-    --interactive-accent
-  ) !important;
-  color: var(
-    --text-on-accent
-  ) !important;
+  background-color: var(--interactive-accent) !important;
+  color: var(--text-on-accent) !important;
   opacity: 1;
 }
 
 .cm-search-action-btn.is-active:hover {
-  background-color: var(
-    --interactive-accent-hover
-  ) !important;
+  background-color: var(--interactive-accent-hover) !important;
 }
 
 .cm-search-filter-options {
@@ -2105,4 +2097,363 @@ body.color-master-rtl .color-master-modal .modal-content p {
 .cm-search-filter-options {
   border: none !important;
   padding: 0 !important;
+}
+
+/* --- Custom Background Image Styles --- */
+
+body.cm-workspace-background-active {
+  background-image: var(--cm-background-image);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+/* Make key UI layers transparent when background is active */
+body.cm-workspace-background-active .workspace-split.mod-root,
+body.cm-workspace-background-active .workspace-leaf,
+body.cm-workspace-background-active .workspace-leaf-content,
+body.cm-workspace-background-active .view-header,
+body.cm-workspace-background-active .workspace-tab-header-container {
+  background-color: transparent !important;
+}
+
+/* 4. This handles the settings tab background separately IF a background is not on workspace */
+body.cm-settings-background-active .color-master-settings-tab {
+  background-image: var(--cm-background-image);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+/* Add a subtle overlay to modals to improve readability */
+body.cm-workspace-background-active .modal-container .modal {
+  background-color: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(5px);
+}
+
+.cm-control-icon-button {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: var(--text-muted) !important;
+  padding: 4px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-s);
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.cm-control-icon-button:hover {
+  background-color: var(--background-modifier-hover) !important;
+  color: var(--text-normal) !important;
+}
+
+.cm-modal .cm-wide-text-input {
+  width: 100%;
+}
+.cm-modal .cm-full-width-control {
+  width: 100%;
+}
+
+/* Make text inputs in modals wider */
+.cm-modal .cm-wide-text-input {
+  width: 100%;
+}
+.cm-modal .cm-full-width-control {
+  width: 100%;
+}
+
+/* Paste box visual feedback on drag-over */
+.cm-paste-box.is-over {
+  border-color: var(--interactive-accent);
+  background-color: var(--background-modifier-hover);
+  color: var(--interactive-accent);
+}
+
+/* --- Image Browser Modal Styles --- */
+.cm-image-browser-modal .modal-content {
+  padding-bottom: 15px;
+}
+
+.cm-image-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 15px;
+  margin-top: 15px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 5px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-m);
+}
+
+.cm-image-card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-s);
+  overflow: hidden;
+  background: var(--background-secondary);
+}
+
+.cm-image-card-preview {
+  width: 100%;
+  height: 80px; /* Keep the fixed height */
+  /* Use contain to ensure the whole SVG is visible without cropping */
+  object-fit: contain;
+  background-color: var(--background-primary);
+  border-bottom: 1px solid var(--background-modifier-border);
+  /* Add some padding in case the SVG is borderless */
+  padding: 3px;
+  box-sizing: border-box; /* Include padding in height */
+}
+
+.cm-image-card-name {
+  font-size: var(--font-ui-smaller);
+  padding: 8px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.cm-image-card-controls {
+  display: flex;
+  justify-content: space-around;
+  padding: 4px;
+}
+
+.cm-image-card-controls .setting-editor-button {
+  padding: 6px 8px;
+  font-size: 12px;
+  flex-grow: 1;
+  cursor: pointer;
+}
+
+/* Style the delete button in the image card like the main settings delete button */
+.cm-image-card-controls button.mod-warning {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: var(--text-muted) !important;
+  padding: 4px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-s);
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+  flex-grow: 0;
+  line-height: 0;
+}
+
+/* Red color only on hover */
+.cm-image-card-controls button.mod-warning:hover {
+  background-color: var(--interactive-error) !important;
+  color: var(--text-on-accent) !important;
+}
+
+/* Ensure the SVG icon size is consistent */
+.cm-image-card-controls button.mod-warning .svg-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.cm-image-card-controls .setting-editor-button.mod-warning:hover {
+  background-color: var(--interactive-error);
+  color: var(--text-on-accent);
+}
+
+.cm-image-browser-empty {
+  text-align: center;
+  padding: 30px;
+  color: var(--text-muted);
+  grid-column: 1 / -1;
+  font-style: italic;
+}
+
+/* Style for the new editable image name */
+.cm-image-card .setting-item.cm-image-card-name-input {
+  border-top: 1px solid var(--background-modifier-border);
+  border-bottom: 1px solid var(--background-modifier-border);
+  padding: 0px 8px;
+  min-height: 0;
+}
+
+.cm-image-card-name-input .setting-item-control {
+  width: 100%;
+}
+
+.cm-image-card .cm-image-card-name-input input[type="text"] {
+  width: 100%;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  text-align: center;
+  font-size: var(--font-ui-smaller);
+  padding: 8px 0px;
+}
+
+.cm-image-card .cm-image-card-name-input input[type="text"]:focus {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* New Two-Part Input Styles */
+.cm-name-input-container {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+  border-radius: var(--radius-s);
+  padding: 0;
+  transition: all 0.2s ease-in-out;
+  margin: 0 auto;
+}
+
+/* --- Hover/Focus states for the *whole container* --- */
+
+/* Change text colors on hover/focus */
+.cm-name-input-container:hover .cm-name-input-basename,
+.cm-name-input-container:has(.cm-name-input-basename:focus)
+  .cm-name-input-basename {
+  color: var(--text-normal);
+}
+.cm-name-input-container:hover .cm-name-input-extension,
+.cm-name-input-container:has(.cm-name-input-basename:focus)
+  .cm-name-input-extension {
+  color: var(--text-muted);
+}
+
+.cm-name-input-basename {
+  /* Reset input styles */
+  border: none;
+  outline: none;
+  box-shadow: none;
+  background-color: transparent;
+
+  /* Sizing and text */
+  text-align: right;
+  font-size: var(--font-ui-smaller);
+  color: var(--text-muted);
+
+  /* Make it part of the container */
+  padding: 4px 0 4px 12px;
+  border-top-left-radius: var(--radius-s);
+  border-bottom-left-radius: var(--radius-s);
+
+  /* Sizing & Ellipsis */
+  flex-grow: 1;
+  min-width: 30px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: none;
+}
+
+.cm-name-input-extension {
+  font-size: var(--font-ui-smaller);
+  color: var(--text-faint);
+
+  /* Make it part of the container */
+  padding: 4px 12px 4px 2px;
+  border-top-right-radius: var(--radius-s);
+  border-bottom-right-radius: var(--radius-s);
+  user-select: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* --- Hover/Focus states for the *whole container* --- */
+
+.cm-name-input-container:hover {
+  background-color: var(--background-modifier-hover) !important;
+}
+
+/* New marching ants animation that moves clockwise */
+@keyframes cm-marching-ants {
+  to {
+    background-position: 10px 0, 100% 10px, -10px 100%, 0 -10px;
+  }
+}
+
+.cm-paste-box {
+  border: none;
+  border-radius: var(--radius-m);
+  padding: 30px;
+  text-align: center;
+  color: var(--text-muted);
+  background-color: var(--background-secondary);
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+  caret-color: transparent;
+  margin-top: 15px;
+
+  /* This creates the border using 4 gradients (top, right, bottom, left) */
+  background-image: linear-gradient(
+      to right,
+      var(--text-faint) 50%,
+      transparent 50%
+    ),
+    linear-gradient(to bottom, var(--text-faint) 50%, transparent 50%),
+    linear-gradient(to right, var(--text-faint) 50%, transparent 50%),
+    linear-gradient(to bottom, var(--text-faint) 50%, transparent 50%);
+  background-repeat: repeat-x, repeat-y, repeat-x, repeat-y;
+  background-size: 10px 2px, 2px 10px, 10px 2px, 2px 10px;
+  background-position: 0 0, 100% 0, 0 100%, 0 0;
+}
+
+.cm-paste-box:hover {
+  color: var(--text-normal);
+  background-color: var(--background-modifier-hover);
+  outline: none;
+
+  /* Change border color to blue (static) */
+  background-image: linear-gradient(
+      to right,
+      var(--interactive-accent) 50%,
+      transparent 50%
+    ),
+    linear-gradient(to bottom, var(--interactive-accent) 50%, transparent 50%),
+    linear-gradient(to right, var(--interactive-accent) 50%, transparent 50%),
+    linear-gradient(to bottom, var(--interactive-accent) 50%, transparent 50%);
+
+  /* NO animation here */
+  animation: none;
+}
+
+.cm-paste-box:focus,
+.cm-paste-box.is-over {
+  color: var(--text-normal);
+  background-color: var(--background-modifier-hover);
+  outline: none;
+
+  /* Change border color to blue AND start animation */
+  background-image: linear-gradient(
+      to right,
+      var(--interactive-accent) 50%,
+      transparent 50%
+    ),
+    linear-gradient(to bottom, var(--interactive-accent) 50%, transparent 50%),
+    linear-gradient(to right, var(--interactive-accent) 50%, transparent 50%),
+    linear-gradient(to bottom, var(--interactive-accent) 50%, transparent 50%);
+
+  /* This is the NEW line to add. It resets the position for the animation */
+  background-position: 0 0, 100% 0, 0 100%, 0 0;
+
+  /* Add animation only on focus or drag-over */
+  animation: cm-marching-ants 0.2s linear infinite;
+}
+
+.cm-name-input-container:hover,
+.cm-name-input-container:has(.cm-name-input-basename:focus) {
+  background-color: transparent !important;
+  box-shadow: none !important;
 }

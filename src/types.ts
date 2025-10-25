@@ -30,10 +30,12 @@ export interface Profile {
       desc: string;
     };
   };
+  backgroundImage?: string;
+  backgroundEnabled?: boolean;
 }
 
 export interface PluginSettings {
-  noticeRules?: any; // To handle old settings structure during migration
+  noticeRules?: any;
   pluginEnabled: boolean;
   language: string;
   overrideIconizeColors: boolean;

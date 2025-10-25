@@ -1,5 +1,27 @@
 # Changelog
 
+## [v1.1.0](https://github.com/YazanAmmar/obsidian-color-master/releases/tag/1.1.0) - 2025-10-25
+
+This update introduces the most requested feature: **Per-Profile Custom Backgrounds**. You now have full control over your workspace's appearance with custom background images, managed entirely within each profile.
+
+### New Feature: Per-Profile Custom Backgrounds
+
+- **Add & Manage Images:** A new "Set Custom Background" option has been added to the Advanced Settings card.
+- **Multiple Input Methods:** Add images easily via file upload, pasting a URL, pasting a copied image, or dragging & dropping directly into the "Add New" modal.
+- **Profile-Specific Folders:** All images are automatically saved into a profile-specific folder (e.g., `.obsidian/backgrounds/MyProfile`), keeping your vault clean and preventing conflicts.
+- **Image Browser:** A new "Browse" (📦) icon opens a modal gallery displaying all images saved to the active profile.
+- **Full Control:** From the browser, you can select an image, delete it (with confirmation), or rename it directly in the UI. The file extension is locked during rename to prevent errors.
+- **Enable/Disable Toggle:** A new settings icon (⚙️) opens a modal where you can quickly enable or disable the background image for the current profile without removing it.
+
+### Improvements & UX Enhancements
+
+- **Smart Transparency:** When a background is applied, key UI variables (like `--background-primary`) are automatically set to `transparent`. Disabling or removing the background intelligently restores these variables to their default theme values.
+
+### Fixes & Code Quality
+
+- **Fixed: Plugin Reset Bug:** Resolved an `EBUSY` error that could occur when resetting the plugin. The process now reliably shows the "Reload" notice _before_ attempting to delete the (potentially locked) backgrounds folder.
+- **Cleanup:** Removed the default "OLED Green Glow" and "OLED Active Line Highlight" snippets from the "OLED Matrix" profile for a cleaner start.
+
 ## [v1.0.9](https://github.com/YazanAmmar/obsidian-color-master/releases/tag/1.0.9) - 2025-10-17
 
 This is a massive quality-of-life update focused on professional workflows, UI polish, and deep integration with your Obsidian environment. We've introduced direct importing from your installed themes, a smarter UI that warns you about conflicts, and a host of powerful new features and commands to streamline your customization process.

@@ -1,17 +1,22 @@
 /*
  * Color Master - Obsidian Plugin
- * Version: 1.0.9
+ * Version: 1.1.0
  * Author: Yazan Ammar (GitHub : https://github.com/YazanAmmar )
  * Description: Provides a comprehensive UI to control all Obsidian CSS color variables directly,
  * removing the need for Force Mode and expanding customization options.
  */
-import { ButtonComponent, moment, Notice, Plugin } from "obsidian";
+import { ButtonComponent, moment, Notice, Plugin, requestUrl } from "obsidian";
 import { registerCommands } from "./commands";
-import { DEFAULT_SETTINGS, DEFAULT_VARS } from "./constants";
+import {
+  DEFAULT_SETTINGS,
+  DEFAULT_VARS,
+  BUILT_IN_PROFILES_VARS,
+} from "./constants";
 import { initializeT, t } from "./i18n";
 import { PluginSettings } from "./types";
 import { ColorMasterSettingTab } from "./ui/settingsTab";
 import { flattenVars } from "./utils";
+import { FileConflictModal } from "./ui/modals";
 
 let T: ColorMaster;
 
@@ -76,6 +81,301 @@ export default class ColorMaster extends Plugin {
   restartColorUpdateLoop() {
     this.stopColorUpdateLoop();
     this.startColorUpdateLoop();
+  }
+
+  // Removes background image CSS variable and body classes.
+  _clearBackgroundImageCSS() {
+    document.body.style.removeProperty("--cm-background-image");
+    document.body.classList.remove("cm-workspace-background-active");
+    document.body.classList.remove("cm-settings-background-active");
+  }
+
+  // Applies the current profile's background image and transparency settings.
+  async applyBackgroundImage() {
+    this._clearBackgroundImageCSS(); // Always start clean
+
+    const profile = this.settings.profiles?.[this.settings.activeProfile];
+
+    // Restore defaults and exit if background is disabled for this profile
+    if (profile && profile.backgroundEnabled === false) {
+      this._clearBackgroundImageCSS();
+      await this._restoreDefaultBackgroundVars();
+      return;
+    }
+
+    // Exit if no profile or background image path
+    if (!profile || !profile.backgroundImage) {
+      return;
+    }
+
+    const path = profile.backgroundImage;
+
+    // Verify file exists
+    if (!(await this.app.vault.adapter.exists(path))) {
+      new Notice(t("NOTICE_BACKGROUND_IMAGE_NOT_FOUND", path));
+      // Keep UI clean, background is already cleared.
+      return;
+    }
+
+    // --- Apply Transparency Logic ---
+    // Make key UI variables transparent if they hold default values
+    const activeProfileName = this.settings.activeProfile;
+    const profileOriginalVars =
+      BUILT_IN_PROFILES_VARS[
+        activeProfileName as keyof typeof BUILT_IN_PROFILES_VARS
+      ];
+    // Use the base default if the active profile isn't a built-in one or not found
+    const baseVars = profileOriginalVars || BUILT_IN_PROFILES_VARS.Default;
+
+    const varsToMakeTransparent = [
+      "--background-primary",
+      "--background-secondary",
+      "--background-modifier-border",
+      "--titlebar-background-focused",
+      "--background-modifier-hover",
+    ];
+
+    let settingsChanged = false; // Track if settings need saving
+    for (const varName of varsToMakeTransparent) {
+      if (profile.vars[varName] !== "transparent") {
+        const defaultValue = baseVars[varName as keyof typeof baseVars];
+        if (!profile.vars[varName] || profile.vars[varName] === defaultValue) {
+          profile.vars[varName] = "transparent";
+          settingsChanged = true;
+          if (this.settings.colorUpdateFPS > 0) {
+            this.pendingVarUpdates[varName] = "transparent";
+          }
+        }
+      }
+    }
+
+    // Save immediately if transparency was applied (uses saveData)
+    if (settingsChanged) {
+      // Note: This save will trigger applyStyles/applyBackgroundImage again,
+      // but it's okay because the transparency is already set.
+      await this.saveData(this.settings); // Use saveData to avoid infinite loop
+      // Refresh the settings tab view if it's open
+      if (
+        this.settingTabInstance &&
+        this.settingTabInstance.containerEl.offsetHeight > 0
+      ) {
+        this.settingTabInstance.display();
+      }
+    }
+    // --- End Transparency ---
+
+    const imageUrl = this.app.vault.adapter.getResourcePath(path);
+
+    // Apply image URL to CSS variable
+    document.body.style.setProperty(
+      "--cm-background-image",
+      `url("${imageUrl}")`
+    );
+
+    // Add body class to activate CSS rules for background display
+    document.body.classList.add("cm-workspace-background-active");
+  }
+
+  /**
+   * Restores specific UI CSS variables from 'transparent' back to default values.
+   * @returns True if settings were changed and saved, false otherwise.
+   */
+  async _restoreDefaultBackgroundVars(): Promise<boolean> {
+    const profile = this.settings.profiles?.[this.settings.activeProfile];
+    if (!profile) return false;
+
+    const activeProfileName = this.settings.activeProfile;
+    const profileOriginalVars =
+      BUILT_IN_PROFILES_VARS[
+        activeProfileName as keyof typeof BUILT_IN_PROFILES_VARS
+      ];
+    const baseVars = profileOriginalVars || BUILT_IN_PROFILES_VARS.Default;
+
+    // List of variables to check and potentially restore
+    const varsToRestore = [
+      "--background-primary",
+      "--background-secondary",
+      "--background-modifier-border",
+      "--titlebar-background-focused",
+      "--background-modifier-hover",
+    ];
+
+    let settingsRestored = false;
+    for (const varName of varsToRestore) {
+      // Only restore if currently 'transparent'
+      if (profile.vars[varName] === "transparent") {
+        const defaultValue = baseVars[varName as keyof typeof baseVars];
+        if (defaultValue) {
+          profile.vars[varName] = defaultValue;
+          settingsRestored = true;
+          // Update pending immediately if live preview is on
+          if (this.settings.colorUpdateFPS > 0) {
+            this.pendingVarUpdates[varName] = defaultValue;
+          }
+        }
+      }
+    }
+
+    // Save and update UI only if changes were made
+    if (settingsRestored) {
+      await this.saveData(this.settings); // Persist
+      // Refresh settings UI if visible
+      if (
+        this.settingTabInstance &&
+        this.settingTabInstance.containerEl.offsetHeight > 0
+      ) {
+        this.settingTabInstance.display();
+      }
+      if (this.settings.colorUpdateFPS === 0) {
+        this.applyPendingNow(); // Apply changes immediately if live preview is off
+      }
+      return true;
+    }
+
+    return false;
+  }
+
+  async removeBackgroundImage() {
+    const profile = this.settings.profiles?.[this.settings.activeProfile];
+    if (!profile) return;
+
+    const imagePathToDelete = profile.backgroundImage;
+
+    // Clear the path from the settings object in memory first
+    delete profile.backgroundImage;
+
+    await this._restoreDefaultBackgroundVars();
+
+    // Attempt to delete the actual image file (best effort)
+    if (imagePathToDelete) {
+      try {
+        if (await this.app.vault.adapter.exists(imagePathToDelete)) {
+          await this.app.vault.adapter.remove(imagePathToDelete);
+        }
+      } catch (error) {
+        console.warn(
+          `Color Master: Could not delete background file '${imagePathToDelete}'.`,
+          error
+        );
+      }
+    }
+
+    await this.saveSettings();
+
+    // Refresh settings tab UI if it's open
+    if (this.settingTabInstance) {
+      this.settingTabInstance.display();
+    }
+  }
+
+  // Helper to find an available file path (e.g., 'image-2.png').
+  async _findNextAvailablePath(path: string): Promise<string> {
+    const adapter = this.app.vault.adapter;
+
+    // If original path doesn't exist, use it directly.
+    if (!(await adapter.exists(path))) {
+      return path;
+    }
+
+    // Split path into directory, base filename, and extension
+    const pathParts = path.split("/");
+    const fullFileName = pathParts.pop();
+    if (!fullFileName) return path;
+
+    const dir = pathParts.join("/");
+    // Check if file has an extension
+    const fileNameParts = fullFileName.split(".");
+    const ext = fileNameParts.length > 1 ? fileNameParts.pop() : "";
+    const baseName = fileNameParts.join(".");
+
+    let counter = 2;
+    let newPath = ext
+      ? `${dir}/${baseName}-${counter}.${ext}`
+      : `${dir}/${baseName}-${counter}`;
+
+    while (await adapter.exists(newPath)) {
+      counter++;
+      newPath = ext
+        ? `${dir}/${baseName}-${counter}.${ext}`
+        : `${dir}/${baseName}-${counter}`;
+    }
+    return newPath;
+  }
+
+  // Adds or replaces the background image file for the active profile.
+  async setBackgroundImage(
+    arrayBuffer: ArrayBuffer,
+    fileName: string,
+    conflictChoice: "replace" | "keep" | "prompt" = "prompt"
+  ) {
+    const activeProfile = this.settings.profiles?.[this.settings.activeProfile];
+    if (!activeProfile) return;
+
+    const activeProfileName = this.settings.activeProfile;
+    const backgroundsPath = `.obsidian/backgrounds/${activeProfileName}`;
+
+    let targetPath = `${backgroundsPath}/${fileName}`;
+
+    // 1. Ensure folder exists
+    try {
+      if (!(await this.app.vault.adapter.exists(backgroundsPath))) {
+        await this.app.vault.adapter.mkdir(backgroundsPath);
+      }
+
+      const fileExists = await this.app.vault.adapter.exists(targetPath);
+
+      // 2. Resolve conflicts if file exists
+      if (fileExists && conflictChoice === "prompt") {
+        new FileConflictModal(
+          this.app,
+          this,
+          arrayBuffer,
+          fileName,
+          async (choice) => {
+            await this.setBackgroundImage(arrayBuffer, fileName, choice);
+          }
+        ).open();
+        return;
+      }
+
+      if (fileExists && conflictChoice === "keep") {
+        targetPath = await this._findNextAvailablePath(targetPath);
+      }
+      if (fileExists && conflictChoice === "replace") {
+        await this.app.vault.adapter.remove(targetPath);
+      }
+
+      // 3. Save image data
+      await this.app.vault.createBinary(targetPath, arrayBuffer);
+
+      const oldImagePath = activeProfile.backgroundImage;
+
+      // 4. Update settings
+      activeProfile.backgroundImage = targetPath;
+
+      // 5. Save settings (this will trigger applyBackgroundImage)
+      await this.saveSettings();
+      new Notice(t("NOTICE_BACKGROUND_IMAGE_SET"));
+
+      // 6. Cleanup previous file if replacing original name and paths differ
+      if (
+        oldImagePath &&
+        oldImagePath !== targetPath &&
+        conflictChoice === "replace" // Only delete if 'replace'
+      ) {
+        if (await this.app.vault.adapter.exists(oldImagePath)) {
+          await this.app.vault.adapter.remove(oldImagePath);
+        }
+      }
+
+      // 7. Refresh settings tab UI
+      if (this.settingTabInstance) {
+        this.settingTabInstance.display();
+      }
+    } catch (error) {
+      new Notice(t("NOTICE_IMAGE_LOAD_ERROR"));
+      console.error("Color Master: Error setting background image:", error);
+    }
   }
 
   applyCustomCssForProfile(profileName: string) {
@@ -332,7 +632,8 @@ export default class ColorMaster extends Plugin {
     this.clearStyles();
     this.removeInjectedCustomCss();
     this.stopColorUpdateLoop();
-    console.log("Color Master v1.0.9 unloaded.");
+    this._clearBackgroundImageCSS();
+    console.log("Color Master v1.1.0 unloaded.");
   }
 
   public enableObservers(): void {
@@ -472,7 +773,7 @@ export default class ColorMaster extends Plugin {
     }
   }
 
-  applyStyles() {
+  async applyStyles() {
     this.removeOrphanedIconizeElements();
     this.clearStyles();
     if (!this.settings.pluginEnabled) {
@@ -522,6 +823,7 @@ export default class ColorMaster extends Plugin {
     } else {
       document.body.classList.remove("color-master-rtl");
     }
+    await this.applyBackgroundImage();
   }
 
   clearStyles() {
@@ -563,6 +865,7 @@ export default class ColorMaster extends Plugin {
     }
     this.app.workspace.trigger("css-change");
     document.body.classList.remove("color-master-rtl");
+    this._clearBackgroundImageCSS();
   }
 
   async loadSettings() {
@@ -648,40 +951,113 @@ export default class ColorMaster extends Plugin {
       );
       await this.saveData(this.settings);
     }
+
+    let profileMigrationNeeded = false;
+    for (const profileName in this.settings.profiles) {
+      const profile = this.settings.profiles[profileName];
+      // If background image exists but enabled status is not set, default it to true
+      if (
+        profile &&
+        profile.backgroundImage &&
+        typeof profile.backgroundEnabled === "undefined"
+      ) {
+        profile.backgroundEnabled = true;
+        profileMigrationNeeded = true;
+      }
+      // If background image doesn't exist, ensure enabled is false or undefined
+      else if (
+        profile &&
+        !profile.backgroundImage &&
+        profile.backgroundEnabled === true
+      ) {
+        profile.backgroundEnabled = false;
+        profileMigrationNeeded = true;
+      }
+    }
+    if (profileMigrationNeeded) {
+      console.log(
+        "Color Master: Setting default backgroundEnabled status for profiles."
+      );
+      await this.saveData(this.settings); // Save changes if migration happened
+    }
   }
 
   async saveSettings() {
     await this.saveData(this.settings);
-    this.applyStyles();
+    await this.applyStyles();
     await this.refreshOpenGraphViews();
     this.app.workspace.trigger("css-change");
   }
 
+  // This is the entire updated function
   async resetPluginData() {
     const pluginDataPath = `${this.manifest.dir}/data.json`;
+    const backgroundsPath = ".obsidian/backgrounds"; // The folder we want to delete
 
-    // Delete the file using the Obsidian API
+    let dataDeleted = false; // Flag to track if data.json was deleted
+
     try {
-      await this.app.vault.adapter.remove(pluginDataPath);
+      // 1. Delete the data.json file
+      if (await this.app.vault.adapter.exists(pluginDataPath)) {
+        await this.app.vault.adapter.remove(pluginDataPath);
+        dataDeleted = true; // Mark as deleted
+        console.log("Color Master: data.json deleted successfully.");
+      } else {
+        // If data.json doesn't exist, we still consider the data part 'reset'
+        dataDeleted = true;
+      }
 
-      // Create a notification with a reload button
-      const notice = new Notice(t("RESET_SUCCESS_NOTICE"), 0); // The notification will remain visible.
-      const noticeEl = notice.noticeEl;
-
-      const buttonContainer = noticeEl.createDiv({
-        cls: "modal-button-container",
-      });
-      new ButtonComponent(buttonContainer)
-        .setButtonText(t("RELOAD_BUTTON"))
-        .setCta()
-        .onClick(() => {
-          // Call the Obsidian reload command
-          (this.app as any).commands.executeCommandById("app:reload");
+      // 2. IMPORTANT: Show the success notice "immediately" after data.json deletion
+      if (dataDeleted) {
+        const notice = new Notice(t("RESET_SUCCESS_NOTICE"), 0); // Keep notice visible
+        const noticeEl = notice.noticeEl;
+        const buttonContainer = noticeEl.createDiv({
+          cls: "modal-button-container",
         });
-    } catch (e) {
-      // If an error occurs and the file is not deleted
-      new Notice(`Failed to delete plugin data: ${e.message}`);
-      console.error("Color Master: Failed to reset plugin data.", e);
+        new ButtonComponent(buttonContainer)
+          .setButtonText(t("RELOAD_BUTTON"))
+          .setCta()
+          .onClick(() => {
+            (this.app as any).commands.executeCommandById("app:reload");
+          });
+      } else {
+        // Should not happen, but as a fallback
+        new Notice("Failed to delete plugin data file.");
+        return; // Stop if data.json deletion failed
+      }
+
+      // 3. Attempt to delete the backgrounds folder (Best effort, ignore EBUSY)
+      try {
+        if (await this.app.vault.adapter.exists(backgroundsPath)) {
+          console.log(
+            "Color Master: Attempting to delete backgrounds folder..."
+          );
+          await this.app.vault.adapter.rmdir(backgroundsPath, true); // true for recursive
+          console.log(
+            "Color Master: Backgrounds folder deleted successfully (or was already gone)."
+          );
+        }
+      } catch (folderError) {
+        // Specifically ignore EBUSY or similar errors during folder removal
+        if (folderError.code === "EBUSY") {
+          console.warn(
+            `Color Master: Could not delete backgrounds folder due to EBUSY. It will be ignored after reload. Path: ${backgroundsPath}`
+          );
+        } else {
+          // Log other unexpected errors during folder deletion
+          console.error(
+            `Color Master: Unexpected error deleting backgrounds folder: ${folderError.message}`,
+            folderError
+          );
+        }
+      }
+    } catch (dataError) {
+      // Catch errors specifically from deleting data.json
+      new Notice(`Failed to delete plugin data: ${dataError.message}`);
+      console.error(
+        "Color Master: Failed to reset plugin data (data.json deletion).",
+        dataError
+      );
     }
   }
 
@@ -875,5 +1251,115 @@ export default class ColorMaster extends Plugin {
       return nextState;
     }
     return null;
+  }
+
+  // Downloads an image from a URL and sets it as the background.
+  async setBackgroundImageFromUrl(url: string) {
+    if (!url) {
+      new Notice(t("NOTICE_URL_LOAD_ERROR"));
+      return;
+    }
+    try {
+      const response = await requestUrl({ url });
+      const arrayBuffer = response.arrayBuffer;
+
+      // Extract filename, remove query params
+      let fileName = url.split("/").pop();
+
+      // Clean up potential query parameters
+      if (fileName) {
+        fileName = fileName.split("?")[0]; // Get image data as ArrayBuffer
+      }
+
+      // Generate fallback name if needed
+      if (!fileName || fileName.indexOf(".") === -1 || fileName.length > 50) {
+        const extension =
+          response.headers["content-type"]?.split("/")[1] || "png";
+        fileName = `image-${Date.now()}.${extension}`;
+      }
+
+      // Pass to main function
+      await this.setBackgroundImage(arrayBuffer, fileName, "prompt");
+    } catch (error) {
+      new Notice(t("NOTICE_URL_LOAD_ERROR"));
+      console.error("Color Master: Error fetching image from URL:", error);
+    }
+  }
+
+  // Sets an existing image file as the active background.
+  async selectBackgroundImage(newPath: string) {
+    const activeProfile = this.settings.profiles?.[this.settings.activeProfile];
+    if (!activeProfile) return;
+
+    // Set the new path in the settings
+    activeProfile.backgroundImage = newPath;
+
+    // Save settings (this will trigger applyBackgroundImage to show it)
+    await this.saveSettings();
+
+    new Notice(t("NOTICE_BACKGROUND_IMAGE_SET"));
+  }
+
+  // Renames a background image file and updates settings if it was active.
+  async renameBackgroundImage(
+    oldPath: string,
+    newFullName: string
+  ): Promise<string | false> {
+    const adapter = this.app.vault.adapter;
+
+    // Validate name
+    if (
+      !newFullName ||
+      newFullName.includes("/") ||
+      newFullName.includes("\\")
+    ) {
+      new Notice(t("NOTICE_INVALID_FILENAME"));
+      return false; // Indicate failure
+    }
+
+    const pathParts = oldPath.split("/");
+    const originalFileName = pathParts.pop() || "";
+    const folderPath = pathParts.join("/");
+    const oldExtMatch = originalFileName.match(/\.([a-zA-Z0-9]+)$/);
+    const oldExt = oldExtMatch ? oldExtMatch[0] : "";
+
+    // Construct the final, validated new path
+    const newPath = `${folderPath}/${newFullName}`;
+
+    // Ensure extension wasn't changed
+    if (oldExt && !newFullName.toLowerCase().endsWith(oldExt.toLowerCase())) {
+      console.warn(
+        `Color Master: Rename blocked. Attempted to change extension from "${oldExt}" in "${newFullName}".`
+      );
+      new Notice(t("NOTICE_INVALID_FILENAME") + " (Extension mismatch)");
+      return false;
+    }
+
+    // Prevent overwriting *different* existing file
+    if (await adapter.exists(newPath)) {
+      if (oldPath.toLowerCase() !== newPath.toLowerCase()) {
+        new Notice(t("NOTICE_FILENAME_EXISTS", newFullName));
+        return false;
+      }
+    }
+
+    // Attempt rename
+    try {
+      await adapter.rename(oldPath, newPath);
+
+      // Update setting if it was the active background
+      const profile = this.settings.profiles[this.settings.activeProfile];
+      if (profile && profile.backgroundImage === oldPath) {
+        profile.backgroundImage = newPath;
+        await this.saveSettings();
+      }
+
+      new Notice(t("NOTICE_RENAME_SUCCESS", newFullName));
+      return newPath;
+    } catch (error) {
+      new Notice(t("NOTICE_RENAME_ERROR"));
+      console.error("Color Master: Error renaming background image:", error);
+      return false;
+    }
   }
 }

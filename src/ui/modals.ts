@@ -1775,3 +1775,604 @@ export class IconizeSettingsModal extends Modal {
     contentEl.empty();
   }
 }
+
+export class BackgroundImageSettingsModal extends Modal {
+  plugin: ColorMaster;
+
+  constructor(app: App, plugin: ColorMaster) {
+    super(app);
+    this.plugin = plugin;
+  }
+
+  onOpen() {
+    // Basic setup: add class, get profile, set direction
+    this.modalEl.classList.add("color-master-modal");
+    const { contentEl } = this;
+    const lang = this.plugin.settings.language;
+    const isActiveProfile = // Renamed for clarity
+      this.plugin.settings.profiles[this.plugin.settings.activeProfile];
+
+    this.modalEl.setAttribute(
+      "dir",
+      (lang === "ar" || lang === "fa") && this.plugin.settings.useRtlLayout
+        ? "rtl"
+        : "ltr"
+    );
+
+    contentEl.empty();
+    contentEl.createEl("h3", { text: t("TOOLTIP_BACKGROUND_IMAGE_SETTINGS") });
+
+    // --- Enable/Disable Toggle ---
+    new Setting(contentEl)
+      .setName(t("SETTING_BACKGROUND_ENABLE_NAME"))
+      .setDesc(t("SETTING_BACKGROUND_ENABLE_DESC"))
+      .addToggle((toggle) => {
+        // Default to enabled if undefined or true
+        const isCurrentlyEnabled = isActiveProfile?.backgroundEnabled !== false;
+
+        toggle.setValue(isCurrentlyEnabled).onChange(async (value) => {
+          const profile =
+            this.plugin.settings.profiles[this.plugin.settings.activeProfile];
+          if (profile) {
+            profile.backgroundEnabled = value;
+            await this.plugin.saveSettings(); // Save triggers applyStyles
+          }
+        });
+      });
+  }
+
+  onClose() {
+    const { contentEl } = this;
+    contentEl.empty();
+  }
+}
+
+// Modal shown when adding a background image that already exists
+export class FileConflictModal extends Modal {
+  plugin: ColorMaster;
+  arrayBuffer: ArrayBuffer; // The image data to save
+  fileName: string; // The conflicting filename
+  onResolve: (choice: "replace" | "keep") => void; // Callback with user's choice
+
+  constructor(
+    app: App,
+    plugin: ColorMaster,
+    arrayBuffer: ArrayBuffer,
+    fileName: string,
+    onResolve: (choice: "replace" | "keep") => void
+  ) {
+    super(app);
+    this.plugin = plugin;
+    this.arrayBuffer = arrayBuffer;
+    this.fileName = fileName;
+    this.onResolve = onResolve;
+    this.modalEl.classList.add("color-master-modal");
+  }
+
+  onOpen() {
+    const { contentEl } = this;
+    contentEl.empty();
+
+    contentEl.createEl("h3", { text: t("FILE_CONFLICT_TITLE") });
+    contentEl.createEl("p", { text: t("FILE_CONFLICT_DESC", this.fileName) });
+
+    const buttonContainer = contentEl.createDiv({
+      cls: "modal-button-container",
+    });
+
+    // Replace Button
+    new ButtonComponent(buttonContainer)
+      .setButtonText(t("REPLACE_FILE_BUTTON"))
+
+      .onClick(async () => {
+        this.onResolve("replace");
+        this.close();
+      });
+
+    // Keep Both Button
+    new ButtonComponent(buttonContainer)
+      .setButtonText(t("KEEP_BOTH_BUTTON"))
+      .setCta()
+      .onClick(async () => {
+        this.onResolve("keep");
+        this.close();
+      });
+  }
+
+  onClose() {
+    this.contentEl.empty();
+  }
+}
+
+// Modal for adding a new background image via file upload, paste, or drag/drop
+export class AddBackgroundModal extends Modal {
+  plugin: ColorMaster;
+  settingTab: ColorMasterSettingTab;
+
+  constructor(
+    app: App,
+    plugin: ColorMaster,
+    settingTab: ColorMasterSettingTab
+  ) {
+    super(app);
+    this.plugin = plugin;
+    this.settingTab = settingTab;
+    this.modalEl.classList.add("color-master-modal");
+  }
+
+  // Process pasted image files
+  async handlePastedFile(file: File) {
+    new Notice(`Pasted image "${file.name}"`);
+    await this.processFileWithProgress(file);
+  }
+
+  // Process pasted URLs (http/https or data URLs)
+  async handlePastedUrl(url: string) {
+    const pasteBox = this.contentEl.querySelector(
+      ".cm-paste-box"
+    ) as HTMLElement;
+
+    // Handle data URLs directly
+    if (url.startsWith("data:image")) {
+      try {
+        if (pasteBox) {
+          pasteBox.textContent = t("PROCESSING_IMAGE") + "...";
+        }
+        const response = await fetch(url);
+        const blob = await response.blob();
+        const arrayBuffer = await blob.arrayBuffer();
+        const fileName = `pasted-image-${Date.now()}.${
+          blob.type.split("/")[1] || "png"
+        }`;
+        new Notice("Pasted Base64 image");
+
+        await this.plugin.setBackgroundImage(arrayBuffer, fileName, "prompt");
+        this.close();
+        return; // Exit after handling
+      } catch (error) {
+        new Notice(t("NOTICE_IMAGE_LOAD_ERROR"));
+        console.error("Color Master: Error handling pasted data URL:", error);
+        this.close();
+        return; // Exit on error
+      }
+    }
+
+    // Handle regular URLs
+    if (url.startsWith("http://") || url.startsWith("https://")) {
+      new Notice(`Downloading from ${url}...`);
+      if (pasteBox) {
+        // Show processing (no percentage)
+        pasteBox.textContent = t("PROCESSING_IMAGE") + "...";
+      }
+      await this.plugin.setBackgroundImageFromUrl(url); // Use dedicated function
+      this.close();
+      return; // Exit after handling
+    }
+    // If neither type matched
+    new Notice(t("NOTICE_PASTE_ERROR"));
+  }
+
+  // Read file as ArrayBuffer, update progress, and call setBackgroundImage
+  async processFileWithProgress(file: File) {
+    const reader = new FileReader();
+    const pasteBox = this.contentEl.querySelector(
+      ".cm-paste-box"
+    ) as HTMLElement;
+
+    // Update progress text in paste box
+    reader.onprogress = (event) => {
+      if (event.lengthComputable && pasteBox) {
+        const percent = Math.round((event.loaded / event.total) * 100);
+        pasteBox.textContent = t("PROCESSING_IMAGE") + `${percent}%`;
+      }
+    };
+
+    // On successful load, pass data to main plugin function
+    reader.onload = async () => {
+      if (pasteBox) {
+        pasteBox.textContent = t("PROCESSING_IMAGE") + "100%";
+      }
+      const arrayBuffer = reader.result as ArrayBuffer;
+      await this.plugin.setBackgroundImage(arrayBuffer, file.name, "prompt");
+      this.close(); // Close modal on success
+    };
+
+    // Handle read errors
+    reader.onerror = () => {
+      new Notice(t("NOTICE_IMAGE_LOAD_ERROR"));
+      this.close();
+    };
+
+    // Start reading the file
+    if (pasteBox) {
+      pasteBox.textContent = t("PROCESSING_IMAGE") + "0%";
+    }
+    reader.readAsArrayBuffer(file);
+  }
+
+  onOpen() {
+    const { contentEl } = this;
+    contentEl.empty();
+
+    const lang = this.plugin.settings.language;
+    this.modalEl.setAttribute(
+      "dir",
+      (lang === "ar" || lang === "fa") && this.plugin.settings.useRtlLayout
+        ? "rtl"
+        : "ltr"
+    );
+
+    contentEl.createEl("h3", { text: t("ADD_NEW_BACKGROUND_IMAGE_TITLE") });
+
+    // --- File Import Button ---
+    new Setting(contentEl)
+      .setName(t("IMPORT_FROM_FILE_BUTTON"))
+      .setDesc(t("IMPORT_FROM_FILE_DESC_MODAL"))
+      .addButton((button) => {
+        // Hidden input element to handle file selection
+        const input = createEl("input", {
+          type: "file",
+          attr: { accept: "image/*" }, // Allow standard image types
+        });
+
+        button
+          .setIcon("upload")
+          .setCta()
+          .setButtonText(t("CHOOSE_FILE_BUTTON"))
+          .onClick(() => {
+            input.click(); // Open file dialog
+          });
+
+        input.onchange = async () => {
+          if (!input.files || input.files.length === 0) return;
+          const file = input.files[0];
+
+          await this.processFileWithProgress(file); // Process selected file
+        };
+      });
+
+    contentEl.createEl("hr");
+
+    // --- Paste Box (URL or Image via Paste/DragDrop) ---
+    const pasteBox = contentEl.createDiv({
+      cls: "cm-paste-box",
+      text: t("PASTE_BOX_PLACEHOLDER"),
+    });
+    pasteBox.setAttribute("contenteditable", "true"); // Allow paste
+
+    pasteBox.addEventListener("paste", (event: ClipboardEvent) => {
+      event.preventDefault();
+
+      const clipboardData = event.clipboardData;
+      if (!clipboardData) return;
+
+      // Check for pasted files first
+      if (clipboardData.files && clipboardData.files.length > 0) {
+        const file = clipboardData.files[0];
+        if (file.type.startsWith("image/")) {
+          this.handlePastedFile(file);
+          return;
+        }
+      }
+
+      // Check for pasted text (URLs)
+      const pastedText = clipboardData.getData("text/plain");
+      if (
+        pastedText &&
+        (pastedText.startsWith("http://") ||
+          pastedText.startsWith("https://") ||
+          pastedText.startsWith("data:image"))
+      ) {
+        this.handlePastedUrl(pastedText);
+        return;
+      }
+      // If neither worked
+      new Notice(t("NOTICE_PASTE_ERROR"));
+    });
+
+    // --- Drag and Drop Listeners ---
+    pasteBox.addEventListener("dragover", (event: DragEvent) => {
+      event.preventDefault(); // Required to allow drop
+      pasteBox.classList.add("is-over");
+      pasteBox.textContent = t("DROP_TO_ADD_IMAGE");
+    });
+
+    pasteBox.addEventListener("dragleave", () => {
+      pasteBox.classList.remove("is-over");
+      pasteBox.textContent = t("PASTE_BOX_PLACEHOLDER"); // Reset text
+    });
+
+    pasteBox.addEventListener("drop", (event: DragEvent) => {
+      event.preventDefault(); // Prevent default browser file handling
+      pasteBox.classList.remove("is-over");
+      pasteBox.textContent = t("PASTE_BOX_PLACEHOLDER");
+
+      if (!event.dataTransfer) return;
+
+      // Check for dropped files first
+      if (event.dataTransfer.files && event.dataTransfer.files.length > 0) {
+        const file = event.dataTransfer.files[0];
+        if (file.type.startsWith("image/")) {
+          this.handlePastedFile(file);
+          return;
+        }
+      }
+
+      // Check for dropped URLs (less common, but possible)
+      const url =
+        event.dataTransfer.getData("text/uri-list") ||
+        event.dataTransfer.getData("text/plain");
+      if (url && (url.startsWith("http") || url.startsWith("data:image"))) {
+        this.handlePastedUrl(url);
+        return;
+      }
+      // If neither worked
+      new Notice(t("NOTICE_PASTE_ERROR"));
+    });
+  }
+
+  onClose() {
+    this.contentEl.empty();
+  }
+}
+
+// Modal for browsing, selecting, renaming, and deleting background images for the active profile
+export class ProfileImageBrowserModal extends Modal {
+  plugin: ColorMaster;
+  settingTab: ColorMasterSettingTab;
+  closeCallback: () => void; // Used to potentially close the parent 'AddBackgroundModal'
+  galleryEl: HTMLElement; // Container for image cards
+
+  constructor(
+    app: App,
+    plugin: ColorMaster,
+    settingTab: ColorMasterSettingTab,
+    closeCallback: () => void
+  ) {
+    super(app);
+    this.plugin = plugin;
+    this.settingTab = settingTab;
+    this.closeCallback = closeCallback; // Store the callback
+    this.modalEl.classList.add("color-master-modal", "cm-image-browser-modal");
+  }
+
+  async onOpen() {
+    const { contentEl } = this;
+    contentEl.empty();
+    contentEl.createEl("h3", { text: t("PROFILE_IMAGE_BROWSER_TITLE") });
+
+    this.galleryEl = contentEl.createDiv({ cls: "cm-image-gallery" });
+    await this.displayImages(); // Load and display images
+  }
+
+  // Fetches and displays image cards in the gallery
+  async displayImages() {
+    this.galleryEl.empty();
+    const activeProfileName = this.plugin.settings.activeProfile;
+    // Construct path to the profile's background folder
+    const backgroundsPath = `.obsidian/backgrounds/${activeProfileName}`;
+    const imageExtensions = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg"];
+
+    let files: string[] = [];
+    try {
+      // List files only if the profile's background folder exists
+      if (await this.app.vault.adapter.exists(backgroundsPath)) {
+        const list = await this.app.vault.adapter.list(backgroundsPath);
+        files = list.files; // Get the list of file paths
+      }
+    } catch (e) {
+      console.warn("Color Master: Error listing background folder.", e);
+    }
+
+    // Filter the list to include only supported image types
+    const imageFiles = files.filter((path) =>
+      imageExtensions.some((ext) => path.toLowerCase().endsWith(ext))
+    );
+
+    // Show empty state message if no images found
+    if (imageFiles.length === 0) {
+      this.galleryEl.createDiv({
+        cls: "cm-image-browser-empty",
+        text: t("NO_IMAGES_FOUND"),
+      });
+      return;
+    }
+
+    // Create a card for each image file
+    for (const imagePath of imageFiles) {
+      const cardEl = this.galleryEl.createDiv({ cls: "cm-image-card" });
+      const imageUrl = this.app.vault.adapter.getResourcePath(imagePath);
+      const fileName = imagePath.split("/").pop();
+
+      // --- 1. Image Preview ---
+      cardEl.createEl("img", {
+        cls: "cm-image-card-preview",
+        attr: { src: imageUrl },
+      });
+
+      // --- 2. Editable File Name (Basename + Extension) ---
+      const nameSettingEl = cardEl.createDiv({
+        cls: "setting-item cm-image-card-name-input",
+      });
+      const nameControlEl = nameSettingEl.createDiv({
+        cls: "setting-item-control",
+      });
+
+      const nameInputContainer = nameControlEl.createDiv({
+        cls: "cm-name-input-container",
+      });
+      const nameInput = nameInputContainer.createEl("input", {
+        type: "text",
+        cls: "cm-name-input-basename",
+      });
+      const extensionSpan = nameInputContainer.createSpan({
+        cls: "cm-name-input-extension",
+      });
+
+      // Helper to safely split filename into basename and extension
+      const splitName = (fullFileName: string) => {
+        // Decode potential URI encoding in filenames
+        const decodedName = decodeURIComponent(fullFileName || "");
+        const lastDot = decodedName.lastIndexOf(".");
+        // Check for valid extension (dot exists, not first char, content after dot)
+        if (lastDot > 0 && lastDot < decodedName.length - 1) {
+          return {
+            basename: decodedName.substring(0, lastDot),
+            ext: decodedName.substring(lastDot),
+          };
+        }
+        // Fallback if no valid extension
+        return { basename: decodedName, ext: "" };
+      };
+
+      let currentImagePath = imagePath;
+      let currentFileName = fileName || ""; // Track path locally for updates after rename
+
+      // Set initial values
+      let { basename, ext } = splitName(currentFileName);
+      nameInput.value = basename;
+      extensionSpan.setText(ext);
+
+      // Select basename text on focus for easier editing
+      nameInput.addEventListener("focus", (e) => {
+        (e.target as HTMLInputElement).select();
+      });
+
+      // --- Save Rename Logic ---
+      const saveName = async () => {
+        const newBasename = nameInput.value.trim();
+        const currentBasename = splitName(currentFileName).basename; // Split again to get current state
+
+        // Only proceed if basename is valid and changed
+        if (newBasename && newBasename !== currentBasename) {
+          const newFullName = newBasename + ext; // Get current extension
+
+          // Call main plugin rename function (returns new path or false)
+          const renameResult = await this.plugin.renameBackgroundImage(
+            currentImagePath,
+            newFullName
+          );
+
+          if (renameResult && typeof renameResult === "string") {
+            // SUCCESS - Update local state and necessary UI elements
+            const newPath = renameResult;
+            currentImagePath = newPath; // Update path for subsequent actions
+            currentFileName = newPath.split("/").pop() || ""; // Update filename from the returned path
+            const updatedSplit = splitName(currentFileName);
+            basename = updatedSplit.basename; // Update displayed basename if needed
+            // ext remains the same
+
+            // Update associated elements (preview, buttons) without full redraw
+            const imgEl = cardEl.querySelector(
+              ".cm-image-card-preview"
+            ) as HTMLImageElement | null;
+            const selectBtn = cardEl.querySelector(
+              ".cm-image-card-select-btn"
+            ) as HTMLButtonElement | null;
+            const deleteBtn = cardEl.querySelector(
+              ".cm-image-card-delete-btn"
+            ) as HTMLButtonElement | null;
+
+            if (imgEl) {
+              imgEl.src = this.app.vault.adapter.getResourcePath(newPath);
+            }
+            if (selectBtn) {
+              selectBtn.onclick = () => this.selectImage(newPath);
+            }
+            if (deleteBtn) {
+              deleteBtn.onclick = () => this.deleteImage(newPath, cardEl);
+            }
+          } else {
+            // FAILURE - Revert input to the last known good basename
+            nameInput.value = currentBasename;
+            // Notice is already shown by renameBackgroundImage on failure
+          }
+        } else {
+          // If name empty or unchanged, ensure input reflects current basename
+          nameInput.value = currentBasename;
+        }
+      }; // End saveName
+
+      // Trigger save on Enter or losing focus
+      nameInput.addEventListener("keydown", (e: KeyboardEvent) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          nameInput.blur(); // Trigger focusout event to save
+        }
+      });
+      nameInput.addEventListener("focusout", () => {
+        saveName(); // Triggers focusout
+      });
+
+      // --- 3. Action Buttons (Select/Delete) ---
+      // Added directly to nameControlEl for inline display
+      // Select Button (Icon + Tooltip)
+      const controlsEl = cardEl.createDiv({ cls: "cm-image-card-controls" });
+
+      // Select Button - Add class for easier selection later
+      const selectButton = new ButtonComponent(controlsEl) // Add to name control container
+        .setButtonText(t("SELECT_BUTTON"))
+        .setCta()
+        .onClick(() => this.selectImage(currentImagePath)); // Use current path
+      selectButton.buttonEl.classList.add("cm-image-card-select-btn");
+
+      // Delete Button - Add class for easier selection later
+      const deleteButton = new ButtonComponent(controlsEl)
+        .setIcon("trash")
+        .setClass("mod-warning")
+        .onClick(() => this.deleteImage(currentImagePath, cardEl)); // Use currentImagePath
+      deleteButton.buttonEl.classList.add("cm-image-card-delete-btn");
+    } // End for loop iterating through imageFiles
+  }
+
+  // Action when user clicks the 'select' (check) button on an image card
+  async selectImage(path: string) {
+    await this.plugin.selectBackgroundImage(path);
+    this.settingTab.display(); // Refresh settings tab
+    this.closeCallback(); // Close the 'Add Background' modal
+    this.close(); // Close this modal
+  }
+
+  // Action when user clicks the 'delete' (trash) button on an image card
+  async deleteImage(path: string, cardEl: HTMLElement) {
+    const fileName = path.split("/").pop();
+    // Show confirmation dialog before deleting
+    new ConfirmationModal(
+      this.app,
+      this.plugin,
+      t("CONFIRM_IMAGE_DELETE_TITLE"),
+      t("CONFIRM_IMAGE_DELETE_DESC", fileName || path), // Show filename in confirmation
+      async () => {
+        const activeProfile =
+          this.plugin.settings.profiles[this.plugin.settings.activeProfile];
+
+        // Check if this is the currently active background
+        if (activeProfile.backgroundImage === path) {
+          // Use removeBackgroundImage to clear UI, settings, AND delete file
+          await this.plugin.removeBackgroundImage();
+        } else {
+          // Just delete the file
+          await this.app.vault.adapter.remove(path);
+        }
+
+        new Notice(`Deleted ${fileName}`);
+        cardEl.remove(); // Remove the card from the gallery
+
+        // Check if gallery is now empty
+        if (this.galleryEl.childElementCount === 0) {
+          this.galleryEl.createDiv({
+            cls: "cm-image-browser-empty",
+            text: t("NO_IMAGES_FOUND"),
+          });
+        }
+        // Refresh settings tab in case we deleted the active image
+        this.settingTab.display();
+      },
+      { buttonText: t("DELETE_ANYWAY_BUTTON"), buttonClass: "mod-warning" }
+    ).open();
+  }
+
+  onClose() {
+    this.contentEl.empty();
+  }
+}

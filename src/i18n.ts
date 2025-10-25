@@ -9,7 +9,7 @@ export function initializeT(plugin: ColorMaster) {
 
 export const STRINGS = {
   en: {
-    PLUGIN_NAME: "Color Master - v1.0.9",
+    PLUGIN_NAME: "Color Master - v1.1.0",
     ENABLE_PLUGIN: "Enable Color Master",
     ENABLE_PLUGIN_DESC:
       "Turn this off to temporarily disable all custom colors and revert to your active Obsidian theme.",
@@ -168,11 +168,11 @@ export const STRINGS = {
       "Are you sure you want to delete this snippet? This action cannot be undone.",
     RESET_PLUGIN_NAME: "Reset Plugin Settings",
     RESET_PLUGIN_DESC:
-      "This will delete all profiles, snippets, and settings, resetting the plugin to its original state. This action requires an app reload and cannot be undone.",
+      "This will delete all profiles, snippets, settings, and backgrounds, resetting the plugin to its original state. This action requires an app reload and cannot be undone.",
     RESET_PLUGIN_BUTTON: "Reset All Data...",
     RESET_CONFIRM_MODAL_TITLE: "Are you sure?",
     RESET_CONFIRM_MODAL_DESC:
-      "This will permanently delete all your Color Master data (profiles, snippets, settings). This is irreversible.",
+      "This will permanently delete all your Color Master data (profiles, snippets, settings, and backgrounds). This is irreversible.",
     RESET_SUCCESS_NOTICE:
       "Color Master data has been deleted. Please reload Obsidian to apply the changes.",
     RELOAD_BUTTON: "Reload",
@@ -307,9 +307,62 @@ export const STRINGS = {
     COMMAND_OPEN_SETTINGS: "Open settings tab",
     RIBBON_TOOLTIP_SETTINGS: "Color Master Settings",
     REGEX_PLACEHOLDER: "Enter Regex and press Enter...",
+    SET_BACKGROUND_IMAGE_NAME: "Set Custom Background",
+    SET_BACKGROUND_IMAGE_DESC:
+      "Set a custom background image for your active profile.",
+    SET_BACKGROUND_IMAGE_BUTTON: "Choose Image...",
+    REMOVE_BACKGROUND_IMAGE_BUTTON: "Remove Background",
+    NOTICE_BACKGROUND_IMAGE_SET: "Background image has been set successfully.",
+    NOTICE_BACKGROUND_IMAGE_REMOVED: "Background image has been removed.",
+    NOTICE_IMAGE_LOAD_ERROR: "Failed to load the image.",
+    TOOLTIP_ADD_BACKGROUND_IMAGE: "Add background image",
+    TOOLTIP_REMOVE_BACKGROUND_IMAGE: "Remove background image",
+    TOOLTIP_BACKGROUND_IMAGE_SETTINGS: "Background image settings",
+    TOOLTIP_BROWSE_BACKGROUND_IMAGES: "Browse stored background images",
+    NOTICE_NO_BACKGROUND_IMAGE_TO_REMOVE:
+      "There is no active background image for this profile to remove.",
+    NOTICE_BACKGROUND_IMAGE_DELETED:
+      "Background image and file have been deleted.",
+    CONFIRM_BACKGROUND_DELETION_TITLE: "Confirm Background Deletion",
+    CONFIRM_BACKGROUND_DELETION_DESC:
+      "Are you sure you want to delete the current background image? The image file will be permanently removed from your vault.",
+    DELETE_ANYWAY_BUTTON: "Delete Anyway",
+    NOTICE_BACKGROUND_IMAGE_NOT_FOUND: (path: string) =>
+      `Profile requires background image at '${path}', but the file was not found. Please add the image to this path.`,
+    NOTICE_BACKGROUND_FOLDER_NOT_FOUND:
+      "Backgrounds folder '.obsidian/backgrounds' not found.",
+    FILE_CONFLICT_TITLE: "File Exists",
+    FILE_CONFLICT_DESC: (name: string) =>
+      `A file named '${name}' already exists in your backgrounds folder. What would you like to do?`,
+    REPLACE_FILE_BUTTON: "Replace File",
+    KEEP_BOTH_BUTTON: "Keep Both (Rename)",
+    ADD_NEW_BACKGROUND_IMAGE_TITLE: "Add New Background Image",
+    IMPORT_FROM_FILE_BUTTON: "Import from File",
+    NOTICE_URL_LOAD_ERROR: "Failed to download image from URL.",
+    IMPORT_FROM_FILE_DESC_MODAL:
+      "Import an image file from your computer to use as a background.",
+    PASTE_BOX_PLACEHOLDER: "Drag & Drop / Paste an image or URL here (Ctrl+V)",
+    NOTICE_PASTE_ERROR: "Pasted content is not a valid image or URL.",
+    DROP_TO_ADD_IMAGE: "Drop to add image...",
+    PROCESSING_IMAGE: "Processing",
+    PROFILE_IMAGE_BROWSER_TITLE: "Profile Backgrounds",
+    NO_IMAGES_FOUND: "No images found in your profile's background folder.",
+    SELECT_BUTTON: "Select",
+    CONFIRM_IMAGE_DELETE_TITLE: "Delete Image?",
+    CONFIRM_IMAGE_DELETE_DESC: (name: string) =>
+      `Are you sure you want to permanently delete '${name}'?`,
+    BROWSE_BUTTON: "Browse...",
+    NOTICE_INVALID_FILENAME: "Invalid file name.",
+    NOTICE_FILENAME_EXISTS: (name: string) =>
+      `File name "${name}" already exists.`,
+    NOTICE_RENAME_SUCCESS: (name: string) => `Renamed to "${name}"`,
+    NOTICE_RENAME_ERROR: "Error renaming file.",
+    SETTING_BACKGROUND_ENABLE_NAME: "Enable Background Image",
+    SETTING_BACKGROUND_ENABLE_DESC:
+      "Toggle the visibility of the custom background image for this profile.",
   },
   ar: {
-    PLUGIN_NAME: "متحكم الألوان - v1.0.9",
+    PLUGIN_NAME: "متحكم الألوان - v1.1.0",
     ENABLE_PLUGIN: "تفعيل متحكم الألوان",
     ENABLE_PLUGIN_DESC:
       "أطفئ هذا الخيار لتعطيل جميع الألوان المخصصة مؤقتاً والعودة إلى ثيم Obsidian النشط.",
@@ -472,11 +525,11 @@ export const STRINGS = {
       "هل أنت متأكد من رغبتك في حذف هذه القصاصة؟ لا يمكن التراجع عن هذا الإجراء.",
     RESET_PLUGIN_NAME: "إعادة تعيين الإضافة",
     RESET_PLUGIN_DESC:
-      "سيؤدي هذا إلى حذف جميع الملفات الشخصية والقصاصات والإعدادات، وإعادة الإضافة إلى حالتها الأصلية. يتطلب هذا الإجراء إعادة تحميل Obsidian ولا يمكن التراجع عنه.",
+      "سيؤدي هذا إلى حذف جميع الملفات الشخصية، والمقتطفات، والإعدادات، والخلفيات، وإعادة ضبط الإضافة إلى حالتها الأصلية. يتطلب هذا الإجراء إعادة تحميل التطبيق، ولا يمكن التراجع عنه.",
     RESET_PLUGIN_BUTTON: "إعادة تعيين كل البيانات...",
     RESET_CONFIRM_MODAL_TITLE: "هل أنت متأكد؟",
     RESET_CONFIRM_MODAL_DESC:
-      "سيتم حذف جميع بيانات Color Master بشكل دائم (الملفات الشخصية، القصاصات، الإعدادات). هذا الإجراء لا يمكن التراجع عنه.",
+      "سيتم حذف جميع بيانات Color Master بشكل دائم (الملفات الشخصية، القصاصات، الإعدادات، والخلفيات). هذا الإجراء لا يمكن التراجع عنه.",
     RESET_SUCCESS_NOTICE:
       "تم حذف بيانات Color Master. يرجى إعادة تحميل Obsidian لتطبيق التغييرات.",
     RELOAD_BUTTON: "إعادة تحميل",
@@ -607,9 +660,60 @@ export const STRINGS = {
     COMMAND_OPEN_SETTINGS: "فتح نافذة الإعدادات",
     RIBBON_TOOLTIP_SETTINGS: "إعدادات Color Master",
     REGEX_PLACEHOLDER: "أدخل التعبير النمطي واضغط Enter...",
+    SET_BACKGROUND_IMAGE_NAME: "تعيين خلفية مخصصة",
+    SET_BACKGROUND_IMAGE_DESC: "تعيين صورة خلفية مخصصة لملفك الشخصي النشط.",
+    SET_BACKGROUND_IMAGE_BUTTON: "اختر صورة...",
+    REMOVE_BACKGROUND_IMAGE_BUTTON: "إزالة الخلفية",
+    NOTICE_BACKGROUND_IMAGE_SET: "تم تعيين صورة الخلفية بنجاح.",
+    NOTICE_BACKGROUND_IMAGE_REMOVED: "تمت إزالة صورة الخلفية.",
+    NOTICE_IMAGE_LOAD_ERROR: "فشل تحميل الصورة.",
+    TOOLTIP_ADD_BACKGROUND_IMAGE: "إضافة صورة خلفية",
+    TOOLTIP_REMOVE_BACKGROUND_IMAGE: "إزالة صورة الخلفية",
+    TOOLTIP_BACKGROUND_IMAGE_SETTINGS: "إعدادات صورة الخلفية",
+    TOOLTIP_BROWSE_BACKGROUND_IMAGES: "استعراض صور الخلفية المخزنة",
+    NOTICE_NO_BACKGROUND_IMAGE_TO_REMOVE:
+      "لا توجد صورة خلفية نشطة لهذا الملف الشخصي لإزالتها.",
+    NOTICE_BACKGROUND_IMAGE_DELETED: "تم حذف صورة الخلفية وملفها بنجاح.",
+    CONFIRM_BACKGROUND_DELETION_TITLE: "تأكيد حذف الخلفية",
+    CONFIRM_BACKGROUND_DELETION_DESC:
+      "هل أنت متأكد من رغبتك في حذف صورة الخلفية الحالية؟ سيتم حذف ملف الصورة بشكل دائم من القبو الخاص بك.",
+    DELETE_ANYWAY_BUTTON: "حذف على أي حال",
+    NOTICE_BACKGROUND_IMAGE_NOT_FOUND: (path: string) =>
+      `الملف الشخصي يتطلب صورة خلفية في المسار '${path}'، لكن لم يتم العثور على الملف. يرجى إضافة الصورة إلى هذا المسار.`,
+    NOTICE_BACKGROUND_FOLDER_NOT_FOUND:
+      "تعذر العثور على مجلد الخلفيات '.obsidian/backgrounds'.",
+    FILE_CONFLICT_TITLE: "الملف موجود",
+    FILE_CONFLICT_DESC: (name: string) =>
+      `يوجد ملف باسم '${name}' موجود مسبقاً في مجلد الخلفيات. ماذا تريد أن تفعل؟`,
+    REPLACE_FILE_BUTTON: "استبدال الملف",
+    KEEP_BOTH_BUTTON: "الاحتفاظ بكليهما (إعادة تسمية)",
+    ADD_NEW_BACKGROUND_IMAGE_TITLE: "إضافة صورة خلفية جديدة",
+    IMPORT_FROM_FILE_BUTTON: "استيراد من ملف",
+    NOTICE_URL_LOAD_ERROR: "فشل تحميل الصورة من الرابط.",
+    IMPORT_FROM_FILE_DESC_MODAL:
+      "استيراد ملف صورة من جهاز الكمبيوتر الخاص بك لاستخدامه كخلفية.",
+    PASTE_BOX_PLACEHOLDER: "اسحب وأفلت / أو الصق صورة / رابط هنا (Ctrl+V)",
+    NOTICE_PASTE_ERROR: "المحتوى الذي تم لصقه ليس صورة أو رابط صالح.",
+    DROP_TO_ADD_IMAGE: "أفلتها لإضافة الصورة...",
+    PROCESSING_IMAGE: "جاري المعالجة",
+    PROFILE_IMAGE_BROWSER_TITLE: "خلفيات الملف الشخصي",
+    NO_IMAGES_FOUND: "لا توجد صور في مجلد الخلفيات الخاص بهذا الملف الشخصي.",
+    SELECT_BUTTON: "اختيار",
+    CONFIRM_IMAGE_DELETE_TITLE: "حذف الصورة؟",
+    CONFIRM_IMAGE_DELETE_DESC: (name: string) =>
+      `هل أنت متأكد من رغبتك في حذف '${name}' بشكل دائم؟`,
+    BROWSE_BUTTON: "استعراض...",
+    NOTICE_INVALID_FILENAME: "اسم الملف غير صالح.",
+    NOTICE_FILENAME_EXISTS: (name: string) =>
+      `اسم الملف "${name}" موجود مسبقاً.`,
+    NOTICE_RENAME_SUCCESS: (name: string) => `تمت إعادة التسمية إلى "${name}"`,
+    NOTICE_RENAME_ERROR: "خطأ أثناء إعادة تسمية الملف.",
+    SETTING_BACKGROUND_ENABLE_NAME: "تفعيل صورة الخلفية",
+    SETTING_BACKGROUND_ENABLE_DESC:
+      "التحكم بظهور أو إخفاء صورة الخلفية المخصصة لهذا الملف الشخصي.",
   },
   fa: {
-    PLUGIN_NAME: "استاد رنگ - v1.0.9",
+    PLUGIN_NAME: "استاد رنگ - v1.1.0",
     ENABLE_PLUGIN: "فعال کردن استاد رنگ",
     ENABLE_PLUGIN_DESC:
       "این گزینه را برای غیرفعال کردن موقت تمام رنگ‌های سفارشی و بازگشت به تم فعال Obsidian خود خاموش کنید.",
@@ -773,11 +877,11 @@ export const STRINGS = {
       "آیا مطمئن هستید که می‌خواهید این قطعه کد را حذف کنید؟ این عمل قابل بازگشت نیست.",
     RESET_PLUGIN_NAME: "بازنشانی تنظیمات افزونه",
     RESET_PLUGIN_DESC:
-      "این کار تمام پروفایل‌ها، قطعه کدها و تنظیمات را حذف کرده و افزونه را به حالت اولیه بازنشانی می‌کند. این عمل نیاز به بارگذاری مجدد برنامه دارد و قابل بازگشت نیست.",
+      "این کار تمام پروفایل‌ها، قطعه کدها، تنظیمات و پس‌زمینه‌ها را حذف می‌کند و افزونه را به حالت اولیه‌اش بازنشانی می‌کند. این عمل نیاز به بارگذاری مجدد برنامه دارد و قابل بازگشت نیست.",
     RESET_PLUGIN_BUTTON: "بازنشانی تمام داده‌ها...",
     RESET_CONFIRM_MODAL_TITLE: "آیا مطمئن هستید؟",
     RESET_CONFIRM_MODAL_DESC:
-      "این کار تمام داده‌های استاد رنگ شما (پروفایل‌ها، قطعه کدها، تنظیمات) را برای همیشه حذف می‌کند. این عمل غیرقابل بازگشت است.",
+      "این کار تمام داده‌های Color Master شما (پروفایل‌ها، قطعه کدها، تنظیمات و پس‌زمینه‌ها) را برای همیشه حذف می‌کند. این غیرقابل برگشت است.",
     RESET_SUCCESS_NOTICE:
       "داده‌های استاد رنگ حذف شد. لطفاً برای اعمال تغییرات Obsidian را مجدداً بارگذاری کنید.",
     RELOAD_BUTTON: "بارگذاری مجدد",
@@ -910,9 +1014,62 @@ export const STRINGS = {
     COMMAND_OPEN_SETTINGS: "باز کردن تنظیمات",
     RIBBON_TOOLTIP_SETTINGS: "تنظیمات استاد رنگ",
     REGEX_PLACEHOLDER: "عبارت منظم را وارد کنید و Enter را بزنید...",
+    SET_BACKGROUND_IMAGE_NAME: "تنظیم پس‌زمینه سفارشی",
+    SET_BACKGROUND_IMAGE_DESC:
+      "یک تصویر پس‌زمینه سفارشی برای پروفایل فعال خود تنظیم کنید.",
+    SET_BACKGROUND_IMAGE_BUTTON: "تصویر را انتخاب کنید...",
+    REMOVE_BACKGROUND_IMAGE_BUTTON: "حذف پس‌زمینه",
+    NOTICE_BACKGROUND_IMAGE_SET: "تصویر پس‌زمینه با موفقیت تنظیم شد.",
+    NOTICE_BACKGROUND_IMAGE_REMOVED: "تصویر پس‌زمینه حذف شد.",
+    NOTICE_IMAGE_LOAD_ERROR: "بارگیری تصویر ناموفق بود.",
+    TOOLTIP_ADD_BACKGROUND_IMAGE: "اضافه کردن تصویر پس‌زمینه",
+    TOOLTIP_REMOVE_BACKGROUND_IMAGE: "حذف تصویر پس‌زمینه",
+    TOOLTIP_BACKGROUND_IMAGE_SETTINGS: "تنظیمات تصویر پس‌زمینه",
+    TOOLTIP_BROWSE_BACKGROUND_IMAGES: "مرور تصاویر پس‌زمینه ذخیره شده",
+    NOTICE_NO_BACKGROUND_IMAGE_TO_REMOVE:
+      "هیچ تصویر پس‌زمینه فعالی برای حذف در این نمایه وجود ندارد.",
+    NOTICE_BACKGROUND_IMAGE_DELETED: "تصویر پس‌زمینه و فایل آن حذف شدند.",
+    CONFIRM_BACKGROUND_DELETION_TITLE: "تأیید حذف پس‌زمینه",
+    CONFIRM_BACKGROUND_DELETION_DESC:
+      "آیا مطمئن هستید که می‌خواهید تصویر پس‌زمینه فعلی را حذف کنید؟ فایل تصویر برای همیشه از والت شما حذف خواهد شد.",
+    DELETE_ANYWAY_BUTTON: "در هر صورت حذف کن",
+    NOTICE_BACKGROUND_IMAGE_NOT_FOUND: (path: string) =>
+      `پروفایل به تصویر پس‌زمینه در '${path}' نیاز دارد، اما فایل پیدا نشد. لطفاً تصویر را به این مسیر اضافه کنید.`,
+    NOTICE_BACKGROUND_FOLDER_NOT_FOUND:
+      "پوشه پس‌زمینه‌ها '.obsidian/backgrounds' پیدا نشد.",
+    FILE_CONFLICT_TITLE: "فایل موجود است",
+    FILE_CONFLICT_DESC: (name: string) =>
+      `فایلی با نام '${name}' قبلاً در پوشه پس‌زمینه‌های شما وجود دارد. چه کاری می‌خواهید انجام دهید؟`,
+    REPLACE_FILE_BUTTON: "جایگزینی فایل",
+    KEEP_BOTH_BUTTON: "نگه داشتن هر دو (تغییر نام)",
+    ADD_NEW_BACKGROUND_IMAGE_TITLE: "افزودن تصویر پس‌زمینه جدید",
+    IMPORT_FROM_FILE_BUTTON: "وارد کردن از فایل",
+    NOTICE_URL_LOAD_ERROR: "دانلود تصویر از URL ناموفق بود.",
+    IMPORT_FROM_FILE_DESC_MODAL:
+      "وارد کردن یک فایل تصویر از کامپیوتر شما برای استفاده به عنوان پس‌زمینه.",
+    PASTE_BOX_PLACEHOLDER:
+      "تصویر یا URL را بکشید و رها کنید / یا اینجا بچسبانید (Ctrl+V)",
+    NOTICE_PASTE_ERROR: "محتوای چسبانده شده یک تصویر یا URL معتبر نیست.",
+    DROP_TO_ADD_IMAGE: "برای افزودن تصویر رها کنید...",
+    PROCESSING_IMAGE: "در حال پردازش",
+    PROFILE_IMAGE_BROWSER_TITLE: "پس‌زمینه‌های پروفایل",
+    NO_IMAGES_FOUND: "هیچ تصویری در پوشه پس‌زمینه این پروفایل یافت نشد.",
+    SELECT_BUTTON: "انتخاب",
+    CONFIRM_IMAGE_DELETE_TITLE: "حذف تصویر؟",
+    CONFIRM_IMAGE_DELETE_DESC: (name: string) =>
+      `آیا مطمئن هستید که می‌خواهید '${name}' را برای همیشه حذف کنید؟`,
+    BROWSE_BUTTON: "مرور...",
+    NOTICE_INVALID_FILENAME: "نام فایل نامعتبر است.",
+    NOTICE_FILENAME_EXISTS: (name: string) =>
+      `نام فایل "${name}" از قبل وجود دارد.`,
+    NOTICE_RENAME_SUCCESS: (name: string) => `تغییر نام به "${name}"`,
+    NOTICE_RENAME_ERROR: "خطا در تغییر نام فایل.",
+    SETTING_BACKGROUND_ENABLE_NAME: "فعال کردن تصویر پس‌زمینه",
+    SETTING_BACKGROUND_ENABLE_DESC:
+      "نمایش یا پنهان کردن تصویر پس‌زمینه سفارشی برای این پروفایل را تغییر دهید.",
   },
   fr: {
-    PLUGIN_NAME: "Maître des Couleurs - v1.0.9",
+    PLUGIN_NAME: "Maître des Couleurs - v1.1.0",
     ENABLE_PLUGIN: "Activer Maître des Couleurs",
     ENABLE_PLUGIN_DESC:
       "Désactivez cette option pour désactiver temporairement toutes les couleurs personnalisées et revenir à votre thème Obsidian actif.",
@@ -1076,11 +1233,11 @@ export const STRINGS = {
       "Êtes-vous sûr de vouloir supprimer cet extrait ? Cette action est irréversible.",
     RESET_PLUGIN_NAME: "Réinitialiser les paramètres du plugin",
     RESET_PLUGIN_DESC:
-      "Cela supprimera tous les profils, extraits et paramètres, réinitialisant le plugin à son état d'origine. Cette action nécessite un rechargement de l'application et est irréversible.",
+      "Cette action supprimera tous les profils, extraits, paramètres et arrière-plans, réinitialisant ainsi l'extension à son état d'origine. Cette action nécessite un rechargement de l'application et est irréversible.",
     RESET_PLUGIN_BUTTON: "Réinitialiser toutes les données...",
     RESET_CONFIRM_MODAL_TITLE: "Êtes-vous sûr ?",
     RESET_CONFIRM_MODAL_DESC:
-      "Cela supprimera définitivement toutes vos données de Color Master (profils, extraits, paramètres). Ceci est irréversible.",
+      "Cela supprimera définitivement toutes vos données Color Master (profils, extraits, paramètres et arrière-plans). C'est irréversible.",
     RESET_SUCCESS_NOTICE:
       "Les données de Color Master ont été supprimées. Veuillez recharger Obsidian pour appliquer les changements.",
     RELOAD_BUTTON: "Recharger",
@@ -1223,6 +1380,65 @@ export const STRINGS = {
     COMMAND_OPEN_SETTINGS: "Ouvrir les paramètres",
     RIBBON_TOOLTIP_SETTINGS: "Paramètres de Color Master",
     REGEX_PLACEHOLDER: "Entrez Regex et appuyez sur Entrée...",
+    SET_BACKGROUND_IMAGE_NAME: "Définir un arrière-plan personnalisé",
+    SET_BACKGROUND_IMAGE_DESC:
+      "Définissez une image d'arrière-plan personnalisée pour votre profil actif.",
+    SET_BACKGROUND_IMAGE_BUTTON: "Choisissez une image...",
+    REMOVE_BACKGROUND_IMAGE_BUTTON: "Supprimer l'arrière-plan",
+    NOTICE_BACKGROUND_IMAGE_SET:
+      "L'image d'arrière-plan a été définie avec succès.",
+    NOTICE_BACKGROUND_IMAGE_REMOVED: "L'image d'arrière-plan a été supprimée.",
+    NOTICE_IMAGE_LOAD_ERROR: "Échec du chargement de l'image.",
+    TOOLTIP_ADD_BACKGROUND_IMAGE: "Ajouter une image d'arrière-plan",
+    TOOLTIP_REMOVE_BACKGROUND_IMAGE: "Supprimer l'image d'arrière-plan",
+    TOOLTIP_BACKGROUND_IMAGE_SETTINGS: "Paramètres de l'image d'arrière-plan",
+    TOOLTIP_BROWSE_BACKGROUND_IMAGES:
+      "Parcourir les images d'arrière-plan stockées",
+    NOTICE_NO_BACKGROUND_IMAGE_TO_REMOVE:
+      "Il n'y a pas d'image d'arrière-plan active à supprimer pour ce profil.",
+    NOTICE_BACKGROUND_IMAGE_DELETED:
+      "L'image d'arrière-plan et son fichier ont été supprimés.",
+    CONFIRM_BACKGROUND_DELETION_TITLE:
+      "Confirmer la suppression de l'arrière-plan",
+    CONFIRM_BACKGROUND_DELETION_DESC:
+      "Êtes-vous sûr de vouloir supprimer l'image d'arrière-plan actuelle ? Le fichier image sera définitivement supprimé de votre coffre.",
+    DELETE_ANYWAY_BUTTON: "Supprimer quand même",
+    NOTICE_BACKGROUND_IMAGE_NOT_FOUND: (path: string) =>
+      `Le profil nécessite l'image d'arrière-plan à '${path}', mais le fichier n'a pas été trouvé. Veuillez ajouter l'image à ce chemin.`,
+    NOTICE_BACKGROUND_FOLDER_NOT_FOUND:
+      "Dossier d'arrière-plans '.obsidian/backgrounds' non trouvé.",
+    FILE_CONFLICT_TITLE: "Le fichier existe",
+    FILE_CONFLICT_DESC: (name: string) =>
+      `Un fichier nommé '${name}' existe déjà dans votre dossier d'arrière-plans. Que souhaitez-vous faire ?`,
+    REPLACE_FILE_BUTTON: "Remplacer le fichier",
+    KEEP_BOTH_BUTTON: "Garder les deux (Renommer)",
+    ADD_NEW_BACKGROUND_IMAGE_TITLE: "Ajouter une nouvelle image d'arrière-plan",
+    IMPORT_FROM_FILE_BUTTON: "Importer depuis un fichier",
+    NOTICE_URL_LOAD_ERROR: "Échec du téléchargement de l'image depuis l'URL.",
+    IMPORT_FROM_FILE_DESC_MODAL:
+      "Importer un fichier image depuis votre ordinateur pour l'utiliser comme arrière-plan.",
+    PASTE_BOX_PLACEHOLDER:
+      "Glissez-déposez / Collez une image ou URL ici (Ctrl+V)",
+    NOTICE_PASTE_ERROR:
+      "Le contenu collé n'est pas une image ou une URL valide.",
+    DROP_TO_ADD_IMAGE: "Relâchez pour ajouter l'image...",
+    PROCESSING_IMAGE: "Traitement",
+    PROFILE_IMAGE_BROWSER_TITLE: "Arrière-plans du profil",
+    NO_IMAGES_FOUND:
+      "Aucune image trouvée dans le dossier d'arrière-plans de ce profil.",
+    SELECT_BUTTON: "Sélectionner",
+    CONFIRM_IMAGE_DELETE_TITLE: "Supprimer l'image ?",
+    CONFIRM_IMAGE_DELETE_DESC: (name: string) =>
+      `Êtes-vous sûr de vouloir supprimer définitivement '${name}' ?`,
+    BROWSE_BUTTON: "Parcourir...",
+    NOTICE_INVALID_FILENAME: "Nom de fichier invalide.",
+    NOTICE_FILENAME_EXISTS: (nom: string) =>
+      `Le nom de fichier "${name}" existe déjà.`,
+    NOTICE_RENAME_SUCCESS: (nom: string) => `Renommé en "${name}"`,
+    NOTICE_RENAME_ERROR: "Erreur lors du changement de nom du fichier.",
+    SETTING_BACKGROUND_ENABLE_NAME: "Activer l'image d'arrière-plan",
+    SETTING_BACKGROUND_ENABLE_DESC:
+      "Activer/désactiver la visibilité de l'image d'arrière-plan personnalisée pour ce profil.",
   },
 };
 

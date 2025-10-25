@@ -896,35 +896,7 @@ const OLED_MATRIX_PROFILE = {
     "--tag-color": "#0bd62d",
   },
   themeType: "dark",
-  snippets: [
-    {
-      id: "oled-glow-default-snippet",
-      name: "OLED Green Glow Effect",
-      css: `/* OLED Green Glow Effect */
-/* Adds a subtle green glow to text, perfect for the Matrix feel. */
-body {
-    --text-glow-oled: 0 0 5px rgba(0, 255, 0, 0.7), 0 0 10px rgba(0, 255, 0, 0.5);
-}
-
-.markdown-preview-view, .markdown-source-view {
-    text-shadow: var(--text-glow-oled);
-}
-
-h1, h2, h3 {
-    text-shadow: var(--text-glow-oled);
-}`,
-      enabled: false,
-    },
-    {
-      id: "oled-active-line-snippet",
-      name: "OLED Active Line Highlight",
-      css: `/* Highlights the active line with a faint green background */
-.cm-active.cm-line {
-    background-color: rgba(0, 255, 0, 0.1) !important;
-}`,
-      enabled: true,
-    },
-  ],
+  snippets: [],
 };
 
 const CITRUS_ZEST_PROFILE = {
