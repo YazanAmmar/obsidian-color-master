@@ -2457,3 +2457,12 @@ body.cm-workspace-background-active .modal-container .modal {
   background-color: transparent !important;
   box-shadow: none !important;
 }
+
+.cm-profile-list-modal {
+  margin-top: 10px;
+  margin-bottom: 5px;
+}
+.cm-profile-list-modal strong {
+  color: var(--text-accent);
+  font-weight: 600;
+}

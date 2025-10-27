@@ -167,9 +167,9 @@ export function drawLikePluginCard(
 
   const myGithubButtonWrapper = actions.createDiv({ cls: "codepen-button" });
   myGithubButtonWrapper.createEl("span", {
-    text: t("LIKE_CARD_GITHUB_BUTTON"),
+    text: t("LIKE_CARD_TELEGRAM_CHANNEL_BUTTON"),
   });
   myGithubButtonWrapper.addEventListener("click", () => {
-    window.open("https://github.com/YazanAmmar", "_blank");
+    window.open("https://t.me/ObsidianColorMaster", "_blank");
   });
 }

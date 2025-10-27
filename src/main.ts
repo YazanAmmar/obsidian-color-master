@@ -110,13 +110,6 @@ export default class ColorMaster extends Plugin {
 
     const path = profile.backgroundImage;
 
-    // Verify file exists
-    if (!(await this.app.vault.adapter.exists(path))) {
-      new Notice(t("NOTICE_BACKGROUND_IMAGE_NOT_FOUND", path));
-      // Keep UI clean, background is already cleared.
-      return;
-    }
-
     // --- Apply Transparency Logic ---
     // Make key UI variables transparent if they hold default values
     const activeProfileName = this.settings.activeProfile;
@@ -151,10 +144,7 @@ export default class ColorMaster extends Plugin {
 
     // Save immediately if transparency was applied (uses saveData)
     if (settingsChanged) {
-      // Note: This save will trigger applyStyles/applyBackgroundImage again,
-      // but it's okay because the transparency is already set.
-      await this.saveData(this.settings); // Use saveData to avoid infinite loop
-      // Refresh the settings tab view if it's open
+      await this.saveData(this.settings);
       if (
         this.settingTabInstance &&
         this.settingTabInstance.containerEl.offsetHeight > 0
@@ -235,34 +225,67 @@ export default class ColorMaster extends Plugin {
     return false;
   }
 
-  async removeBackgroundImage() {
-    const profile = this.settings.profiles?.[this.settings.activeProfile];
-    if (!profile) return;
-
-    const imagePathToDelete = profile.backgroundImage;
-
-    // Clear the path from the settings object in memory first
-    delete profile.backgroundImage;
-
-    await this._restoreDefaultBackgroundVars();
-
-    // Attempt to delete the actual image file (best effort)
-    if (imagePathToDelete) {
-      try {
-        if (await this.app.vault.adapter.exists(imagePathToDelete)) {
-          await this.app.vault.adapter.remove(imagePathToDelete);
-        }
-      } catch (error) {
-        console.warn(
-          `Color Master: Could not delete background file '${imagePathToDelete}'.`,
-          error
+  /**
+   * Ensures the global .obsidian/backgrounds folder exists on startup.
+   */
+  async _ensureBackgroundsFolderExists(): Promise<void> {
+    const backgroundsPath = ".obsidian/backgrounds";
+    try {
+      // Check if the folder does NOT exist
+      if (!(await this.app.vault.adapter.exists(backgroundsPath))) {
+        // Create the folder if it's missing
+        await this.app.vault.adapter.mkdir(backgroundsPath);
+        console.log(
+          "Color Master: Created global backgrounds folder at .obsidian/backgrounds"
         );
+      }
+    } catch (error) {
+      console.error(
+        "Color Master: Failed to create backgrounds folder on startup.",
+        error
+      );
+    }
+  }
+
+  // This function now deletes the file AND clears the path from ALL profiles using it.
+  async removeBackgroundImageByPath(pathToDelete: string) {
+    if (!pathToDelete) return;
+
+    // 1. Clear the path from all profiles that use it
+    let settingsChanged = false;
+    for (const profileName in this.settings.profiles) {
+      const profile = this.settings.profiles[profileName];
+      if (profile.backgroundImage === pathToDelete) {
+        profile.backgroundImage = "";
+        // Also disable background if we remove it
+        profile.backgroundEnabled = false;
+        settingsChanged = true;
       }
     }
 
-    await this.saveSettings();
+    // 2. Restore default vars for the active profile if it was affected
+    const activeProfile = this.settings.profiles[this.settings.activeProfile];
+    if (activeProfile.backgroundImage === "") {
+      await this._restoreDefaultBackgroundVars();
+    }
 
-    // Refresh settings tab UI if it's open
+    // 3. Try to delete the actual file
+    try {
+      if (await this.app.vault.adapter.exists(pathToDelete)) {
+        await this.app.vault.adapter.remove(pathToDelete);
+      }
+    } catch (error) {
+      console.warn(
+        `Color Master: Could not delete background file '${pathToDelete}'.`,
+        error
+      );
+    }
+
+    if (settingsChanged) {
+      await this.saveSettings();
+    }
+
+    // Refresh settings tab UI
     if (this.settingTabInstance) {
       this.settingTabInstance.display();
     }
@@ -302,7 +325,7 @@ export default class ColorMaster extends Plugin {
     return newPath;
   }
 
-  // Adds or replaces the background image file for the active profile.
+  // Adds or replaces a background image file in the global folder.
   async setBackgroundImage(
     arrayBuffer: ArrayBuffer,
     fileName: string,
@@ -311,8 +334,7 @@ export default class ColorMaster extends Plugin {
     const activeProfile = this.settings.profiles?.[this.settings.activeProfile];
     if (!activeProfile) return;
 
-    const activeProfileName = this.settings.activeProfile;
-    const backgroundsPath = `.obsidian/backgrounds/${activeProfileName}`;
+    const backgroundsPath = `.obsidian/backgrounds`;
 
     let targetPath = `${backgroundsPath}/${fileName}`;
 
@@ -556,6 +578,7 @@ export default class ColorMaster extends Plugin {
     initializeT(this);
     T = this;
     await this.loadSettings();
+    await this._ensureBackgroundsFolderExists();
     this.liveNoticeRules = null;
     this.liveNoticeRuleType = null;
     if (this.settings.language === "auto") {
@@ -992,7 +1015,7 @@ export default class ColorMaster extends Plugin {
   // This is the entire updated function
   async resetPluginData() {
     const pluginDataPath = `${this.manifest.dir}/data.json`;
-    const backgroundsPath = ".obsidian/backgrounds"; // The folder we want to delete
+    const backgroundsPath = ".obsidian/backgrounds";
 
     let dataDeleted = false; // Flag to track if data.json was deleted
 
@@ -1300,7 +1323,7 @@ export default class ColorMaster extends Plugin {
     new Notice(t("NOTICE_BACKGROUND_IMAGE_SET"));
   }
 
-  // Renames a background image file and updates settings if it was active.
+  // Renames a background image file and updates ALL profiles using it.
   async renameBackgroundImage(
     oldPath: string,
     newFullName: string
@@ -1314,19 +1337,16 @@ export default class ColorMaster extends Plugin {
       newFullName.includes("\\")
     ) {
       new Notice(t("NOTICE_INVALID_FILENAME"));
-      return false; // Indicate failure
+      return false;
     }
 
     const pathParts = oldPath.split("/");
     const originalFileName = pathParts.pop() || "";
     const folderPath = pathParts.join("/");
+    const newPath = `${folderPath}/${newFullName}`;
     const oldExtMatch = originalFileName.match(/\.([a-zA-Z0-9]+)$/);
     const oldExt = oldExtMatch ? oldExtMatch[0] : "";
 
-    // Construct the final, validated new path
-    const newPath = `${folderPath}/${newFullName}`;
-
-    // Ensure extension wasn't changed
     if (oldExt && !newFullName.toLowerCase().endsWith(oldExt.toLowerCase())) {
       console.warn(
         `Color Master: Rename blocked. Attempted to change extension from "${oldExt}" in "${newFullName}".`
@@ -1347,10 +1367,17 @@ export default class ColorMaster extends Plugin {
     try {
       await adapter.rename(oldPath, newPath);
 
-      // Update setting if it was the active background
-      const profile = this.settings.profiles[this.settings.activeProfile];
-      if (profile && profile.backgroundImage === oldPath) {
-        profile.backgroundImage = newPath;
+      // Update the path in ALL profiles that were using the old path
+      let settingsChanged = false;
+      for (const profileName in this.settings.profiles) {
+        const profile = this.settings.profiles[profileName];
+        if (profile && profile.backgroundImage === oldPath) {
+          profile.backgroundImage = newPath;
+          settingsChanged = true;
+        }
+      }
+
+      if (settingsChanged) {
         await this.saveSettings();
       }
 

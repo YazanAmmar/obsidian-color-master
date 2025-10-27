@@ -89,7 +89,7 @@ export const STRINGS = {
     LIKE_CARD_STAR_BUTTON: "Star on GitHub",
     LIKE_CARD_ISSUE_BUTTON: "Report an Issue",
     LIKE_CARD_SYNC_BUTTON: "Sync Your Vault",
-    LIKE_CARD_GITHUB_BUTTON: "My GitHub",
+    LIKE_CARD_TELEGRAM_CHANNEL_BUTTON: "Telegram",
     PASTE_CSS_MODAL_TITLE: "Import / Paste CSS",
     PASTE_CSS_MODAL_NOTE:
       "Note : Pasted CSS can affect UI, proceed only with trusted CSS.",
@@ -309,7 +309,7 @@ export const STRINGS = {
     REGEX_PLACEHOLDER: "Enter Regex and press Enter...",
     SET_BACKGROUND_IMAGE_NAME: "Set Custom Background",
     SET_BACKGROUND_IMAGE_DESC:
-      "Set a custom background image for your active profile.",
+      "Manage the background image for this profile (images are stored globally in .obsidian/backgrounds).",
     SET_BACKGROUND_IMAGE_BUTTON: "Choose Image...",
     REMOVE_BACKGROUND_IMAGE_BUTTON: "Remove Background",
     NOTICE_BACKGROUND_IMAGE_SET: "Background image has been set successfully.",
@@ -324,13 +324,7 @@ export const STRINGS = {
     NOTICE_BACKGROUND_IMAGE_DELETED:
       "Background image and file have been deleted.",
     CONFIRM_BACKGROUND_DELETION_TITLE: "Confirm Background Deletion",
-    CONFIRM_BACKGROUND_DELETION_DESC:
-      "Are you sure you want to delete the current background image? The image file will be permanently removed from your vault.",
     DELETE_ANYWAY_BUTTON: "Delete Anyway",
-    NOTICE_BACKGROUND_IMAGE_NOT_FOUND: (path: string) =>
-      `Profile requires background image at '${path}', but the file was not found. Please add the image to this path.`,
-    NOTICE_BACKGROUND_FOLDER_NOT_FOUND:
-      "Backgrounds folder '.obsidian/backgrounds' not found.",
     FILE_CONFLICT_TITLE: "File Exists",
     FILE_CONFLICT_DESC: (name: string) =>
       `A file named '${name}' already exists in your backgrounds folder. What would you like to do?`,
@@ -345,8 +339,9 @@ export const STRINGS = {
     NOTICE_PASTE_ERROR: "Pasted content is not a valid image or URL.",
     DROP_TO_ADD_IMAGE: "Drop to add image...",
     PROCESSING_IMAGE: "Processing",
-    PROFILE_IMAGE_BROWSER_TITLE: "Profile Backgrounds",
-    NO_IMAGES_FOUND: "No images found in your profile's background folder.",
+    PROFILE_IMAGE_BROWSER_TITLE: "Stored Backgrounds",
+    NO_IMAGES_FOUND:
+      "No images found in your backgrounds folder (.obsidian/backgrounds).",
     SELECT_BUTTON: "Select",
     CONFIRM_IMAGE_DELETE_TITLE: "Delete Image?",
     CONFIRM_IMAGE_DELETE_DESC: (name: string) =>
@@ -360,6 +355,8 @@ export const STRINGS = {
     SETTING_BACKGROUND_ENABLE_NAME: "Enable Background Image",
     SETTING_BACKGROUND_ENABLE_DESC:
       "Toggle the visibility of the custom background image for this profile.",
+    CONFIRM_GLOBAL_BACKGROUND_DELETION_DESC:
+      "Are you sure you want to permanently delete this background? The following profiles are using it and will be reset:",
   },
   ar: {
     PLUGIN_NAME: "متحكم الألوان - v1.1.0",
@@ -442,7 +439,7 @@ export const STRINGS = {
     LIKE_CARD_STAR_BUTTON: "أضف  ★ على GitHub",
     LIKE_CARD_ISSUE_BUTTON: "أبلغ عن مشكلة",
     LIKE_CARD_SYNC_BUTTON: "مزامنة خزنتك",
-    LIKE_CARD_GITHUB_BUTTON: "حسابي على GitHub",
+    LIKE_CARD_TELEGRAM_CHANNEL_BUTTON: "تيليجرام",
     PASTE_CSS_MODAL_TITLE: "استيراد / لصق CSS",
     PASTE_CSS_MODAL_NOTE:
       "ملاحظة : كود CSS الذي تلصقه قد يؤثر على واجهة البرنامج، استخدم فقط الأكواد الموثوقة.",
@@ -661,7 +658,8 @@ export const STRINGS = {
     RIBBON_TOOLTIP_SETTINGS: "إعدادات Color Master",
     REGEX_PLACEHOLDER: "أدخل التعبير النمطي واضغط Enter...",
     SET_BACKGROUND_IMAGE_NAME: "تعيين خلفية مخصصة",
-    SET_BACKGROUND_IMAGE_DESC: "تعيين صورة خلفية مخصصة لملفك الشخصي النشط.",
+    SET_BACKGROUND_IMAGE_DESC:
+      "إدارة صورة الخلفية لهذا الملف الشخصي (يتم تخزين الصور بشكل عام في .obsidian/backgrounds).",
     SET_BACKGROUND_IMAGE_BUTTON: "اختر صورة...",
     REMOVE_BACKGROUND_IMAGE_BUTTON: "إزالة الخلفية",
     NOTICE_BACKGROUND_IMAGE_SET: "تم تعيين صورة الخلفية بنجاح.",
@@ -675,13 +673,7 @@ export const STRINGS = {
       "لا توجد صورة خلفية نشطة لهذا الملف الشخصي لإزالتها.",
     NOTICE_BACKGROUND_IMAGE_DELETED: "تم حذف صورة الخلفية وملفها بنجاح.",
     CONFIRM_BACKGROUND_DELETION_TITLE: "تأكيد حذف الخلفية",
-    CONFIRM_BACKGROUND_DELETION_DESC:
-      "هل أنت متأكد من رغبتك في حذف صورة الخلفية الحالية؟ سيتم حذف ملف الصورة بشكل دائم من القبو الخاص بك.",
     DELETE_ANYWAY_BUTTON: "حذف على أي حال",
-    NOTICE_BACKGROUND_IMAGE_NOT_FOUND: (path: string) =>
-      `الملف الشخصي يتطلب صورة خلفية في المسار '${path}'، لكن لم يتم العثور على الملف. يرجى إضافة الصورة إلى هذا المسار.`,
-    NOTICE_BACKGROUND_FOLDER_NOT_FOUND:
-      "تعذر العثور على مجلد الخلفيات '.obsidian/backgrounds'.",
     FILE_CONFLICT_TITLE: "الملف موجود",
     FILE_CONFLICT_DESC: (name: string) =>
       `يوجد ملف باسم '${name}' موجود مسبقاً في مجلد الخلفيات. ماذا تريد أن تفعل؟`,
@@ -696,8 +688,8 @@ export const STRINGS = {
     NOTICE_PASTE_ERROR: "المحتوى الذي تم لصقه ليس صورة أو رابط صالح.",
     DROP_TO_ADD_IMAGE: "أفلتها لإضافة الصورة...",
     PROCESSING_IMAGE: "جاري المعالجة",
-    PROFILE_IMAGE_BROWSER_TITLE: "خلفيات الملف الشخصي",
-    NO_IMAGES_FOUND: "لا توجد صور في مجلد الخلفيات الخاص بهذا الملف الشخصي.",
+    PROFILE_IMAGE_BROWSER_TITLE: "استعراض الخلفيات",
+    NO_IMAGES_FOUND: "لا توجد صور في مجلد الخلفيات (.obsidian/backgrounds).",
     SELECT_BUTTON: "اختيار",
     CONFIRM_IMAGE_DELETE_TITLE: "حذف الصورة؟",
     CONFIRM_IMAGE_DELETE_DESC: (name: string) =>
@@ -711,6 +703,8 @@ export const STRINGS = {
     SETTING_BACKGROUND_ENABLE_NAME: "تفعيل صورة الخلفية",
     SETTING_BACKGROUND_ENABLE_DESC:
       "التحكم بظهور أو إخفاء صورة الخلفية المخصصة لهذا الملف الشخصي.",
+    CONFIRM_GLOBAL_BACKGROUND_DELETION_DESC:
+      "هل أنت متأكد من رغبتك في حذف هذه الخلفية بشكل دائم؟ البروفايلات التالية تستخدمها حالياً وسيتم إزالتها منها:",
   },
   fa: {
     PLUGIN_NAME: "استاد رنگ - v1.1.0",
@@ -793,7 +787,7 @@ export const STRINGS = {
     LIKE_CARD_STAR_BUTTON: "ستاره در گیت‌هاب",
     LIKE_CARD_ISSUE_BUTTON: "گزارش مشکل",
     LIKE_CARD_SYNC_BUTTON: "همگام‌سازی صندوق شما",
-    LIKE_CARD_GITHUB_BUTTON: "گیت‌هاب من",
+    LIKE_CARD_TELEGRAM_CHANNEL_BUTTON: "تلگرام",
     PASTE_CSS_MODAL_TITLE: "وارد کردن / چسباندن CSS",
     PASTE_CSS_MODAL_NOTE:
       "توجه: CSS چسبانده شده می‌تواند بر رابط کاربری تأثیر بگذارد، فقط با CSS معتبر ادامه دهید.",
@@ -1016,7 +1010,7 @@ export const STRINGS = {
     REGEX_PLACEHOLDER: "عبارت منظم را وارد کنید و Enter را بزنید...",
     SET_BACKGROUND_IMAGE_NAME: "تنظیم پس‌زمینه سفارشی",
     SET_BACKGROUND_IMAGE_DESC:
-      "یک تصویر پس‌زمینه سفارشی برای پروفایل فعال خود تنظیم کنید.",
+      "مدیریت تصویر پس‌زمینه برای این پروفایل (تصاویر به صورت سراسری در .obsidian/backgrounds ذخیره می‌شوند).",
     SET_BACKGROUND_IMAGE_BUTTON: "تصویر را انتخاب کنید...",
     REMOVE_BACKGROUND_IMAGE_BUTTON: "حذف پس‌زمینه",
     NOTICE_BACKGROUND_IMAGE_SET: "تصویر پس‌زمینه با موفقیت تنظیم شد.",
@@ -1030,13 +1024,7 @@ export const STRINGS = {
       "هیچ تصویر پس‌زمینه فعالی برای حذف در این نمایه وجود ندارد.",
     NOTICE_BACKGROUND_IMAGE_DELETED: "تصویر پس‌زمینه و فایل آن حذف شدند.",
     CONFIRM_BACKGROUND_DELETION_TITLE: "تأیید حذف پس‌زمینه",
-    CONFIRM_BACKGROUND_DELETION_DESC:
-      "آیا مطمئن هستید که می‌خواهید تصویر پس‌زمینه فعلی را حذف کنید؟ فایل تصویر برای همیشه از والت شما حذف خواهد شد.",
     DELETE_ANYWAY_BUTTON: "در هر صورت حذف کن",
-    NOTICE_BACKGROUND_IMAGE_NOT_FOUND: (path: string) =>
-      `پروفایل به تصویر پس‌زمینه در '${path}' نیاز دارد، اما فایل پیدا نشد. لطفاً تصویر را به این مسیر اضافه کنید.`,
-    NOTICE_BACKGROUND_FOLDER_NOT_FOUND:
-      "پوشه پس‌زمینه‌ها '.obsidian/backgrounds' پیدا نشد.",
     FILE_CONFLICT_TITLE: "فایل موجود است",
     FILE_CONFLICT_DESC: (name: string) =>
       `فایلی با نام '${name}' قبلاً در پوشه پس‌زمینه‌های شما وجود دارد. چه کاری می‌خواهید انجام دهید؟`,
@@ -1052,8 +1040,9 @@ export const STRINGS = {
     NOTICE_PASTE_ERROR: "محتوای چسبانده شده یک تصویر یا URL معتبر نیست.",
     DROP_TO_ADD_IMAGE: "برای افزودن تصویر رها کنید...",
     PROCESSING_IMAGE: "در حال پردازش",
-    PROFILE_IMAGE_BROWSER_TITLE: "پس‌زمینه‌های پروفایل",
-    NO_IMAGES_FOUND: "هیچ تصویری در پوشه پس‌زمینه این پروفایل یافت نشد.",
+    PROFILE_IMAGE_BROWSER_TITLE: "مرورگر پس‌زمینه‌ها",
+    NO_IMAGES_FOUND:
+      "هیچ تصویری در پوشه پس‌زمینه شما یافت نشد (.obsidian/backgrounds).",
     SELECT_BUTTON: "انتخاب",
     CONFIRM_IMAGE_DELETE_TITLE: "حذف تصویر؟",
     CONFIRM_IMAGE_DELETE_DESC: (name: string) =>
@@ -1067,6 +1056,8 @@ export const STRINGS = {
     SETTING_BACKGROUND_ENABLE_NAME: "فعال کردن تصویر پس‌زمینه",
     SETTING_BACKGROUND_ENABLE_DESC:
       "نمایش یا پنهان کردن تصویر پس‌زمینه سفارشی برای این پروفایل را تغییر دهید.",
+    CONFIRM_GLOBAL_BACKGROUND_DELETION_DESC:
+      "آیا مطمئن هستید که می‌خواهید این پس‌زمینه را برای همیشه حذف کنید؟ پروفایل‌های زیر از آن استفاده می‌کنند و بازنشانی خواهند شد:",
   },
   fr: {
     PLUGIN_NAME: "Maître des Couleurs - v1.1.0",
@@ -1148,7 +1139,7 @@ export const STRINGS = {
     LIKE_CARD_STAR_BUTTON: "Étoile sur GitHub",
     LIKE_CARD_ISSUE_BUTTON: "Signaler un problème",
     LIKE_CARD_SYNC_BUTTON: "Synchronisez votre coffre",
-    LIKE_CARD_GITHUB_BUTTON: "Mon GitHub",
+    LIKE_CARD_TELEGRAM_CHANNEL_BUTTON: "Telegram",
     PASTE_CSS_MODAL_TITLE: "Importer / Coller CSS",
     PASTE_CSS_MODAL_NOTE:
       "Remarque : Le CSS collé peut affecter l'interface utilisateur, n'utilisez que du CSS de confiance.",
@@ -1382,7 +1373,7 @@ export const STRINGS = {
     REGEX_PLACEHOLDER: "Entrez Regex et appuyez sur Entrée...",
     SET_BACKGROUND_IMAGE_NAME: "Définir un arrière-plan personnalisé",
     SET_BACKGROUND_IMAGE_DESC:
-      "Définissez une image d'arrière-plan personnalisée pour votre profil actif.",
+      "Gérer l'image d'arrière-plan pour ce profil (les images sont stockées globalement dans .obsidian/backgrounds).",
     SET_BACKGROUND_IMAGE_BUTTON: "Choisissez une image...",
     REMOVE_BACKGROUND_IMAGE_BUTTON: "Supprimer l'arrière-plan",
     NOTICE_BACKGROUND_IMAGE_SET:
@@ -1400,13 +1391,7 @@ export const STRINGS = {
       "L'image d'arrière-plan et son fichier ont été supprimés.",
     CONFIRM_BACKGROUND_DELETION_TITLE:
       "Confirmer la suppression de l'arrière-plan",
-    CONFIRM_BACKGROUND_DELETION_DESC:
-      "Êtes-vous sûr de vouloir supprimer l'image d'arrière-plan actuelle ? Le fichier image sera définitivement supprimé de votre coffre.",
     DELETE_ANYWAY_BUTTON: "Supprimer quand même",
-    NOTICE_BACKGROUND_IMAGE_NOT_FOUND: (path: string) =>
-      `Le profil nécessite l'image d'arrière-plan à '${path}', mais le fichier n'a pas été trouvé. Veuillez ajouter l'image à ce chemin.`,
-    NOTICE_BACKGROUND_FOLDER_NOT_FOUND:
-      "Dossier d'arrière-plans '.obsidian/backgrounds' non trouvé.",
     FILE_CONFLICT_TITLE: "Le fichier existe",
     FILE_CONFLICT_DESC: (name: string) =>
       `Un fichier nommé '${name}' existe déjà dans votre dossier d'arrière-plans. Que souhaitez-vous faire ?`,
@@ -1423,9 +1408,9 @@ export const STRINGS = {
       "Le contenu collé n'est pas une image ou une URL valide.",
     DROP_TO_ADD_IMAGE: "Relâchez pour ajouter l'image...",
     PROCESSING_IMAGE: "Traitement",
-    PROFILE_IMAGE_BROWSER_TITLE: "Arrière-plans du profil",
+    PROFILE_IMAGE_BROWSER_TITLE: "Parcourir les arrière-plans",
     NO_IMAGES_FOUND:
-      "Aucune image trouvée dans le dossier d'arrière-plans de ce profil.",
+      "Aucune image trouvée dans votre dossier d'arrière-plans (.obsidian/backgrounds).",
     SELECT_BUTTON: "Sélectionner",
     CONFIRM_IMAGE_DELETE_TITLE: "Supprimer l'image ?",
     CONFIRM_IMAGE_DELETE_DESC: (name: string) =>
@@ -1439,6 +1424,8 @@ export const STRINGS = {
     SETTING_BACKGROUND_ENABLE_NAME: "Activer l'image d'arrière-plan",
     SETTING_BACKGROUND_ENABLE_DESC:
       "Activer/désactiver la visibilité de l'image d'arrière-plan personnalisée pour ce profil.",
+    CONFIRM_GLOBAL_BACKGROUND_DELETION_DESC:
+      "Voulez-vous vraiment supprimer définitivement cet arrière-plan ? Les profils suivants l'utilisent et seront réinitialisés :",
   },
 };
 

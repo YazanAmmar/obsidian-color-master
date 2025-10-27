@@ -154,17 +154,44 @@ export function drawOptionsSection(
         .onClick(async () => {
           const profile =
             plugin.settings.profiles[plugin.settings.activeProfile];
-          if (!profile?.backgroundImage) {
+          const imagePathToDelete = profile?.backgroundImage;
+
+          if (!imagePathToDelete) {
             new Notice(t("NOTICE_NO_BACKGROUND_IMAGE_TO_REMOVE"));
             return;
           }
+
+          // Find all profiles using this specific image path
+          const profilesUsingImage: string[] = [];
+          for (const profileName in plugin.settings.profiles) {
+            if (
+              plugin.settings.profiles[profileName].backgroundImage ===
+              imagePathToDelete
+            ) {
+              profilesUsingImage.push(profileName);
+            }
+          }
+
+          // Build the warning message dynamically
+          const messageFragment = new DocumentFragment();
+          messageFragment.append(t("CONFIRM_GLOBAL_BACKGROUND_DELETION_DESC"));
+
+          if (profilesUsingImage.length > 0) {
+            const profileListEl = messageFragment.createEl("ul", {
+              cls: "cm-profile-list-modal",
+            }); // Added a class for styling
+            profilesUsingImage.forEach((name) => {
+              profileListEl.createEl("li").createEl("strong", { text: name });
+            });
+          }
+
           new ConfirmationModal(
             settingTab.app,
             plugin,
             t("CONFIRM_BACKGROUND_DELETION_TITLE"),
-            t("CONFIRM_BACKGROUND_DELETION_DESC"),
+            messageFragment,
             async () => {
-              await plugin.removeBackgroundImage();
+              await plugin.removeBackgroundImageByPath(imagePathToDelete);
               new Notice(t("NOTICE_BACKGROUND_IMAGE_DELETED"));
             },
             {

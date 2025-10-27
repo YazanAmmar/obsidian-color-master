@@ -308,7 +308,7 @@ export class NewProfileModal extends Modal {
 export class ConfirmationModal extends Modal {
   plugin: ColorMaster;
   title: string;
-  message: string;
+  message: string | DocumentFragment;
   onConfirm: () => void;
   confirmButtonText: string;
   confirmButtonClass: string;
@@ -317,7 +317,7 @@ export class ConfirmationModal extends Modal {
     app: App,
     plugin: ColorMaster,
     title: string,
-    message: string,
+    message: string | DocumentFragment,
     onConfirm: () => void,
     options: { buttonText?: string; buttonClass?: string } = {}
   ) {
@@ -340,7 +340,7 @@ export class ConfirmationModal extends Modal {
     const { contentEl } = this;
     contentEl.empty();
     contentEl.createEl("h3", { text: this.title });
-    contentEl.createEl("p", { text: this.message });
+    contentEl.createEl("p").append(this.message);
 
     const buttonContainer = contentEl.createDiv({
       cls: "modal-button-container",
@@ -2148,9 +2148,8 @@ export class ProfileImageBrowserModal extends Modal {
   // Fetches and displays image cards in the gallery
   async displayImages() {
     this.galleryEl.empty();
-    const activeProfileName = this.plugin.settings.activeProfile;
-    // Construct path to the profile's background folder
-    const backgroundsPath = `.obsidian/backgrounds/${activeProfileName}`;
+    // Construct path to the global backgrounds folder
+    const backgroundsPath = `.obsidian/backgrounds`;
     const imageExtensions = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg"];
 
     let files: string[] = [];
@@ -2336,26 +2335,39 @@ export class ProfileImageBrowserModal extends Modal {
   // Action when user clicks the 'delete' (trash) button on an image card
   async deleteImage(path: string, cardEl: HTMLElement) {
     const fileName = path.split("/").pop();
+
+    // Find all profiles using this specific image path
+    const profilesUsingImage: string[] = [];
+    for (const profileName in this.plugin.settings.profiles) {
+      if (this.plugin.settings.profiles[profileName].backgroundImage === path) {
+        profilesUsingImage.push(profileName);
+      }
+    }
+
+    // Build the warning message
+    const messageFragment = new DocumentFragment();
+    messageFragment.append(t("CONFIRM_GLOBAL_BACKGROUND_DELETION_DESC"));
+
+    if (profilesUsingImage.length > 0) {
+      const profileListEl = messageFragment.createEl("ul", {
+        cls: "cm-profile-list-modal",
+      });
+      profilesUsingImage.forEach((name) => {
+        profileListEl.createEl("li").createEl("strong", { text: name });
+      });
+    }
+
     // Show confirmation dialog before deleting
     new ConfirmationModal(
       this.app,
       this.plugin,
       t("CONFIRM_IMAGE_DELETE_TITLE"),
-      t("CONFIRM_IMAGE_DELETE_DESC", fileName || path), // Show filename in confirmation
+      messageFragment,
       async () => {
-        const activeProfile =
-          this.plugin.settings.profiles[this.plugin.settings.activeProfile];
+        // Use the new global delete function from main.ts
+        await this.plugin.removeBackgroundImageByPath(path);
 
-        // Check if this is the currently active background
-        if (activeProfile.backgroundImage === path) {
-          // Use removeBackgroundImage to clear UI, settings, AND delete file
-          await this.plugin.removeBackgroundImage();
-        } else {
-          // Just delete the file
-          await this.app.vault.adapter.remove(path);
-        }
-
-        new Notice(`Deleted ${fileName}`);
+        new Notice(t("NOTICE_BACKGROUND_IMAGE_DELETED"));
         cardEl.remove(); // Remove the card from the gallery
 
         // Check if gallery is now empty
