@@ -4,7 +4,9 @@
 
 Take full control of your Obsidian theme with **Color Master**. This plugin provides a comprehensive user interface to edit every core CSS color variable in Obsidian. Create, save, and share your own color schemes with a powerful profile manager, or even paste raw CSS to instantly use any theme you want—all without writing a single line of code.
 
-<img width="2560" height="640" alt="Color Master Screenshot" src="Images/color-master.png" />
+<p align="center">
+  <img width="500" alt="Color Master Logo" src="Images/color-master.png" />
+</p>
 
 ---
 
