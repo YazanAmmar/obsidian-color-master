@@ -6,7 +6,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![GitHub all releases](https://img.shields.io/github/downloads/YazanAmmar/obsidian-color-master/total?style=flat&color=brightgreen)](https://github.com/YazanAmmar/obsidian-color-master/releases)
 [![Release](https://img.shields.io/github/v/release/YazanAmmar/obsidian-color-master?label=version)](https://github.com/YazanAmmar/obsidian-color-master/releases)
-[![Supported Languages: English, Arabic, French, Persian](https://img.shields.io/badge/languages-4-blue.svg)](https://github.com/YazanAmmar/obsidian-color-master/blob/main/src/i18n.ts)
+[![Supported Languages: English, Arabic, French, Persian](https://img.shields.io/badge/languages-4-blue.svg)](https://github.com/YazanAmmar/obsidian-color-master/blob/main/src/i18n/strings.ts)
 [![GitHub Stars](https://img.shields.io/github/stars/YazanAmmar/obsidian-color-master.svg?style=flat&color=yellow)](https://github.com/YazanAmmar/obsidian-color-master/stargazers)
 [![GitHub Issues](https://img.shields.io/github/issues/YazanAmmar/obsidian-color-master.svg?style=flat&color=red)](https://github.com/YazanAmmar/obsidian-color-master/issues)
 
@@ -53,8 +53,6 @@ Designed for both:
 
 - **Beginners** — Simple color pickers, preset profiles, and a "Set Background" feature to get a polished look fast.
 - **Power users / Developers** — Full variable list, per-profile & global snippets, drag-and-drop reordering, regex notice rules, and exportable JSON.
-
-> The entire plugin is built on TypeScript, ensuring a stable, bug-free experience and faster future updates.
 
 ---
 
@@ -125,19 +123,19 @@ Here is the corrected high-level structure of the `src` folder:
 
 ```markdown
 src/
-├── main.ts               # Main plugin class (entry point, onload/onunload)
-├── constants.ts          # Default variables and built-in profiles
-├── types.ts              # Core TypeScript type definitions (PluginSettings, Profile, Snippet)
-├── utils.ts              # Helper functions (flattenVars, getContrastRatio)
+├── main.ts                   # Main plugin class (entry point, onload/onunload)
+├── constants.ts              # Default variables and built-in profiles
+├── types.ts                  # Core TypeScript type definitions (PluginSettings, Profile, Snippet)
+├── utils.ts                  # Helper functions (flattenVars, getContrastRatio)
 ├── commands/
-│   └── index.ts          # Registers all commands for hotkeys
+│   └── index.ts              # Registers all commands for hotkeys
 ├── i18n/
-│   ├── strings.ts        # Translation strings and logic
-│   └── types.ts          # TypeScript type definitions for i18n
+│   ├── strings.ts            # Translation strings and logic
+│   └── types.ts              # TypeScript type definitions for i18n
 └── ui/
-    ├── settingsTab.ts    # Builds the main settings UI container
-    ├── modals.ts         # Contains all modal (popup) classes
-    └── components/       # UI components drawn into the settingsTab
+    ├── settingsTab.ts        # Builds the main settings UI container
+    ├── modals.ts        	  # Contains all modal (popup) classes
+    └── components/           # UI components drawn into the settingsTab
         ├── color-pickers.ts
         ├── profile-manager.ts
         ├── snippets-ui.ts
