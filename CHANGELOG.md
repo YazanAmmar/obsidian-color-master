@@ -42,14 +42,14 @@ The "Add Custom Variable" feature has been completely rebuilt from the ground up
 
 ## [v1.1.0](https://github.com/YazanAmmar/obsidian-color-master/releases/tag/1.1.0) - 2025-10-25
 
-This update introduces the most requested feature: **Per-Profile Custom Backgrounds**. You now have full control over your workspace's appearance with custom background images, managed entirely within each profile.
+This update introduces the most requested feature: **Custom Background Images**. You now have full control over your workspace's appearance with custom background images, which can be assigned uniquely to each profile.
 
-### New Feature: Per-Profile Custom Backgrounds
+### New Feature: Custom Backgrounds
 
 - **Add & Manage Images:** A new "Set Custom Background" option has been added to the Advanced Settings card.
 - **Multiple Input Methods:** Add images easily via file upload, pasting a URL, pasting a copied image, or dragging & dropping directly into the "Add New" modal.
-- **Profile-Specific Folders:** All images are automatically saved into a profile-specific folder (e.g., `.obsidian/backgrounds/MyProfile`), keeping your vault clean and preventing conflicts.
-- **Image Browser:** A new "Browse" (📦) icon opens a modal gallery displaying all images saved to the active profile.
+- **Global Storage & Access:** All background images are now stored centrally in the **global backgrounds folder** (`.obsidian/backgrounds`). 
+- **Image Browser:** A new "Browse" (📦) icon opens a modal gallery displaying all images saved to the backgrounds folder.
 - **Full Control:** From the browser, you can select an image, delete it (with confirmation), or rename it directly in the UI. The file extension is locked during rename to prevent errors.
 - **Enable/Disable Toggle:** A new settings icon (⚙️) opens a modal where you can quickly enable or disable the background image for the current profile without removing it.
 
