@@ -1,21 +1,11 @@
 import { Notice, Setting } from "obsidian";
-import {
-  COLOR_DESCRIPTIONS,
-  COLOR_DESCRIPTIONS_AR,
-  COLOR_DESCRIPTIONS_FA,
-  COLOR_DESCRIPTIONS_FR,
-  COLOR_NAMES,
-  COLOR_NAMES_AR,
-  COLOR_NAMES_FA,
-  COLOR_NAMES_FR,
-  DEFAULT_VARS,
-  TEXT_TO_BG_MAP,
-} from "../../constants";
-import { t } from "../../i18n";
+import { DEFAULT_VARS, TEXT_TO_BG_MAP } from "../../constants";
+import { t } from "../../i18n/strings";
 import {
   flattenVars,
   getAccessibilityRating,
   getContrastRatio,
+  isIconizeEnabled,
 } from "../../utils";
 import { IconizeSettingsModal, NoticeRulesModal } from "../modals";
 import type { ColorMasterSettingTab } from "../settingsTab";
@@ -29,8 +19,25 @@ export function drawColorPickers(
     plugin.settings.profiles[plugin.settings.activeProfile].vars;
 
   for (const [category, vars] of Object.entries(DEFAULT_VARS)) {
-    const headingText =
-      t(category.toUpperCase().replace(/ /g, "_") as any) || category;
+    // Map specific category names to their short keys defined in i18n.ts
+    let categoryKey: string;
+    const lowerCategory = category.toLowerCase();
+
+    if (lowerCategory === "interactive elements") {
+      categoryKey = "interactive";
+    } else if (lowerCategory === "ui elements") {
+      categoryKey = "ui";
+    } else if (lowerCategory === "graph view") {
+      categoryKey = "graph";
+    } else if (lowerCategory === "plugin integrations") {
+      // Handle this explicitly too for safety
+      categoryKey = "pluginintegrations";
+    } else {
+      // Default: remove spaces for other potential categories
+      categoryKey = lowerCategory.replace(/ /g, "");
+    }
+
+    const headingText = t(`categories.${categoryKey}`) || category; // Use the derived categoryKey
     const categoryContainerClasses = ["cm-category-container"];
 
     if (category === "Graph View") {
@@ -53,39 +60,30 @@ export function drawColorPickers(
 
     for (const [varName, defaultValue] of Object.entries(vars)) {
       const lang = plugin.settings.language;
-      const description =
-        lang === "ar"
-          ? COLOR_DESCRIPTIONS_AR[
-              varName as keyof typeof COLOR_DESCRIPTIONS_AR
-            ] || ""
-          : lang === "fa"
-          ? COLOR_DESCRIPTIONS_FA[
-              varName as keyof typeof COLOR_DESCRIPTIONS_FA
-            ] || ""
-          : lang === "fr"
-          ? COLOR_DESCRIPTIONS_FR[
-              varName as keyof typeof COLOR_DESCRIPTIONS_FR
-            ] || ""
-          : COLOR_DESCRIPTIONS[varName as keyof typeof COLOR_DESCRIPTIONS] ||
-            "";
+      const description = t(`colors.descriptions.${varName}`) || "";
 
       const setting = new Setting(containerEl)
-        .setName(
-          lang === "ar"
-            ? COLOR_NAMES_AR[varName as keyof typeof COLOR_NAMES_AR] || varName
-            : lang === "fa"
-            ? COLOR_NAMES_FA[varName as keyof typeof COLOR_NAMES_FA] || varName
-            : lang === "fr"
-            ? COLOR_NAMES_FR[varName as keyof typeof COLOR_NAMES_FR] || varName
-            : COLOR_NAMES[varName as keyof typeof COLOR_NAMES] || varName
-        )
+        .setName(t(`colors.names.${varName}`) || varName)
         .setDesc(description);
+
+      if (
+        categoryKey === "pluginintegrations" &&
+        varName === "--iconize-icon-color"
+      ) {
+        if (!isIconizeEnabled(plugin.app)) {
+          const badgeEl = setting.nameEl.createSpan({
+            text: t("options.badgeNotInstalled"),
+            cls: "cm-not-installed-badge",
+          });
+          badgeEl.setAttr("aria-label", t("tooltips.iconizeNotInstalled"));
+        }
+      }
 
       if (varName === "--iconize-icon-color") {
         setting.addExtraButton((button) => {
           button
             .setIcon("settings")
-            .setTooltip(t("TOOLTIP_ICONIZE_SETTINGS"))
+            .setTooltip(t("tooltips.iconizeSettings"))
             .onClick(() => {
               new IconizeSettingsModal(settingTab.app, plugin).open();
             });
@@ -238,7 +236,7 @@ export function drawColorPickers(
       setting.addExtraButton((button) => {
         button
           .setIcon("eraser")
-          .setTooltip(t("TOOLTIP_SET_TRANSPARENT"))
+          .setTooltip(t("tooltips.setTransparent"))
           .onClick(() => {
             const newColor = "transparent";
             textInput.value = newColor;
@@ -250,7 +248,7 @@ export function drawColorPickers(
       setting.addExtraButton((button) => {
         button
           .setIcon("reset")
-          .setTooltip(t("TOOLTIP_UNDO_CHANGE"))
+          .setTooltip(t("tooltips.undoChange"))
           .onClick(async () => {
             const profile =
               plugin.settings.profiles[plugin.settings.activeProfile];
@@ -268,9 +266,9 @@ export function drawColorPickers(
 
               await plugin.saveSettings();
               settingTab.updateAccessibilityCheckers();
-              new Notice(t("NOTICE_COLOR_RESTORED", safeRestoredColor));
+              new Notice(t("notices.colorRestored", safeRestoredColor));
             } else {
-              new Notice(t("NOTICE_NO_COLOR_HISTORY"));
+              new Notice(t("notices.noColorHistory"));
             }
           });
       });
@@ -289,7 +287,7 @@ export function drawColorPickers(
   if (Object.keys(customVars).length > 0) {
     const customVarsContainer = containerEl.createDiv();
     customVarsContainer.createEl("h3", {
-      text: t("CUSTOM_VARIABLES_HEADING"),
+      text: t("categories.custom"),
       cls: "cm-section-heading",
     });
 
@@ -297,9 +295,11 @@ export function drawColorPickers(
       plugin.settings.profiles[plugin.settings.activeProfile];
 
     for (const [varName, varValue] of Object.entries(customVars)) {
+      // Get metadata, falling back to defaults if not set
       const meta = activeProfile.customVarMetadata?.[varName];
+      const varType = meta?.type || "color"; // Default to 'color' for safety
       const displayName = meta?.name || varName;
-      const displayDesc = meta?.desc || t("CUSTOM_VARIABLE_DESC");
+      const displayDesc = meta?.desc || t("categories.customDesc");
 
       const setting = new Setting(customVarsContainer)
         .setName(displayName)
@@ -308,58 +308,167 @@ export function drawColorPickers(
       setting.settingEl.classList.add("cm-var-row");
       setting.settingEl.dataset.var = varName;
       setting.settingEl.dataset.category = "Custom";
+      setting.nameEl.classList.add("cm-var-name");
 
-      const colorPicker = setting.controlEl.createEl("input", {
-        type: "color",
-      });
-      const textInput = setting.controlEl.createEl("input", {
-        type: "text",
-        cls: "color-master-text-input",
-      });
+      const handleCustomVarChange = (newValue: string) => {
+        activeProfile.vars[varName] = newValue;
 
-      const handleCustomVarChange = (newColor: string) => {
-        activeProfile.vars[varName] = newColor;
-        plugin.saveSettings();
-        settingTab.updateColorPickerAppearance(textInput, colorPicker);
+        if (plugin.settings.colorUpdateFPS > 0) {
+          plugin.pendingVarUpdates[varName] = newValue;
+        } else {
+          document.body.style.setProperty(varName, newValue);
+          plugin.saveSettings();
+        }
+
+        if (plugin.settings.colorUpdateFPS > 0) {
+          plugin.saveSettings();
+        }
       };
 
-      colorPicker.value = varValue;
-      textInput.value = varValue;
-      settingTab.updateColorPickerAppearance(textInput, colorPicker);
-
-      colorPicker.addEventListener("input", (e) => {
-        textInput.value = (e.target as HTMLInputElement).value;
-      });
-      colorPicker.addEventListener("change", (e) => {
-        handleCustomVarChange((e.target as HTMLInputElement).value);
-      });
-      textInput.addEventListener("change", (e) => {
-        colorPicker.value = (e.target as HTMLInputElement).value;
-        handleCustomVarChange((e.target as HTMLInputElement).value);
-      });
-
-      setting.addExtraButton((button) => {
-        button
-          .setIcon("eraser")
-          .setTooltip(t("TOOLTIP_SET_TRANSPARENT"))
-          .onClick(() => {
-            const newColor = "transparent";
-            textInput.value = newColor;
-            handleCustomVarChange(newColor);
+      switch (varType) {
+        case "color":
+          const colorPicker = setting.controlEl.createEl("input", {
+            type: "color",
           });
-      });
+          const textInput = setting.controlEl.createEl("input", {
+            type: "text",
+            cls: "color-master-text-input",
+          });
+
+          colorPicker.value = varValue;
+          textInput.value = varValue;
+          settingTab.updateColorPickerAppearance(textInput, colorPicker);
+
+          colorPicker.addEventListener("input", (e) => {
+            const newColor = (e.target as HTMLInputElement).value;
+            textInput.value = newColor;
+            if (plugin.settings.colorUpdateFPS > 0) {
+              plugin.pendingVarUpdates[varName] = newColor;
+            }
+          });
+          colorPicker.addEventListener("change", (e) => {
+            handleCustomVarChange((e.target as HTMLInputElement).value);
+            settingTab.updateColorPickerAppearance(textInput, colorPicker);
+          });
+          textInput.addEventListener("change", (e) => {
+            const newColor = (e.target as HTMLInputElement).value;
+            try {
+              colorPicker.value = newColor;
+            } catch (err) {
+            }
+            handleCustomVarChange(newColor);
+            settingTab.updateColorPickerAppearance(textInput, colorPicker);
+          });
+
+          setting.addExtraButton((button) => {
+            button
+              .setIcon("eraser")
+              .setTooltip(t("tooltips.setTransparent"))
+              .onClick(() => {
+                const newColor = "transparent";
+                textInput.value = newColor;
+                handleCustomVarChange(newColor);
+                settingTab.updateColorPickerAppearance(textInput, colorPicker);
+              });
+          });
+          break;
+
+        case "size":
+          const sizeMatch = varValue.match(
+            /(-?\d*\.?\d+)\s*(px|em|rem|%|vw|vh|auto)?/
+          );
+          let numValue = sizeMatch?.[1] || "10";
+          let unitValue = sizeMatch?.[2] || "px";
+
+          const sizeInput = setting.controlEl.createEl("input", {
+            type: "number",
+            cls: "color-master-text-input",
+          });
+          sizeInput.value = numValue;
+          sizeInput.style.width = "80px";
+
+          const unitDropdown = setting.controlEl.createEl("select", {
+            cls: "dropdown cm-search-small",
+          });
+          const units = ["px", "em", "rem", "%", "vw", "vh", "auto"];
+          if (!units.includes(unitValue)) unitValue = "px";
+
+          units.forEach((unit) => {
+            unitDropdown.createEl("option", { text: unit, value: unit });
+          });
+          unitDropdown.value = unitValue;
+
+          const updateSize = () => {
+            const newNum = sizeInput.value || "0";
+            const newUnit = unitDropdown.value;
+            const newValue =
+              newUnit === "auto" ? "auto" : `${newNum}${newUnit}`;
+            sizeInput.disabled = newUnit === "auto";
+
+            handleCustomVarChange(newValue);
+          };
+
+          sizeInput.addEventListener("change", updateSize);
+          unitDropdown.addEventListener("change", updateSize);
+
+          // Run the function the first time to disable the field if the value is 'auto'
+          sizeInput.disabled = unitValue === "auto";
+          break;
+
+        case "text":
+          setting.controlEl.classList.add("cm-full-width-control");
+          const textInputArea = setting.controlEl.createEl("input", {
+            type: "text",
+            cls: "cm-wide-text-input",
+          });
+          textInputArea.value = varValue;
+          textInputArea.placeholder = "Enter text value...";
+
+          textInputArea.addEventListener("change", (e) => {
+            handleCustomVarChange((e.target as HTMLInputElement).value);
+          });
+          break;
+
+        case "number":
+          const numInput = setting.controlEl.createEl("input", {
+            type: "number",
+            cls: "color-master-text-input",
+          });
+          numInput.value = varValue;
+          numInput.style.width = "100px";
+
+          numInput.addEventListener("change", (e) => {
+            handleCustomVarChange((e.target as HTMLInputElement).value);
+          });
+          break;
+
+        default:
+          setting.controlEl.classList.add("cm-full-width-control");
+          const defaultInput = setting.controlEl.createEl("input", {
+            type: "text",
+            cls: "cm-wide-text-input",
+          });
+          defaultInput.value = varValue;
+          defaultInput.addEventListener("change", (e) => {
+            handleCustomVarChange((e.target as HTMLInputElement).value);
+          });
+      }
 
       setting.addExtraButton((button) => {
         button
           .setIcon("trash")
-          .setTooltip(t("TOOLTIP_DELETE_CUSTOM_VARIABLE"))
+          .setTooltip(t("tooltips.deleteCustomVar"))
           .onClick(async () => {
             delete activeProfile.vars[varName];
+            // Remove the property from the DOM
             document.body.style.removeProperty(varName);
+
             if (activeProfile.customVarMetadata?.[varName]) {
               delete activeProfile.customVarMetadata[varName];
             }
             await plugin.saveSettings();
+
+            // Force redraw of settings tab
             settingTab.display();
           });
       });

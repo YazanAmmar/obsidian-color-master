@@ -1,5 +1,45 @@
 # Changelog
 
+## [v1.1.1](https://github.com/YazanAmmar/obsidian-color-master/releases/tag/1.1.1) - 2025-11-01
+
+This update introduces the plugin's most-requested feature: **Video Backgrounds**. You can now fully customize your workspace with looped videos, alongside a host of performance improvements and smart new settings.
+
+### New Feature: Video Backgrounds!
+
+Bring your workspace to life by setting looped videos as your background, in addition to static images.
+
+- **Video Background Support:** The plugin now fully supports `.mp4` and `.webm` video files as backgrounds.
+- **Redesigned Settings Modal:** The "Background Settings" (⚙️) modal has been completely redesigned with a new "Setting Type" toggle.
+- **Dedicated Media Settings:**
+  - **Image Tab:** Now contains image-specific settings, including the new **"Convert to JPG"** feature.
+  - **Video Tab:** Contains new video-specific settings:
+    - **Video Opacity:** A slider to control the video's transparency for better readability.
+    - **Mute Video:** A toggle to mute the video (enabled by default).
+- **Interactive Previews:** Video previews in the "Browse Backgrounds" modal are now interactive. You can click to play/pause them.
+- **Active Background Highlight:** The currently active background (image or video) is now highlighted with a border and shadow in the "Browse Backgrounds" modal for easy identification.
+
+### Improvements & UX Enhancements
+
+- **New: Convert to JPG (Performance):** A new option in the "Image" settings tab allows you to automatically convert PNG, WEBP, or BMP images to JPG on upload. This significantly reduces file size and improves performance. (GIFs are automatically skipped to preserve animation).
+- **New: Remember Settings State:** The plugin now remembers your last search query and scroll position in the settings tab. When you reopen the settings, it auto-filters and scrolls down to your last position. (This state is cleared when the plugin unloads).
+- **Smart Plugin Integration (Iconize):**
+  - Added a "Not Installed" badge next to the "Iconize" color setting if the plugin is missing or disabled.
+  - The "Override Iconize Colors" toggle will now automatically disable itself if the Iconize plugin is uninstalled.
+- **Smarter Plugin Reset:** When using the "Reset All Data" function, the plugin will now preserve your installation date ("Days of Use"), language preference, and RTL/LTR layout settings.
+- **Unified Media System:** The entire background system has been refactored (`backgroundPath`, `backgroundType`) to intelligently handle both images and videos. All related functions have been updated for cleaner, more maintainable code.
+- **Translation Updates:** All relevant UI text (buttons, descriptions, modals) has been updated from "Image" to "Background" or "Image/Video" across all supported languages.
+
+### Smart Custom Variables
+
+The "Add Custom Variable" feature has been completely rebuilt from the ground up to be smarter, more powerful, and easier to use.
+
+- **Support for Multiple Data Types:** You can now create variables that are not just colors. The modal fully supports 'Color', 'Size (px/em)', 'Text', and 'Number' types.
+- **Context-Aware Controls:**
+  - The "Add" modal provides the correct input for each type (e.g., a number input + unit dropdown for 'Size').
+  - The main settings page now renders the correct control for each custom variable (e.g., a size input for `--my-font-size` instead of a color picker).
+- **Duplicate Variable Prevention:** The modal now intelligently checks against all default and existing custom variables to prevent you from creating a duplicate (e.g., `--h1-color`).
+- **Improved Search & Highlighting:** Custom variables are now fully searchable by their name _and_ their description. Search term highlighting also works correctly on both the name and description.
+
 ## [v1.1.0](https://github.com/YazanAmmar/obsidian-color-master/releases/tag/1.1.0) - 2025-10-25
 
 This update introduces the most requested feature: **Per-Profile Custom Backgrounds**. You now have full control over your workspace's appearance with custom background images, managed entirely within each profile.
@@ -28,7 +68,7 @@ This is a massive quality-of-life update focused on professional workflows, UI p
 
 ### New Features
 
--   **Import from Installed Themes & Snippets**: You can now directly import CSS from your installed community themes and local snippets to create new, editable CSS-based profiles. This is a powerful way to start customizing your favorite themes without needing to find the source code manually.
+- **Import from Installed Themes & Snippets**: You can now directly import CSS from your installed community themes and local snippets to create new, editable CSS-based profiles. This is a powerful way to start customizing your favorite themes without needing to find the source code manually.
 - **Quick Theme Toggle for Profiles**: A new icon button (`sun`/`moon`/`sun-moon`) has been added to the Profile Manager. It allows you to instantly cycle the active profile's theme setting between "Force Light," "Force Dark," and "Auto (follows Obsidian)" without needing to create a new profile.
 - **New Command: Cycle Profile Theme**: A new command, `Color Master: Cycle active profile theme`, has been added. You can assign a hotkey to it for rapid switching between light, dark, and auto modes, with a confirmation notice for each change.
 - **Reset Plugin Settings**: A powerful and safe "Reset Plugin Settings" option has been added to the Advanced Settings. It allows you to completely reset the plugin to its factory state by deleting the `data.json` file, which is useful for troubleshooting or starting fresh.

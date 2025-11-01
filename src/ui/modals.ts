@@ -7,12 +7,15 @@ import {
   setIcon,
   TextComponent,
   TextAreaComponent,
+  DropdownComponent,
 } from "obsidian";
-import { t } from "../i18n";
+import { t } from "../i18n/strings";
 import type ColorMaster from "../main";
 import type { ColorMasterSettingTab } from "./settingsTab";
-import type { Profile, Snippet, NoticeRule } from "../types";
+import type { Profile, Snippet, NoticeRule, CustomVarType } from "../types";
 import Sortable = require("sortablejs");
+import { DEFAULT_VARS } from "../constants";
+import { flattenVars, debounce } from "../utils";
 
 export class ProfileJsonImportModal extends Modal {
   plugin: ColorMaster;
@@ -40,29 +43,33 @@ export class ProfileJsonImportModal extends Modal {
 
     const { contentEl } = this;
     contentEl.empty();
-    contentEl.createEl("h3", { text: t("IMPORT_JSON_MODAL_TITLE") });
-    new Setting(contentEl).setName(t("PROFILE_NAME_LABEL")).addText((text) => {
-      this.nameInput = text;
-      text.setPlaceholder(t("PROFILE_NAME_PLACEHOLDER")).onChange((value) => {
-        this.profileName = value.trim();
+    contentEl.createEl("h3", { text: t("modals.jsonImport.title") });
+    new Setting(contentEl)
+      .setName(t("modals.newProfile.nameLabel"))
+      .addText((text) => {
+        this.nameInput = text;
+        text
+          .setPlaceholder(t("modals.newProfile.namePlaceholder"))
+          .onChange((value) => {
+            this.profileName = value.trim();
+          });
       });
-    });
     contentEl.createEl("hr");
 
     contentEl.createEl("p", {
-      text: t("IMPORT_JSON_MODAL_DESC_1"),
+      text: t("modals.jsonImport.desc1"),
     });
     this.textarea = contentEl.createEl("textarea", {
       cls: "cm-search-input cm-import-textarea",
-      attr: { rows: "12", placeholder: t("IMPORT_JSON_MODAL_PLACEHOLDER") },
+      attr: { rows: "12", placeholder: t("modals.jsonImport.placeholder") },
     });
 
     // File import button
     new Setting(contentEl)
-      .setName(t("IMPORT_JSON_MODAL_SETTING_NAME"))
-      .setDesc(t("IMPORT_JSON_MODAL_SETTING_DESC"))
+      .setName(t("modals.jsonImport.settingName"))
+      .setDesc(t("modals.jsonImport.settingDesc"))
       .addButton((button) => {
-        button.setButtonText(t("CHOOSE_FILE_BUTTON")).onClick(() => {
+        button.setButtonText(t("buttons.chooseFile")).onClick(() => {
           this._handleFileImport();
         });
       });
@@ -71,10 +78,10 @@ export class ProfileJsonImportModal extends Modal {
     const ctrl = contentEl.createDiv({ cls: "cm-profile-actions" });
     ctrl.createDiv({ cls: "cm-profile-action-spacer" });
     const replaceBtn = ctrl.createEl("button", {
-      text: t("REPLACE_ACTIVE_BUTTON"),
+      text: t("modals.jsonImport.replaceActiveButton"),
     });
     const createBtn = ctrl.createEl("button", {
-      text: t("CREATE_NEW_BUTTON"),
+      text: t("modals.jsonImport.createNewButton"),
       cls: "cm-profile-action-btn mod-cta",
     });
 
@@ -107,7 +114,7 @@ export class ProfileJsonImportModal extends Modal {
           /* ignore json parsing errors here */
         }
 
-        new Notice(t("NOTICE_FILE_LOADED", file.name));
+        new Notice(t("notices.fileLoaded", file.name));
       })();
     };
     input.click();
@@ -120,18 +127,18 @@ export class ProfileJsonImportModal extends Modal {
   async _applyCreate() {
     const name = this.profileName;
     if (!name) {
-      new Notice(t("EMPTY_PROFILE_NAME_NOTICE"));
+      new Notice(t("notices.varNameEmpty"));
       return;
     }
 
     if (this.plugin.settings.profiles[name]) {
-      new Notice(t("NOTICE_PROFILE_NAME_EXISTS", name));
+      new Notice(t("notices.profileNameExists", name));
       return;
     }
 
     const raw = this.textarea.value.trim();
     if (!raw) {
-      new Notice(t("NOTICE_TEXTBOX_EMPTY"));
+      new Notice(t("notices.textboxEmpty"));
       return;
     }
 
@@ -139,7 +146,7 @@ export class ProfileJsonImportModal extends Modal {
     try {
       parsed = JSON.parse(raw);
     } catch (e) {
-      new Notice(t("NOTICE_INVALID_JSON"));
+      new Notice(t("notices.invalidJson"));
       return;
     }
 
@@ -155,33 +162,33 @@ export class ProfileJsonImportModal extends Modal {
     await this.plugin.saveSettings();
     this.settingTab.display();
     this.close();
-    new Notice(t("NOTICE_PROFILE_CREATED_SUCCESS", name));
+    new Notice(t("notices.profileCreatedSuccess", name));
   }
   async _applyImport(mode: "replace") {
     const raw = this.textarea.value.trim();
     if (!raw) {
-      new Notice(t("NOTICE_TEXTBOX_EMPTY"));
+      new Notice(t("notices.textboxEmpty"));
       return;
     }
     let parsed;
     try {
       parsed = JSON.parse(raw);
     } catch (e) {
-      new Notice(t("NOTICE_INVALID_JSON"));
+      new Notice(t("notices.invalidJson"));
       return;
     }
 
     const profileObj = parsed.profile ? parsed.profile : parsed;
     if (typeof profileObj !== "object" || profileObj === null) {
       // Added null check for safety
-      new Notice(t("NOTICE_INVALID_PROFILE_OBJECT"));
+      new Notice(t("notices.invalidProfileObject"));
       return;
     }
 
     const activeName = this.plugin.settings.activeProfile;
     const activeProfile = this.plugin.settings.profiles[activeName];
     if (!activeProfile) {
-      new Notice(t("NOTICE_PROFILE_NOT_FOUND"));
+      new Notice(t("notices.profileNotFound"));
       return;
     }
 
@@ -206,7 +213,7 @@ export class ProfileJsonImportModal extends Modal {
 
     this.settingTab.display();
     this.close();
-    new Notice(t("NOTICE_PROFILE_IMPORTED_SUCCESS", mode));
+    new Notice(t("notices.profileImportedSuccess", mode));
   }
 }
 
@@ -239,24 +246,28 @@ export class NewProfileModal extends Modal {
 
     const { contentEl } = this;
     contentEl.empty();
-    contentEl.createEl("h3", { text: t("NEW_PROFILE_TITLE") });
+    contentEl.createEl("h3", { text: t("modals.newProfile.title") });
 
     let profileName = "";
     let themeType: "auto" | "dark" | "light" = "auto";
 
-    new Setting(contentEl).setName(t("PROFILE_NAME_LABEL")).addText((text) => {
-      text.setPlaceholder(t("PROFILE_NAME_PLACEHOLDER")).onChange((value) => {
-        profileName = value;
+    new Setting(contentEl)
+      .setName(t("modals.newProfile.nameLabel"))
+      .addText((text) => {
+        text
+          .setPlaceholder(t("modals.newProfile.namePlaceholder"))
+          .onChange((value) => {
+            profileName = value;
+          });
       });
-    });
 
     new Setting(contentEl)
-      .setName(t("PROFILE_THEME_TYPE"))
-      .setDesc(t("PROFILE_THEME_TYPE_DESC"))
+      .setName(t("profileManager.themeType"))
+      .setDesc(t("profileManager.themeTypeDesc"))
       .addDropdown((dropdown) => {
-        dropdown.addOption("auto", t("THEME_TYPE_AUTO"));
-        dropdown.addOption("dark", t("THEME_TYPE_DARK"));
-        dropdown.addOption("light", t("THEME_TYPE_LIGHT"));
+        dropdown.addOption("auto", t("profileManager.themeAuto"));
+        dropdown.addOption("dark", t("profileManager.themeDark"));
+        dropdown.addOption("light", t("profileManager.themeLight"));
         dropdown.setValue(themeType);
         dropdown.onChange((value: "auto" | "dark" | "light") => {
           themeType = value;
@@ -268,12 +279,12 @@ export class NewProfileModal extends Modal {
     });
 
     const cancelButton = buttonContainer.createEl("button", {
-      text: t("CANCEL_BUTTON"),
+      text: t("buttons.cancel"),
     });
     cancelButton.addEventListener("click", () => this.close());
 
     const createButton = buttonContainer.createEl("button", {
-      text: t("CREATE_BUTTON"),
+      text: t("buttons.create"),
       cls: "mod-cta",
     });
 
@@ -282,9 +293,9 @@ export class NewProfileModal extends Modal {
       if (trimmedName) {
         this.onSubmit({ name: trimmedName, themeType: themeType });
         this.close();
-        new Notice(t("NOTICE_PROFILE_CREATED", trimmedName));
+        new Notice(t("notices.profileCreated", trimmedName));
       } else {
-        new Notice(t("EMPTY_PROFILE_NAME_NOTICE"));
+        new Notice(t("notices.varNameEmpty"));
       }
     };
 
@@ -327,7 +338,7 @@ export class ConfirmationModal extends Modal {
     this.title = title;
     this.message = message;
     this.onConfirm = onConfirm;
-    this.confirmButtonText = options.buttonText || t("DELETE_BUTTON");
+    this.confirmButtonText = options.buttonText || t("buttons.delete");
     this.confirmButtonClass = options.buttonClass || "mod-warning";
   }
 
@@ -347,7 +358,7 @@ export class ConfirmationModal extends Modal {
     });
 
     const cancelButton = buttonContainer.createEl("button", {
-      text: t("CANCEL_BUTTON"),
+      text: t("buttons.cancel"),
     });
     cancelButton.addEventListener("click", () => this.close());
 
@@ -382,14 +393,6 @@ export class PasteCssModal extends Modal {
   profileName: string;
   isSaving: boolean = false;
 
-  _debounce(func: (...args: any[]) => void, delay: number) {
-    let timeout: number;
-    return (...args: any[]) => {
-      clearTimeout(timeout);
-      timeout = window.setTimeout(() => func.apply(this, args), delay);
-    };
-  }
-
   constructor(
     app: App,
     plugin: ColorMaster,
@@ -420,7 +423,7 @@ export class PasteCssModal extends Modal {
         const file = input.files[0];
         const content = await file.text();
         this.cssTextarea.value = content;
-        new Notice(t("NOTICE_FILE_LOADED", file.name));
+        new Notice(t("notices.fileLoaded", file.name));
       })();
     };
     input.click();
@@ -438,8 +441,8 @@ export class PasteCssModal extends Modal {
     const titleContainer = contentEl.createDiv({ cls: "cm-title-container" });
 
     const titleText = this.isEditing
-      ? t("EDIT_PROFILE_TITLE")
-      : t("IMPORT_PROFILE_TITLE");
+      ? t("modals.cssImport.titleEdit")
+      : t("modals.cssImport.title");
 
     this.modalTitleEl = titleContainer.createEl("h3", { text: titleText });
 
@@ -448,8 +451,8 @@ export class PasteCssModal extends Modal {
     let selectedTheme = themeNames.length > 0 ? themeNames[0] : "";
 
     const themeImporterEl = new Setting(contentEl)
-      .setName(t("IMPORT_FROM_INSTALLED_THEME"))
-      .setDesc(t("IMPORT_FROM_INSTALLED_THEME_DESC"));
+      .setName(t("modals.cssImport.importFromTheme"))
+      .setDesc(t("modals.cssImport.importFromThemeDesc"));
     themeImporterEl.settingEl.addClass("cm-theme-importer-setting");
 
     themeImporterEl.addDropdown((dropdown) => {
@@ -461,14 +464,14 @@ export class PasteCssModal extends Modal {
           selectedTheme = value;
         });
       } else {
-        dropdown.addOption("", t("NO_THEMES_INSTALLED"));
+        dropdown.addOption("", t("modals.cssImport.noThemes"));
         dropdown.setDisabled(true);
       }
     });
 
     themeImporterEl.addButton((button) => {
       button
-        .setButtonText(t("IMPORT_BUTTON"))
+        .setButtonText(t("buttons.import"))
         .setCta()
         .setDisabled(themeNames.length === 0)
         .onClick(async () => {
@@ -479,9 +482,9 @@ export class PasteCssModal extends Modal {
             this.cssTextarea.value = cssContent;
             this.nameInput.setValue(selectedTheme);
             this.profileName = selectedTheme;
-            new Notice(t("NOTICE_THEME_CSS_LOADED", selectedTheme));
+            new Notice(t("notices.themeCssLoaded", selectedTheme));
           } catch (error) {
-            new Notice(t("NOTICE_THEME_READ_FAILED", selectedTheme));
+            new Notice(t("notices.themeReadFailed", selectedTheme));
             console.error(
               `Color Master: Failed to read theme CSS at ${themePath}`,
               error
@@ -490,12 +493,12 @@ export class PasteCssModal extends Modal {
         });
     });
 
-    let nameLabelText = t("PROFILE_NAME_LABEL");
+    let nameLabelText = t("modals.newProfile.nameLabel");
     this.nameSetting = new Setting(contentEl)
       .setName(nameLabelText)
       .addText((text) => {
         this.nameInput = text;
-        let placeholderText = t("PROFILE_NAME_PLACEHOLDER");
+        let placeholderText = t("modals.newProfile.namePlaceholder");
 
         text
           .setValue(
@@ -511,18 +514,21 @@ export class PasteCssModal extends Modal {
 
     this.cssTextarea = contentEl.createEl("textarea", {
       cls: "cm-search-input cm-large-textarea",
-      attr: { rows: "12", placeholder: t("CSS_TEXTAREA_PLACEHOLDER") },
+      attr: {
+        rows: "12",
+        placeholder: t("modals.snippetEditor.cssPlaceholder"),
+      },
     });
 
     contentEl.createDiv({
-      text: t("PASTE_CSS_MODAL_NOTE"),
+      text: t("modals.cssImport.note"),
       cls: "cm-modal-warning-note",
     });
     new Setting(contentEl)
-      .setName(t("IMPORT_FROM_FILE"))
-      .setDesc(t("IMPORT_FROM_FILE_DESC"))
+      .setName(t("modals.cssImport.importFromFile"))
+      .setDesc(t("modals.cssImport.importFromFileDesc"))
       .addButton((button) => {
-        button.setButtonText(t("CHOOSE_FILE_BUTTON")).onClick(() => {
+        button.setButtonText(t("buttons.chooseFile")).onClick(() => {
           this._handleFileImport();
         });
       });
@@ -551,7 +557,7 @@ export class PasteCssModal extends Modal {
       this.cssTextarea.value = initialCss;
     }
 
-    const debouncedPushHistory = this._debounce((id, value) => {
+    const debouncedPushHistory = debounce((id, value) => {
       this.plugin.pushCssHistory(id, value);
     }, 500);
 
@@ -583,12 +589,12 @@ export class PasteCssModal extends Modal {
     });
 
     buttonContainer
-      .createEl("button", { text: t("CANCEL_BUTTON") })
+      .createEl("button", { text: t("buttons.cancel") })
       .addEventListener("click", () => this.close());
 
     buttonContainer
       .createEl("button", {
-        text: this.isEditing ? t("UPDATE_BUTTON") : t("CREATE_BUTTON"),
+        text: this.isEditing ? t("buttons.update") : t("buttons.create"),
         cls: "mod-cta",
       })
       .addEventListener("click", () => this.handleSave());
@@ -607,7 +613,7 @@ export class PasteCssModal extends Modal {
     let name = (this.profileName || "").trim();
 
     if (!name) {
-      new Notice(t("EMPTY_PROFILE_NAME_NOTICE"));
+      new Notice(t("notices.varNameEmpty"));
       return;
     }
 
@@ -623,7 +629,7 @@ export class PasteCssModal extends Modal {
             this.existingProfileData.name.toLowerCase() !== name.toLowerCase()))
     );
     if (isNameTaken) {
-      new Notice(t("NOTICE_PROFILE_NAME_EXISTS", name));
+      new Notice(t("notices.profileNameExists", name));
       return;
     }
 
@@ -647,7 +653,7 @@ export class PasteCssModal extends Modal {
         customCss: cssText,
       };
       this.plugin.settings.activeProfile = name;
-      new Notice(t("NOTICE_PROFILE_UPDATED", name));
+      new Notice(t("notices.profileUpdated", name));
     } else {
       // Logic for creating a new CSS-based profile
       this.plugin.settings.profiles[name] = {
@@ -658,7 +664,7 @@ export class PasteCssModal extends Modal {
         snippets: [],
       };
       this.plugin.settings.activeProfile = name;
-      new Notice(t("NOTICE_PROFILE_CREATED_FROM_CSS", name));
+      new Notice(t("notices.profileCreatedFromCss", name));
     }
 
     this.isSaving = true;
@@ -733,7 +739,7 @@ export class SnippetCssModal extends Modal {
         const file = input.files[0];
         const content = await file.text();
         this.cssTextarea.inputEl.value = content;
-        new Notice(t("NOTICE_FILE_LOADED", file.name));
+        new Notice(t("notices.fileLoaded", file.name));
       })();
     };
     input.click();
@@ -751,8 +757,8 @@ export class SnippetCssModal extends Modal {
     const titleContainer = contentEl.createDiv({ cls: "cm-title-container" });
 
     let titleText = this.isEditing
-      ? t("EDIT_SNIPPET_TITLE")
-      : t("CREATE_SNIPPET_TITLE");
+      ? t("modals.snippetEditor.titleEdit")
+      : t("modals.snippetEditor.title");
 
     this.modalTitleEl = titleContainer.createEl("h3", { text: titleText });
 
@@ -761,8 +767,8 @@ export class SnippetCssModal extends Modal {
       installedSnippets.length > 0 ? installedSnippets[0] : "";
 
     const snippetImporterEl = new Setting(contentEl)
-      .setName(t("IMPORT_FROM_INSTALLED_SNIPPET"))
-      .setDesc(t("IMPORT_FROM_INSTALLED_SNIPPET_DESC"));
+      .setName(t("modals.snippetEditor.importFromSnippet"))
+      .setDesc(t("modals.snippetEditor.importFromSnippetDesc"));
     snippetImporterEl.settingEl.addClass("cm-theme-importer-setting");
 
     snippetImporterEl.addDropdown((dropdown) => {
@@ -774,14 +780,14 @@ export class SnippetCssModal extends Modal {
           selectedSnippet = value;
         });
       } else {
-        dropdown.addOption("", t("NO_SNIPPETS_INSTALLED"));
+        dropdown.addOption("", t("modals.snippetEditor.noSnippets"));
         dropdown.setDisabled(true);
       }
     });
 
     snippetImporterEl.addButton((button) => {
       button
-        .setButtonText(t("IMPORT_BUTTON"))
+        .setButtonText(t("buttons.import"))
         .setCta()
         .setDisabled(installedSnippets.length === 0)
         .onClick(async () => {
@@ -792,9 +798,9 @@ export class SnippetCssModal extends Modal {
             this.cssTextarea.setValue(cssContent);
             this.nameInput.setValue(selectedSnippet);
             this.snippetName = selectedSnippet;
-            new Notice(t("NOTICE_SNIPPET_LOADED", selectedSnippet));
+            new Notice(t("notices.snippetLoaded", selectedSnippet));
           } catch (error) {
-            new Notice(t("NOTICE_SNIPPET_READ_FAILED", selectedSnippet));
+            new Notice(t("notices.snippetReadFailed", selectedSnippet));
             console.error(
               `Color Master: Failed to read snippet CSS at ${snippetPath}`,
               error
@@ -803,13 +809,13 @@ export class SnippetCssModal extends Modal {
         });
     });
 
-    const nameLabelText = t("SNIPPET_NAME_LABEL");
+    const nameLabelText = t("modals.snippetEditor.nameLabel");
 
     this.nameSetting = new Setting(contentEl)
       .setName(nameLabelText)
       .addText((text) => {
         this.nameInput = text;
-        let placeholderText = t("SNIPPET_NAME_PLACEHOLDER");
+        let placeholderText = t("modals.snippetEditor.namePlaceholder");
 
         text
           .setValue(
@@ -824,8 +830,8 @@ export class SnippetCssModal extends Modal {
       });
 
     new Setting(contentEl)
-      .setName(t("SAVE_AS_GLOBAL_SNIPPET_NAME"))
-      .setDesc(t("SAVE_AS_GLOBAL_SNIPPET_DESC"))
+      .setName(t("snippets.globalName"))
+      .setDesc(t("snippets.globalDesc"))
       .addToggle((toggle) => {
         toggle.setValue(this.isGlobalSnippet).onChange((value) => {
           this.isGlobalSnippet = value;
@@ -834,15 +840,15 @@ export class SnippetCssModal extends Modal {
 
     this.cssTextarea = new TextAreaComponent(contentEl);
     contentEl.createDiv({
-      text: t("PASTE_CSS_MODAL_NOTE"),
+      text: t("modals.cssImport.note"),
       cls: "cm-modal-warning-note",
     });
 
     new Setting(contentEl)
-      .setName(t("IMPORT_FROM_FILE"))
-      .setDesc(t("IMPORT_FROM_FILE_DESC"))
+      .setName(t("modals.cssImport.importFromFile"))
+      .setDesc(t("modals.cssImport.importFromFileDesc"))
       .addButton((button) => {
-        button.setButtonText(t("CHOOSE_FILE_BUTTON")).onClick(() => {
+        button.setButtonText(t("buttons.chooseFile")).onClick(() => {
           this._handleFileImport();
         });
       });
@@ -852,7 +858,7 @@ export class SnippetCssModal extends Modal {
       "cm-large-textarea"
     );
     this.cssTextarea.inputEl.rows = 12;
-    this.cssTextarea.setPlaceholder(t("CSS_TEXTAREA_PLACEHOLDER"));
+    this.cssTextarea.setPlaceholder(t("modals.snippetEditor.cssPlaceholder"));
 
     const historyId =
       this.isEditing && this.existingSnippet ? this.existingSnippet.id : null;
@@ -874,7 +880,7 @@ export class SnippetCssModal extends Modal {
       this.cssTextarea.setValue(initialCss);
     }
 
-    const debouncedPushHistory = this._debounce((id, value) => {
+    const debouncedPushHistory = debounce((id, value) => {
       this.plugin.pushCssHistory(id, value);
     }, 500);
 
@@ -906,12 +912,12 @@ export class SnippetCssModal extends Modal {
     });
 
     buttonContainer
-      .createEl("button", { text: t("CANCEL_BUTTON") })
+      .createEl("button", { text: t("buttons.cancel") })
       .addEventListener("click", () => this.close());
 
     buttonContainer
       .createEl("button", {
-        text: this.isEditing ? t("UPDATE_BUTTON") : t("CREATE_BUTTON"),
+        text: this.isEditing ? t("buttons.update") : t("buttons.create"),
         cls: "mod-cta",
       })
       .addEventListener("click", () => this.handleSave());
@@ -923,11 +929,11 @@ export class SnippetCssModal extends Modal {
     const name = (this.snippetName || "").trim();
 
     if (!name) {
-      new Notice(t("EMPTY_PROFILE_NAME_NOTICE"));
+      new Notice(t("notices.varNameEmpty"));
       return;
     }
     if (!cssText) {
-      new Notice(t("NOTICE_CSS_CONTENT_EMPTY"));
+      new Notice(t("notices.cssContentEmpty"));
       return;
     }
 
@@ -951,7 +957,7 @@ export class SnippetCssModal extends Modal {
     );
 
     if (isNameTaken) {
-      new Notice(t("NOTICE_SNIPPET_NAME_EXISTS", name));
+      new Notice(t("notices.snippetNameExists", name));
       return;
     }
 
@@ -980,15 +986,13 @@ export class SnippetCssModal extends Modal {
           // delete from the old list
           const [snippetToMove] = originalList.splice(snippetIndex, 1);
 
-          // ...and modify its data
           snippetToMove.name = name;
           snippetToMove.css = cssText;
           snippetToMove.isGlobal = this.isGlobalSnippet;
 
-          // ...and add it to the new list
           targetList.push(snippetToMove);
         }
-        new Notice(t("NOTICE_SNIPPET_UPDATED", name));
+        new Notice(t("notices.snippetUpdated", name));
       }
     } else {
       targetList.push({
@@ -998,7 +1002,7 @@ export class SnippetCssModal extends Modal {
         enabled: true,
         isGlobal: this.isGlobalSnippet,
       });
-      new Notice(t("NOTICE_SNIPPET_CREATED", name));
+      new Notice(t("notices.snippetCreated", name));
     }
 
     this.isSaving = true;
@@ -1069,8 +1073,8 @@ export class NoticeRulesModal extends Modal {
 
     const title =
       this.ruleType === "text"
-        ? t("ADVANCED_NOTICE_TEXT_RULES_TITLE")
-        : t("ADVANCED_NOTICE_BG_RULES_TITLE");
+        ? t("modals.noticeRules.titleText")
+        : t("modals.noticeRules.titleBg");
 
     const headerContainer = contentEl.createDiv({
       cls: "cm-rules-modal-header",
@@ -1085,14 +1089,14 @@ export class NoticeRulesModal extends Modal {
     });
 
     descAndButtonContainer.createEl("p", {
-      text: t("NOTICE_RULES_DESC"),
+      text: t("modals.noticeRules.desc"),
       cls: "cm-rules-modal-desc",
     });
     const buttonSettingContainer = descAndButtonContainer.createDiv();
     const settingEl = new Setting(buttonSettingContainer).addButton(
       (button) => {
         button
-          .setButtonText(t("ADD_NEW_RULE"))
+          .setButtonText(t("modals.noticeRules.addNewRule"))
           .setCta()
           .onClick(() => {
             const newRule: NoticeRule = {
@@ -1120,11 +1124,11 @@ export class NoticeRulesModal extends Modal {
     });
 
     buttonContainer
-      .createEl("button", { text: t("CANCEL_BUTTON") })
+      .createEl("button", { text: t("buttons.cancel") })
       .addEventListener("click", () => this.close());
 
     buttonContainer
-      .createEl("button", { text: t("APPLY_BUTTON"), cls: "mod-cta" })
+      .createEl("button", { text: t("buttons.apply"), cls: "mod-cta" })
       .addEventListener("click", async () => {
         const allTagInputs =
           this.rulesContainer.querySelectorAll<HTMLInputElement>(
@@ -1158,7 +1162,7 @@ export class NoticeRulesModal extends Modal {
         this.plugin.liveNoticeRules = null;
         this.plugin.liveNoticeRuleType = null;
 
-        new Notice(t("SETTINGS_SAVED"));
+        new Notice(t("notices.settingsSaved"));
         this.close();
       });
   }
@@ -1186,7 +1190,7 @@ export class NoticeRulesModal extends Modal {
 
       const handleBtn = new ButtonComponent(moveButtons)
         .setIcon("grip-vertical")
-        .setTooltip(t("DRAG_HANDLE_TOOLTIP") || "Drag to reorder");
+        .setTooltip(t("tooltips.dragReorder"));
 
       handleBtn.buttonEl.classList.add("cm-drag-handle");
       handleBtn.buttonEl.addEventListener("mousedown", (e) => {
@@ -1220,14 +1224,14 @@ export class NoticeRulesModal extends Modal {
       new ButtonComponent(colorContainer)
         .setIcon("eraser")
         .setClass("cm-rule-icon-button")
-        .setTooltip(t("TOOLTIP_SET_TRANSPARENT"))
+        .setTooltip(t("tooltips.setTransparent"))
         .onClick(() => {
           rule.color = "transparent";
           colorInput.classList.add("is-transparent");
         });
 
       const regexContainer = ruleEl.createDiv({ cls: "cm-regex-container" });
-      regexContainer.createSpan({ text: t("USE_REGEX_LABEL") });
+      regexContainer.createSpan({ text: t("modals.noticeRules.useRegex") });
       const regexCheckbox = regexContainer.createEl("input", {
         type: "checkbox",
       });
@@ -1239,7 +1243,7 @@ export class NoticeRulesModal extends Modal {
       new ButtonComponent(ruleEl)
         .setIcon("bell")
         .setClass("cm-rule-icon-button")
-        .setTooltip(t("TOOLTIP_TEST_RULE"))
+        .setTooltip(t("tooltips.testRule"))
         .onClick(() => {
           this._handleTestRule(rule);
         });
@@ -1330,7 +1334,7 @@ export class NoticeRulesModal extends Modal {
         type: "text",
         cls: "cm-tag-input-field",
       });
-      inputEl.placeholder = t("KEYWORD_PLACEHOLDER");
+      inputEl.placeholder = t("modals.noticeRules.keywordPlaceholder");
 
       const addKeywordFromInput = () => {
         const newKeyword = inputEl.value.trim().replace(/,/g, "");
@@ -1495,17 +1499,22 @@ export class DuplicateProfileModal extends Modal {
       cls: "cm-duplicate-modal-icon",
     });
     setIcon(iconContainer, "alert-triangle");
-    headerContainer.createEl("h3", { text: t("DUPLICATE_PROFILE_TITLE") });
+    headerContainer.createEl("h3", {
+      text: t("modals.duplicateProfile.title"),
+    });
 
     const descriptionFragment = new DocumentFragment();
-    const [part1, part2] = t("DUPLICATE_PROFILE_DESC_PARTS");
+    const [part1, part2] = t("modals.duplicateProfile.descParts") as [
+      string,
+      string
+    ];
     descriptionFragment.append(part1);
     descriptionFragment.createEl("strong", { text: this.existingName });
     descriptionFragment.append(part2);
 
     new Setting(contentEl).setDesc(descriptionFragment).addText((text) => {
       text
-        .setPlaceholder(t("DUPLICATE_PROFILE_PLACEHOLDER"))
+        .setPlaceholder(t("modals.duplicateProfile.placeholder"))
         .onChange((value) => {
           this.newName = value.trim();
         });
@@ -1522,21 +1531,21 @@ export class DuplicateProfileModal extends Modal {
       cls: "modal-button-container",
     });
     new ButtonComponent(buttonContainer)
-      .setButtonText(t("CANCEL_BUTTON"))
+      .setButtonText(t("buttons.cancel"))
       .onClick(() => this.close());
     new ButtonComponent(buttonContainer)
-      .setButtonText(t("CREATE_BUTTON"))
+      .setButtonText(t("buttons.create"))
       .setCta()
       .onClick(() => this.handleConfirm());
   }
 
   handleConfirm() {
     if (!this.newName) {
-      new Notice(t("EMPTY_PROFILE_NAME_NOTICE"));
+      new Notice(t("notices.varNameEmpty"));
       return;
     }
     if (this.plugin.settings.profiles[this.newName]) {
-      new Notice(t("PROFILE_EXISTS_NOTICE", this.newName));
+      new Notice(t("notices.profileNameExists", this.newName));
       return;
     }
     this.onSubmit(this.newName);
@@ -1556,11 +1565,17 @@ export class CustomVariableMetaModal extends Modal {
     varValue: string;
     displayName: string;
     description: string;
+    varType: CustomVarType;
   }) => void;
+
+  // Instance variables
   varName: string = "";
-  varValue: string = "#ffffff";
+  varValue: string = "#ffffff"; // The default value will be color
   displayName: string = "";
   description: string = "";
+  varType: CustomVarType = "color"; // Default type
+  sizeUnit: string = "px";
+  valueInputContainer: HTMLElement;
 
   constructor(
     app: App,
@@ -1571,6 +1586,7 @@ export class CustomVariableMetaModal extends Modal {
       varValue: string;
       displayName: string;
       description: string;
+      varType: CustomVarType;
     }) => void
   ) {
     super(app);
@@ -1579,19 +1595,129 @@ export class CustomVariableMetaModal extends Modal {
     this.onSubmit = onSubmit;
   }
 
+  // A function to plot the input field based on the type
+  renderValueInput(container: HTMLElement) {
+    container.empty(); // Clean up the old field
+    const valueSetting = new Setting(container)
+      .setName(t("modals.customVar.varValue"))
+      .setDesc(t("modals.customVar.varValueDesc"));
+
+    switch (this.varType) {
+      case "color":
+        // If the current value is not a color, return it to default
+        if (!this.varValue.match(/^(#|rgb|hsl|transparent)/)) {
+          this.varValue = "#ffffff";
+        }
+
+        const colorPicker = valueSetting.controlEl.createEl("input", {
+          type: "color",
+        });
+        const textInput = valueSetting.controlEl.createEl("input", {
+          type: "text",
+          cls: "color-master-text-input",
+        });
+
+        colorPicker.value = this.varValue;
+        textInput.value = this.varValue;
+
+        colorPicker.addEventListener("input", (e) => {
+          const newColor = (e.target as HTMLInputElement).value;
+          textInput.value = newColor;
+          this.varValue = newColor;
+        });
+        textInput.addEventListener("change", (e) => {
+          const newColor = (e.target as HTMLInputElement).value;
+          colorPicker.value = newColor;
+          this.varValue = newColor;
+        });
+        break;
+
+      case "size":
+        // If the current value is not a size, return it to the default
+        if (!this.varValue.match(/^(-?\d+)(\.\d+)?(px|em|rem|%)$/)) {
+          this.varValue = "10px";
+        }
+
+        // Extract the number and unit
+        const sizeMatch = this.varValue.match(/(-?\d+)(\.\d+)?(\D+)/);
+        let num = sizeMatch
+          ? (sizeMatch[1] || "") + (sizeMatch[2] || "")
+          : "10";
+        let unit = sizeMatch ? sizeMatch[3] || "" : "px";
+        if (!["px", "em", "rem", "%"].includes(unit)) unit = "px";
+        this.sizeUnit = unit;
+
+        const sizeInput = valueSetting.controlEl.createEl("input", {
+          type: "number",
+          cls: "color-master-text-input",
+        });
+        sizeInput.style.width = "80px";
+        sizeInput.value = num;
+
+        const unitDropdown = new DropdownComponent(valueSetting.controlEl);
+        unitDropdown.addOption("px", "px");
+        unitDropdown.addOption("em", "em");
+        unitDropdown.addOption("rem", "rem");
+        unitDropdown.addOption("%", "%");
+        unitDropdown.setValue(this.sizeUnit);
+
+        const updateSizeValue = () => {
+          this.varValue = (sizeInput.value || "0") + this.sizeUnit;
+        };
+        sizeInput.addEventListener("change", updateSizeValue);
+        unitDropdown.onChange((newUnit) => {
+          this.sizeUnit = newUnit;
+          updateSizeValue();
+        });
+        break;
+
+      case "text":
+        // Dump the value if the type is different
+        if (this.varType !== "text") this.varValue = "";
+        valueSetting.addTextArea((text) => {
+          text
+            .setValue(this.varValue)
+            .setPlaceholder("modals.customVar.textValuePlaceholder")
+            .onChange((value) => {
+              this.varValue = value;
+            });
+          text.inputEl.style.width = "100%";
+          text.inputEl.style.height = "80px";
+        });
+        break;
+
+      case "number":
+        // If the value is not a number, return it to 0
+        if (isNaN(parseFloat(this.varValue))) this.varValue = "0";
+        valueSetting.addText((text) => {
+          text.inputEl.type = "number";
+          text.setValue(this.varValue).onChange((value) => {
+            this.varValue = value;
+          });
+        });
+        break;
+    }
+  }
+
   onOpen() {
     const { contentEl } = this;
     contentEl.empty();
+    this.modalEl.classList.add("color-master-modal");
 
-    contentEl.createEl("h3", { text: t("MODAL_ADD_VAR_TITLE") });
-    contentEl.createEl("p", { text: t("MODAL_ADD_VAR_DESC") });
+    const lang = this.plugin.settings.language;
+    const isRTL =
+      (lang === "ar" || lang === "fa") && this.plugin.settings.useRtlLayout;
+    this.modalEl.setAttribute("dir", isRTL ? "rtl" : "ltr");
+
+    contentEl.createEl("h3", { text: t("modals.customVar.title") });
+    contentEl.createEl("p", { text: t("modals.customVar.desc") });
 
     new Setting(contentEl)
-      .setName(t("MODAL_VAR_DISPLAY_NAME"))
-      .setDesc(t("MODAL_VAR_DISPLAY_NAME_DESC"))
+      .setName(t("modals.customVar.displayName"))
+      .setDesc(t("modals.customVar.displayNameDesc"))
       .addText((text) =>
         text
-          .setPlaceholder(t("MODAL_VAR_DISPLAY_NAME_PLACEHOLDER"))
+          .setPlaceholder(t("modals.customVar.displayNamePlaceholder"))
           .setValue(this.displayName)
           .onChange((value) => {
             this.displayName = value;
@@ -1599,60 +1725,111 @@ export class CustomVariableMetaModal extends Modal {
       );
 
     new Setting(contentEl)
-      .setName(t("MODAL_VAR_NAME"))
-      .setDesc(t("MODAL_VAR_NAME_DESC"))
+      .setName(t("modals.customVar.varName"))
+      .setDesc(t("modals.customVar.varNameDesc"))
       .addText((text) =>
         text
-          .setPlaceholder(t("MODAL_VAR_NAME_PLACEHOLDER"))
+          .setPlaceholder(t("modals.customVar.varNamePlaceholder"))
           .setValue(this.varName)
           .onChange((value) => {
-            this.varName = value.startsWith("--") ? value : `--${value}`;
+            if (value.length > 0 && !value.startsWith("--")) {
+              if (value.startsWith("-")) {
+                this.varName = "-" + value;
+              } else {
+                this.varName = "--" + value;
+              }
+            } else {
+              this.varName = value;
+            }
           })
       );
 
     new Setting(contentEl)
-      .setName(t("MODAL_VAR_VALUE"))
-      .setDesc(t("MODAL_VAR_VALUE_DESC"))
-      .addText((text) =>
-        text
-          .setPlaceholder(t("MODAL_VAR_VALUE_PLACEHOLDER"))
-          .setValue(this.varValue)
-          .onChange((value) => {
-            this.varValue = value;
-          })
-      );
+      .setName(t("modals.customVar.varType"))
+      .setDesc(t("modals.customVar.varTypeDesc"))
+      .addDropdown((dropdown) => {
+        dropdown
+          .addOption("color", t("modals.customVar.types.color"))
+          .addOption("size", t("modals.customVar.types.size"))
+          .addOption("text", t("modals.customVar.types.text"))
+          .addOption("number", t("modals.customVar.types.number"))
+          .setValue(this.varType)
+          .onChange((value: CustomVarType) => {
+            this.varType = value;
 
+            switch (value) {
+              case "color":
+                this.varValue = "#ffffff";
+                break;
+              case "size":
+                this.varValue = "10px";
+                break;
+              case "number":
+                this.varValue = "0";
+                break;
+              case "text":
+                this.varValue = "";
+                break;
+            }
+            this.renderValueInput(this.valueInputContainer);
+          });
+      });
+
+    this.valueInputContainer = contentEl.createDiv("cm-value-input-container");
+    this.renderValueInput(this.valueInputContainer);
+
+    // Description
     new Setting(contentEl)
-      .setName(t("MODAL_VAR_DESCRIPTION"))
-      .setDesc(t("MODAL_VAR_DESCRIPTION_DESC"))
+      .setName(t("modals.customVar.description"))
+      .setDesc(t("modals.customVar.descriptionDesc"))
       .addTextArea((text) =>
         text
-          .setPlaceholder(t("MODAL_VAR_DESCRIPTION_PLACEHOLDER"))
+          .setPlaceholder(t("modals.customVar.descriptionPlaceholder"))
           .setValue(this.description)
           .onChange((value) => {
             this.description = value;
           })
       );
 
+    // Buttons
     new Setting(contentEl)
       .setClass("modal-button-container")
       .addButton((button) =>
-        button.setButtonText(t("CANCEL_BUTTON")).onClick(() => this.close())
+        button.setButtonText(t("buttons.cancel")).onClick(() => this.close())
       )
       .addButton((button) =>
         button
-          .setButtonText(t("ADD_BUTTON"))
+          .setButtonText(t("modals.customVar.addVarButton"))
           .setCta()
           .onClick(() => {
-            if (!this.varName.startsWith("--")) {
-              new Notice(t("ERROR_VAR_NAME_PREFIX"));
+            const trimmedVarName = this.varName.trim();
+
+            if (!trimmedVarName.startsWith("--")) {
+              new Notice(t("notices.varNameFormat"));
               return;
             }
+            if (!this.displayName.trim()) {
+              new Notice(t("notices.varNameEmpty"));
+              return;
+            }
+
+            const allDefaultVars = Object.keys(flattenVars(DEFAULT_VARS));
+            const activeProfile =
+              this.plugin.settings.profiles[this.plugin.settings.activeProfile];
+            const allProfileVars = Object.keys(activeProfile.vars || {});
+            const allVarNames = new Set([...allDefaultVars, ...allProfileVars]);
+
+            if (allVarNames.has(trimmedVarName)) {
+              new Notice(t("notices.varExists", trimmedVarName));
+              return;
+            }
+
             this.onSubmit({
-              displayName: this.displayName,
-              varName: this.varName,
-              varValue: this.varValue,
-              description: this.description,
+              displayName: this.displayName.trim(),
+              varName: trimmedVarName,
+              varValue: this.varValue.trim(),
+              description: this.description.trim(),
+              varType: this.varType,
             });
             this.close();
           })
@@ -1684,11 +1861,13 @@ export class LanguageSettingsModal extends Modal {
     );
 
     contentEl.empty();
-    contentEl.createEl("h3", { text: t("LANGUAGE_SETTINGS_TITLE") });
+    contentEl.createEl("h3", {
+      text: t("settings.languageSettingsModalTitle"),
+    });
 
     new Setting(contentEl)
-      .setName(t("RTL_LAYOUT_NAME"))
-      .setDesc(t("RTL_LAYOUT_DESC"))
+      .setName(t("settings.rtlLayoutName"))
+      .setDesc(t("settings.rtlLayoutDesc"))
       .addToggle((toggle) => {
         toggle
           .setValue(this.plugin.settings.useRtlLayout)
@@ -1727,11 +1906,11 @@ export class IconizeSettingsModal extends Modal {
     );
 
     contentEl.empty();
-    contentEl.createEl("h3", { text: t("ICONIZE_SETTINGS_MODAL_TITLE") });
+    contentEl.createEl("h3", { text: t("options.iconizeModalTitle") });
 
     new Setting(contentEl)
-      .setName(t("OVERRIDE_ICONIZE"))
-      .setDesc(t("OVERRIDE_ICONIZE_DESC"))
+      .setName(t("options.overrideIconizeName"))
+      .setDesc(t("options.overrideIconizeDesc"))
       .addToggle((toggle) => {
         toggle
           .setValue(this.plugin.settings.overrideIconizeColors)
@@ -1744,7 +1923,7 @@ export class IconizeSettingsModal extends Modal {
               );
 
               if (!isIconizeInstalled) {
-                new Notice(t("ICONIZE_NOT_FOUND_NOTICE"));
+                new Notice(t("notices.iconizeNotFound"));
                 toggle.setValue(false);
                 return;
               }
@@ -1755,8 +1934,8 @@ export class IconizeSettingsModal extends Modal {
       });
 
     new Setting(contentEl)
-      .setName(t("CLEANUP_INTERVAL_NAME"))
-      .setDesc(t("CLEANUP_INTERVAL_DESC"))
+      .setName(t("options.cleanupIntervalName"))
+      .setDesc(t("options.cleanupIntervalDesc"))
       .addSlider((slider) => {
         slider
           .setLimits(1, 10, 1)
@@ -1785,11 +1964,10 @@ export class BackgroundImageSettingsModal extends Modal {
   }
 
   onOpen() {
-    // Basic setup: add class, get profile, set direction
     this.modalEl.classList.add("color-master-modal");
     const { contentEl } = this;
     const lang = this.plugin.settings.language;
-    const isActiveProfile = // Renamed for clarity
+    const activeProfile =
       this.plugin.settings.profiles[this.plugin.settings.activeProfile];
 
     this.modalEl.setAttribute(
@@ -1800,25 +1978,171 @@ export class BackgroundImageSettingsModal extends Modal {
     );
 
     contentEl.empty();
-    contentEl.createEl("h3", { text: t("TOOLTIP_BACKGROUND_IMAGE_SETTINGS") });
+    contentEl.createEl("h3", {
+      text: t("options.backgroundModalSettingsTitle"),
+    });
 
     // --- Enable/Disable Toggle ---
     new Setting(contentEl)
-      .setName(t("SETTING_BACKGROUND_ENABLE_NAME"))
-      .setDesc(t("SETTING_BACKGROUND_ENABLE_DESC"))
+      .setName(t("options.backgroundEnableName"))
+      .setDesc(t("options.backgroundEnableDesc"))
       .addToggle((toggle) => {
-        // Default to enabled if undefined or true
-        const isCurrentlyEnabled = isActiveProfile?.backgroundEnabled !== false;
-
+        const isCurrentlyEnabled = activeProfile?.backgroundEnabled !== false;
         toggle.setValue(isCurrentlyEnabled).onChange(async (value) => {
           const profile =
             this.plugin.settings.profiles[this.plugin.settings.activeProfile];
           if (profile) {
             profile.backgroundEnabled = value;
-            await this.plugin.saveSettings(); // Save triggers applyStyles
+            await this.plugin.saveSettings();
           }
+          this.onOpen(); // Redraw the window
         });
       });
+
+    const settingTypeSetting = new Setting(contentEl).setName(
+      t("options.settingType")
+    );
+
+    let imageButton: ButtonComponent;
+    let videoButton: ButtonComponent;
+
+    const imageSettingsEl = contentEl.createDiv("cm-settings-group");
+    imageSettingsEl.style.display = "none"; // It starts hidden
+
+    const videoSettingsEl = contentEl.createDiv("cm-settings-group");
+    videoSettingsEl.style.display = "none"; // It starts hidden
+
+    // --- Fill the Image Settings container ---
+    new Setting(imageSettingsEl)
+      .setName(t("options.convertImagesName"))
+      .setDesc(t("options.convertImagesDesc"))
+      .addToggle((toggle) => {
+        toggle
+          .setValue(activeProfile?.convertImagesToJpg || false)
+          .onChange(async (value) => {
+            activeProfile.convertImagesToJpg = value;
+            if (value && !activeProfile.jpgQuality) {
+              activeProfile.jpgQuality = 85;
+            }
+            await this.plugin.saveSettings();
+            this.onOpen();
+          });
+      });
+
+    if (activeProfile?.convertImagesToJpg === true) {
+      new Setting(imageSettingsEl)
+        .setName(t("options.jpgQualityName"))
+        .setDesc(t("options.jpgQualityDesc"))
+        .addSlider((slider) => {
+          slider
+            .setLimits(1, 100, 1)
+            .setValue(activeProfile?.jpgQuality || 85)
+            .setDynamicTooltip()
+            .onChange(async (value) => {
+              this.debouncedSaveSettings(value);
+            });
+        });
+    }
+
+    // --- Fill the video settings container (it is still hidden) ---
+    new Setting(videoSettingsEl)
+      .setName(t("options.videoOpacityName"))
+      .setDesc(t("options.videoOpacityDesc"))
+      .addSlider((slider) => {
+        slider
+          .setLimits(0.1, 1, 0.1)
+          .setValue(activeProfile.videoOpacity || 0.5)
+          .setDynamicTooltip()
+          .onChange(async (value) => {
+            activeProfile.videoOpacity = value;
+            await this.plugin.saveSettings();
+          });
+
+        slider.sliderEl.oninput = (e) => {
+          const value = parseFloat((e.target as HTMLInputElement).value);
+          const videoEl = document.getElementById(
+            "cm-background-video"
+          ) as HTMLVideoElement;
+          if (videoEl) {
+            videoEl.style.opacity = value.toString();
+          }
+        };
+      });
+
+    new Setting(videoSettingsEl)
+      .setName(t("options.videoMuteName"))
+      .setDesc(t("options.videoMuteDesc"))
+      .addToggle((toggle) =>
+        toggle
+          .setValue(activeProfile.videoMuted !== false)
+          .onChange(async (value) => {
+            activeProfile.videoMuted = value;
+            await this.plugin.saveSettings();
+
+            const videoEl = document.getElementById(
+              "cm-background-video"
+            ) as HTMLVideoElement;
+            if (videoEl) {
+              videoEl.muted = value;
+            }
+          })
+      );
+
+    // --- Attaching buttons to containers ---
+    const setActiveButton = (active: "image" | "video") => {
+      if (active === "image") {
+        imageButton.setCta();
+        videoButton.buttonEl.classList.remove("mod-cta");
+        imageSettingsEl.style.display = "block";
+        videoSettingsEl.style.display = "none";
+      } else {
+        imageButton.buttonEl.classList.remove("mod-cta");
+        videoButton.setCta();
+        imageSettingsEl.style.display = "none";
+        videoSettingsEl.style.display = "block";
+      }
+    };
+
+    settingTypeSetting.addButton((button) => {
+      imageButton = button;
+      button
+        .setButtonText(t("options.settingTypeImage"))
+        .onClick(() => setActiveButton("image"));
+    });
+
+    settingTypeSetting.addButton((button) => {
+      videoButton = button;
+      button
+        .setButtonText(t("options.settingTypeVideo"))
+        .onClick(() => setActiveButton("video"));
+    });
+
+    const currentType = activeProfile?.backgroundType || "image";
+    setActiveButton(currentType);
+  }
+
+  debouncedSaveSettings = debounce(async (value: number) => {
+    const profile =
+      this.plugin.settings.profiles[this.plugin.settings.activeProfile];
+    if (profile) {
+      profile.jpgQuality = value;
+      await this.plugin.saveSettings();
+      new Notice("notices.jpgQualitySet");
+    }
+  }, 500);
+
+  debounce(func: (...args: any[]) => void, wait: number) {
+    let timeout: NodeJS.Timeout | null;
+    return (...args: any[]) => {
+      const later = () => {
+        timeout = null;
+        func(...args);
+      };
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+      timeout = setTimeout(later, wait);
+    };
   }
 
   onClose() {
@@ -1853,8 +2177,10 @@ export class FileConflictModal extends Modal {
     const { contentEl } = this;
     contentEl.empty();
 
-    contentEl.createEl("h3", { text: t("FILE_CONFLICT_TITLE") });
-    contentEl.createEl("p", { text: t("FILE_CONFLICT_DESC", this.fileName) });
+    contentEl.createEl("h3", { text: t("modals.fileConflict.title") });
+    contentEl.createEl("p", {
+      text: t("modals.fileConflict.desc", this.fileName),
+    });
 
     const buttonContainer = contentEl.createDiv({
       cls: "modal-button-container",
@@ -1862,7 +2188,7 @@ export class FileConflictModal extends Modal {
 
     // Replace Button
     new ButtonComponent(buttonContainer)
-      .setButtonText(t("REPLACE_FILE_BUTTON"))
+      .setButtonText(t("modals.fileConflict.replaceButton"))
 
       .onClick(async () => {
         this.onResolve("replace");
@@ -1871,7 +2197,7 @@ export class FileConflictModal extends Modal {
 
     // Keep Both Button
     new ButtonComponent(buttonContainer)
-      .setButtonText(t("KEEP_BOTH_BUTTON"))
+      .setButtonText(t("modals.fileConflict.keepButton"))
       .setCta()
       .onClick(async () => {
         this.onResolve("keep");
@@ -1916,7 +2242,7 @@ export class AddBackgroundModal extends Modal {
     if (url.startsWith("data:image")) {
       try {
         if (pasteBox) {
-          pasteBox.textContent = t("PROCESSING_IMAGE") + "...";
+          pasteBox.textContent = t("modals.addBackground.processing") + "...";
         }
         const response = await fetch(url);
         const blob = await response.blob();
@@ -1926,11 +2252,11 @@ export class AddBackgroundModal extends Modal {
         }`;
         new Notice("Pasted Base64 image");
 
-        await this.plugin.setBackgroundImage(arrayBuffer, fileName, "prompt");
+        await this.plugin.setBackgroundMedia(arrayBuffer, fileName, "prompt");
         this.close();
         return; // Exit after handling
       } catch (error) {
-        new Notice(t("NOTICE_IMAGE_LOAD_ERROR"));
+        new Notice(t("notices.backgroundLoadError"));
         console.error("Color Master: Error handling pasted data URL:", error);
         this.close();
         return; // Exit on error
@@ -1942,14 +2268,14 @@ export class AddBackgroundModal extends Modal {
       new Notice(`Downloading from ${url}...`);
       if (pasteBox) {
         // Show processing (no percentage)
-        pasteBox.textContent = t("PROCESSING_IMAGE") + "...";
+        pasteBox.textContent = t("modals.addBackground.processing") + "...";
       }
-      await this.plugin.setBackgroundImageFromUrl(url); // Use dedicated function
+      await this.plugin.setBackgroundMediaFromUrl(url); // Use dedicated function
       this.close();
       return; // Exit after handling
     }
     // If neither type matched
-    new Notice(t("NOTICE_PASTE_ERROR"));
+    new Notice(t("notices.pasteError"));
   }
 
   // Read file as ArrayBuffer, update progress, and call setBackgroundImage
@@ -1963,29 +2289,30 @@ export class AddBackgroundModal extends Modal {
     reader.onprogress = (event) => {
       if (event.lengthComputable && pasteBox) {
         const percent = Math.round((event.loaded / event.total) * 100);
-        pasteBox.textContent = t("PROCESSING_IMAGE") + `${percent}%`;
+        pasteBox.textContent =
+          t("modals.addBackground.processing") + `${percent}%`;
       }
     };
 
     // On successful load, pass data to main plugin function
     reader.onload = async () => {
       if (pasteBox) {
-        pasteBox.textContent = t("PROCESSING_IMAGE") + "100%";
+        pasteBox.textContent = t("modals.addBackground.processing") + " 100%";
       }
       const arrayBuffer = reader.result as ArrayBuffer;
-      await this.plugin.setBackgroundImage(arrayBuffer, file.name, "prompt");
+      await this.plugin.setBackgroundMedia(arrayBuffer, file.name, "prompt");
       this.close(); // Close modal on success
     };
 
     // Handle read errors
     reader.onerror = () => {
-      new Notice(t("NOTICE_IMAGE_LOAD_ERROR"));
+      new Notice(t("notices.backgroundLoadError"));
       this.close();
     };
 
     // Start reading the file
     if (pasteBox) {
-      pasteBox.textContent = t("PROCESSING_IMAGE") + "0%";
+      pasteBox.textContent = t("modals.addBackground.processing") + "0%";
     }
     reader.readAsArrayBuffer(file);
   }
@@ -2002,23 +2329,23 @@ export class AddBackgroundModal extends Modal {
         : "ltr"
     );
 
-    contentEl.createEl("h3", { text: t("ADD_NEW_BACKGROUND_IMAGE_TITLE") });
+    contentEl.createEl("h3", { text: t("modals.addBackground.title") });
 
     // --- File Import Button ---
     new Setting(contentEl)
-      .setName(t("IMPORT_FROM_FILE_BUTTON"))
-      .setDesc(t("IMPORT_FROM_FILE_DESC_MODAL"))
+      .setName(t("modals.addBackground.importFromFile"))
+      .setDesc(t("modals.addBackground.importFromFileDesc"))
       .addButton((button) => {
         // Hidden input element to handle file selection
         const input = createEl("input", {
           type: "file",
-          attr: { accept: "image/*" }, // Allow standard image types
+          attr: { accept: "image/*, video/mp4, video/webm" }, // Allow standard image types
         });
 
         button
           .setIcon("upload")
           .setCta()
-          .setButtonText(t("CHOOSE_FILE_BUTTON"))
+          .setButtonText(t("buttons.chooseFile"))
           .onClick(() => {
             input.click(); // Open file dialog
           });
@@ -2036,7 +2363,7 @@ export class AddBackgroundModal extends Modal {
     // --- Paste Box (URL or Image via Paste/DragDrop) ---
     const pasteBox = contentEl.createDiv({
       cls: "cm-paste-box",
-      text: t("PASTE_BOX_PLACEHOLDER"),
+      text: t("modals.addBackground.pasteBoxPlaceholder"),
     });
     pasteBox.setAttribute("contenteditable", "true"); // Allow paste
 
@@ -2049,7 +2376,7 @@ export class AddBackgroundModal extends Modal {
       // Check for pasted files first
       if (clipboardData.files && clipboardData.files.length > 0) {
         const file = clipboardData.files[0];
-        if (file.type.startsWith("image/")) {
+        if (file.type.startsWith("image/") || file.type.startsWith("video/")) {
           this.handlePastedFile(file);
           return;
         }
@@ -2067,25 +2394,25 @@ export class AddBackgroundModal extends Modal {
         return;
       }
       // If neither worked
-      new Notice(t("NOTICE_PASTE_ERROR"));
+      new Notice(t("notices.backgroundPasteError"));
     });
 
     // --- Drag and Drop Listeners ---
     pasteBox.addEventListener("dragover", (event: DragEvent) => {
       event.preventDefault(); // Required to allow drop
       pasteBox.classList.add("is-over");
-      pasteBox.textContent = t("DROP_TO_ADD_IMAGE");
+      pasteBox.textContent = t("modals.addBackground.dropToAdd");
     });
 
     pasteBox.addEventListener("dragleave", () => {
       pasteBox.classList.remove("is-over");
-      pasteBox.textContent = t("PASTE_BOX_PLACEHOLDER"); // Reset text
+      pasteBox.textContent = t("modals.addBackground.pasteBoxPlaceholder");
     });
 
     pasteBox.addEventListener("drop", (event: DragEvent) => {
       event.preventDefault(); // Prevent default browser file handling
       pasteBox.classList.remove("is-over");
-      pasteBox.textContent = t("PASTE_BOX_PLACEHOLDER");
+      pasteBox.textContent = t("modals.addBackground.pasteBoxPlaceholder");
 
       if (!event.dataTransfer) return;
 
@@ -2107,7 +2434,7 @@ export class AddBackgroundModal extends Modal {
         return;
       }
       // If neither worked
-      new Notice(t("NOTICE_PASTE_ERROR"));
+      new Notice(t("notices.backgroundPasteError"));
     });
   }
 
@@ -2139,7 +2466,7 @@ export class ProfileImageBrowserModal extends Modal {
   async onOpen() {
     const { contentEl } = this;
     contentEl.empty();
-    contentEl.createEl("h3", { text: t("PROFILE_IMAGE_BROWSER_TITLE") });
+    contentEl.createEl("h3", { text: t("modals.backgroundBrowser.title") });
 
     this.galleryEl = contentEl.createDiv({ cls: "cm-image-gallery" });
     await this.displayImages(); // Load and display images
@@ -2150,7 +2477,16 @@ export class ProfileImageBrowserModal extends Modal {
     this.galleryEl.empty();
     // Construct path to the global backgrounds folder
     const backgroundsPath = `.obsidian/backgrounds`;
-    const imageExtensions = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg"];
+    const mediaExtensions = [
+      ".png",
+      ".jpg",
+      ".jpeg",
+      ".gif",
+      ".webp",
+      ".svg",
+      ".mp4",
+      ".webm",
+    ];
 
     let files: string[] = [];
     try {
@@ -2164,31 +2500,76 @@ export class ProfileImageBrowserModal extends Modal {
     }
 
     // Filter the list to include only supported image types
-    const imageFiles = files.filter((path) =>
-      imageExtensions.some((ext) => path.toLowerCase().endsWith(ext))
+    const mediaFiles = files.filter((path) =>
+      mediaExtensions.some((ext) => path.toLowerCase().endsWith(ext))
     );
 
     // Show empty state message if no images found
-    if (imageFiles.length === 0) {
+    if (mediaFiles.length === 0) {
       this.galleryEl.createDiv({
         cls: "cm-image-browser-empty",
-        text: t("NO_IMAGES_FOUND"),
+        text: t("modals.backgroundBrowser.noImages"),
       });
       return;
     }
 
     // Create a card for each image file
-    for (const imagePath of imageFiles) {
-      const cardEl = this.galleryEl.createDiv({ cls: "cm-image-card" });
-      const imageUrl = this.app.vault.adapter.getResourcePath(imagePath);
-      const fileName = imagePath.split("/").pop();
+    const activeProfile =
+      this.plugin.settings.profiles[this.plugin.settings.activeProfile];
+    const activeMediaPath = activeProfile?.backgroundPath;
 
-      // --- 1. Image Preview ---
-      cardEl.createEl("img", {
-        cls: "cm-image-card-preview",
-        attr: { src: imageUrl },
+    // Create a card for each image file
+    for (const mediaPath of mediaFiles) {
+      const cardEl = this.galleryEl.createDiv({ cls: "cm-image-card" });
+
+      if (mediaPath === activeMediaPath) {
+        cardEl.classList.add("is-active");
+      }
+
+      const mediaUrl = this.app.vault.adapter.getResourcePath(mediaPath);
+      const fileName = mediaPath.split("/").pop();
+
+      // --- 1. Image/Video Preview ---
+      const isVideo =
+        mediaPath.toLowerCase().endsWith(".mp4") ||
+        mediaPath.toLowerCase().endsWith(".webm");
+
+      const previewContainer = cardEl.createDiv({
+        cls: "cm-media-preview-container",
       });
 
+      if (isVideo) {
+        const videoEl = previewContainer.createEl("video", {
+          cls: "cm-image-card-preview",
+          attr: {
+            src: mediaUrl,
+            muted: true,
+            loop: true,
+            playsinline: true,
+            "data-path": mediaPath,
+          },
+        });
+
+        const playOverlay = previewContainer.createDiv({
+          cls: "cm-media-play-overlay",
+        });
+        setIcon(playOverlay, "play");
+
+        previewContainer.addEventListener("click", () => {
+          if (videoEl.paused) {
+            videoEl.play();
+            playOverlay.style.opacity = "0";
+          } else {
+            videoEl.pause();
+            playOverlay.style.opacity = "1";
+          }
+        });
+      } else {
+        previewContainer.createEl("img", {
+          cls: "cm-image-card-preview",
+          attr: { src: mediaUrl, "data-path": mediaPath },
+        });
+      }
       // --- 2. Editable File Name (Basename + Extension) ---
       const nameSettingEl = cardEl.createDiv({
         cls: "setting-item cm-image-card-name-input",
@@ -2224,7 +2605,7 @@ export class ProfileImageBrowserModal extends Modal {
         return { basename: decodedName, ext: "" };
       };
 
-      let currentImagePath = imagePath;
+      let currentImagePath = mediaPath;
       let currentFileName = fileName || ""; // Track path locally for updates after rename
 
       // Set initial values
@@ -2247,13 +2628,13 @@ export class ProfileImageBrowserModal extends Modal {
           const newFullName = newBasename + ext; // Get current extension
 
           // Call main plugin rename function (returns new path or false)
-          const renameResult = await this.plugin.renameBackgroundImage(
+          const renameResult = await this.plugin.renameBackgroundMedia(
             currentImagePath,
             newFullName
           );
 
           if (renameResult && typeof renameResult === "string") {
-            // SUCCESS - Update local state and necessary UI elements
+            // Update local state and necessary UI elements
             const newPath = renameResult;
             currentImagePath = newPath; // Update path for subsequent actions
             currentFileName = newPath.split("/").pop() || ""; // Update filename from the returned path
@@ -2276,21 +2657,20 @@ export class ProfileImageBrowserModal extends Modal {
               imgEl.src = this.app.vault.adapter.getResourcePath(newPath);
             }
             if (selectBtn) {
-              selectBtn.onclick = () => this.selectImage(newPath);
+              selectBtn.onclick = () => this.selectMedia(newPath);
             }
             if (deleteBtn) {
-              deleteBtn.onclick = () => this.deleteImage(newPath, cardEl);
+              deleteBtn.onclick = () => this.deleteMedia(newPath, cardEl);
             }
           } else {
             // FAILURE - Revert input to the last known good basename
             nameInput.value = currentBasename;
-            // Notice is already shown by renameBackgroundImage on failure
           }
         } else {
           // If name empty or unchanged, ensure input reflects current basename
           nameInput.value = currentBasename;
         }
-      }; // End saveName
+      };
 
       // Trigger save on Enter or losing focus
       nameInput.addEventListener("keydown", (e: KeyboardEvent) => {
@@ -2308,45 +2688,49 @@ export class ProfileImageBrowserModal extends Modal {
       // Select Button (Icon + Tooltip)
       const controlsEl = cardEl.createDiv({ cls: "cm-image-card-controls" });
 
-      // Select Button - Add class for easier selection later
+      // Select Button
       const selectButton = new ButtonComponent(controlsEl) // Add to name control container
-        .setButtonText(t("SELECT_BUTTON"))
+        .setButtonText(t("buttons.select"))
         .setCta()
-        .onClick(() => this.selectImage(currentImagePath)); // Use current path
+        .onClick(() => this.selectMedia(currentImagePath)); // Use current path
       selectButton.buttonEl.classList.add("cm-image-card-select-btn");
 
-      // Delete Button - Add class for easier selection later
+      // Delete Button
       const deleteButton = new ButtonComponent(controlsEl)
         .setIcon("trash")
         .setClass("mod-warning")
-        .onClick(() => this.deleteImage(currentImagePath, cardEl)); // Use currentImagePath
+        .onClick(() => this.deleteMedia(currentImagePath, cardEl)); // Use currentImagePath
       deleteButton.buttonEl.classList.add("cm-image-card-delete-btn");
-    } // End for loop iterating through imageFiles
+    }
   }
 
-  // Action when user clicks the 'select' (check) button on an image card
-  async selectImage(path: string) {
-    await this.plugin.selectBackgroundImage(path);
+  // Action when user clicks the 'select' (check) button on an background card
+  async selectMedia(path: string) {
+    const fileExt = path.split(".").pop()?.toLowerCase();
+    const mediaType: "image" | "video" =
+      fileExt === "mp4" || fileExt === "webm" ? "video" : "image";
+
+    await this.plugin.selectBackgroundMedia(path, mediaType);
     this.settingTab.display(); // Refresh settings tab
-    this.closeCallback(); // Close the 'Add Background' modal
-    this.close(); // Close this modal
+    this.closeCallback();
+    this.close();
   }
 
   // Action when user clicks the 'delete' (trash) button on an image card
-  async deleteImage(path: string, cardEl: HTMLElement) {
+  async deleteMedia(path: string, cardEl: HTMLElement) {
     const fileName = path.split("/").pop();
 
     // Find all profiles using this specific image path
     const profilesUsingImage: string[] = [];
     for (const profileName in this.plugin.settings.profiles) {
-      if (this.plugin.settings.profiles[profileName].backgroundImage === path) {
+      if (this.plugin.settings.profiles[profileName].backgroundPath === path) {
         profilesUsingImage.push(profileName);
       }
     }
 
     // Build the warning message
     const messageFragment = new DocumentFragment();
-    messageFragment.append(t("CONFIRM_GLOBAL_BACKGROUND_DELETION_DESC"));
+    messageFragment.append(t("modals.confirmation.deleteGlobalBgDesc"));
 
     if (profilesUsingImage.length > 0) {
       const profileListEl = messageFragment.createEl("ul", {
@@ -2361,26 +2745,25 @@ export class ProfileImageBrowserModal extends Modal {
     new ConfirmationModal(
       this.app,
       this.plugin,
-      t("CONFIRM_IMAGE_DELETE_TITLE"),
+      t("modals.confirmation.deleteBackgroundTitle"),
       messageFragment,
       async () => {
-        // Use the new global delete function from main.ts
-        await this.plugin.removeBackgroundImageByPath(path);
+        await this.plugin.removeBackgroundMediaByPath(path);
 
-        new Notice(t("NOTICE_BACKGROUND_IMAGE_DELETED"));
-        cardEl.remove(); // Remove the card from the gallery
+        new Notice(t("notices.bgDeleted"));
+        cardEl.remove();
 
         // Check if gallery is now empty
         if (this.galleryEl.childElementCount === 0) {
           this.galleryEl.createDiv({
             cls: "cm-image-browser-empty",
-            text: t("NO_IMAGES_FOUND"),
+            text: t("modals.imageBrowser.noImages"),
           });
         }
         // Refresh settings tab in case we deleted the active image
         this.settingTab.display();
       },
-      { buttonText: t("DELETE_ANYWAY_BUTTON"), buttonClass: "mod-warning" }
+      { buttonText: t("buttons.deleteAnyway"), buttonClass: "mod-warning" }
     ).open();
   }
 

@@ -1,3 +1,5 @@
+export type CustomVarType = "color" | "size" | "text" | "number";
+
 export interface Snippet {
   id: string;
   name: string;
@@ -28,13 +30,21 @@ export interface Profile {
     [key: string]: {
       name: string;
       desc: string;
+      type: CustomVarType;
     };
   };
-  backgroundImage?: string;
+  backgroundPath?: string;
+  backgroundType?: "image" | "video";
+  videoOpacity?: number;
+  videoMuted?: boolean;
   backgroundEnabled?: boolean;
+  convertImagesToJpg?: boolean;
+  jpgQuality?: number;
 }
 
 export interface PluginSettings {
+  lastSearchQuery?: string;
+  lastScrollPosition?: number;
   noticeRules?: any;
   pluginEnabled: boolean;
   language: string;

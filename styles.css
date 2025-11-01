@@ -2466,3 +2466,105 @@ body.cm-workspace-background-active .modal-container .modal {
   color: var(--text-accent);
   font-weight: 600;
 }
+
+/* --- Badge for Not Installed Plugin --- */
+.cm-not-installed-badge {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--interactive-warning);
+  padding: 1px 6px;
+  border-radius: 10px;
+  border: 1px solid var(--background-modifier-border);
+  background: var(--background-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: relative;
+  top: -1px;
+  margin-left: 8px;
+  cursor: help;
+}
+
+.color-master-settings-tab[dir="rtl"] .cm-not-installed-badge {
+  margin-left: 0;
+  margin-right: 8px;
+}
+
+/* --- Video Background Styles --- */
+#cm-background-video {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  z-index: -1;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+/* Browser window video preview format */
+.cm-image-card-preview[src*=".mp4"],
+.cm-image-card-preview[src*=".webm"] {
+  object-fit: cover;
+}
+
+/* Old background code to become public */
+body.cm-workspace-background-active {
+  background-image: var(--cm-background-image);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+/* --- Split Settings Container Formats --- */
+.cm-settings-group {
+  border-top: 1px solid var(--background-modifier-border);
+  margin-top: 0px;
+  padding-top: 10px;
+}
+
+/* --- Interactive video preview formats --- */
+.cm-media-preview-container {
+  position: relative;
+  width: 100%;
+  height: 80px;
+  background-color: var(--background-primary);
+  border-bottom: 1px solid var(--background-modifier-border);
+  cursor: pointer;
+}
+
+.cm-media-preview-container .cm-image-card-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cm-media-play-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  background-color: rgba(0, 0, 0, 0.4);
+  opacity: 1;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.cm-media-play-overlay svg {
+  width: 32px;
+  height: 32px;
+}
+
+.cm-image-card.is-active {
+  border: 2px solid var(--interactive-accent);
+  box-shadow: 0 0 10px var(--interactive-accent);
+  transform: scale(1.02);
+  transition: all 0.2s ease-in-out;
+}

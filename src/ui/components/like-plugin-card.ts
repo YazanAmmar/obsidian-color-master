@@ -1,5 +1,5 @@
 import { DEFAULT_VARS } from "../../constants";
-import { t } from "../../i18n";
+import { t } from "../../i18n/strings";
 import { flattenVars } from "../../utils";
 import type { ColorMasterSettingTab } from "../settingsTab";
 
@@ -119,27 +119,27 @@ export function drawLikePluginCard(
 
   createStatBar(
     statsContainer,
-    t("LIKE_CARD_PROFILES_STAT", profilesCount, snippetsCount),
+    t("likeCard.profilesStat", profilesCount, snippetsCount),
     profilesCount + snippetsCount,
     50
   );
   createStatBar(
     statsContainer,
-    t("LIKE_CARD_COLORS_STAT"),
+    t("likeCard.colorsStat"),
     calcVarsCount(settingTab),
     calcVarsCount(settingTab)
   );
   createStatBar(
     statsContainer,
-    t("LIKE_CARD_INTEGRATIONS_STAT"),
+    t("likeCard.integrationsStat"),
     calcPluginIntegrations(),
     5
   );
-  createStatBar(statsContainer, t("LIKE_CARD_DAYS_STAT"), days, 365);
+  createStatBar(statsContainer, t("likeCard.daysStat"), days, 365);
 
   const actions = contentWrapper.createDiv("cm-like-actions");
   const starButtonWrapper = actions.createDiv({ cls: "codepen-button" });
-  starButtonWrapper.createEl("span", { text: t("LIKE_CARD_STAR_BUTTON") });
+  starButtonWrapper.createEl("span", { text: t("likeCard.starButton") });
   starButtonWrapper.addEventListener("click", () => {
     window.open(
       "https://github.com/YazanAmmar/obsidian-color-master",
@@ -148,7 +148,7 @@ export function drawLikePluginCard(
   });
 
   const reportButtonWrapper = actions.createDiv({ cls: "codepen-button" });
-  reportButtonWrapper.createEl("span", { text: t("LIKE_CARD_ISSUE_BUTTON") });
+  reportButtonWrapper.createEl("span", { text: t("likeCard.issueButton") });
   reportButtonWrapper.addEventListener("click", () => {
     window.open(
       "https://github.com/YazanAmmar/obsidian-color-master/issues",
@@ -160,14 +160,14 @@ export function drawLikePluginCard(
   const syncButtonWrapper = syncPromoContainer.createDiv({
     cls: "codepen-button",
   });
-  syncButtonWrapper.createEl("span", { text: t("LIKE_CARD_SYNC_BUTTON") });
+  syncButtonWrapper.createEl("span", { text: t("likeCard.syncButton") });
   syncButtonWrapper.addEventListener("click", () => {
     window.open("https://github.com/YazanAmmar/SyncEveryThing", "_blank");
   });
 
   const myGithubButtonWrapper = actions.createDiv({ cls: "codepen-button" });
   myGithubButtonWrapper.createEl("span", {
-    text: t("LIKE_CARD_TELEGRAM_CHANNEL_BUTTON"),
+    text: t("likeCard.telegramButton"),
   });
   myGithubButtonWrapper.addEventListener("click", () => {
     window.open("https://t.me/ObsidianColorMaster", "_blank");

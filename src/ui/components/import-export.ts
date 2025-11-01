@@ -1,4 +1,4 @@
-import { t } from "../../i18n";
+import { t } from "../../i18n/strings";
 import { PasteCssModal, ProfileJsonImportModal } from "../modals";
 import type { ColorMasterSettingTab } from "../settingsTab";
 
@@ -10,14 +10,14 @@ export function drawImportExport(
 
   actionsEl
     .createEl("button", {
-      text: t("EXPORT_FILE_BUTTON"),
+      text: t("buttons.exportFile"),
       cls: "cm-profile-action-btn",
     })
     .addEventListener("click", () => settingTab._exportProfileToFile());
 
   actionsEl
     .createEl("button", {
-      text: t("COPY_JSON_BUTTON"),
+      text: t("buttons.copyJson"),
       cls: "cm-profile-action-btn",
     })
 
@@ -26,7 +26,7 @@ export function drawImportExport(
   actionsEl.createDiv({ cls: "cm-profile-action-spacer" });
 
   const pasteCssBtn = actionsEl.createEl("button", {
-    text: t("IMPORT_PASTE_CSS_BUTTON"),
+    text: t("buttons.importCss"),
     cls: "cm-profile-action-btn cm-paste-css-btn",
   });
 
@@ -41,7 +41,7 @@ export function drawImportExport(
 
   actionsEl
     .createEl("button", {
-      text: t("IMPORT_PASTE_JSON_BUTTON"),
+      text: t("buttons.importJson"),
       cls: "cm-profile-action-btn mod-cta",
     })
     .addEventListener("click", () =>

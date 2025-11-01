@@ -1,11 +1,10 @@
 import { Setting, Notice, setIcon } from "obsidian";
-import { t } from "../../i18n";
+import { t } from "../../i18n/strings";
 import type { ColorMasterSettingTab } from "../settingsTab";
 import {
   CustomVariableMetaModal,
   ConfirmationModal,
   BackgroundImageSettingsModal,
-  FileConflictModal,
   AddBackgroundModal,
   ProfileImageBrowserModal,
 } from "../modals";
@@ -17,7 +16,7 @@ export function drawOptionsSection(
   const plugin = settingTab.plugin;
   const activeProfile = plugin.settings.profiles[plugin.settings.activeProfile];
 
-  containerEl.createEl("h3", { text: t("OPTIONS_HEADING") });
+  containerEl.createEl("h3", { text: t("options.heading") });
   containerEl.createEl("hr");
   const advancedSettingsGrid = containerEl.createDiv(
     "cm-advanced-settings-grid"
@@ -25,8 +24,8 @@ export function drawOptionsSection(
 
   // --- Live Update FPS ---
   const fpsSetting = new Setting(advancedSettingsGrid)
-    .setName(t("UPDATE_FREQUENCY_NAME"))
-    .setDesc(t("UPDATE_FREQUENCY_DESC"))
+    .setName(t("options.liveUpdateName"))
+    .setDesc(t("options.liveUpdateDesc"))
     .addSlider((slider) => {
       slider
         .setLimits(0, 60, 1)
@@ -36,7 +35,7 @@ export function drawOptionsSection(
           plugin.settings.colorUpdateFPS = value;
           await plugin.saveSettings();
           plugin.restartColorUpdateLoop();
-          new Notice(t("NOTICE_FPS_UPDATED", value));
+          new Notice(t("notices.fpsUpdated", value));
         });
     });
 
@@ -45,11 +44,11 @@ export function drawOptionsSection(
 
   // --- Add Custom Variable ---
   const customVarSetting = new Setting(advancedSettingsGrid)
-    .setName(t("ADD_CUSTOM_VARIABLE_NAME"))
-    .setDesc(t("ADD_CUSTOM_VARIABLE_DESC"))
+    .setName(t("options.addCustomVarName"))
+    .setDesc(t("options.addCustomVarDesc"))
     .addButton((button) => {
       button
-        .setButtonText(t("ADD_NEW_VARIABLE_BUTTON"))
+        .setButtonText(t("options.addNewVarButton"))
         .setClass("cm-add-variable-button")
         .onClick(() => {
           new CustomVariableMetaModal(
@@ -65,10 +64,11 @@ export function drawOptionsSection(
               activeProfile.customVarMetadata[result.varName] = {
                 name: result.displayName,
                 desc: result.description,
+                type: result.varType,
               };
 
               await plugin.saveSettings();
-              new Notice(t("NOTICE_VAR_ADDED", result.varName));
+              new Notice(t("notices.varAdded", result.varName));
               settingTab.display();
             }
           ).open();
@@ -79,22 +79,22 @@ export function drawOptionsSection(
 
   // --- Reset Plugin Settings ---
   const resetSetting = new Setting(advancedSettingsGrid)
-    .setName(t("RESET_PLUGIN_NAME"))
-    .setDesc(t("RESET_PLUGIN_DESC"))
+    .setName(t("options.resetPluginName"))
+    .setDesc(t("options.resetPluginDesc"))
     .addButton((button) => {
       button
-        .setButtonText(t("RESET_PLUGIN_BUTTON"))
+        .setButtonText(t("options.resetPluginButton"))
         .setWarning()
         .onClick(() => {
           new ConfirmationModal(
             settingTab.app,
             plugin,
-            t("RESET_CONFIRM_MODAL_TITLE"),
-            t("RESET_CONFIRM_MODAL_DESC"),
+            t("modals.confirmation.resetPluginTitle"),
+            t("modals.confirmation.resetPluginDesc"),
             () => {
               plugin.resetPluginData();
             },
-            { buttonText: t("DELETE_BUTTON"), buttonClass: "mod-warning" }
+            { buttonText: t("buttons.delete"), buttonClass: "mod-warning" }
           ).open();
         });
       setIcon(button.buttonEl, "database-backup");
@@ -111,8 +111,8 @@ export function drawOptionsSection(
 
   // --- Set Background Image ---
   const backgroundSetting = new Setting(advancedSettingsGrid)
-    .setName(t("SET_BACKGROUND_IMAGE_NAME"))
-    .setDesc(t("SET_BACKGROUND_IMAGE_DESC"));
+    .setName(t("options.backgroundName"))
+    .setDesc(t("options.backgroundDesc"));
 
   backgroundSetting.nameEl.appendChild(backgroundSetting.controlEl);
   backgroundSetting.settingEl.classList.add("cm-card-with-header-control");
@@ -122,7 +122,7 @@ export function drawOptionsSection(
       // Add/Choose Button
       button
         .setIcon("plus")
-        .setTooltip(t("TOOLTIP_ADD_BACKGROUND_IMAGE"))
+        .setTooltip(t("tooltips.addBg"))
         .setClass("cm-control-icon-button")
         .onClick(() => {
           // Pass the settingTab instance to the modal
@@ -133,7 +133,7 @@ export function drawOptionsSection(
       // Browse Button
       button
         .setIcon("package-search")
-        .setTooltip(t("TOOLTIP_BROWSE_BACKGROUND_IMAGES"))
+        .setTooltip(t("tooltips.browseBg"))
         .setClass("cm-control-icon-button")
         .onClick(() => {
           // Directly open the browser modal
@@ -149,15 +149,15 @@ export function drawOptionsSection(
       // Remove Button
       button
         .setIcon("trash")
-        .setTooltip(t("TOOLTIP_REMOVE_BACKGROUND_IMAGE"))
+        .setTooltip(t("tooltips.removeBg"))
         .setClass("cm-control-icon-button")
         .onClick(async () => {
           const profile =
             plugin.settings.profiles[plugin.settings.activeProfile];
-          const imagePathToDelete = profile?.backgroundImage;
+          const imagePathToDelete = profile?.backgroundPath;
 
           if (!imagePathToDelete) {
-            new Notice(t("NOTICE_NO_BACKGROUND_IMAGE_TO_REMOVE"));
+            new Notice(t("notices.noBgToRemove"));
             return;
           }
 
@@ -165,21 +165,21 @@ export function drawOptionsSection(
           const profilesUsingImage: string[] = [];
           for (const profileName in plugin.settings.profiles) {
             if (
-              plugin.settings.profiles[profileName].backgroundImage ===
+              plugin.settings.profiles[profileName].backgroundPath ===
               imagePathToDelete
             ) {
               profilesUsingImage.push(profileName);
             }
           }
 
-          // Build the warning message dynamically
+          // Build the warning message
           const messageFragment = new DocumentFragment();
-          messageFragment.append(t("CONFIRM_GLOBAL_BACKGROUND_DELETION_DESC"));
+          messageFragment.append(t("modals.confirmation.deleteGlobalBgDesc"));
 
           if (profilesUsingImage.length > 0) {
             const profileListEl = messageFragment.createEl("ul", {
               cls: "cm-profile-list-modal",
-            }); // Added a class for styling
+            });
             profilesUsingImage.forEach((name) => {
               profileListEl.createEl("li").createEl("strong", { text: name });
             });
@@ -188,14 +188,14 @@ export function drawOptionsSection(
           new ConfirmationModal(
             settingTab.app,
             plugin,
-            t("CONFIRM_BACKGROUND_DELETION_TITLE"),
+            t("modals.confirmation.deleteGlobalBgTitle"),
             messageFragment,
             async () => {
-              await plugin.removeBackgroundImageByPath(imagePathToDelete);
-              new Notice(t("NOTICE_BACKGROUND_IMAGE_DELETED"));
+              await plugin.removeBackgroundMediaByPath(imagePathToDelete);;
+              new Notice(t("notices.bgDeleted"));
             },
             {
-              buttonText: t("DELETE_ANYWAY_BUTTON"),
+              buttonText: t("buttons.deleteAnyway"),
               buttonClass: "mod-warning",
             }
           ).open();
@@ -205,7 +205,7 @@ export function drawOptionsSection(
       // Settings Button
       button
         .setIcon("settings")
-        .setTooltip(t("TOOLTIP_BACKGROUND_IMAGE_SETTINGS"))
+        .setTooltip(t("tooltips.bgSettings"))
         .setClass("cm-control-icon-button")
         .onClick(() => {
           new BackgroundImageSettingsModal(settingTab.app, plugin).open();

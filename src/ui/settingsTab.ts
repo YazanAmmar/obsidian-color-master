@@ -7,24 +7,14 @@ import {
   Setting,
   setIcon,
 } from "obsidian";
-import {
-  COLOR_DESCRIPTIONS,
-  COLOR_DESCRIPTIONS_AR,
-  COLOR_DESCRIPTIONS_FA,
-  COLOR_DESCRIPTIONS_FR,
-  COLOR_NAMES,
-  COLOR_NAMES_AR,
-  COLOR_NAMES_FA,
-  COLOR_NAMES_FR,
-  DEFAULT_VARS,
-  TEXT_TO_BG_MAP,
-} from "../constants";
-import { t } from "../i18n";
+import { DEFAULT_VARS, TEXT_TO_BG_MAP } from "../constants";
+import { t } from "../i18n/strings";
 import type ColorMaster from "../main";
 import {
   flattenVars,
   getAccessibilityRating,
   getContrastRatio,
+  debounce,
 } from "../utils";
 import { drawColorPickers } from "./components/color-pickers";
 import { drawImportExport } from "./components/import-export";
@@ -106,10 +96,17 @@ export class ColorMasterSettingTab extends PluginSettingTab {
   }
 
   initSearchUI(containerEl: HTMLElement) {
+    this._searchState = {
+      query: this.plugin.settings.lastSearchQuery || "",
+      regex: false,
+      caseSensitive: false,
+      section: "",
+    };
+
     const searchBarContainer = containerEl.createDiv({
       cls: "cm-search-bar-container",
     });
-    const originalPlaceholder = t("SEARCH_PLACEHOLDER");
+    const originalPlaceholder = t("settings.searchPlaceholder");
 
     //---1. Input field section---
     const searchInputContainer = searchBarContainer.createDiv({
@@ -124,6 +121,7 @@ export class ColorMasterSettingTab extends PluginSettingTab {
       type: "search",
       placeholder: originalPlaceholder,
     });
+    this.searchInput.value = this._searchState.query;
 
     // --- 2. Control buttons section ---
     const searchActions = searchBarContainer.createDiv({
@@ -134,13 +132,13 @@ export class ColorMasterSettingTab extends PluginSettingTab {
       cls: "cm-search-action-btn",
     });
     this.caseToggle.textContent = "Aa";
-    this.caseToggle.setAttr("aria-label", t("ARIA_LABEL_CASE_SENSITIVE"));
+    this.caseToggle.setAttr("aria-label", t("settings.ariaCase"));
 
     this.regexToggle = searchActions.createEl("button", {
       cls: "cm-search-action-btn",
     });
     setIcon(this.regexToggle, "regex");
-    this.regexToggle.setAttr("aria-label", t("ARIA_LABEL_REGEX_SEARCH"));
+    this.regexToggle.setAttr("aria-label", t("settings.ariaRegex"));
 
     const filterOptionsContainer = searchActions.createDiv({
       cls: "cm-search-filter-options is-hidden", // We start by hiding it
@@ -148,7 +146,7 @@ export class ColorMasterSettingTab extends PluginSettingTab {
 
     // --- New code using the official component ---
     const dropdown = new DropdownComponent(filterOptionsContainer)
-      .addOption("", t("ALL_SECTIONS"))
+      .addOption("", t("settings.allSections"))
       .onChange(async (value) => {
         this._searchState.section = value;
         filterOptionsContainer.classList.toggle(
@@ -161,8 +159,22 @@ export class ColorMasterSettingTab extends PluginSettingTab {
     // Add the rest of the options to the list
     try {
       Object.keys(DEFAULT_VARS || {}).forEach((category) => {
-        const translatedCategory =
-          t(category.toUpperCase().replace(/ /g, "_")) || category;
+        let categoryKey: string;
+        const lowerCategory = category.toLowerCase();
+
+        if (lowerCategory === "interactive elements") {
+          categoryKey = "interactive";
+        } else if (lowerCategory === "ui elements") {
+          categoryKey = "ui";
+        } else if (lowerCategory === "graph view") {
+          categoryKey = "graph";
+        } else if (lowerCategory === "plugin integrations") {
+          categoryKey = "pluginintegrations";
+        } else {
+          categoryKey = lowerCategory.replace(/ /g, "");
+        }
+
+        const translatedCategory = t(`categories.${categoryKey}`) || category;
         dropdown.addOption(category, translatedCategory);
       });
     } catch (e) {}
@@ -173,7 +185,7 @@ export class ColorMasterSettingTab extends PluginSettingTab {
       activeProfile?.customVarMetadata &&
       Object.keys(activeProfile.customVarMetadata).length > 0
     ) {
-      dropdown.addOption("Custom", t("CUSTOM_VARIABLES_HEADING"));
+      dropdown.addOption("Custom", t("categories.custom"));
     }
 
     // Add our own format and maintain a reference to the element
@@ -184,7 +196,7 @@ export class ColorMasterSettingTab extends PluginSettingTab {
       cls: "cm-search-action-btn",
     });
     setIcon(this.clearBtn, "x");
-    this.clearBtn.setAttr("aria-label", t("CLEAR_BUTTON"));
+    this.clearBtn.setAttr("aria-label", t("settings.clear"));
 
     const filterButton = searchActions.createEl("button", {
       cls: "cm-search-action-btn",
@@ -195,22 +207,14 @@ export class ColorMasterSettingTab extends PluginSettingTab {
     this.searchInfo = searchActions.createEl("div", { cls: "cm-search-info" });
     this.searchInfo.style.display = "none";
 
-    this._searchState = {
-      query: "",
-      regex: false,
-      caseSensitive: false,
-      section: "",
-    };
-    const debouncedFilter = this._debounce(
-      () => this._applySearchFilter(),
-      180
-    );
+    const debouncedFilter = debounce(() => this._applySearchFilter(), 180);
 
     this.searchInput.addEventListener("input", (e: Event) => {
-      // If Regex mode is enabled, do nothing and wait for Enter to be pressed.
       if (this._searchState.regex) return;
-
-      this._searchState.query = (e.target as HTMLInputElement).value;
+      const query = (e.target as HTMLInputElement).value;
+      this._searchState.query = query;
+      this.plugin.settings.lastSearchQuery = query;
+      this.plugin.saveData(this.plugin.settings);
       debouncedFilter();
     });
 
@@ -238,7 +242,7 @@ export class ColorMasterSettingTab extends PluginSettingTab {
       // Check Regex State to Change Temporary Text
       if (this._searchState.regex) {
         // If Regex is enabled, change the temporary text
-        this.searchInput.placeholder = t("REGEX_PLACEHOLDER");
+        this.searchInput.placeholder = t("settings.regexPlaceholder");
       } else {
         // If Regex is deactivated, return the original temporary text
         this.searchInput.placeholder = originalPlaceholder;
@@ -265,19 +269,15 @@ export class ColorMasterSettingTab extends PluginSettingTab {
 
     this.clearBtn.addEventListener("click", () => {
       this._clearSearchAndFilters();
+      this.plugin.settings.lastSearchQuery = "";
+      this.plugin.saveData(this.plugin.settings);
     });
-  }
-
-  _debounce(fn: (...args: any[]) => void, ms = 200) {
-    let t: NodeJS.Timeout | null = null;
-    return (...args: any[]) => {
-      if (t) clearTimeout(t);
-      t = setTimeout(() => fn.apply(this, args), ms);
-    };
   }
 
   _applySearchFilter() {
     const s = this._searchState;
+    const activeProfile =
+      this.plugin.settings.profiles[this.plugin.settings.activeProfile];
     if (this.staticContentContainer) {
       const isSearching = s.query.trim().length > 0 || s.section !== "";
       this.staticContentContainer.toggleClass("cm-hidden", isSearching);
@@ -307,25 +307,17 @@ export class ColorMasterSettingTab extends PluginSettingTab {
       ) as HTMLInputElement;
       const varValue = textInput ? textInput.value.trim() : "";
 
-      const lang = this.plugin.settings.language;
-      const displayName =
-        (lang === "ar"
-          ? COLOR_NAMES_AR[varName as keyof typeof COLOR_NAMES_AR]
-          : lang === "fa"
-          ? COLOR_NAMES_FA[varName as keyof typeof COLOR_NAMES_FA]
-          : lang === "fr"
-          ? COLOR_NAMES_FR[varName as keyof typeof COLOR_NAMES_FR]
-          : COLOR_NAMES[varName as keyof typeof COLOR_NAMES]) || snippetName;
+      let displayName = "";
+      let description = "";
+      const customMeta = activeProfile?.customVarMetadata?.[varName];
 
-      const description =
-        (lang === "ar"
-          ? COLOR_DESCRIPTIONS_AR[varName as keyof typeof COLOR_DESCRIPTIONS_AR]
-          : lang === "fa"
-          ? COLOR_DESCRIPTIONS_FA[varName as keyof typeof COLOR_DESCRIPTIONS_FA]
-          : lang === "fr"
-          ? COLOR_DESCRIPTIONS_FR[varName as keyof typeof COLOR_DESCRIPTIONS_FR]
-          : COLOR_DESCRIPTIONS[varName as keyof typeof COLOR_DESCRIPTIONS]) ||
-        "";
+      if (customMeta) {
+        displayName = customMeta.name;
+        description = customMeta.desc;
+      } else {
+        displayName = t(`colors.names.${varName}`) || snippetName;
+        description = t(`colors.descriptions.${varName}`) || "";
+      }
 
       if (s.section && s.section !== row.dataset.category) {
         row.classList.add("cm-hidden");
@@ -393,7 +385,7 @@ export class ColorMasterSettingTab extends PluginSettingTab {
 
     // If in search text, show the number of results
     if (query) {
-      this.searchInfo.setText(t("SEARCH_RESULTS_FOUND", visibleCount));
+      this.searchInfo.setText(t("settings.searchResultsFound", visibleCount));
       this.searchInfo.style.display = "inline-block"; // Make sure it is shown
     } else {
       // If the search field is empty, hide the counter
@@ -462,7 +454,7 @@ export class ColorMasterSettingTab extends PluginSettingTab {
 
     if (this.resetPinBtn) {
       this.resetPinBtn
-        .setTooltip(t("TOOLTIP_RESET_TO_PINNED"))
+        .setTooltip(t("tooltips.resetToPinned"))
         .setDisabled(!snapshot);
     }
 
@@ -474,9 +466,9 @@ export class ColorMasterSettingTab extends PluginSettingTab {
         const day = dateObj.getDate();
         const formattedDate = `${year}-${month}-${day}`;
 
-        this.pinBtn.setTooltip(t("TOOLTIP_PIN_SNAPSHOT_DATE", formattedDate));
+        this.pinBtn.setTooltip(t("tooltips.pinSnapshotDate", formattedDate));
       } else {
-        this.pinBtn.setTooltip(t("TOOLTIP_PIN_SNAPSHOT"));
+        this.pinBtn.setTooltip(t("tooltips.pinSnapshot"));
       }
     }
   }
@@ -495,17 +487,17 @@ export class ColorMasterSettingTab extends PluginSettingTab {
   async _copyProfileToClipboard() {
     const payload = this._getCurrentProfileJson();
     if (!payload) {
-      new Notice(t("NOTICE_NO_ACTIVE_PROFILE_TO_COPY"));
+      new Notice(t("notices.noActiveProfileToCopy"));
       return;
     }
     await navigator.clipboard.writeText(JSON.stringify(payload, null, 2));
-    new Notice(t("NOTICE_JSON_COPIED_CLIPBOARD"));
+    new Notice(t("notices.jsonCopied"));
   }
 
   _exportProfileToFile() {
     const payload = this._getCurrentProfileJson();
     if (!payload) {
-      new Notice(t("NOTICE_NO_ACTIVE_PROFILE_TO_EXPORT"));
+      new Notice(t("notices.noActiveProfileToExport"));
       return;
     }
     const blob = new Blob([JSON.stringify(payload, null, 2)], {
@@ -518,7 +510,7 @@ export class ColorMasterSettingTab extends PluginSettingTab {
     a.click();
     URL.revokeObjectURL(url);
     a.remove();
-    new Notice(t("NOTICE_EXPORT_SUCCESS"));
+    new Notice(t("notices.exportSuccess"));
   }
 
   // --- Smart update function for contrast checkers ---
@@ -560,17 +552,18 @@ export class ColorMasterSettingTab extends PluginSettingTab {
     const { containerEl } = this;
     containerEl.classList.add("color-master-settings-tab");
     containerEl.empty();
+    containerEl.style.visibility = "hidden";
 
     const lang = this.plugin.settings.language;
     const isRTL =
       (lang === "ar" || lang === "fa") && this.plugin.settings.useRtlLayout;
     this.containerEl.setAttribute("dir", isRTL ? "rtl" : "ltr");
 
-    containerEl.createEl("h2", { text: t("PLUGIN_NAME") });
+    containerEl.createEl("h2", { text: t("plugin.name") });
 
     new Setting(containerEl)
-      .setName(t("ENABLE_PLUGIN"))
-      .setDesc(t("ENABLE_PLUGIN_DESC"))
+      .setName(t("settings.enablePlugin"))
+      .setDesc(t("settings.enablePluginDesc"))
       .addToggle((toggle) => {
         toggle
           .setValue(this.plugin.settings.pluginEnabled)
@@ -586,14 +579,14 @@ export class ColorMasterSettingTab extends PluginSettingTab {
             await this.plugin.saveSettings();
             this.plugin.restartColorUpdateLoop();
             new Notice(
-              value ? t("PLUGIN_ENABLED_NOTICE") : t("PLUGIN_DISABLED_NOTICE")
+              value ? t("notices.pluginEnabled") : t("notices.pluginDisabled")
             );
           });
       });
 
     const languageSetting = new Setting(containerEl)
-      .setName(t("LANGUAGE"))
-      .setDesc(t("LANGUAGE_DESC"));
+      .setName(t("settings.language"))
+      .setDesc(t("settings.languageDesc"));
 
     const langIcon = languageSetting.nameEl.createSpan({
       cls: "cm-setting-icon",
@@ -608,7 +601,7 @@ export class ColorMasterSettingTab extends PluginSettingTab {
       languageSetting.addExtraButton((button) => {
         button
           .setIcon("settings-2")
-          .setTooltip("Language Settings")
+          .setTooltip("settings.languageSettingsModalTitle")
           .onClick(() => {
             new LanguageSettingsModal(this.app, this.plugin).open();
           });
@@ -653,6 +646,54 @@ export class ColorMasterSettingTab extends PluginSettingTab {
     drawColorPickers(this.containerEl, this);
     containerEl.createEl("hr");
     drawLikePluginCard(containerEl, this);
+
+    //---Implement automatic search and scrolling---
+
+    // Make sure that the filter is applied
+    this._applySearchFilter();
+
+    if (this._searchState.query) {
+      setTimeout(() => {
+        // Find the first "visible" line
+        const firstVisibleRow = this.containerEl.querySelector(
+          ".cm-var-row:not(.cm-hidden)"
+        ) as HTMLElement;
+
+        if (firstVisibleRow) {
+          firstVisibleRow.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+        }
+      }, 0);
+    }
+    const scrollContainer = this.containerEl.closest(
+      ".vertical-tab-content"
+    ) as HTMLElement | null;
+
+    if (!scrollContainer) {
+      console.warn("Color Master: Could not find scroll container.");
+    } else {
+      const debouncedScrollSave = debounce(() => {
+        this.plugin.settings.lastScrollPosition = scrollContainer.scrollTop;
+        this.plugin.saveData(this.plugin.settings);
+      }, 200);
+
+      this.plugin.registerDomEvent(
+        scrollContainer,
+        "scroll",
+        debouncedScrollSave
+      );
+
+      if (!this._searchState.query && this.plugin.settings.lastScrollPosition) {
+        scrollContainer.scrollTo({
+          top: this.plugin.settings.lastScrollPosition,
+          behavior: "auto",
+        });
+      }
+    }
+
+    containerEl.style.visibility = "visible";
   }
 
   // ---------- Replacement hide() that acts like "Cancel" on accidental close ----------
@@ -719,7 +760,7 @@ export class ColorMasterSettingTab extends PluginSettingTab {
     this.graphViewTempState = null;
     this.graphViewWorkingState = null;
     this.hideGraphActionButtons();
-    new Notice(t("NOTICE_GRAPH_COLORS_APPLIED"));
+    new Notice(t("notices.graphColorsApplied"));
   }
 
   onGraphCancel() {

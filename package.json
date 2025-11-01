@@ -1,6 +1,6 @@
 {
   "name": "obsidian-color-master",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Full control of Obsidian's appearance. Create and share color profiles, use advanced CSS snippets, and override any theme with a powerful, live UI.",
   "main": "main.js",
   "scripts": {

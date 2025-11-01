@@ -5,7 +5,7 @@ import {
   ToggleComponent,
   setIcon,
 } from "obsidian";
-import { t } from "../../i18n";
+import { t } from "../../i18n/strings";
 import type { Snippet } from "../../types";
 import { ConfirmationModal, SnippetCssModal } from "../modals";
 import type { ColorMasterSettingTab } from "../settingsTab";
@@ -43,7 +43,7 @@ function initSnippetDrag(
       if (oldIndex < numGlobal) {
         if (newIndex >= numGlobal) {
           settingTab.display();
-          new Notice(t("NOTICE_MOVE_SNIPPET_SCOPE"));
+          new Notice(t("notices.snippetScopeMove"));
           return;
         }
         const [movedItem] = globalSnippets.splice(oldIndex, 1);
@@ -51,7 +51,7 @@ function initSnippetDrag(
       } else {
         if (newIndex < numGlobal) {
           settingTab.display();
-          new Notice(t("NOTICE_MOVE_SNIPPET_SCOPE"));
+          new Notice(t("notices.snippetScopeMove"));
           return;
         }
         const adjustedOldIndex = oldIndex - numGlobal;
@@ -76,12 +76,12 @@ export function drawCssSnippetsUI(
   const headerContainer = containerEl.createDiv({
     cls: "cm-snippets-header",
   });
-  headerContainer.createEl("h3", { text: t("SNIPPETS_HEADING") });
+  headerContainer.createEl("h3", { text: t("snippets.heading") });
   new Setting(headerContainer)
     .setClass("cm-snippets-add-button")
     .addButton((button) => {
       button
-        .setButtonText(t("CREATE_SNIPPET_BUTTON"))
+        .setButtonText(t("snippets.createButton"))
         .setCta()
         .onClick(() => {
           new SnippetCssModal(settingTab.app, plugin, settingTab, null).open();
@@ -102,7 +102,7 @@ export function drawCssSnippetsUI(
 
   if (globalSnippets.length === 0 && profileSnippets.length === 0) {
     const emptyState = snippetsContainer.createDiv("cm-snippets-empty-state");
-    emptyState.setText(t("NO_SNIPPETS_DESC"));
+    emptyState.setText(t("snippets.noSnippetsDesc"));
     return;
   }
 
@@ -156,21 +156,21 @@ export function drawCssSnippetsUI(
 
     new ButtonComponent(controlEl)
       .setIcon("pencil")
-      .setTooltip(t("TOOLTIP_EDIT_SNIPPET"))
+      .setTooltip(t("tooltips.editSnippet"))
       .onClick(() => {
         new SnippetCssModal(settingTab.app, plugin, settingTab, snippet).open();
       });
 
     new ButtonComponent(controlEl)
       .setIcon("copy")
-      .setTooltip(t("TOOLTIP_COPY_SNIPPET_CSS"))
+      .setTooltip(t("tooltips.copySnippetCss"))
       .onClick(async (evt) => {
         if (!snippet.css) {
-          new Notice(t("NOTICE_SNIPPET_EMPTY"));
+          new Notice(t("notices.snippetEmpty"));
           return;
         }
         await navigator.clipboard.writeText(snippet.css);
-        new Notice(t("NOTICE_SNIPPET_COPIED"));
+        new Notice(t("notices.snippetCssCopied"));
         const buttonEl = evt.currentTarget as HTMLElement;
         if (!buttonEl) return;
         setIcon(buttonEl, "check");
@@ -185,13 +185,13 @@ export function drawCssSnippetsUI(
 
     new ButtonComponent(controlEl)
       .setIcon("trash")
-      .setTooltip(t("TOOLTIP_DELETE_SNIPPET"))
+      .setTooltip(t("tooltips.deleteSnippet"))
       .onClick(() => {
         new ConfirmationModal(
           settingTab.app,
           plugin,
-          t("MODAL_DELETE_SNIPPET_TITLE", snippet.name),
-          t("MODAL_DELETE_SNIPPET_DESC"),
+          t("modals.confirmation.deleteSnippetTitle", snippet.name),
+          t("modals.confirmation.deleteSnippetDesc"),
           async () => {
             const list = isGlobal
               ? plugin.settings.globalSnippets
