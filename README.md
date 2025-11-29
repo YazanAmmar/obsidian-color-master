@@ -77,7 +77,6 @@ Designed for both:
 - **Beginners** — Simple color pickers, preset profiles, and a "Set Background" feature to get a polished look fast.
     
 - **Power users / Developers** — Full variable list, per-profile & global snippets, drag-and-drop reordering, regex notice rules, and exportable JSON.
-    
 
 ---
 
