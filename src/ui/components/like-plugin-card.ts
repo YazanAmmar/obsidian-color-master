@@ -18,7 +18,9 @@ function createStatBar(
   const skillPer = skillBar.createEl("span", {
     cls: "skill-per cm-skill-gradient",
   });
-  skillPer.style.setProperty("--skill-percentage", `${percentage}%`);
+  skillPer.setCssProps({
+    "--skill-percentage": `${percentage}%`,
+  });
 }
 
 function calcProfilesCount(settingTab: ColorMasterSettingTab): number {

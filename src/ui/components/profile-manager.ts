@@ -1,11 +1,5 @@
 import { App, Notice, setIcon, Setting } from "obsidian";
-import {
-  BUILT_IN_PROFILES_DATA,
-  BUILT_IN_PROFILES_VARS,
-  DEFAULT_VARS,
-} from "../../constants";
 import { t } from "../../i18n/strings";
-import { flattenVars } from "../../utils";
 import { ConfirmationModal, NewProfileModal, PasteCssModal } from "../modals";
 import type { ColorMasterSettingTab } from "../settingsTab";
 
@@ -27,9 +21,6 @@ export function drawProfileManager(
   });
   const activeProfileName = plugin.settings.activeProfile;
   const activeProfile = plugin.settings.profiles[activeProfileName];
-  const isBuiltInProfile = Object.keys(BUILT_IN_PROFILES_VARS).includes(
-    activeProfileName
-  );
   const isCssProfile = activeProfile?.isCssProfile;
 
   const profileSetting = new Setting(containerEl)
@@ -48,6 +39,7 @@ export function drawProfileManager(
       dropdown.onChange(async (value) => {
         plugin.removeInjectedCustomCss();
         plugin.settings.activeProfile = value;
+        plugin.pendingVarUpdates = {};
         await plugin.saveSettings();
         settingTab.display();
       });
@@ -88,58 +80,35 @@ export function drawProfileManager(
       // Set the initial state of the button on load
       updateButtonAppearance(activeProfile.themeType);
 
-      // Add the click logic to cycle through themes
-      button.onClick(async () => {
-        const currentType = activeProfile.themeType;
-        let nextType: "auto" | "dark" | "light";
+      // Add click logic (Simplified - No Animation)
+      button.buttonEl.addEventListener("click", () => {
+        void (async () => {
+          const currentType = activeProfile.themeType;
+          let nextType: "auto" | "dark" | "light";
 
-        if (currentType === "light") {
-          nextType = "dark";
-        } else if (currentType === "dark") {
-          nextType = "auto";
-        } else {
-          nextType = "light";
-        }
+          if (currentType === "light") {
+            nextType = "dark";
+            new Notice(t("notices.themeSwitchedDark"));
+          } else if (currentType === "dark") {
+            nextType = "auto";
+            new Notice(t("notices.themeSwitchedAuto"));
+          } else {
+            nextType = "light";
+            new Notice(t("notices.themeSwitchedLight"));
+          }
 
-        activeProfile.themeType = nextType;
-        updateButtonAppearance(nextType);
-        await plugin.saveSettings();
+          activeProfile.themeType = nextType;
+          updateButtonAppearance(nextType);
+
+          await plugin.saveSettings();
+        })().catch((err) => {
+          console.error("Failed to switch theme type:", err);
+        });
       });
     })
 
     .addButton((button) => {
-      if (isBuiltInProfile) {
-        button
-          .setIcon("history")
-          .setTooltip(t("tooltips.restoreBuiltin"))
-          .onClick(() => {
-            new ConfirmationModal(
-              settingTab.app,
-              plugin,
-              t("modals.restoreProfile.title", activeProfileName),
-              t("modals.restoreProfile.desc", activeProfileName),
-              async () => {
-                const originalProfileData =
-                  BUILT_IN_PROFILES_DATA[
-                    activeProfileName as keyof typeof BUILT_IN_PROFILES_DATA
-                  ];
-                if (!originalProfileData) {
-                  new Notice(t("notices.cannotFindOriginalProfile"));
-                  return;
-                }
-
-                plugin.settings.profiles[activeProfileName] = JSON.parse(
-                  JSON.stringify(originalProfileData)
-                );
-
-                await plugin.saveSettings();
-                new Notice(t("notices.profileRestored", activeProfileName));
-                settingTab.display();
-              },
-              { buttonText: t("buttons.restore"), buttonClass: "mod-cta" }
-            ).open();
-          });
-      } else if (isCssProfile && activeProfile) {
+      if (isCssProfile && activeProfile) {
         button
           .setIcon("pencil")
           .setTooltip(t("tooltips.editCssProfile"))
@@ -171,13 +140,17 @@ export function drawProfileManager(
           await plugin.pinProfileSnapshot(plugin.settings.activeProfile);
           new Notice(t("notices.profilePinned"));
           settingTab._updatePinButtons();
+
+          plugin.settings.profiles[plugin.settings.activeProfile].vars = {};
+          plugin.pendingVarUpdates = {};
+          settingTab.display();
         });
       button.buttonEl.classList.add("cm-control-button");
     })
     .addButton((button) => {
       settingTab.resetPinBtn = button;
       button
-        .setIcon("reset")
+        .setIcon("history")
         .setTooltip(t("tooltips.resetToPinned"))
 
         .onClick(() => {
@@ -187,10 +160,14 @@ export function drawProfileManager(
             plugin,
             t("modals.confirmation.resetProfileTitle"),
             t("modals.confirmation.resetProfileDesc"),
-            async () => {
-              await plugin.resetProfileToPinned(name);
-              new Notice(t("notices.profileReset"));
-              settingTab.display();
+            () => {
+              void (async () => {
+                await plugin.resetProfileToPinned(name);
+                new Notice(t("notices.profileReset"));
+                settingTab.display();
+              })().catch((err) => {
+                console.error("Failed to reset profile:", err);
+              });
             },
             { buttonText: t("buttons.reset"), buttonClass: "mod-cta" }
           ).open();
@@ -200,29 +177,40 @@ export function drawProfileManager(
     .addButton((button) => {
       button.setButtonText(t("buttons.new")).onClick(() => {
         new NewProfileModal(settingTab.app, plugin, (result) => {
-          if (result && result.name && !plugin.settings.profiles[result.name]) {
-            let newProfileVars: Record<string, string> = {};
-            if (result.themeType === "light") {
-              newProfileVars = {
-                ...BUILT_IN_PROFILES_DATA["Citrus Zest"].vars,
-              };
-            } else {
-              newProfileVars = { ...flattenVars(DEFAULT_VARS) };
+          void (async () => {
+            if (!result || !result.name) return;
+
+            if (plugin.settings.profiles[result.name]) {
+              new Notice(t("notices.profileNameExists", result.name));
+              return;
+            }
+
+            // --- Unified Empty Profile Logic ---
+            const newProfileVars = {};
+            const themeType = result.themeType;
+            let finalThemeType = themeType;
+
+            if (themeType === "auto") {
+              const isCurrentlyDark =
+                document.body.classList.contains("theme-dark");
+              finalThemeType = isCurrentlyDark ? "dark" : "light";
             }
 
             plugin.settings.profiles[result.name] = {
               vars: newProfileVars,
-              themeType: result.themeType,
+              themeType: finalThemeType,
               snippets: [],
               noticeRules: { text: [], background: [] },
             };
 
             plugin.settings.activeProfile = result.name;
-            void plugin.saveSettings();
+            plugin.pendingVarUpdates = {};
+
+            await plugin.saveSettings();
             settingTab.display();
-          } else if (result && result.name) {
-            new Notice(t("notices.profileNameExists", result.name));
-          }
+          })().catch((err) => {
+            console.error("Failed to create new profile:", err);
+          });
         }).open();
       });
       button.buttonEl.classList.add("cm-control-button");
@@ -248,6 +236,7 @@ export function drawProfileManager(
             plugin.settings.activeProfile = Object.keys(
               plugin.settings.profiles
             )[0];
+            plugin.pendingVarUpdates = {};
             void plugin.saveSettings();
             settingTab.display();
             new Notice(t("notices.profileDeleted"));

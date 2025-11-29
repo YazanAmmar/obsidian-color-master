@@ -13,6 +13,7 @@ export interface NoticeRule {
   keywords: string;
   color: string;
   isRegex: boolean;
+  highlightOnly: boolean;
 }
 
 export interface Profile {
@@ -41,11 +42,33 @@ export interface Profile {
   convertImagesToJpg?: boolean;
   jpgQuality?: number;
 }
+/**
+ * Simple translation dictionary.
+ * e.g., { "buttons.new": "", "buttons.delete": "" }
+ */
+export type CustomTranslation = Record<string, string>;
+
+/**
+ * The object that represents the complete custom language.
+ */
+export interface CustomLanguage {
+  languageName: string;
+  translations: CustomTranslation;
+  isRtl?: boolean;
+}
 
 export interface PluginSettings {
+  advancedResetOptions?: {
+    deleteProfiles: boolean;
+    deleteSnippets: boolean;
+    deleteSettings: boolean;
+    deleteBackgrounds: boolean;
+    deleteLanguages?: boolean;
+  };
   lastSearchQuery?: string;
+  lastSearchSection?: string;
   lastScrollPosition?: number;
-  noticeRules?: any;
+  noticeRules?: unknown;
   pluginEnabled: boolean;
   language: string;
   overrideIconizeColors: boolean;
@@ -54,7 +77,8 @@ export interface PluginSettings {
   activeProfile: string;
   profiles: { [key: string]: Profile };
   globalSnippets: Snippet[];
-  pinnedSnapshots: { [key: string]: any };
+  pinnedSnapshots: { [key: string]: unknown };
   useRtlLayout: boolean;
   installDate?: string;
+  customLanguages?: Record<string, CustomLanguage>;
 }

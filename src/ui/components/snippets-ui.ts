@@ -9,7 +9,7 @@ import { t } from "../../i18n/strings";
 import type { Snippet } from "../../types";
 import { ConfirmationModal, SnippetCssModal } from "../modals";
 import type { ColorMasterSettingTab } from "../settingsTab";
-import Sortable = require("sortablejs");
+import Sortable from "sortablejs";
 
 function initSnippetDrag(
   containerEl: HTMLElement,
@@ -25,44 +25,56 @@ function initSnippetDrag(
     return;
   }
 
+  const isLocked = (plugin.settings as unknown).snippetsLocked || false;
+
   settingTab.snippetSortable = new Sortable(containerEl, {
     handle: ".cm-snippet-drag-handle",
     animation: 160,
     ghostClass: "cm-snippet-ghost",
     dragClass: "cm-snippet-dragged",
+    disabled: isLocked, // Disable dragging via Sortable API
 
-    onEnd: async (evt: any) => {
-      const { oldIndex, newIndex } = evt;
-      if (oldIndex === newIndex) return;
+    onEnd: (evt: unknown) => {
+      void (async () => {
+        const { oldIndex, newIndex } = evt as {
+          oldIndex: number;
+          newIndex: number;
+        };
+        if (oldIndex === newIndex) return;
 
-      const globalSnippets = plugin.settings.globalSnippets || [];
-      const profileSnippets =
-        plugin.settings.profiles[plugin.settings.activeProfile].snippets || [];
-      const numGlobal = globalSnippets.length;
+        const globalSnippets = plugin.settings.globalSnippets || [];
+        const profileSnippets =
+          plugin.settings.profiles[plugin.settings.activeProfile].snippets ||
+          [];
+        const numGlobal = globalSnippets.length;
 
-      if (oldIndex < numGlobal) {
-        if (newIndex >= numGlobal) {
-          settingTab.display();
-          new Notice(t("notices.snippetScopeMove"));
-          return;
+        if (oldIndex < numGlobal) {
+          if (newIndex >= numGlobal) {
+            settingTab.display();
+            new Notice(t("notices.snippetScopeMove"));
+            return;
+          }
+          const [movedItem] = globalSnippets.splice(oldIndex, 1);
+          globalSnippets.splice(newIndex, 0, movedItem);
+        } else {
+          if (newIndex < numGlobal) {
+            settingTab.display();
+            new Notice(t("notices.snippetScopeMove"));
+            return;
+          }
+
+          const adjustedOldIndex = oldIndex - numGlobal;
+          const adjustedNewIndex = newIndex - numGlobal;
+
+          const [movedItem] = profileSnippets.splice(adjustedOldIndex, 1);
+          profileSnippets.splice(adjustedNewIndex, 0, movedItem);
         }
-        const [movedItem] = globalSnippets.splice(oldIndex, 1);
-        globalSnippets.splice(newIndex, 0, movedItem);
-      } else {
-        if (newIndex < numGlobal) {
-          settingTab.display();
-          new Notice(t("notices.snippetScopeMove"));
-          return;
-        }
-        const adjustedOldIndex = oldIndex - numGlobal;
-        const adjustedNewIndex = newIndex - numGlobal;
 
-        const [movedItem] = profileSnippets.splice(adjustedOldIndex, 1);
-        profileSnippets.splice(adjustedNewIndex, 0, movedItem);
-      }
-
-      await plugin.saveSettings();
-      settingTab.display();
+        await plugin.saveSettings();
+        settingTab.display();
+      })().catch((err) => {
+        console.error("Failed to reorder snippets:", err);
+      });
     },
   });
 }
@@ -76,17 +88,47 @@ export function drawCssSnippetsUI(
   const headerContainer = containerEl.createDiv({
     cls: "cm-snippets-header",
   });
+
+  const isLocked = (plugin.settings as unknown).snippetsLocked || false;
+
   headerContainer.createEl("h3", { text: t("snippets.heading") });
-  new Setting(headerContainer)
-    .setClass("cm-snippets-add-button")
-    .addButton((button) => {
-      button
-        .setButtonText(t("snippets.createButton"))
-        .setCta()
-        .onClick(() => {
-          new SnippetCssModal(settingTab.app, plugin, settingTab, null).open();
-        });
-    });
+
+  const controlsContainer = new Setting(headerContainer).setClass(
+    "cm-snippets-add-button"
+  );
+
+  // --- Lock Button ---
+  controlsContainer.addExtraButton((btn) => {
+    btn
+      .setIcon(isLocked ? "lock" : "lock-open")
+      .setTooltip(
+        isLocked ? t("tooltips.unlockSnippets") : t("tooltips.lockSnippets")
+      )
+      .onClick(async () => {
+        (plugin.settings as unknown).snippetsLocked = !isLocked;
+        await plugin.saveSettings();
+
+        settingTab.display();
+
+        new Notice(
+          isLocked ? t("notices.snippetsUnlocked") : t("notices.snippetsLocked")
+        );
+      });
+
+    btn.extraSettingsEl.classList.add("cm-snippet-lock-btn");
+    if (isLocked) {
+      btn.extraSettingsEl.classList.add("is-locked");
+    }
+  });
+
+  controlsContainer.addButton((button) => {
+    button
+      .setButtonText(t("snippets.createButton"))
+      .setCta()
+      .onClick(() => {
+        new SnippetCssModal(settingTab.app, plugin, settingTab, null).open();
+      });
+  });
 
   const activeProfile = plugin.settings.profiles[plugin.settings.activeProfile];
   if (!activeProfile) return;
@@ -118,10 +160,16 @@ export function drawCssSnippetsUI(
     const dragContainer = snippetEl.createDiv({
       cls: "cm-snippet-drag-container",
     });
+
     const handle = dragContainer.createDiv({
       cls: "cm-snippet-drag-handle",
     });
     setIcon(handle, "grip-vertical");
+
+    if (isLocked) {
+      handle.classList.add("is-locked");
+    }
+
     dragContainer.createEl("span", {
       cls: "cm-snippet-divider",
       text: "|",
@@ -140,7 +188,7 @@ export function drawCssSnippetsUI(
 
     if (isGlobal) {
       nameEl.createSpan({
-        text: "Global",
+        text: t("snippets.global"),
         cls: "cm-snippet-global-badge",
       });
     }
@@ -175,11 +223,11 @@ export function drawCssSnippetsUI(
         if (!buttonEl) return;
         setIcon(buttonEl, "check");
         buttonEl.classList.add("is-success");
-        (buttonEl as any).disabled = true;
+        (buttonEl as unknown).disabled = true;
         setTimeout(() => {
           buttonEl.classList.remove("is-success");
           setIcon(buttonEl, "copy");
-          (buttonEl as any).disabled = false;
+          (buttonEl as unknown).disabled = false;
         }, 1000);
       });
 
@@ -192,18 +240,24 @@ export function drawCssSnippetsUI(
           plugin,
           t("modals.confirmation.deleteSnippetTitle", snippet.name),
           t("modals.confirmation.deleteSnippetDesc"),
-          async () => {
-            const list = isGlobal
-              ? plugin.settings.globalSnippets
-              : plugin.settings.profiles[plugin.settings.activeProfile]
-                  .snippets;
+          () => {
+            void (async () => {
+              const list = isGlobal
+                ? plugin.settings.globalSnippets
+                : plugin.settings.profiles[plugin.settings.activeProfile]
+                    .snippets;
 
-            const snippetIndex = list.findIndex((s) => s.id === snippet.id);
-            if (snippetIndex > -1) {
-              list.splice(snippetIndex, 1);
-            }
-            await plugin.saveSettings();
-            settingTab.display();
+              const snippetIndex = list.findIndex((s) => s.id === snippet.id);
+              if (snippetIndex > -1) {
+                list.splice(snippetIndex, 1);
+              }
+
+              await plugin.saveSettings();
+              settingTab.display();
+              new Notice(t("notices.snippetDeleted"));
+            })().catch((err) => {
+              console.error("Failed to delete snippet:", err);
+            });
           }
         ).open();
       });

@@ -1,6 +1,6 @@
 /*
  * Color Master - Obsidian Plugin
- * Version: 1.1.1
+ * Version: 1.2.0
  * Author: Yazan Ammar (GitHub : https://github.com/YazanAmmar )
  * Description: Provides a comprehensive UI to control all Obsidian CSS color variables directly,
  * removing the need for Force Mode and expanding customization options.
@@ -20,6 +20,7 @@ import {
   findNextAvailablePath,
   maybeConvertToJpg,
   isIconizeEnabled,
+  convertColorToHex,
 } from "./utils";
 import { FileConflictModal } from "./ui/modals";
 
@@ -31,45 +32,45 @@ export default class ColorMaster extends Plugin {
   colorUpdateInterval: number | null = null;
   pendingVarUpdates: Record<string, string> = {};
   settingTabInstance: ColorMasterSettingTab | null = null;
-  liveNoticeRules: any[] | null = null;
+  liveNoticeRules: unknown[] | null = null;
   liveNoticeRuleType: "text" | "background" | null = null;
   iconizeObserver: MutationObserver;
   noticeObserver: MutationObserver;
   cssHistory: Record<string, { undoStack: string[]; redoStack: string[] }> = {};
+  cachedThemeDefaults: Record<string, string> | null = null;
+  lastCachedThemeMode: "dark" | "light" | null = null;
 
   startColorUpdateLoop() {
     this.stopColorUpdateLoop();
 
     const fps = this.settings.colorUpdateFPS;
-    if (!this.settings.pluginEnabled || !fps || fps <= 0) {
-      return; // Stop if disabled or FPS is 0
-    }
+    if (!this.settings.pluginEnabled || !fps || fps <= 0) return;
 
     const intervalMs = 1000 / fps;
+
     this.colorUpdateInterval = window.setInterval(() => {
       const pendingKeys = Object.keys(this.pendingVarUpdates);
-      if (pendingKeys.length === 0) return; // Do nothing if the box is empty
+      if (pendingKeys.length === 0) return;
+
+      // Optimization: Check specifically for Iconize var to avoid expensive DOM updates later
+      const iconizeUpdateNeeded = pendingKeys.includes("--iconize-icon-color");
 
       for (const varName of pendingKeys) {
-        document.body.style.setProperty(
-          varName,
-          this.pendingVarUpdates[varName]
-        );
+        const value = this.pendingVarUpdates[varName] ?? null;
+        document.body.setCssProps({ [varName]: value });
       }
 
-      this.pendingVarUpdates = {}; // Empty the box after applying
+      this.pendingVarUpdates = {};
 
-      // Trigger updates for Graph View and accessibility checkers
+      // Notify Obsidian components (e.g., Graph View) to repaint
       this.app.workspace.trigger("css-change");
 
-      if (this.settingTabInstance) {
-        this.settingTabInstance?.updateAccessibilityCheckers();
-      }
-      // ensure iconize icons update live using current computed var
-      try {
-        this.forceIconizeColors();
-      } catch (e) {
-        console.warn("forceIconizeColors failed in update loop", e);
+      if (iconizeUpdateNeeded) {
+        try {
+          this.forceIconizeColors();
+        } catch (e) {
+          console.warn("forceIconizeColors failed in update loop", e);
+        }
       }
     }, intervalMs);
   }
@@ -90,7 +91,7 @@ export default class ColorMaster extends Plugin {
 
   // Removes background image CSS variable and body classes.
   _clearBackgroundMedia() {
-    document.body.style.removeProperty("--cm-background-image");
+    document.body.setCssProps({ "--cm-background-image": null });
     document.body.classList.remove("cm-workspace-background-active");
     document.body.classList.remove("cm-settings-background-active");
 
@@ -170,17 +171,17 @@ export default class ColorMaster extends Plugin {
     const type = profile.backgroundType;
     if (type === "image") {
       const imageUrl = this.app.vault.adapter.getResourcePath(path);
-      document.body.style.setProperty(
-        "--cm-background-image",
-        `url("${imageUrl}")`
-      );
+      document.body.setCssProps({
+        "--cm-background-image": `url("${imageUrl}")`,
+      });
+
       document.body.classList.add("cm-workspace-background-active");
     } else if (type === "video") {
       const videoUrl = this.app.vault.adapter.getResourcePath(path);
 
-      let videoEl = document.getElementById(
-        "cm-background-video"
-      ) as HTMLVideoElement;
+      let videoEl = document.querySelector<HTMLVideoElement>(
+        "#cm-background-video"
+      );
       if (!videoEl) {
         videoEl = document.createElement("video");
         videoEl.id = "cm-background-video";
@@ -192,7 +193,10 @@ export default class ColorMaster extends Plugin {
       videoEl.loop = true;
       videoEl.muted = profile.videoMuted !== false;
       videoEl.playsInline = true;
-      videoEl.style.opacity = (profile.videoOpacity || 0.5).toString(); // Apply transparency
+      videoEl.setCssProps({
+        opacity: (profile.videoOpacity || 0.5).toString(),
+      });
+
       videoEl.load();
       document.body.classList.add("cm-workspace-background-active");
     }
@@ -261,14 +265,14 @@ export default class ColorMaster extends Plugin {
    * Ensures the global .obsidian/backgrounds folder exists on startup.
    */
   async _ensureBackgroundsFolderExists(): Promise<void> {
-    const backgroundsPath = ".obsidian/backgrounds";
+    const backgroundsPath = `${this.app.vault.configDir}/backgrounds`;
     try {
       // Check if the folder does NOT exist
       if (!(await this.app.vault.adapter.exists(backgroundsPath))) {
         // Create the folder if it's missing
         await this.app.vault.adapter.mkdir(backgroundsPath);
-        console.log(
-          "Color Master: Created global backgrounds folder at .obsidian/backgrounds"
+        console.debug(
+          `Color Master: Created global backgrounds folder at ${backgroundsPath}`
         );
       }
     } catch (error) {
@@ -283,26 +287,52 @@ export default class ColorMaster extends Plugin {
   async removeBackgroundMediaByPath(pathToDelete: string) {
     if (!pathToDelete) return;
 
-    // 1. Clear the path from all profiles that use it
+    const varsToRestore = [
+      "--background-primary",
+      "--background-secondary",
+      "--background-modifier-border",
+      "--titlebar-background-focused",
+      "--background-modifier-hover",
+    ];
+
     let settingsChanged = false;
+
+    // 1. Iterate through ALL profiles to find who is using this image
     for (const profileName in this.settings.profiles) {
       const profile = this.settings.profiles[profileName];
+
       if (profile.backgroundPath === pathToDelete) {
+        // Clear the path
         profile.backgroundPath = "";
         profile.backgroundType = undefined;
-        // Also disable background if we remove it
+        // Disable background automatically to prevent issues
         profile.backgroundEnabled = false;
+
+        // Restore colors for THIS profile (Active or Inactive)
+        const profileOriginalVars =
+          BUILT_IN_PROFILES_VARS[
+            profileName as keyof typeof BUILT_IN_PROFILES_VARS
+          ] || BUILT_IN_PROFILES_VARS.Default;
+
+        for (const varName of varsToRestore) {
+          if (profile.vars[varName] === "transparent") {
+            const defaultValue =
+              profileOriginalVars[varName as keyof typeof profileOriginalVars];
+
+            if (defaultValue) {
+              profile.vars[varName] = defaultValue;
+            } else {
+              // If no default exists, remove the var to let theme handle it
+              delete profile.vars[varName];
+            }
+          }
+        }
+
         settingsChanged = true;
       }
     }
 
-    // 2. Restore default vars for the active profile if it was affected
-    const activeProfile = this.settings.profiles[this.settings.activeProfile];
-    if (activeProfile.backgroundPath === "") {
-      await this._restoreDefaultBackgroundVars();
-    }
-
-    // 3. Try to delete the actual file
+    // 2. Try to delete the actual file
     try {
       if (await this.app.vault.adapter.exists(pathToDelete)) {
         await this.app.vault.adapter.remove(pathToDelete);
@@ -316,9 +346,21 @@ export default class ColorMaster extends Plugin {
 
     if (settingsChanged) {
       await this.saveSettings();
+
+      // If the active profile was affected, we need to apply changes immediately
+      // We use pending updates to make it smooth if live preview is on
+      const activeProfile = this.settings.profiles[this.settings.activeProfile];
+      if (activeProfile.backgroundPath === "") {
+        // Re-apply pending updates for the active profile just in case
+        for (const varName of varsToRestore) {
+          const val = activeProfile.vars[varName];
+          if (val) this.pendingVarUpdates[varName] = val;
+        }
+        this.applyPendingNow();
+      }
     }
 
-    // Refresh settings tab UI
+    // 3. Refresh settings tab UI
     if (this.settingTabInstance) {
       this.settingTabInstance.display();
     }
@@ -340,7 +382,7 @@ export default class ColorMaster extends Plugin {
     const mediaType: "image" | "video" =
       fileExt === "mp4" || fileExt === "webm" ? "video" : "image";
 
-    const backgroundsPath = `.obsidian/backgrounds`;
+    const backgroundsPath = `${this.app.vault.configDir}/backgrounds`;
 
     let targetPath = `${backgroundsPath}/${finalFileName}`; // Use finalFileName
 
@@ -359,12 +401,17 @@ export default class ColorMaster extends Plugin {
           this,
           finalArrayBuffer,
           finalFileName,
-          async (choice) => {
-            await this.setBackgroundMedia(
-              finalArrayBuffer,
-              finalFileName,
-              choice
-            );
+          (choice) => {
+            // run async logic safely
+            void (async () => {
+              await this.setBackgroundMedia(
+                finalArrayBuffer,
+                finalFileName,
+                choice
+              );
+            })().catch((err) => {
+              console.error("Failed to set background media:", err);
+            });
           }
         ).open();
         return;
@@ -424,6 +471,7 @@ export default class ColorMaster extends Plugin {
         return;
       }
 
+      // eslint-disable-next-line obsidianmd/no-forbidden-elements
       const el = document.createElement("style");
       el.id = `cm-custom-css-for-profile`;
       el.textContent = profile.customCss;
@@ -468,6 +516,7 @@ export default class ColorMaster extends Plugin {
       .join("\n\n");
 
     if (enabledCss) {
+      // eslint-disable-next-line obsidianmd/no-forbidden-elements
       const el = document.createElement("style");
       el.id = "cm-css-snippets";
       el.textContent = enabledCss;
@@ -494,7 +543,8 @@ export default class ColorMaster extends Plugin {
 
       // Apply all pending CSS properties
       for (const k of keys) {
-        document.body.style.setProperty(k, pending[k]);
+        const value = pending[k] ?? null;
+        document.body.setCssProps({ [k]: value });
       }
 
       // Clear pending updates
@@ -586,22 +636,30 @@ export default class ColorMaster extends Plugin {
   }
 
   async onload() {
-    initializeT(this);
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     T = this;
     await this.loadSettings();
+    initializeT(this);
     await this._ensureBackgroundsFolderExists();
     this.liveNoticeRules = null;
     this.liveNoticeRuleType = null;
     if (this.settings.language === "auto") {
       const obsidianLang = moment.locale();
+
+      // Determine the language based on Obsidian's current locale
       if (obsidianLang === "ar") {
-        this.settings.language = "ar"; // If it is Arabic, we will designate it as Arabic.
+        this.settings.language = "ar";
+      } else if (obsidianLang === "fa") {
+        this.settings.language = "fa";
+      } else if (obsidianLang === "fr") {
+        this.settings.language = "fr";
       } else {
-        this.settings.language = "en"; // For any other language, we set it to English.
+        this.settings.language = "en"; // The default
       }
       await this.saveSettings();
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     T = this;
     registerCommands(this);
 
@@ -609,10 +667,10 @@ export default class ColorMaster extends Plugin {
     this.addRibbonIcon(
       "paint-bucket",
       t("plugin.ribbonTooltip"),
-      (evt: MouseEvent) => {
+      (_evt: MouseEvent) => {
         // Open the settings tab when the icon is clicked
-        (this.app as any).setting.open();
-        (this.app as any).setting.openTabById(this.manifest.id);
+        (this.app as unknown).setting.open();
+        (this.app as unknown).setting.openTabById(this.manifest.id);
       }
     );
 
@@ -621,7 +679,7 @@ export default class ColorMaster extends Plugin {
     this.addSettingTab(this.settingTabInstance);
 
     this.app.workspace.onLayoutReady(() => {
-      this.applyStyles();
+      void this.applyStyles();
       setTimeout(() => this.app.workspace.trigger("css-change"), 100);
 
       // Start the update engine
@@ -660,21 +718,23 @@ export default class ColorMaster extends Plugin {
     this.resetIconizeWatcher();
   }
 
-  async onunload() {
+  onunload(): void {
     if (this.noticeObserver) this.noticeObserver.disconnect();
     if (this.iconizeObserver) this.iconizeObserver.disconnect();
 
     if (this.settings) {
       this.settings.lastSearchQuery = "";
       this.settings.lastScrollPosition = 0;
-      await this.saveData(this.settings);
+      this.saveData(this.settings).catch((err) => {
+        console.error("Color Master: Failed to save settings on unload.", err);
+      });
     }
 
     this.clearStyles();
     this.removeInjectedCustomCss();
     this.stopColorUpdateLoop();
     this._clearBackgroundMedia();
-    console.log("Color Master v1.1.1 unloaded.");
+    console.debug("Color Master unloaded.");
   }
 
   public enableObservers(): void {
@@ -687,7 +747,7 @@ export default class ColorMaster extends Plugin {
         childList: true,
         subtree: true,
       });
-      console.log("Color Master Observers: Enabled");
+      console.debug("Color Master Observers: Enabled");
     } catch (e) {
       console.error("Color Master: Failed to enable observers", e);
     }
@@ -697,7 +757,7 @@ export default class ColorMaster extends Plugin {
     try {
       this.iconizeObserver.disconnect();
       this.noticeObserver.disconnect();
-      console.log("Color Master Observers: Disabled");
+      console.debug("Color Master Observers: Disabled");
     } catch (e) {
       console.error("Color Master: Failed to disable observers", e);
     }
@@ -709,7 +769,7 @@ export default class ColorMaster extends Plugin {
       return;
     }
 
-    console.log(
+    console.debug(
       `Color Master: Found ${graphLeaves.length} graph(s). Applying Plan C (programmatic rebuild).`
     );
 
@@ -755,13 +815,15 @@ export default class ColorMaster extends Plugin {
       const svg = iconNode.querySelector("svg");
       if (!svg) return;
 
-      [svg, ...svg.querySelectorAll("*")].forEach((el: any) => {
+      [svg, ...svg.querySelectorAll("*")].forEach((el: unknown) => {
         if (typeof el.hasAttribute !== "function") return;
 
         if (!iconizeColor) {
           // remove inline overrides to let theme/defaults show
-          el.style.fill = "";
-          el.style.stroke = "";
+          el.setCssProps({
+            fill: null,
+            stroke: null,
+          });
           return;
         }
 
@@ -774,19 +836,11 @@ export default class ColorMaster extends Plugin {
           originalFill !== "none" &&
           !originalFill.startsWith("url(")
         ) {
-          try {
-            el.style.setProperty("fill", iconizeColor, "important");
-          } catch (e) {
-            el.style.fill = iconizeColor;
-          }
+          el.setCssProps({ fill: iconizeColor });
         }
 
         if (originalStroke && originalStroke !== "none") {
-          try {
-            el.style.setProperty("stroke", iconizeColor, "important");
-          } catch (e) {
-            el.style.stroke = iconizeColor;
-          }
+          el.setCssProps({ stroke: iconizeColor });
         }
       });
     });
@@ -803,7 +857,7 @@ export default class ColorMaster extends Plugin {
     // If not installed, check if the override setting is still on.
     let settingsChanged = false;
     if (this.settings.overrideIconizeColors === true) {
-      console.log(
+      console.debug(
         "Color Master: Iconize plugin not found. Disabling override setting."
       );
       this.settings.overrideIconizeColors = false;
@@ -814,14 +868,19 @@ export default class ColorMaster extends Plugin {
     const orphanedIcons = document.querySelectorAll(".iconize-icon");
 
     if (orphanedIcons.length > 0) {
-      console.log(
+      console.debug(
         `Color Master: Found ${orphanedIcons.length} orphaned Iconize elements. Cleaning up...`
       );
       orphanedIcons.forEach((icon) => icon.remove());
     }
 
     if (settingsChanged) {
-      this.saveSettings();
+      void this.saveSettings().catch((err) => {
+        console.error(
+          "Failed to save settings after removing Iconize leftovers:",
+          err
+        );
+      });
     }
   }
 
@@ -843,14 +902,15 @@ export default class ColorMaster extends Plugin {
     if (profileVars.length > 0) {
       const cssString = `body.theme-dark, body.theme-light {
     ${profileVars
-      .map(([key, value]) => `${key}: ${value};`)
+      .map(([key, value]) => (value ? `${key}: ${value};` : ""))
+      .filter(Boolean)
       .join("\n            ")}
-}`;
+    }`;
 
+      // eslint-disable-next-line obsidianmd/no-forbidden-elements
       const styleEl = document.createElement("style");
       styleEl.id = "cm-profile-variables";
       styleEl.textContent = cssString;
-
       document.head.appendChild(styleEl);
     }
 
@@ -859,22 +919,59 @@ export default class ColorMaster extends Plugin {
 
     const themeType = profile.themeType || "auto";
 
+    // Handle theme toggle (Dark/Light/Auto)
     if (themeType === "dark") {
       document.body.classList.remove("theme-light");
       document.body.classList.add("theme-dark");
     } else if (themeType === "light") {
       document.body.classList.remove("theme-dark");
       document.body.classList.add("theme-light");
+    } else {
+      const currentConfig = (this.app.vault as unknown).getConfig("theme");
+      const isSystemDark = window.matchMedia(
+        "(prefers-color-scheme: dark)"
+      ).matches;
+
+      if (
+        currentConfig === "obsidian" ||
+        (currentConfig === "system" && isSystemDark)
+      ) {
+        document.body.classList.remove("theme-light");
+        document.body.classList.add("theme-dark");
+      } else {
+        document.body.classList.remove("theme-dark");
+        document.body.classList.add("theme-light");
+      }
     }
     this.applyCustomCssForProfile(this.settings.activeProfile);
     this.applyCssSnippets();
+
     // Add/Remove body class for RTL notices
-    if (this.settings.language === "ar" || this.settings.language === "fa") {
+    const langCode = this.settings.language;
+    const customLang = this.settings.customLanguages?.[langCode];
+    const isCoreRtlLang = langCode === "ar" || langCode === "fa";
+    const isCustomRtlLang = customLang?.isRtl === true;
+    const isRtlEnabled = this.settings.useRtlLayout;
+    const isRTL = (isCoreRtlLang || isCustomRtlLang) && isRtlEnabled;
+
+    if (isRTL) {
       document.body.classList.add("color-master-rtl");
     } else {
       document.body.classList.remove("color-master-rtl");
     }
     await this.applyBackgroundMedia();
+    this.app.workspace.trigger("css-change");
+    window.dispatchEvent(new Event("resize"));
+
+    setTimeout(() => {
+      this.app.workspace.trigger("css-change");
+      const graphLeaves = this.app.workspace.getLeavesOfType("graph");
+      graphLeaves.forEach((leaf) => {
+        if (leaf.view && (leaf.view as unknown).reload) {
+          (leaf.view as unknown).reload();
+        }
+      });
+    }, 300);
   }
 
   clearStyles() {
@@ -894,18 +991,20 @@ export default class ColorMaster extends Plugin {
       }
     }
     allVars.forEach((key: string) => {
-      document.body.style.removeProperty(key);
+      document.body.setCssProps({ [key]: null });
     });
 
     document.querySelectorAll(".iconize-icon").forEach((iconNode) => {
       const svg = iconNode.querySelector("svg");
       if (!svg) return;
 
-      [svg, ...svg.querySelectorAll("*")].forEach((el: any) => {
+      [svg, ...svg.querySelectorAll("*")].forEach((el: unknown) => {
         if (typeof el.hasAttribute !== "function") return;
 
-        el.style.removeProperty("fill");
-        el.style.removeProperty("stroke");
+        el.setCssProps({
+          fill: null,
+          stroke: null,
+        });
       });
     });
 
@@ -927,7 +1026,7 @@ export default class ColorMaster extends Plugin {
       this.settings.noticeRules &&
       Object.keys(this.settings.profiles || {}).length > 0
     ) {
-      console.log(
+      console.debug(
         "Color Master: Detected old global notice rules. Starting migration..."
       );
       for (const profileName in this.settings.profiles) {
@@ -938,7 +1037,7 @@ export default class ColorMaster extends Plugin {
           );
         }
       }
-      delete (this.settings as any).noticeRules;
+      delete (this.settings as unknown).noticeRules;
       migrationNeeded = true;
     }
 
@@ -951,7 +1050,7 @@ export default class ColorMaster extends Plugin {
     }
 
     if (migrationNeeded) {
-      console.log(
+      console.debug(
         "Color Master: Notice rules migration complete. Saving new settings structure."
       );
       await this.saveData(this.settings);
@@ -985,7 +1084,7 @@ export default class ColorMaster extends Plugin {
       ) {
         snippetsMigrationNeeded = true;
         const snippetsArray = Object.entries(profile.snippets).map(
-          ([name, data]: [string, any]) => ({
+          ([name, data]: [string, unknown]) => ({
             id: `snippet-${Date.now()}-${Math.random()}`,
             name: name,
             css: data.css || "",
@@ -997,7 +1096,7 @@ export default class ColorMaster extends Plugin {
     }
 
     if (snippetsMigrationNeeded) {
-      console.log(
+      console.debug(
         "Color Master: The clipping data structure is being migrated to the new format (array)."
       );
       await this.saveData(this.settings);
@@ -1026,7 +1125,7 @@ export default class ColorMaster extends Plugin {
       }
     }
     if (profileMigrationNeeded) {
-      console.log(
+      console.debug(
         "Color Master: Setting default backgroundEnabled status for profiles."
       );
       await this.saveData(this.settings); // Save changes if migration happened
@@ -1040,178 +1139,356 @@ export default class ColorMaster extends Plugin {
     this.app.workspace.trigger("css-change");
   }
 
-  async resetPluginData() {
-    // Keep important data first
+  async resetPluginData(options: {
+    deleteProfiles: boolean;
+    deleteSnippets: boolean;
+    deleteSettings: boolean;
+    deleteBackgrounds: boolean;
+    deleteLanguages?: boolean;
+  }) {
     const oldInstallDate = this.settings.installDate;
-    const oldLanguage = this.settings.language;
-    const oldRtl = this.settings.useRtlLayout;
 
-    const backgroundsPath = ".obsidian/backgrounds";
-    let dataReset = false;
+    // Deep clone defaults to ensure a clean slate before merging preserved data
+    const newSettings = JSON.parse(
+      JSON.stringify(DEFAULT_SETTINGS)
+    ) as PluginSettings;
 
-    try {
-      // 1. Make a new copy of the default settings
-      this.settings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+    // 1. Preserve Settings (if not deleting)
+    if (!options.deleteSettings) {
+      newSettings.language = this.settings.language;
+      newSettings.useRtlLayout = this.settings.useRtlLayout;
+      newSettings.overrideIconizeColors = this.settings.overrideIconizeColors;
+      newSettings.cleanupInterval = this.settings.cleanupInterval;
+      newSettings.colorUpdateFPS = this.settings.colorUpdateFPS;
+      newSettings.lastSearchQuery = this.settings.lastSearchQuery;
+      newSettings.lastScrollPosition = this.settings.lastScrollPosition;
+      newSettings.advancedResetOptions = this.settings.advancedResetOptions;
+    }
 
-      // 2. Return the data we want to preserve
-      this.settings.installDate = oldInstallDate;
-      this.settings.language = oldLanguage;
-      this.settings.useRtlLayout = oldRtl;
+    // 2. Preserve Profiles
+    if (!options.deleteProfiles) {
+      newSettings.profiles = this.settings.profiles;
+      newSettings.activeProfile = this.settings.activeProfile;
+      newSettings.pinnedSnapshots = this.settings.pinnedSnapshots;
+    }
 
-      // 3. Save new settings (default + saved data)
-      await this.saveData(this.settings);
-      dataReset = true;
-      console.log(
-        "Color Master: Settings object reset to default, preserving installDate and language."
-      );
+    // 3. Preserve Snippets
+    if (!options.deleteSnippets) {
+      newSettings.globalSnippets = this.settings.globalSnippets;
+    }
 
-      // 4. Show reload notification
-      if (dataReset) {
-        const notice = new Notice(t("notices.resetSuccess"), 0);
-        const noticeEl = notice.noticeEl;
-        const buttonContainer = noticeEl.createDiv({
-          cls: "modal-button-container",
-        });
-        new ButtonComponent(buttonContainer)
-          .setButtonText(t("buttons.reload"))
-          .setCta()
-          .onClick(() => {
-            (this.app as any).commands.executeCommandById("app:reload");
-          });
-      } else {
-        new Notice("Failed to reset plugin settings.");
-        return;
+    // 4. Preserve Languages
+    if (!options.deleteLanguages) {
+      newSettings.customLanguages = this.settings.customLanguages;
+    }
+
+    // Edge Case: Deleting snippets but keeping profiles -> clear snippets from preserved profiles
+    if (options.deleteSnippets && !options.deleteProfiles) {
+      for (const profileName in newSettings.profiles) {
+        if (newSettings.profiles[profileName]) {
+          newSettings.profiles[profileName].snippets = [];
+        }
       }
+    }
 
-      // 5. Delete the backgrounds folder
+    newSettings.installDate = oldInstallDate;
+
+    // Reset specific settings if requested
+    if (options.deleteSettings) {
+      newSettings.advancedResetOptions = this.settings.advancedResetOptions;
+      newSettings.language = "auto";
+    }
+
+    this.settings = newSettings;
+    await this.saveData(this.settings);
+
+    console.debug("Color Master: Selective data reset complete.", options);
+
+    // Handle File System operations (Backgrounds)
+    if (options.deleteBackgrounds) {
+      const backgroundsPath = `${this.app.vault.configDir}/backgrounds`;
       try {
         if (await this.app.vault.adapter.exists(backgroundsPath)) {
-          console.log(
-            "Color Master: Attempting to delete backgrounds folder..."
-          );
+          console.debug("Color Master: Deleting backgrounds folder...");
           await this.app.vault.adapter.rmdir(backgroundsPath, true);
-          console.log(
-            "Color Master: Backgrounds folder deleted successfully (or was already gone)."
-          );
+        }
+
+        // If profiles are kept but backgrounds deleted, remove references from profiles
+        if (!options.deleteProfiles) {
+          for (const profileName in this.settings.profiles) {
+            const profile = this.settings.profiles[profileName];
+            if (profile) {
+              profile.backgroundPath = undefined;
+              profile.backgroundType = undefined;
+            }
+          }
+          await this.saveData(this.settings);
         }
       } catch (folderError) {
-        // Specifically ignore EBUSY or similar errors during folder removal
-        if (folderError.code === "EBUSY") {
-          console.warn(
-            `Color Master: Could not delete backgrounds folder due to EBUSY. It will be ignored after reload. Path: ${backgroundsPath}`
-          );
-        } else {
-          console.error(
-            `Color Master: Unexpected error deleting backgrounds folder: ${folderError.message}`,
-            folderError
-          );
-        }
+        console.error(
+          `Color Master: Error deleting backgrounds: ${folderError.message}`
+        );
+        new Notice(t("notices.deleteBackgroundsError", folderError.message));
       }
-    } catch (dataError) {
-      new Notice(`Failed to reset plugin data: ${dataError.message}`);
-      console.error(
-        "Color Master: Failed to reset plugin settings object.",
-        dataError
-      );
     }
+
+    // UI Feedback & Reload
+    const notice = new Notice(t("notices.resetSuccess"), 15000);
+    const buttonContainer = notice.messageEl.createDiv({
+      cls: "modal-button-container",
+    });
+    new ButtonComponent(buttonContainer)
+      .setButtonText(t("buttons.reload"))
+      .setCta()
+      .onClick(() => {
+        (this.app as unknown).commands.executeCommandById("app:reload");
+      });
   }
 
   processNotice(el: HTMLElement) {
-    let noticeText = (el.textContent || "").toLowerCase();
-    const testKeywordEl = el.querySelector(".cm-test-keyword") as HTMLElement;
+    // Prevent processing the same element multiple times
+    if (!el || !el.classList || el.dataset.cmProcessed === "true") return;
 
+    // Extract text content (handle test keywords if present)
+    let noticeText = (el.textContent || "").toLowerCase();
+    const testKeywordEl = el.querySelector<HTMLElement>(".cm-test-keyword");
     if (testKeywordEl) {
       noticeText = (testKeywordEl.textContent || "").toLowerCase();
     }
-    if (!el || !el.classList || el.dataset.cmProcessed === "true") return;
 
     el.dataset.cmProcessed = "true";
 
     try {
       const settings = this.settings;
       const activeProfile = settings.profiles[settings.activeProfile];
-
       if (!activeProfile) return;
 
       const liveRules = this.liveNoticeRules;
       const liveRuleType = this.liveNoticeRuleType;
 
+      // --- 1. Background Rules (Base Style) ---
       const bgRules =
         liveRuleType === "background" && liveRules
           ? liveRules
           : activeProfile?.noticeRules?.background || [];
 
-      const textRules =
-        liveRuleType === "text" && liveRules
-          ? liveRules
-          : activeProfile?.noticeRules?.text || [];
-
       let finalBgColor = activeProfile.vars["--cm-notice-bg-default"];
-      let finalTextColor = activeProfile.vars["--cm-notice-text-default"];
 
       for (const rule of bgRules) {
-        if (!rule.keywords || !rule.keywords.trim()) continue;
-        const keywords = (rule.keywords || "").toLowerCase();
+        if (!rule.keywords?.trim()) continue;
+        const keywords = rule.keywords.toLowerCase();
         let match = false;
 
         if (rule.isRegex) {
           try {
-            const regex = new RegExp(keywords, "i");
-            if (regex.test(noticeText)) match = true;
-          } catch (e) {}
+            if (new RegExp(keywords, "i").test(noticeText)) match = true;
+          } catch {
+            // ignore invalid regex
+          }
         } else {
+          // Optimize: Only process if keyword array isn't empty
           const keywordArray = keywords
             .split(",")
             .map((k: string) => k.trim())
             .filter(Boolean);
-          for (const keyword of keywordArray) {
-            if (noticeText.includes(keyword)) {
+          if (keywordArray.length > 0) {
+            const escaped = keywordArray.map((k: string) =>
+              k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+            );
+            // Enforce whole-word matching to avoid partial false positives
+            if (
+              new RegExp(`\\b(${escaped.join("|")})\\b`, "i").test(noticeText)
+            ) {
               match = true;
-              break;
             }
           }
         }
+
         if (match) {
           finalBgColor = rule.color;
-          break;
-        }
-      }
-
-      for (const rule of textRules) {
-        if (!rule.keywords || !rule.keywords.trim()) continue;
-        const keywords = (rule.keywords || "").toLowerCase();
-        let match = false;
-
-        if (rule.isRegex) {
-          try {
-            const regex = new RegExp(keywords, "i");
-            if (regex.test(noticeText)) match = true;
-          } catch (e) {}
-        } else {
-          const keywordArray = keywords
-            .split(",")
-            .map((k: string) => k.trim())
-            .filter(Boolean);
-          for (const keyword of keywordArray) {
-            if (noticeText.includes(keyword)) {
-              match = true;
-              break;
-            }
-          }
-        }
-
-        if (match) {
-          finalTextColor = rule.color;
-          break;
+          break; // Priority: First match wins
         }
       }
 
       if (finalBgColor) {
         el.dataset.cmNoticeBg = finalBgColor;
       }
+
+      // --- 2. Text Rules (Split: Base Color vs. DOM Highlights) ---
+      const textRules =
+        liveRuleType === "text" && liveRules
+          ? liveRules
+          : activeProfile?.noticeRules?.text || [];
+
+      let finalTextColor = activeProfile.vars["--cm-notice-text-default"];
+      const highlightRules: unknown[] = [];
+      const fullColorRules: unknown[] = [];
+
+      // Pre-sort rules to avoid multiple iterations later
+      for (const rule of textRules) {
+        if (rule.highlightOnly) {
+          highlightRules.push(rule);
+        } else {
+          fullColorRules.push(rule);
+        }
+      }
+
+      // 2a. Apply Base Text Color
+      for (const rule of fullColorRules) {
+        if (!rule.keywords?.trim()) continue;
+        const keywords = rule.keywords.toLowerCase();
+        let match = false;
+
+        if (rule.isRegex) {
+          try {
+            if (new RegExp(keywords, "i").test(noticeText)) match = true;
+          } catch {
+            // ignore invalid regex
+          }
+        } else {
+          const keywordArray = keywords
+            .split(",")
+            .map((k: string) => k.trim())
+            .filter(Boolean);
+          if (keywordArray.length > 0) {
+            const escaped = keywordArray.map((k: string) =>
+              k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+            );
+            if (
+              new RegExp(`\\b(${escaped.join("|")})\\b`, "i").test(noticeText)
+            ) {
+              match = true;
+            }
+          }
+        }
+        if (match) {
+          finalTextColor = rule.color;
+          break;
+        }
+      }
+
       if (finalTextColor) {
         el.dataset.cmNoticeText = finalTextColor;
       }
+
+      // 2b. Apply Keyword Highlights (DOM Manipulation)
+      if (highlightRules.length > 0) {
+        const textNodes: Node[] = [];
+
+        // Use TreeWalker to safely traverse text nodes without breaking nested HTML
+        const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, {
+          acceptNode: (node) => {
+            return node.parentElement?.classList.contains(
+              "cm-keyword-highlight"
+            )
+              ? NodeFilter.FILTER_REJECT // Skip already highlighted
+              : NodeFilter.FILTER_ACCEPT;
+          },
+        });
+
+        while (walker.nextNode()) textNodes.push(walker.currentNode);
+
+        for (const node of textNodes) {
+          const nodeContent = node.textContent;
+          if (!nodeContent?.trim()) continue;
+
+          const parent = node.parentElement;
+          if (!parent) continue;
+
+          // Collect all matches from all highlight rules
+          const allMatches: { start: number; end: number; color: string }[] =
+            [];
+
+          for (const rule of highlightRules) {
+            if (!rule.keywords?.trim()) continue;
+            const color = rule.color;
+
+            if (rule.isRegex) {
+              try {
+                const regex = new RegExp(rule.keywords, "gi");
+                let match;
+                while ((match = regex.exec(nodeContent)) !== null) {
+                  if (match[0].length === 0) break;
+                  allMatches.push({
+                    start: match.index,
+                    end: match.index + match[0].length,
+                    color,
+                  });
+                }
+              } catch (e) {
+                console.warn("Color Master: Invalid Regex in notice rule", e);
+              }
+            } else {
+              const keywords = rule.keywords
+                .split(",")
+                .map((k: string) => k.trim())
+                .filter(Boolean);
+              if (keywords.length > 0) {
+                const escaped = keywords.map((k: string) =>
+                  k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+                );
+                const ruleRegex = new RegExp(
+                  `\\b(${escaped.join("|")})\\b`,
+                  "gi"
+                );
+                let match;
+                while ((match = ruleRegex.exec(nodeContent)) !== null) {
+                  allMatches.push({
+                    start: match.index,
+                    end: match.index + match[0].length,
+                    color,
+                  });
+                }
+              }
+            }
+          }
+
+          if (allMatches.length === 0) continue;
+
+          // Sort and filter matches to prevent overlapping spans
+          allMatches.sort((a, b) => a.start - b.start);
+          const uniqueMatches = [];
+          let currentEnd = -1;
+
+          for (const match of allMatches) {
+            if (match.start >= currentEnd) {
+              uniqueMatches.push(match);
+              currentEnd = match.end;
+            }
+          }
+
+          if (uniqueMatches.length === 0) continue;
+
+          // Rebuild DOM fragment with highlights
+          const fragments = new DocumentFragment();
+          let lastIndex = 0;
+
+          for (const match of uniqueMatches) {
+            if (match.start > lastIndex) {
+              fragments.appendChild(
+                document.createTextNode(
+                  nodeContent.substring(lastIndex, match.start)
+                )
+              );
+            }
+            const span = document.createElement("span");
+            span.className = "cm-keyword-highlight";
+            span.setCssProps({ color: match.color });
+            span.textContent = nodeContent.substring(match.start, match.end);
+            fragments.appendChild(span);
+            lastIndex = match.end;
+          }
+
+          if (lastIndex < nodeContent.length) {
+            fragments.appendChild(
+              document.createTextNode(nodeContent.substring(lastIndex))
+            );
+          }
+
+          parent.replaceChild(fragments, node);
+        }
+      }
+
       this.updateNoticeStyles();
     } catch (e) {
       console.warn("Color Master: processNotice failed", e);
@@ -1231,6 +1508,7 @@ export default class ColorMaster extends Plugin {
     }
 
     if (!styleEl) {
+      // eslint-disable-next-line obsidianmd/no-forbidden-elements
       styleEl = document.createElement("style");
       styleEl.id = styleId;
       document.head.appendChild(styleEl);
@@ -1422,5 +1700,87 @@ export default class ColorMaster extends Plugin {
       console.error("Color Master: Error renaming background image:", error);
       return false;
     }
+  }
+
+  /**
+   * Temporarily strips plugin styles to snapshot the underlying theme's CSS variables.
+   * Essential for determining base theme defaults.
+   */
+  async captureCurrentComputedVars(): Promise<Record<string, string>> {
+    console.debug("Color Master: Capturing current computed styles...");
+
+    // 1. Flush plugin overrides and await repaint to expose base theme
+    this.clearStyles();
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+
+    const capturedVars: Record<string, string> = {};
+    const flatDefaultVars = flattenVars(DEFAULT_VARS);
+    const allVarKeys = Object.keys(flatDefaultVars);
+
+    const bodyStyles = getComputedStyle(document.body);
+
+    // Heuristic: Only treat a variable as a color if its internal default definition is color-like.
+    const isColorRegex =
+      /^(#|rgb|hsl|transparent|var\(--)|(white|black|red|blue|green|yellow|orange|purple|cyan|magenta)$/i;
+
+    for (const varName of allVarKeys) {
+      const computedValue = bodyStyles.getPropertyValue(varName).trim();
+      const defaultValue = flatDefaultVars[varName] || "";
+
+      if (computedValue) {
+        if (isColorRegex.test(defaultValue)) {
+          // Standardize computed values (often rgb()) to Hex for UI consistency
+          try {
+            capturedVars[varName] = convertColorToHex(computedValue);
+          } catch (e) {
+            console.warn(
+              `Failed to convert color ${varName}: ${computedValue}`,
+              e
+            );
+            capturedVars[varName] = computedValue;
+          }
+        } else {
+          capturedVars[varName] = computedValue;
+        }
+      }
+    }
+
+    console.debug(
+      `Color Master: Captured ${Object.keys(capturedVars).length} variables.`
+    );
+
+    // 2. Restore plugin state
+    void this.applyStyles();
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+
+    return capturedVars;
+  }
+
+  /**
+   * Memoized wrapper for captureCurrentComputedVars.
+   * Prevents UI flickering by caching defaults until theme mode (dark/light) changes.
+   */
+  async getThemeDefaults(): Promise<Record<string, string>> {
+    const currentThemeMode = document.body.classList.contains("theme-dark")
+      ? "dark"
+      : "light";
+
+    if (
+      this.cachedThemeDefaults &&
+      this.lastCachedThemeMode === currentThemeMode
+    ) {
+      return this.cachedThemeDefaults;
+    }
+
+    console.debug(
+      "Color Master: Cache miss or theme change. Refreshing defaults..."
+    );
+
+    const newDefaults = await this.captureCurrentComputedVars();
+
+    this.cachedThemeDefaults = newDefaults;
+    this.lastCachedThemeMode = currentThemeMode;
+
+    return newDefaults;
   }
 }

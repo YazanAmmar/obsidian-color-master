@@ -1,20 +1,63 @@
-.color-master-text-input {
-  width: 100px;
+/* ==========================================================================
+   Base Styles
+   Variables, LTR/RTL layouts, animations, and core editor overrides.
+   ========================================================================== */
+:root {
+  /* Snippet List UI Variables */
+  --cm-snippet-row-min-height: 40px;
+  --cm-snippet-toggle-scale: 0.85;
+  --cm-snippet-icon-size: 18px;
+  --cm-snippet-drag-area-spacing: 4px;
+  --cm-snippet-handle-vertical-nudge: 2px;
 }
 
-.setting-item-control input[type="color"],
-.color-master-text-input {
-  vertical-align: middle;
+/* --- Animations --- */
+@keyframes cm-flash-red {
+  0% {
+    background-color: var(--interactive-error);
+  }
+  100% {
+    background-color: var(--interactive-accent);
+  }
 }
-
+@keyframes cm-shake {
+  10%, 90% {
+    transform: translateX(-1px);
+  }
+  20%, 80% {
+    transform: translateX(1px);
+  }
+  30%, 50%, 70% {
+    transform: translateX(-3px);
+  }
+  40%, 60% {
+    transform: translateX(3px);
+  }
+}
+/* --- Layout Directionality (LTR/RTL) --- */
+.is-ltr {
+  direction: ltr !important;
+}
+.is-ltr h2,
+.is-ltr h3,
+.is-ltr .setting-item-name,
+.is-ltr .setting-item-description {
+  text-align: left !important;
+}
+.is-ltr .setting-item,
+.is-ltr .modal-content .setting-item {
+  flex-direction: row !important;
+}
+.is-ltr {
+  /* Refactor modal-specific logic to dedicated files later */
+}
+.is-ltr .modal-content .setting-item-info {
+  text-align: left !important;
+  margin-right: 10px;
+  margin-left: 0;
+}
 .is-ltr .color-master-text-input {
   margin-left: 8px;
-}
-.is-ltr .setting-item-name,
-.is-ltr .setting-item-description,
-.is-ltr h2,
-.is-ltr h3 {
-  text-align: left;
 }
 
 .is-rtl {
@@ -30,136 +73,1095 @@
   text-align: right;
 }
 
-/* --- Global RTL Notice --- */
-
+/* Global RTL override for notices */
 body.color-master-rtl .notice {
   direction: rtl;
   text-align: right;
 }
 
-/* --- Force LTR for English UI in RTL Obsidian --- */
-
-.is-ltr {
-  direction: ltr !important;
+/* --- Global Backgrounds --- */
+#cm-background-video {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  z-index: -1;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
 }
 
-.is-ltr h2,
-.is-ltr h3,
-.is-ltr .setting-item-name,
-.is-ltr .setting-item-description {
-  text-align: left !important;
+body.cm-workspace-background-active {
+  background-image: var(--cm-background-image);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  /* Ensure workspace transparency to reveal background */
+}
+body.cm-workspace-background-active .workspace-split.mod-root,
+body.cm-workspace-background-active .workspace-leaf,
+body.cm-workspace-background-active .workspace-leaf-content,
+body.cm-workspace-background-active .view-header,
+body.cm-workspace-background-active .workspace-tab-header-container {
+  background-color: transparent !important;
+}
+body.cm-workspace-background-active {
+  /* Add backdrop blur for legibility in modals */
+}
+body.cm-workspace-background-active .modal-container .modal {
+  background-color: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(5px);
 }
 
-.is-ltr .setting-item {
-  flex-direction: row !important;
+/* Scoped background for settings tab */
+body.cm-settings-background-active .color-master-settings-tab {
+  background-image: var(--cm-background-image);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 
-.is-ltr .modal-content .setting-item {
-  flex-direction: row !important;
+/* --- Editor & Markdown Overrides --- */
+/* Tag Styling */
+.tag {
+  color: var(--tag-color) !important;
+  background-color: var(--tag-bg) !important;
+  padding: 2px 8px;
+  border-radius: 12px;
+  text-decoration: none;
+}
+.tag:hover {
+  color: var(--tag-color-hover) !important;
 }
 
-/* ======================================================= */
-
-.is-ltr .modal-content .setting-item-info {
-  text-align: left !important;
-  margin-right: 10px;
-  margin-left: 0;
+/* Live Preview Tags */
+.cm-s-obsidian span.cm-hashtag {
+  background-color: var(--tag-bg) !important;
+  color: var(--tag-color) !important;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  border-radius: 0;
+  padding-left: 0;
+  padding-right: 0;
+}
+.cm-s-obsidian span.cm-hashtag-begin {
+  background-color: var(--tag-bg) !important;
+  color: var(--tag-color) !important;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  padding-inline-start: 8px;
+  border-start-start-radius: 12px;
+  border-end-start-radius: 12px;
+}
+.cm-s-obsidian span.cm-hashtag-end {
+  background-color: var(--tag-bg) !important;
+  color: var(--tag-color) !important;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  padding-inline-end: 8px;
+  border-start-end-radius: 12px;
+  border-end-end-radius: 12px;
 }
 
-.setting-item-control input[type="color"] {
-  appearance: none;
-  -webkit-appearance: none;
-  width: 28px;
-  height: 28px;
-  min-width: 28px;
+/* Inline Code */
+.cm-s-obsidian span.cm-inline-code,
+.markdown-preview-view code:not(pre code) {
+  color: var(--code-normal) !important;
+  background-color: var(--code-background) !important;
+}
+
+/* Highlights */
+.markdown-source-view.mod-cm6 .cm-highlight,
+.markdown-preview-view mark,
+.markdown-preview-view .highlight {
+  background-color: var(--text-highlight-bg) !important;
+}
+
+/* Blockquotes */
+.markdown-preview-view blockquote,
+.cm-s-obsidian span.cm-quote {
+  background-color: var(--blockquote-bg) !important;
+}
+
+/* --- Utilities --- */
+/* Search Highlight (Unified with Editor Highlight) */
+.cm-search-match {
+  background-color: var(--text-highlight-bg);
+  color: var(--text-normal);
+  border-radius: 2px;
+  padding: 0 2px;
+}
+
+.cm-keyword-highlight {
+  font-weight: 600;
+}
+
+/* --- Modals --- */
+/* Language Info Modal */
+.cm-info-modal {
+  max-width: 650px;
+}
+.cm-info-modal .modal-content {
+  max-height: unset;
+  padding: 0;
+}
+.cm-info-modal .cm-info-content {
+  border-bottom: 1px solid var(--background-modifier-border);
+  padding: 0 var(--size-4-4) var(--size-4-4) var(--size-4-4);
+  margin-bottom: var(--size-4-4);
+  max-height: unset;
+  overflow-y: visible;
+}
+.cm-info-modal .cm-info-content p {
+  margin-bottom: var(--size-4-2);
+}
+.cm-info-modal .cm-info-content ul,
+.cm-info-modal .cm-info-content ol {
+  margin-inline-start: var(--size-4-6);
+  margin-bottom: var(--size-4-2);
+}
+.cm-info-modal .cm-info-content li {
+  margin-bottom: var(--size-4-1);
+}
+.cm-info-modal .cm-info-content code {
+  background-color: var(--background-modifier-hover);
+  color: var(--text-normal);
+  padding: 2px 4px;
+  border-radius: var(--radius-s);
+}
+
+/* Translator Modal - Flex layout for scrollable list */
+.cm-translator-modal .modal-content {
+  display: flex;
+  flex-direction: column;
+  height: 65vh;
+  max-height: 65vh;
+}
+.cm-translator-modal .cm-translator-list {
+  flex: 1;
+  overflow-y: auto;
+}
+.cm-translator-modal .cm-translator-controls,
+.cm-translator-modal .cm-translator-main-controls {
+  flex: 0 0 auto;
+}
+.cm-translator-modal .cm-translator-main-controls {
   padding: 0;
   border: none;
-  border-radius: 50%;
+  margin-top: var(--size-4-2);
+}
+
+.cm-translator-toggle {
+  font-size: var(--font-ui-small);
+  color: var(--text-accent);
   cursor: pointer;
-  overflow: hidden;
+  margin-top: 4px;
+  display: inline-block;
 }
-.setting-item-control input[type="color"]::-webkit-color-swatch-wrapper {
-  padding: 0;
-}
-.setting-item-control input[type="color"]::-webkit-color-swatch {
-  border-radius: 50%;
-  border: 1px solid var(--background-modifier-border);
-  width: 100%;
-  height: 100%;
-  box-sizing: border-box;
+.cm-translator-toggle:hover {
+  color: var(--text-accent-hover);
 }
 
-/* --- Styles for Graph View Header Buttons --- */
-.cm-graph-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+/* Notice Rules List */
+.cm-rules-modal .cm-rule-item .cm-rule-icon-button {
+  margin-left: 4px;
+}
+.cm-rules-modal .cm-rule-item .cm-rule-icon-button.is-active {
+  color: var(--text-accent);
+  background-color: var(--background-modifier-hover);
+  box-shadow: 0 0 0 1px var(--background-modifier-border-focus);
+}
+
+/* ==========================================================================
+   Modal Styles
+   Styles for all plugin modals (Settings, Translator, Rules, etc.)
+   ========================================================================== */
+.color-master-modal {
+  /* --- Generic Modal Components --- */
+}
+.color-master-modal .modal-content h3 {
+  border-bottom: 1px solid var(--background-modifier-border);
+  padding-bottom: 10px;
+  margin-bottom: 8px;
+}
+.color-master-modal .setting-item:first-of-type {
+  border-top: none;
+  padding-top: 4px !important;
+}
+.color-master-modal .modal-content > hr {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+.color-master-modal .modal-button-container {
+  justify-content: flex-end;
+  margin-top: 12px !important;
+  padding-bottom: 0 !important;
+}
+.color-master-modal {
+  /* --- Setting Items inside Modals --- */
+}
+.color-master-modal .setting-item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  margin-bottom: 0 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  min-width: 0 !important;
+}
+.color-master-modal .setting-item:first-of-type {
+  border-top: none;
+}
+.color-master-modal .setting-item .setting-item-description {
+  white-space: normal !important;
+  max-width: 80%;
+}
+.color-master-modal .setting-item {
+  /* Focus glow for toggles */
+}
+.color-master-modal .setting-item .checkbox-container {
+  outline: none !important;
+  box-shadow: none !important;
+}
+.color-master-modal .setting-item .checkbox-container:focus, .color-master-modal .setting-item .checkbox-container:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: var(--background-modifier-border) !important;
+}
+.color-master-modal {
+  /* --- Specific Modal Utilities --- */
+}
+.color-master-modal .cm-modal-warning-note {
+  font-size: var(--font-ui-smaller);
+  color: var(--interactive-warning);
   margin-bottom: 10px;
-  margin-top: 20px;
+  margin-top: 4px;
+  text-align: center;
 }
-
-.cm-graph-header h3 {
+.color-master-modal .cm-wide-text-input,
+.color-master-modal .cm-full-width-control,
+.color-master-modal .cm-import-textarea,
+.color-master-modal .cm-large-textarea {
+  width: 100%;
+}
+.color-master-modal .cm-textarea-size {
+  height: 30px;
+  width: 166px !important;
+}
+.color-master-modal .cm-import-textarea {
+  margin-bottom: 15px;
+}
+.color-master-modal .cm-theme-importer-setting.setting-item {
+  border-top: none;
+  padding-top: 0;
+  margin-top: 12px;
+  margin-bottom: 20px;
+}
+.color-master-modal {
+  /* --- Background Picker & Gallery --- */
+}
+.color-master-modal .cm-paste-box {
+  border: none;
+  border-radius: var(--radius-m);
+  padding: 30px;
+  text-align: center;
+  color: var(--text-muted);
+  background-color: var(--background-secondary);
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+  caret-color: transparent;
+  margin-top: 15px;
+  /* Dashed Border Pattern */
+  background-image: linear-gradient(to right, var(--text-faint) 50%, transparent 50%), linear-gradient(to bottom, var(--text-faint) 50%, transparent 50%), linear-gradient(to right, var(--text-faint) 50%, transparent 50%), linear-gradient(to bottom, var(--text-faint) 50%, transparent 50%);
+  background-repeat: repeat-x, repeat-y;
+  background-size: 10px 2px, 2px 10px;
+  background-position: 0 0, 100% 0, 0 100%, 0 0;
+}
+.color-master-modal .cm-paste-box:hover, .color-master-modal .cm-paste-box:focus, .color-master-modal .cm-paste-box.is-over {
+  color: var(--text-normal);
+  background-color: var(--background-modifier-hover);
+  outline: none;
+  /* Active Border Pattern */
+  background-image: linear-gradient(to right, var(--interactive-accent) 50%, transparent 50%), linear-gradient(to bottom, var(--interactive-accent) 50%, transparent 50%), linear-gradient(to right, var(--interactive-accent) 50%, transparent 50%), linear-gradient(to bottom, var(--interactive-accent) 50%, transparent 50%);
+}
+.color-master-modal .cm-paste-box:focus, .color-master-modal .cm-paste-box.is-over {
+  animation: cm-marching-ants 0.2s linear infinite;
+}
+.color-master-modal .cm-image-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 15px;
+  margin-top: 15px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 5px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-m);
+}
+.color-master-modal .cm-image-card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-s);
+  overflow: hidden;
+  background: var(--background-secondary);
+}
+.color-master-modal .cm-image-card.is-active {
+  border: 2px solid var(--interactive-accent);
+  box-shadow: 0 0 10px var(--interactive-accent);
+  transform: scale(1.02);
+  transition: all 0.2s ease-in-out;
+}
+.color-master-modal .cm-image-card {
+  /* Formatting the button container inside the card */
+}
+.color-master-modal .cm-image-card .cm-image-card-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px;
+  background-color: var(--background-secondary);
+  border-top: 1px solid var(--background-modifier-border);
+}
+.color-master-modal .cm-image-card .cm-image-card-controls .cm-image-card-select-btn {
+  flex-grow: 1;
+  justify-content: center;
   margin: 0;
 }
-.cm-graph-buttons-container button:not(:last-child) {
-  margin-right: 8px;
+.color-master-modal .cm-image-card .cm-image-card-controls .cm-image-card-delete-btn {
+  flex-shrink: 0;
+  width: 30px;
+  padding: 0 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+}
+.color-master-modal .cm-media-preview-container {
+  position: relative;
+  width: 100%;
+  height: 80px;
+  background-color: var(--background-primary);
+  border-bottom: 1px solid var(--background-modifier-border);
+  cursor: pointer;
+}
+.color-master-modal .cm-media-preview-container .cm-image-card-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  padding: 3px;
+  box-sizing: border-box;
+}
+.color-master-modal .cm-media-preview-container .cm-media-play-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  background-color: rgba(0, 0, 0, 0.4);
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+.color-master-modal .cm-media-preview-container .cm-media-play-overlay svg {
+  width: 32px;
+  height: 32px;
+}
+.color-master-modal .cm-media-preview-container .cm-media-mute-toggle {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 2;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+.color-master-modal .cm-media-preview-container .cm-media-mute-toggle svg {
+  width: 16px;
+  height: 16px;
+}
+.color-master-modal .cm-media-preview-container:hover .cm-media-mute-toggle {
+  opacity: 1;
+}
+.color-master-modal .cm-image-card-name-input.setting-item {
+  border: none !important;
+  border-top: 1px solid var(--background-modifier-border) !important;
+  background-color: var(--background-secondary);
+  padding: 4px 8px !important;
+  min-height: 32px !important;
+  justify-content: center;
+}
+.color-master-modal .cm-image-card-name-input.setting-item .setting-item-control {
+  width: 100%;
+  justify-content: center;
+}
+.color-master-modal .cm-name-input-container {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  padding: 2px 6px;
+  margin: 0 auto;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+  max-width: 100%;
+}
+.color-master-modal .cm-name-input-container:hover, .color-master-modal .cm-name-input-container:has(.cm-name-input-basename:focus) {
+  background-color: var(--background-primary) !important;
+}
+.color-master-modal .cm-name-input-container:hover .cm-name-input-basename, .color-master-modal .cm-name-input-container:has(.cm-name-input-basename:focus) .cm-name-input-basename {
+  color: var(--text-normal);
+}
+.color-master-modal .cm-name-input-container:hover .cm-name-input-extension, .color-master-modal .cm-name-input-container:has(.cm-name-input-basename:focus) .cm-name-input-extension {
+  color: var(--text-muted);
+}
+.color-master-modal .cm-name-input-basename {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background-color: transparent !important;
+  text-align: right;
+  font-size: var(--font-ui-smaller);
+  color: var(--text-muted);
+  padding: 2px 0;
+  flex-grow: 0;
+  min-width: 20px;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.color-master-modal .cm-name-input-basename {
+  border: none;
+  outline: none;
+  box-shadow: none;
+  background-color: transparent;
+  text-align: right;
+  font-size: var(--font-ui-smaller);
+  color: var(--text-muted);
+  padding: 4px 0 4px 12px;
+  flex-grow: 1;
+  min-width: 30px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.color-master-modal .cm-name-input-extension {
+  font-size: var(--font-ui-smaller);
+  color: var(--text-faint);
+  padding: 4px 12px 4px 2px;
+  user-select: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.color-master-modal .cm-image-browser-empty {
+  text-align: center;
+  padding: 30px;
+  color: var(--text-muted);
+  grid-column: 1/-1;
+  font-style: italic;
+}
+.color-master-modal .cm-profile-list-modal {
+  margin-top: 10px;
+  margin-bottom: 5px;
+}
+.color-master-modal .cm-profile-list-modal strong {
+  color: var(--text-accent);
+  font-weight: 600;
+}
+.color-master-modal .cm-settings-group {
+  border-top: 1px solid var(--background-modifier-border);
+  margin-top: 0;
+  padding-top: 10px;
 }
 
-/* --- Styles for the Graph View header buttons wrapper --- */
-.cm-buttons-wrapper {
+/* --- Notice Rules Modal --- */
+.cm-rules-modal .cm-rules-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+  border-bottom: 1px solid var(--background-modifier-border);
+  padding-bottom: 10px;
+}
+.cm-rules-modal .cm-rules-modal-header h3 {
+  border: none;
+  margin: 0;
+  padding: 0;
+}
+.cm-rules-modal .cm-rules-modal-header .cm-rules-modal-header-icon {
+  position: relative;
+  top: 3px;
+}
+.cm-rules-modal .cm-rules-modal-header .cm-rules-modal-header-icon svg {
+  width: 22px;
+  height: 22px;
+  color: var(--text-accent);
+}
+.cm-rules-modal .cm-rules-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 15px;
+}
+.cm-rules-modal .cm-rules-header p.cm-rules-modal-desc {
+  margin: -5px 0 0 0;
+  flex-grow: 1;
+  font-size: var(--font-ui-smaller);
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+.cm-rules-modal .cm-rules-add-button-setting {
+  padding: 0;
+  border-top: none;
+}
+.cm-rules-modal .cm-rules-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+  border-top: 1px solid var(--background-modifier-border);
+  padding-top: 16px;
+}
+.cm-rules-modal .cm-rule-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border-radius: 6px;
+  background-color: var(--background-secondary);
+}
+.cm-rules-modal .cm-rule-item.newly-added {
+  animation: fadeInScale 0.35s ease-out;
+}
+.cm-rules-modal .cm-rule-item.removing {
+  animation: fadeOutSlide 0.12s ease-in forwards;
+}
+.cm-rules-modal .cm-rule-item .cm-rule-actions {
   display: flex;
   align-items: center;
   gap: 8px;
+  padding-right: 8px;
+  margin-right: 8px;
+  border-right: 1px solid var(--background-modifier-border);
+  align-self: stretch;
 }
-
-.cm-refresh-button-setting {
-  border: none;
-  padding: 0;
-  margin: 0;
+.cm-rules-modal .cm-rule-item .cm-rule-order-number {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-muted);
+  font-family: monospace;
 }
-
-.cm-refresh-button-setting .setting-item-control {
-  justify-content: flex-end;
-}
-
-.cm-temporary-buttons {
-  display: contents;
-}
-/* --- Styles for Accessibility Checker --- */
-.cm-accessibility-checker {
+.cm-rules-modal .cm-rule-item .cm-rule-input-wrapper {
+  flex-grow: 1;
   display: flex;
   align-items: center;
-  padding: 4px 8px;
+}
+.cm-rules-modal .cm-rule-item .cm-color-container {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.cm-rules-modal .cm-rule-item .cm-color-container .setting-item-control button {
+  height: 24px;
+  width: 24px;
+}
+.cm-rules-modal .cm-rule-item {
+  /* Transparent swatch fix */
+}
+.cm-rules-modal .cm-rule-item input[type=color].is-transparent {
+  background-color: transparent;
+}
+.cm-rules-modal .cm-rule-item input[type=color].is-transparent::-webkit-color-swatch {
+  background-image: linear-gradient(45deg, #808080 25%, transparent 25%), linear-gradient(-45deg, #808080 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #808080 75%), linear-gradient(-45deg, transparent 75%, #808080 75%);
+  background-size: 8px 8px;
+  background-position: 0 0, 0 4px, 4px -4px, -4px 0px;
+  border: 1px solid var(--text-faint);
+}
+.cm-rules-modal {
+  /* Tag Inputs */
+}
+.cm-rules-modal .cm-tag-input-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
   border-radius: 5px;
-  margin-left: 10px; /* For LTR */
-  font-size: 11px;
+  border: 1px solid var(--background-modifier-border);
+  background-color: transparent;
+  cursor: text;
+  min-height: 36px;
+  width: 100%;
+}
+.cm-rules-modal .cm-tag-input-container:focus-within {
+  border-color: var(--interactive-accent);
+  box-shadow: 0 0 0 1px var(--background-modifier-border-focus);
+}
+.cm-rules-modal .cm-tag-item {
+  display: flex;
+  align-items: center;
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+  padding: 3px 4px 3px 8px;
+  border-radius: 4px;
+  font-size: 13px;
   font-weight: 500;
+  white-space: nowrap;
+}
+.cm-rules-modal .cm-tag-item.cm-tag-duplicate-flash {
+  animation: cm-flash-red 1s ease-out, cm-shake 0.5s ease-in-out;
+}
+.cm-rules-modal .cm-tag-remove {
+  margin-left: 6px;
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 14px;
+  line-height: 1;
+  transition: background-color 0.2s ease;
+}
+.cm-rules-modal .cm-tag-remove:hover {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+.cm-rules-modal .cm-tag-input-field {
+  flex-grow: 1;
+  border: none;
+  outline: none;
+  background-color: transparent;
+  padding: 4px 2px;
+  min-width: 120px;
+  color: var(--text-normal);
+}
+.cm-rules-modal .cm-tag-input-field:focus {
+  box-shadow: none;
+}
+.cm-rules-modal .cm-rule-icon-button {
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 4px !important;
+  cursor: pointer;
+  color: var(--text-muted);
+  border-radius: 4px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+.cm-rules-modal .cm-rule-icon-button:hover:not(.mod-warning) {
+  background-color: var(--background-modifier-hover) !important;
+  color: var(--text-normal);
+}
+.cm-rules-modal .cm-rule-icon-button.mod-warning {
+  color: var(--text-muted);
+}
+.cm-rules-modal .cm-rule-icon-button.mod-warning:hover {
+  background-color: var(--interactive-error) !important;
+  color: var(--text-on-accent) !important;
+}
+.cm-rules-modal .cm-drag-handle {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  opacity: 0.6;
+  cursor: grab;
+}
+.cm-rules-modal .cm-drag-handle:hover {
+  opacity: 1;
+}
+
+/* --- Advanced Reset Modal --- */
+.cm-advanced-reset-options .setting-item {
+  border-top: none !important;
+  padding-top: 4px !important;
+  padding-bottom: 4px !important;
+}
+.cm-advanced-reset-options .setting-item-control {
+  order: 2;
+  justify-content: flex-end;
+}
+.cm-advanced-reset-options .setting-item-control .clickable-icon {
+  color: var(--text-faint);
+  cursor: help;
+}
+.cm-advanced-reset-options .setting-item-control .clickable-icon:hover {
+  color: var(--text-muted);
+}
+.cm-advanced-reset-options .setting-item-info {
+  order: 1;
+}
+.cm-advanced-reset-options {
+  /* RTL Override */
+}
+[dir=rtl] .cm-advanced-reset-options .setting-item-control {
+  order: 1;
+  justify-content: flex-start;
+}
+[dir=rtl] .cm-advanced-reset-options .setting-item-info {
+  order: 2;
+}
+
+/* --- Translator Tree Modal --- */
+.cm-translator-tree-modal .modal-content {
+  width: 100%;
+  max-width: 90vw;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+}
+.cm-translator-tree-modal .cm-translator-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  border-bottom: 1px solid var(--background-modifier-border);
+  padding-bottom: 15px;
+  /* Search & Filter */
+}
+.cm-translator-tree-modal .cm-translator-controls .cm-search-bar-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-grow: 1;
+  min-width: 250px;
+}
+.cm-translator-tree-modal .cm-translator-controls .cm-search-input-container {
+  flex-grow: 1;
+  position: relative;
+}
+.cm-translator-tree-modal .cm-translator-controls .cm-search-input-container .search-input-container {
+  width: 100%;
+}
+.cm-translator-tree-modal .cm-translator-controls .cm-search-input-container .search-input-container input {
+  width: 100%;
+}
+.cm-translator-tree-modal .cm-translator-controls .cm-search-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.cm-translator-tree-modal .cm-translator-controls .cm-search-action-btn {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: var(--text-muted) !important;
+  opacity: 0.8;
+  cursor: pointer;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-s);
+  transition: all 0.1s ease-in-out;
+  min-height: 20px;
+}
+.cm-translator-tree-modal .cm-translator-controls .cm-search-action-btn:hover {
+  background-color: var(--background-modifier-hover) !important;
+  color: var(--text-normal) !important;
+  opacity: 1;
+}
+.cm-translator-tree-modal .cm-translator-controls .cm-search-action-btn.is-active {
+  background-color: var(--interactive-accent) !important;
+  color: var(--text-on-accent) !important;
+  opacity: 1;
+}
+.cm-translator-tree-modal .cm-translator-controls .cm-search-action-btn.is-active:hover {
+  background-color: var(--interactive-accent-hover) !important;
+}
+.cm-translator-tree-modal .cm-translator-controls {
+  /* I/O Buttons Container */
+}
+.cm-translator-tree-modal .cm-translator-controls .cm-translator-io-controls {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+}
+.cm-translator-tree-modal .cm-translator-controls .cm-translator-io-controls .setting-item {
+  border-top: none;
+  padding: 0;
+  margin: 0;
+  flex-grow: 0;
+  flex-shrink: 0;
+}
+.cm-translator-tree-modal {
+  /* Tree List */
+}
+.cm-translator-tree-modal .cm-translator-list {
+  overflow-y: auto;
+  flex: 1;
+  padding-right: 10px;
+}
+.cm-translator-tree-modal .cm-translator-group {
+  border-left: 2px solid var(--background-modifier-border);
+  margin-left: 10px;
+  padding-left: 10px;
+  margin-bottom: 5px;
+}
+.cm-translator-tree-modal .cm-translator-group .cm-translator-group-title {
+  font-weight: 600;
+  font-size: 1.1em;
+  color: var(--text-accent);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+.cm-translator-tree-modal .cm-translator-group .cm-translator-group-title:hover {
+  background-color: var(--background-modifier-hover);
+}
+.cm-translator-tree-modal .cm-translator-group .cm-translator-group-content {
+  padding-left: 10px;
+}
+.cm-translator-tree-modal .cm-translator-item {
+  border-top: none;
+  border-bottom: 1px solid var(--background-modifier-border-hover);
+  padding: 10px 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.cm-translator-tree-modal .cm-translator-item .cm-translator-index {
+  font-size: var(--font-ui-smaller);
+  color: var(--text-faint);
+  width: 28px;
+  text-align: right;
+  flex-shrink: 0;
+  padding-top: 6px;
+}
+.cm-translator-tree-modal .cm-translator-item .setting-item-info {
+  flex-grow: 1;
+}
+.cm-translator-tree-modal .cm-translator-item .setting-item-name.cm-translator-key {
+  font-weight: 600;
+  font-family: var(--font-monospace);
+  font-size: 0.9em;
+  word-break: break-all;
+  margin-bottom: 4px;
+}
+.cm-translator-tree-modal .cm-translator-item .setting-item-description {
+  font-style: italic;
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  white-space: normal;
+}
+.cm-translator-tree-modal .cm-translator-item .setting-item-control {
+  flex: 1 1 50%;
+  padding-left: 10px;
+}
+.cm-translator-tree-modal .cm-translator-item .setting-item-control input[type=text],
+.cm-translator-tree-modal .cm-translator-item .setting-item-control textarea {
+  width: 100%;
+}
+.cm-translator-tree-modal .cm-translator-empty {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 20px;
+}
+.cm-translator-tree-modal .cm-translator-main-controls {
+  border-top: 1px solid var(--background-modifier-border);
+  padding-top: 15px;
+  margin-top: 10px;
+}
+
+/* --- Animations --- */
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes fadeOutSlide {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+}
+@keyframes cm-marching-ants {
+  to {
+    background-position: 10px 0, 100% 10px, -10px 100%, 0 -10px;
+  }
+}
+/* ==========================================================================
+   Settings Tab Styles
+   Main configuration interface styling (.color-master-settings-tab).
+   ========================================================================== */
+.color-master-settings-tab {
+  /* --- 1. LTR/RTL Localization Overrides --- */
+}
+.color-master-settings-tab[dir=ltr] {
+  direction: ltr !important;
+}
+.color-master-settings-tab[dir=ltr] .setting-item {
+  flex-direction: row !important;
+}
+.color-master-settings-tab[dir=ltr] h2,
+.color-master-settings-tab[dir=ltr] h3,
+.color-master-settings-tab[dir=ltr] .setting-item-name,
+.color-master-settings-tab[dir=ltr] .setting-item-description {
+  text-align: left !important;
+}
+.color-master-settings-tab[dir=ltr] .setting-item-info {
+  margin-right: 10px !important;
+  margin-left: 0 !important;
+}
+.color-master-settings-tab[dir=ltr] .cm-search-container,
+.color-master-settings-tab[dir=ltr] .cm-profile-actions,
+.color-master-settings-tab[dir=ltr] .cm-snippets-header {
+  flex-direction: row !important;
+}
+.color-master-settings-tab[dir=ltr] .cm-search-input-icon {
+  left: 10px !important;
+  right: auto !important;
+}
+.color-master-settings-tab[dir=ltr] .cm-search-input-container .cm-search-input {
+  background-color: transparent;
+  padding: 8px 12px 8px 38px !important;
+}
+.color-master-settings-tab[dir=ltr] .cm-accessibility-checker {
+  margin-left: 10px !important;
+  margin-right: 0 !important;
+}
+.color-master-settings-tab[dir=ltr] .cm-setting-icon {
+  margin-right: 5px;
+  margin-left: 0;
+}
+.color-master-settings-tab[dir=rtl] .cm-search-input-icon {
+  left: auto;
+  right: 10px;
+}
+.color-master-settings-tab[dir=rtl] .cm-search-input-container .cm-search-input {
+  padding-left: 12px !important;
+  padding-right: 36px !important;
+}
+.color-master-settings-tab[dir=rtl] .cm-accessibility-checker {
+  margin-left: 0;
+  margin-right: 10px;
+}
+.color-master-settings-tab[dir=rtl] .cm-setting-icon {
+  margin-right: 0;
+  margin-left: 5px;
+}
+.color-master-settings-tab {
+  /* --- 2. Search Bar & Filters --- */
+}
+.color-master-settings-tab .cm-search-bar-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin-bottom: 20px;
+}
+.color-master-settings-tab {
+  /* Search Input Wrapper */
+}
+.color-master-settings-tab .cm-search-input-container {
+  flex-grow: 1;
+  position: relative;
+}
+.color-master-settings-tab .cm-search-input-container .cm-search-input-icon {
+  display: none;
+}
+.color-master-settings-tab .cm-search-input-container .search-input-container {
+  width: 100%;
+}
+.color-master-settings-tab .cm-search-input-container .search-input-container input {
+  width: 100%;
+  background-color: transparent !important;
   border: 1px solid var(--background-modifier-border);
 }
-
-.is-rtl .cm-accessibility-checker {
-  margin-left: 0;
-  margin-right: 10px; /* For RTL */
+.color-master-settings-tab .cm-search-input-container .search-input-container input:focus {
+  box-shadow: none !important;
+  border-color: var(--interactive-accent);
 }
-
-/* Accessibility Rating Colors */
-.cm-accessibility-pass {
-  background-color: #28a74520;
-  color: #28a745;
-  border-color: #28a74580;
+.color-master-settings-tab {
+  /* Action Buttons Container (Regex, Case, Filter) */
 }
-.cm-accessibility-warn {
-  background-color: #ffc10720;
-  color: #b58900;
-  border-color: #ffc10780;
+.color-master-settings-tab .cm-search-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
-.cm-accessibility-fail {
-  background-color: #dc354520;
-  color: #dc3545;
-  border-color: #dc354580;
+.color-master-settings-tab {
+  /* Individual Toggle Buttons */
 }
-
-.cm-search-info {
+.color-master-settings-tab .cm-search-action-btn {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: var(--text-muted) !important;
+  opacity: 0.8;
+  cursor: pointer;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-s);
+  transition: all 0.1s ease-in-out;
+}
+.color-master-settings-tab .cm-search-action-btn:hover {
+  background-color: var(--background-modifier-hover) !important;
+  color: var(--text-normal) !important;
+  opacity: 1;
+}
+.color-master-settings-tab .cm-search-action-btn.is-active {
+  background-color: var(--interactive-accent) !important;
+  color: var(--text-on-accent) !important;
+  opacity: 1;
+}
+.color-master-settings-tab .cm-search-action-btn.is-active:hover {
+  background-color: var(--interactive-accent-hover) !important;
+}
+.color-master-settings-tab {
+  /* Filter Dropdown Container */
+}
+.color-master-settings-tab .cm-search-filter-options {
+  display: flex;
+  align-items: center;
+  padding: 0 !important;
+  border-radius: 6px !important;
+  background-color: transparent !important;
+  margin-left: 4px;
+  border: none !important;
+}
+.color-master-settings-tab .cm-search-filter-options.is-hidden {
+  display: none;
+}
+.color-master-settings-tab .cm-search-filter-options select.cm-search-small {
+  background-color: transparent !important;
+  border: 1px solid var(--background-modifier-border) !important;
+  padding-right: 25px !important;
+}
+.color-master-settings-tab .cm-search-filter-options select.cm-search-small:hover {
+  background-color: var(--background-modifier-hover) !important;
+}
+.color-master-settings-tab {
+  /* Result Counter */
+}
+.color-master-settings-tab .cm-search-info {
   font-size: 12px;
   font-weight: 500;
   color: var(--text-muted);
@@ -171,149 +1173,529 @@ body.color-master-rtl .notice {
   white-space: nowrap;
   line-height: 1;
 }
-
-.color-master-settings-tab[dir="rtl"] .cm-search-info {
-  margin-left: 0;
-  margin-right: 6px;
+.color-master-settings-tab {
+  /* --- 3. Profile Manager --- */
 }
-
-.cm-var-row.cm-hidden,
-.cm-category-container.cm-hidden,
-.cm-static-sections.cm-hidden {
-  display: none !important;
-}
-.cm-var-row .cm-var-name {
-  font-weight: 600;
-}
-
-/* --- Text shading with a moving color gradient --- */
-.color-master-settings-tab .cm-highlight {
-  background-image: linear-gradient(
-    to right,
-    #0ea5e9,
-    #8b5cf6,
-    #d946ef,
-    #0ea5e9
-  );
-  background-size: 200% auto;
-  color: transparent;
-  -webkit-background-clip: text;
-  background-clip: text;
-  animation: textShine 1s linear infinite;
-}
-
-@keyframes textShine {
-  to {
-    background-position: 200% center;
-  }
-}
-
-.cm-search-small {
-  font-size: 12px;
-  padding: 4px 6px;
-  border-radius: 6px;
-  background-color: var(--background-secondary);
-  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
-}
-.color-master-settings-tab .cm-search-small.is-active {
-  background-color: var(--interactive-accent);
-  color: var(--text-on-accent);
-}
-
-/* Profile copy / paste buttons */
-.cm-profile-actions {
+.color-master-settings-tab .cm-profile-actions {
   display: flex;
   gap: 8px;
   align-items: center;
   margin: 10px 0 14px;
 }
-
-.cm-profile-action-btn:active {
-  transform: translateY(1px);
-}
-.cm-profile-action-btn.mod-cta {
-  background: var(--interactive-accent);
-  color: var(--text-on-accent);
-  border-color: var(--interactive-accent);
-}
-.cm-profile-action-spacer {
+.color-master-settings-tab .cm-profile-actions .cm-profile-action-spacer {
   flex: 1;
 }
-
-.cm-banner-svg {
+.color-master-settings-tab {
+  /* Management Buttons (Export, Copy, Import) */
+}
+.color-master-settings-tab .cm-profile-action-btn {
+  background-color: transparent;
+  border: 1px solid var(--background-modifier-border);
+  box-shadow: none;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+.color-master-settings-tab .cm-profile-action-btn:active {
+  transform: translateY(1px);
+}
+.color-master-settings-tab .cm-profile-action-btn:hover {
+  background-color: var(--background-modifier-hover);
+  border-color: var(--background-modifier-border-hover);
+}
+.color-master-settings-tab .cm-profile-action-btn {
+  /* Primary Action (Blue) */
+}
+.color-master-settings-tab .cm-profile-action-btn.mod-cta {
+  border-color: var(--interactive-accent);
+  color: var(--interactive-accent);
+}
+.color-master-settings-tab .cm-profile-action-btn.mod-cta:hover {
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+.color-master-settings-tab .cm-profile-action-btn.cm-paste-css-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.color-master-settings-tab .cm-profile-manager-controls {
+  /* Condense control buttons */
+}
+.color-master-settings-tab .cm-profile-manager-controls .setting-item-control button {
+  margin-left: -2px;
+  margin-right: -2px;
+}
+.color-master-settings-tab {
+  /* Theme Warning Icon */
+}
+.color-master-settings-tab .cm-theme-warning-icon {
+  display: inline-block;
+  margin-left: 8px;
+  color: var(--interactive-warning);
+  cursor: help;
+  vertical-align: middle;
+}
+.color-master-settings-tab .cm-theme-warning-icon svg {
+  width: 16px;
+  height: 16px;
+  position: relative;
+  top: -1px;
+}
+.color-master-settings-tab {
+  /* --- 4. Advanced Settings Section --- */
+}
+.color-master-settings-tab .cm-advanced-settings-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-top: 15px;
+  margin-bottom: 20px;
+}
+.color-master-settings-tab {
+  /* Card Style for Settings */
+}
+.color-master-settings-tab .setting-item.cm-card-with-header-control {
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--input-border-radius);
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.color-master-settings-tab .setting-item.cm-card-with-header-control .setting-item-name {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 8px;
+}
+.color-master-settings-tab .setting-item.cm-card-with-header-control .setting-item-description {
+  margin: 0;
+  flex-grow: 1;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+.color-master-settings-tab .setting-item.cm-card-with-header-control > .setting-item-control {
+  display: none;
+}
+.color-master-settings-tab {
+  /* Add Variable Button */
+}
+.color-master-settings-tab .cm-add-variable-button {
+  background-color: transparent !important;
+  border: 1px solid var(--interactive-accent) !important;
+  color: var(--interactive-accent) !important;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+.color-master-settings-tab .cm-add-variable-button:hover {
+  background-color: var(--interactive-accent) !important;
+  color: var(--text-on-accent) !important;
+}
+.color-master-settings-tab {
+  /* Reset Plugin Button */
+}
+.color-master-settings-tab .cm-reset-plugin-icon-button {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: var(--text-muted) !important;
+  padding: 4px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-s);
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+.color-master-settings-tab .cm-reset-plugin-icon-button:hover {
+  background-color: var(--interactive-error) !important;
+  color: var(--text-on-accent) !important;
+}
+.color-master-settings-tab {
+  /* Generic Icon Control Button */
+}
+.color-master-settings-tab .cm-control-icon-button {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: var(--text-muted) !important;
+  padding: 4px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-s);
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+.color-master-settings-tab .cm-control-icon-button:hover {
+  background-color: var(--background-modifier-hover) !important;
+  color: var(--text-normal) !important;
+}
+.color-master-settings-tab {
+  /* --- 5. Snippets UI --- */
+}
+.color-master-settings-tab .cm-snippets-container {
+  margin-bottom: 20px;
+}
+.color-master-settings-tab .cm-snippets-container h3 {
+  margin-top: -10px;
+  margin-bottom: 15px;
+}
+.color-master-settings-tab .cm-snippets-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  margin-bottom: 16px;
+}
+.color-master-settings-tab .cm-snippets-header h3 {
+  margin: 0;
+  white-space: nowrap;
+}
+.color-master-settings-tab .cm-snippets-header .cm-snippets-add-button.setting-item {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+.color-master-settings-tab .cm-snippets-header .cm-snippets-add-button button {
+  background-color: transparent;
+  border: 1px solid var(--interactive-accent);
+  color: var(--interactive-accent);
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+.color-master-settings-tab .cm-snippets-header .cm-snippets-add-button button:hover {
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+.color-master-settings-tab .cm-snippets-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.color-master-settings-tab .cm-snippets-empty-state {
+  color: var(--text-muted);
+  font-style: italic;
+  padding: 10px;
+  text-align: center;
+}
+.color-master-settings-tab {
+  /* Snippet Item Row */
+}
+.color-master-settings-tab .cm-snippet-item.setting-item {
+  align-items: center !important;
+  min-height: var(--cm-snippet-row-min-height);
+  padding-top: 4px !important;
+  padding-bottom: 4px !important;
+  transition: transform 0.16s ease;
+  gap: 4px !important;
+  padding-left: 10px !important;
+}
+.color-master-settings-tab .cm-snippet-item .setting-item-info {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  margin-right: 10px;
+}
+.color-master-settings-tab .cm-snippet-item .setting-item-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.color-master-settings-tab .cm-snippet-item {
+  /* Snippet Actions */
+}
+.color-master-settings-tab .cm-snippet-item .setting-item-control {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.color-master-settings-tab .cm-snippet-item .setting-item-control button {
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+  color: var(--text-muted);
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  width: 28px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+.color-master-settings-tab .cm-snippet-item .setting-item-control button .svg-icon {
+  width: var(--cm-snippet-icon-size);
+  height: var(--cm-snippet-icon-size);
+  transition: all 0.2s ease-in-out;
+}
+.color-master-settings-tab .cm-snippet-item .setting-item-control button:hover {
+  background-color: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+.color-master-settings-tab .cm-snippet-item .setting-item-control button.is-success {
+  color: #00ff08;
+}
+.color-master-settings-tab .cm-snippet-item .setting-item-control button.is-success .svg-icon {
+  transform: scale(1.2);
+}
+.color-master-settings-tab .cm-snippet-item .checkbox-container {
+  transform: scale(var(--cm-snippet-toggle-scale));
+}
+.color-master-settings-tab {
+  /* Global Badge */
+}
+.color-master-settings-tab .cm-snippet-global-badge {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--text-accent);
+  padding: 1px 6px;
+  border-radius: 10px;
+  border: 1px solid var(--interactive-accent-hover);
+  background: rgba(14, 165, 233, 0.1);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: relative;
+  top: 1px;
+}
+.color-master-settings-tab {
+  /* Snippet Drag & Drop Elements */
+}
+.color-master-settings-tab .cm-snippet-drag-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: var(--cm-snippet-drag-area-spacing);
+}
+.color-master-settings-tab .cm-snippet-divider {
+  color: var(--background-modifier-border);
+  font-size: 16px;
+  opacity: 0.8;
+}
+.color-master-settings-tab .cm-snippet-order-number {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  width: auto;
+  padding-left: 6px;
+  text-align: center;
+}
+.color-master-settings-tab .cm-snippet-drag-handle {
+  cursor: grab;
+  color: var(--text-faint);
+  opacity: 0.7;
+  position: relative;
+  top: var(--cm-snippet-handle-vertical-nudge);
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+.color-master-settings-tab .cm-snippet-drag-handle:hover {
+  opacity: 1;
+  color: var(--text-normal);
+}
+.color-master-settings-tab .cm-snippet-ghost {
+  opacity: 0.75;
+  transform: scale(0.99);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+  transition: transform 0.12s ease;
+}
+.color-master-settings-tab .cm-snippet-item.cm-snippet-dragged {
+  background-color: var(--background-secondary) !important;
+}
+.color-master-settings-tab {
+  /* --- 6. Color Picker Rows --- */
+}
+.color-master-settings-tab .color-master-text-input {
+  width: 100px;
+  vertical-align: middle;
+  background-color: transparent !important;
+  border: 1px solid var(--background-modifier-border) !important;
+  box-shadow: none !important;
+}
+.color-master-settings-tab .color-master-text-input:focus {
+  border-color: var(--background-modifier-border-focus);
+}
+.color-master-settings-tab {
+  /* Color Swatch Styling */
+}
+.color-master-settings-tab .setting-item-control input[type=color] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  overflow: hidden;
+  vertical-align: middle;
+}
+.color-master-settings-tab .setting-item-control input[type=color]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+.color-master-settings-tab .setting-item-control input[type=color]::-webkit-color-swatch {
+  border-radius: 50%;
+  border: 1px solid var(--background-modifier-border);
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+.color-master-settings-tab .setting-item-control input[type=color] {
+  /* Transparent State Pattern */
+}
+.color-master-settings-tab .setting-item-control input[type=color].is-transparent {
+  position: relative;
+  background-color: white;
+}
+.color-master-settings-tab .setting-item-control input[type=color].is-transparent::-webkit-color-swatch {
+  background-image: linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%);
+  background-size: 10px 10px;
+  background-position: 0 0, 0 5px, 5px -5px, -5px 0px;
+}
+.color-master-settings-tab {
+  /* Main Row Wrapper */
+}
+.color-master-settings-tab .cm-var-row.cm-hidden {
+  display: none !important;
+}
+.color-master-settings-tab .cm-var-row .cm-var-name {
+  font-weight: 600;
+}
+.color-master-settings-tab .cm-var-row .cm-not-installed-badge {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--interactive-warning);
+  padding: 1px 6px;
+  border-radius: 10px;
+  border: 1px solid var(--background-modifier-border);
+  background: var(--background-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: relative;
+  top: -1px;
+  margin-left: 8px;
+  cursor: help;
+}
+.color-master-settings-tab .cm-category-container.cm-hidden {
+  display: none !important;
+}
+.color-master-settings-tab {
+  /* Accessibility Contrast Checker */
+}
+.color-master-settings-tab .cm-accessibility-checker {
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 500;
+  border: 1px solid var(--background-modifier-border);
+}
+.color-master-settings-tab .cm-accessibility-checker.cm-accessibility-pass {
+  background-color: rgba(40, 167, 69, 0.1254901961);
+  color: #28a745;
+  border-color: rgba(40, 167, 69, 0.5019607843);
+}
+.color-master-settings-tab .cm-accessibility-checker.cm-accessibility-warn {
+  background-color: rgba(255, 193, 7, 0.1254901961);
+  color: #b58900;
+  border-color: rgba(255, 193, 7, 0.5019607843);
+}
+.color-master-settings-tab .cm-accessibility-checker.cm-accessibility-fail {
+  background-color: rgba(220, 53, 69, 0.1254901961);
+  color: #dc3545;
+  border-color: rgba(220, 53, 69, 0.5019607843);
+}
+.color-master-settings-tab {
+  /* --- 7. Like Plugin Card (Promo) --- */
+}
+.color-master-settings-tab .cm-like-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: stretch;
+  padding: 10px;
+  margin-top: 20px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0.02));
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.28);
+  position: relative;
+  border: 4px solid transparent;
+  border-image-slice: 1;
+  animation: cm-glowing-border 2s linear infinite;
+}
+.color-master-settings-tab .cm-banner-svg {
   display: block;
   width: 100%;
   height: auto;
 }
-
-.cm-content-wrapper {
+.color-master-settings-tab .cm-content-wrapper {
   display: flex;
   gap: 20px;
   align-items: center;
   width: 100%;
   padding: 0 4px;
 }
-
-.cm-like-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  align-self: stretch;
-}
-.cm-like-stats {
+.color-master-settings-tab .cm-like-stats {
   flex: 3;
   min-width: 0;
-}
-
-.cm-like-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  align-self: stretch;
-
-  flex: 2;
-
-  max-width: 150px;
-}
-.cm-like-action {
-  width: 100%;
-  justify-content: center;
-}
-/* ===== Stats Progress Bars ===== */
-.cm-like-stats {
   display: flex;
   flex-direction: column;
   gap: 14px;
   margin-top: 12px;
   width: 100%;
 }
-.cm-stat-box {
+.color-master-settings-tab .cm-like-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-self: stretch;
+  flex: 2;
+  max-width: 150px;
+}
+.color-master-settings-tab .cm-like-action {
+  width: 100%;
+  justify-content: center;
+}
+.color-master-settings-tab {
+  /* Stats Bars */
+}
+.color-master-settings-tab .cm-stat-box {
   width: 100%;
 }
-.cm-stat-header {
+.color-master-settings-tab .cm-stat-box .cm-stat-header {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
   margin-bottom: 6px;
 }
-.cm-stat-header .title {
+.color-master-settings-tab .cm-stat-box .cm-stat-header .title {
   font-size: 13px;
   font-weight: 500;
   color: var(--text-muted);
 }
-.cm-stat-header .value {
+.color-master-settings-tab .cm-stat-box .cm-stat-header .value {
   font-size: 13px;
   font-weight: 600;
   color: var(--text-normal);
 }
-.cm-stat-box .skill-bar {
+.color-master-settings-tab .cm-stat-box .skill-bar {
   height: 8px;
   width: 100%;
   border-radius: 6px;
   background-color: var(--background-modifier-border);
   overflow: hidden;
 }
-.skill-bar .skill-per {
+.color-master-settings-tab .cm-stat-box .skill-bar .skill-per {
   position: relative;
   overflow: hidden;
   display: block;
@@ -323,40 +1705,18 @@ body.color-master-rtl .notice {
   animation: cm-progress 0.8s ease-out forwards;
   background: none;
 }
-
-.skill-bar .skill-per::before {
+.color-master-settings-tab .cm-stat-box .skill-bar .skill-per::before {
   content: "";
   position: absolute;
   top: 0;
   left: 0;
   width: 400%;
   height: 100%;
-
-  background: linear-gradient(
-    115deg,
-    #33ff00,
-    #ffcc00,
-    #8000ff,
-    #00b7ff,
-    #00ff66
-  );
+  background: linear-gradient(115deg, #33ff00, #ffcc00, #8000ff, #00b7ff, #00ff66);
   background-size: 25% 100%;
-
   animation: cm-border-animation 2s linear infinite;
 }
-@keyframes cm-progress {
-  from {
-    width: 0;
-  }
-  to {
-    opacity: 1;
-  }
-  to {
-    width: var(--skill-percentage);
-    opacity: 1;
-  }
-}
-.skill-per .tooltip {
+.color-master-settings-tab .cm-stat-box .skill-bar .tooltip {
   position: absolute;
   right: -18px;
   top: -30px;
@@ -369,10 +1729,7 @@ body.color-master-rtl .notice {
   opacity: 0;
   transition: opacity 0.2s;
 }
-.skill-bar:hover .tooltip {
-  opacity: 1;
-}
-.tooltip::before {
+.color-master-settings-tab .cm-stat-box .skill-bar .tooltip::before {
   content: "";
   position: absolute;
   left: 50%;
@@ -382,8 +1739,349 @@ body.color-master-rtl .notice {
   background-color: var(--interactive-accent);
   transform: translateX(-50%) rotate(45deg);
 }
+.color-master-settings-tab .cm-stat-box .skill-bar:hover .tooltip {
+  opacity: 1;
+}
+.color-master-settings-tab {
+  /* Codepen-style Buttons */
+}
+.color-master-settings-tab .codepen-button {
+  display: block;
+  cursor: pointer;
+  color: white;
+  position: relative;
+  text-decoration: none;
+  font-weight: 600;
+  border-radius: 6px;
+  overflow: hidden;
+  padding: 2px;
+  isolation: isolate;
+  width: 100%;
+}
+.color-master-settings-tab .codepen-button::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 400%;
+  height: 100%;
+  background: linear-gradient(115deg, #33ff00, #ffcc00, #8000ff, #00b7ff, #00ff66);
+  background-size: 25% 100%;
+  animation: cm-border-animation 1.5s linear infinite;
+  animation-play-state: running;
+}
+.color-master-settings-tab .codepen-button span {
+  position: relative;
+  display: block;
+  text-align: center;
+  padding: 8px 12px;
+  font-size: 13px;
+  background: var(--background-secondary);
+  border-radius: 4px;
+  height: 100%;
+}
+.color-master-settings-tab {
+  /* Light Mode Fix for Codepen Button */
+}
+.theme-light .color-master-settings-tab .codepen-button span {
+  color: #000000;
+  background: #f0f2f5;
+}
+.color-master-settings-tab .cm-promo-container {
+  border-top: 1px solid var(--background-modifier-border);
+  text-align: center;
+  width: 100%;
+}
+.color-master-settings-tab {
+  /* --- 8. General & Utility Styles --- */
+  /* Hide static sections during search */
+}
+.color-master-settings-tab .cm-static-sections.cm-hidden {
+  display: none !important;
+}
+.color-master-settings-tab {
+  /* Dividers */
+}
+.color-master-settings-tab > hr {
+  border: none;
+  height: 1px;
+  background-color: var(--background-modifier-border);
+  margin: -1px 0px;
+}
+.color-master-settings-tab .cm-static-sections > hr {
+  margin-top: 3px;
+  margin-bottom: 30px;
+}
+.color-master-settings-tab .cm-section-heading {
+  margin-top: 24px;
+}
+.color-master-settings-tab .cm-setting-icon {
+  display: inline-block;
+  position: relative;
+  top: 4px;
+  opacity: 0.7;
+}
+.color-master-settings-tab .cm-add-variable-setting.setting-item {
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+.color-master-settings-tab {
+  /* Unified Button/Select Styles (Transparent) */
+}
+.color-master-settings-tab .cm-profile-action-btn,
+.color-master-settings-tab .cm-add-variable-setting button,
+.color-master-settings-tab .setting-item-control select,
+.color-master-settings-tab .cm-search-small {
+  background-color: transparent;
+  border: 1px solid var(--background-modifier-border);
+  box-shadow: none;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+.color-master-settings-tab .cm-profile-action-btn:hover,
+.color-master-settings-tab .cm-add-variable-setting button:hover,
+.color-master-settings-tab .setting-item-control select:hover,
+.color-master-settings-tab .cm-search-small:hover {
+  background-color: var(--background-modifier-hover);
+  border-color: var(--background-modifier-border-hover);
+}
+.color-master-settings-tab {
+  /* Select Elements */
+}
+.color-master-settings-tab .setting-item-control select,
+.color-master-settings-tab .cm-search-small {
+  font-size: 12px;
+  border-radius: 6px;
+  color: var(--text-normal) !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  background-repeat: no-repeat !important;
+  padding-top: 4px !important;
+  padding-bottom: 4px !important;
+  padding-left: 7px !important;
+  padding-right: 25px !important;
+  background-position: right 7px center !important;
+}
+.color-master-settings-tab .setting-item-control select.is-active,
+.color-master-settings-tab .cm-search-small.is-active {
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+.color-master-settings-tab .setting-item-control select.is-active:hover,
+.color-master-settings-tab .cm-search-small.is-active:hover {
+  background-color: var(--interactive-accent-hover) !important;
+}
+.color-master-settings-tab[dir=rtl] .setting-item-control select,
+.color-master-settings-tab[dir=rtl] .cm-search-small {
+  padding-right: 7px !important;
+  padding-left: 25px !important;
+  background-position: left 7px center !important;
+}
+.color-master-settings-tab .cm-search-filter-options select.cm-search-small {
+  background-position: right 8px center !important;
+  padding-right: 30px !important;
+}
+.color-master-settings-tab {
+  /* Range Slider Styling */
+}
+.color-master-settings-tab input[type=range] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+  width: 100px;
+}
+.color-master-settings-tab input[type=range]::-webkit-slider-runnable-track {
+  background-color: var(--background-modifier-border);
+  height: 4px;
+  border-radius: 4px;
+}
+.color-master-settings-tab input[type=range]::-moz-range-track {
+  background-color: var(--background-modifier-border);
+  height: 4px;
+  border-radius: 4px;
+}
+.color-master-settings-tab input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  margin-top: 0px;
+  background-color: var(--text-muted);
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--background-primary);
+}
+.color-master-settings-tab input[type=range]::-webkit-slider-thumb:hover {
+  background-color: var(--text-normal);
+}
+.color-master-settings-tab input[type=range]::-moz-range-thumb {
+  background-color: var(--text-muted);
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--background-primary);
+}
+.color-master-settings-tab input[type=range]::-moz-range-thumb:hover {
+  background-color: var(--text-normal);
+}
+.color-master-settings-tab {
+  /* Generic Control Buttons */
+}
+.color-master-settings-tab .setting-item-control .cm-control-button {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: var(--text-normal);
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+.color-master-settings-tab .setting-item-control .cm-control-button:hover {
+  background-color: var(--background-modifier-hover) !important;
+  color: var(--text-normal);
+  border-color: var(--background-modifier-border-hover) !important;
+}
+.color-master-settings-tab .setting-item-control .cm-control-button[disabled], .color-master-settings-tab .setting-item-control .cm-control-button.is-disabled {
+  cursor: not-allowed;
+}
+.color-master-settings-tab {
+  /* Focus State for Checkboxes */
+}
+.color-master-settings-tab .setting-item .checkbox-container {
+  outline: none !important;
+  box-shadow: none !important;
+}
+.color-master-settings-tab .setting-item .checkbox-container:focus, .color-master-settings-tab .setting-item .checkbox-container:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: var(--background-modifier-border) !important;
+}
 
-/* ===== Animated Buttons ("codepen-button" style) ===== */
+/* ======================================== */
+/* --- 9. Pristine / Modified States ---    */
+/* ======================================== */
+.cm-var-row {
+  /* Default State: Dimmed */
+}
+.cm-var-row.is-pristine {
+  opacity: 0.6;
+  transition: opacity 0.2s ease-in-out;
+}
+.cm-var-row.is-pristine .cm-var-name {
+  font-weight: 400;
+}
+.cm-var-row.is-pristine:hover {
+  opacity: 1;
+}
+.cm-var-row {
+  /* Modified State: Fully Opaque */
+}
+.cm-var-row.is-modified {
+  opacity: 1;
+}
+
+.color-master-hidden {
+  visibility: hidden;
+}
+
+/* ==========================================================================
+   Component Styles
+   Reusable UI elements: Cards, Snippet Lists, Badges, Menus.
+   ========================================================================== */
+/* --- Like Plugin Card (Promo) --- */
+.cm-like-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: stretch;
+  padding: 10px;
+  margin-top: 20px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0.02));
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.28);
+  position: relative;
+  border: 4px solid transparent;
+  border-image-slice: 1;
+  animation: cm-glowing-border 2s linear infinite;
+}
+.cm-like-card .cm-banner-container .cm-banner-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.cm-like-card .cm-content-wrapper {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  width: 100%;
+  padding: 0 4px;
+}
+.cm-like-card .cm-like-stats {
+  flex: 3;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 12px;
+  width: 100%;
+}
+.cm-like-card .cm-like-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-self: stretch;
+  flex: 2;
+  max-width: 150px;
+}
+
+/* --- Stats Progress Bars --- */
+.cm-stat-box {
+  width: 100%;
+}
+.cm-stat-box .cm-stat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+}
+.cm-stat-box .cm-stat-header .title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+.cm-stat-box .cm-stat-header .value {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-normal);
+}
+.cm-stat-box .skill-bar {
+  height: 8px;
+  width: 100%;
+  border-radius: 6px;
+  background-color: var(--background-modifier-border);
+  overflow: hidden;
+}
+.cm-stat-box .skill-per {
+  position: relative;
+  overflow: hidden;
+  display: block;
+  height: 100%;
+  width: 0%; /* Animated via JS/CSS var */
+  border-radius: 6px;
+  animation: cm-progress 0.8s ease-out forwards;
+  background: none;
+}
+.cm-stat-box .skill-per::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 400%;
+  height: 100%;
+  background: linear-gradient(115deg, #33ff00, #ffcc00, #8000ff, #00b7ff, #00ff66);
+  background-size: 25% 100%;
+  animation: cm-border-animation 2s linear infinite;
+}
+
+/* --- Animated Gradient Buttons --- */
 .codepen-button {
   display: block;
   cursor: pointer;
@@ -404,23 +2102,10 @@ body.color-master-rtl .notice {
   left: 0;
   width: 400%;
   height: 100%;
-  background: linear-gradient(
-    115deg,
-    #33ff00,
-    #ffcc00,
-    #8000ff,
-    #00b7ff,
-    #00ff66
-  );
+  background: linear-gradient(115deg, #33ff00, #ffcc00, #8000ff, #00b7ff, #00ff66);
   background-size: 25% 100%;
   animation: cm-border-animation 1.5s linear infinite;
   animation-play-state: running;
-}
-
-@keyframes cm-border-animation {
-  to {
-    transform: translateX(-25%);
-  }
 }
 .codepen-button span {
   position: relative;
@@ -432,12 +2117,13 @@ body.color-master-rtl .notice {
   border-radius: 4px;
   height: 100%;
 }
-/* --- Light Mode Fix for Animated Buttons --- */
+.codepen-button {
+  /* Light Mode Fallback */
+}
 .theme-light .codepen-button span {
   color: #000000;
   background: #f0f2f5;
 }
-/* ------------------------------------------ */
 
 .cm-promo-container {
   border-top: 1px solid var(--background-modifier-border);
@@ -445,802 +2131,7 @@ body.color-master-rtl .notice {
   width: 100%;
 }
 
-/* ===== Glowing Border Animation for Header ===== */
-
-.cm-like-card {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  align-items: stretch;
-  padding: 10px;
-  margin-top: 20px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0.02));
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.28);
-  position: relative;
-
-  border: 4px solid transparent;
-  border-image-slice: 1;
-  animation: cm-glowing-border 2s linear infinite;
-}
-
-@keyframes cm-glowing-border {
-  0% {
-    border-image-source: linear-gradient(
-      to right,
-      #ff0000,
-      #ff7f00,
-      #ffff00,
-      #00ff00,
-      #0000ff,
-      #4b0082,
-      #9400d3
-    );
-  }
-  14% {
-    border-image-source: linear-gradient(
-      to right,
-      #ff7f00,
-      #ffff00,
-      #00ff00,
-      #0000ff,
-      #4b0082,
-      #9400d3,
-      #ff0000
-    );
-  }
-  28% {
-    border-image-source: linear-gradient(
-      to right,
-      #ffff00,
-      #00ff00,
-      #0000ff,
-      #4b0082,
-      #9400d3,
-      #ff0000,
-      #ff7f00
-    );
-  }
-  42% {
-    border-image-source: linear-gradient(
-      to right,
-      #00ff00,
-      #0000ff,
-      #4b0082,
-      #9400d3,
-      #ff0000,
-      #ff7f00,
-      #ffff00
-    );
-  }
-  56% {
-    border-image-source: linear-gradient(
-      to right,
-      #0000ff,
-      #4b0082,
-      #9400d3,
-      #ff0000,
-      #ff7f00,
-      #ffff00,
-      #00ff00
-    );
-  }
-  70% {
-    border-image-source: linear-gradient(
-      to right,
-      #4b0082,
-      #9400d3,
-      #ff0000,
-      #ff7f00,
-      #ffff00,
-      #00ff00,
-      #0000ff
-    );
-  }
-  84% {
-    border-image-source: linear-gradient(
-      to right,
-      #9400d3,
-      #ff0000,
-      #ff7f00,
-      #ffff00,
-      #00ff00,
-      #0000ff,
-      #4b0082
-    );
-  }
-  100% {
-    border-image-source: linear-gradient(
-      to right,
-      #ff0000,
-      #ff7f00,
-      #ffff00,
-      #00ff00,
-      #0000ff,
-      #4b0082,
-      #9400d3
-    );
-  }
-}
-
-/* Paste CSS button + badges (Flexbox Fix) */
-.cm-paste-css-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-}
-
-/* --- To add a space under the input field title in the module --- */
-.cm-modal-label {
-  display: block;
-  margin-bottom: 6px;
-}
-
-.setting-item-control input[type="color"].is-transparent {
-  position: relative;
-  background-color: white;
-}
-
-.setting-item-control input[type="color"].is-transparent::-webkit-color-swatch {
-  background-image: linear-gradient(45deg, #ccc 25%, transparent 25%),
-    linear-gradient(-45deg, #ccc 25%, transparent 25%),
-    linear-gradient(45deg, transparent 75%, #ccc 75%),
-    linear-gradient(-45deg, transparent 75%, #ccc 75%);
-  background-size: 10px 10px;
-  background-position: 0 0, 0 5px, 5px -5px, -5px 0px;
-}
-
-/* --- CSS Snippets  --- */
-
-.cm-snippets-container {
-  margin-bottom: 20px;
-}
-
-.cm-snippets-container h3 {
-  margin-top: -10px;
-  margin-bottom: 15px;
-}
-
-.cm-last-option-item {
-  margin-bottom: -20px;
-}
-
-/* ======================================================= */
-
-.tag {
-  color: var(--tag-color) !important;
-  background-color: var(--tag-bg) !important;
-  padding: 2px 8px;
-  border-radius: 12px;
-  text-decoration: none;
-}
-.tag:hover {
-  color: var(--tag-color-hover) !important;
-}
-
-/* 2. Styling for Editor View */
-
-.cm-s-obsidian span.cm-hashtag-begin,
-.cm-s-obsidian span.cm-hashtag-end {
-  color: var(--tag-color) !important;
-  background-color: var(--tag-bg) !important;
-  padding-top: 2px;
-  padding-bottom: 2px;
-}
-
-.cm-s-obsidian span.cm-hashtag-begin {
-  padding-inline-start: 8px;
-  border-start-start-radius: 12px;
-  border-end-start-radius: 12px;
-}
-
-.cm-s-obsidian span.cm-hashtag-end {
-  padding-inline-end: 8px;
-  border-start-end-radius: 12px;
-  border-end-end-radius: 12px;
-}
-
-/* =================================================================== */
-
-.cm-segmented-control button.is-active {
-  background-color: var(--interactive-accent);
-  color: var(--text-on-accent);
-  font-weight: 600;
-}
-
-.cm-segmented-control button:hover:not(.is-active) {
-  background-color: var(--background-modifier-hover);
-}
-
-/* =================================================================== */
-
-.cm-section-heading {
-  margin-top: 24px;
-}
-
-/* --- Add Underline to Modal Titles --- */
-
-.color-master-modal .modal-content h3 {
-  border-bottom: 1px solid var(--background-modifier-border);
-  padding-bottom: 10px;
-  margin-bottom: 20px;
-}
-
-/* ======================================================= */
-
-.color-master-modal .modal-content .setting-item:first-of-type {
-  border-top: none;
-}
-
-.color-master-modal .modal-content h3 {
-  margin-bottom: 3px;
-}
-.color-master-modal .setting-item-description {
-  white-space: normal !important;
-  max-width: 80%;
-}
-
-/* --- Adjust HR (Divider Line) Spacing --- */
-
-.cm-static-sections > hr {
-  margin-top: 3px;
-  margin-bottom: 30px;
-}
-
-/* --- Adjust HR Spacing Inside Modals --- */
-
-.color-master-modal .modal-content > hr {
-  margin-top: 0px;
-  margin-bottom: 0px;
-}
-
-/* ===== Base Notice Styling ===== */
-
-.notice,
-.toast {
-  padding: 8px 12px !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-  max-width: 300px;
-  border-radius: 6px !important;
-  min-width: 120px !important;
-  box-sizing: border-box !important;
-}
-
-/* --- Final Styles for Rule Actions --- */
-.cm-rule-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding-right: 8px;
-  margin-right: 8px;
-  border-right: 1px solid var(--background-modifier-border);
-}
-
-.cm-rule-action-buttons {
-  display: flex;
-  flex-direction: row;
-  gap: 3px;
-}
-
-.cm-rule-action-buttons button.clickable-icon {
-  height: 20px;
-  width: 20px;
-  padding: 0;
-}
-
-.cm-rule-action-buttons button.clickable-icon svg {
-  width: 14px;
-  height: 14px;
-}
-
-.cm-rule-action-buttons button.clickable-icon:not(:disabled):hover {
-  background-color: var(--interactive-accent);
-  color: var(--text-on-accent);
-}
-
-.cm-rule-order-number {
-  font-size: 16px;
-  font-weight: 500;
-  color: var(--text-muted);
-  font-family: monospace;
-}
-
-.cm-color-container {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.cm-color-container .setting-item-control button {
-  height: 24px;
-  width: 24px;
-}
-
-/* --- Styles for the new Tag Input --- */
-
-.cm-tag-input-container {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 8px;
-  border-radius: 5px;
-  border: 1px solid var(--background-modifier-border);
-  background-color: var(--background-primary);
-  cursor: text;
-  min-height: 36px; /* Ensures it has a consistent height */
-  width: 100%;
-}
-
-.cm-tag-input-container:focus-within {
-  border-color: var(--background-modifier-border-focus);
-  box-shadow: 0 0 0 1px var(--background-modifier-border-focus);
-}
-
-.cm-tag-item {
-  display: flex;
-  align-items: center;
-  background-color: var(--interactive-accent);
-  color: var(--text-on-accent);
-  padding: 3px 4px 3px 8px;
-  border-radius: 4px;
-  font-size: 13px;
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-.cm-tag-remove {
-  margin-left: 6px;
-  cursor: pointer;
-  width: 16px;
-  height: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  font-size: 14px;
-  line-height: 1;
-  transition: background-color 0.2s ease;
-}
-
-.cm-tag-remove:hover {
-  background-color: rgba(0, 0, 0, 0.2);
-}
-
-.cm-tag-input-field {
-  flex-grow: 1;
-  border: none;
-  outline: none;
-  background-color: transparent;
-  padding: 4px 2px;
-  min-width: 120px; /* Gives space for typing */
-  color: var(--text-normal);
-}
-
-.cm-tag-input-field:focus {
-  box-shadow: none;
-}
-
-.cm-rule-input-wrapper {
-  flex-grow: 1;
-}
-
-/* --- Fix for Transparent Swatch inside Rules Modal --- */
-
-/* This targets the color input ONLY inside the rules modal when it's transparent */
-.cm-rules-modal .cm-rule-item input[type="color"].is-transparent {
-  background-color: transparent;
-}
-
-.cm-rules-modal
-  .cm-rule-item
-  input[type="color"].is-transparent::-webkit-color-swatch {
-  background-image: linear-gradient(45deg, #808080 25%, transparent 25%),
-    linear-gradient(-45deg, #808080 25%, transparent 25%),
-    linear-gradient(45deg, transparent 75%, #808080 75%),
-    linear-gradient(-45deg, transparent 75%, #808080 75%);
-  background-size: 8px 8px;
-  background-position: 0 0, 0 4px, 4px -4px, -4px 0px;
-  border: 1px solid var(--text-faint);
-}
-
-/* --- Cleaner, Borderless Icons for Rules Modal --- */
-
-.cm-rule-icon-button {
-  background: none !important;
-  border: none !important;
-  box-shadow: none !important;
-  padding: 4px !important;
-  cursor: pointer;
-  color: var(--text-muted);
-  border-radius: 4px;
-  transition: background-color 0.2s ease, color 0.2s ease;
-}
-
-.cm-rule-icon-button:hover:not(.mod-warning) {
-  background-color: var(--background-modifier-hover) !important;
-  color: var(--text-normal);
-}
-
-.cm-rule-icon-button.mod-warning:hover {
-  background-color: var(--interactive-error) !important;
-  color: var(--text-on-accent) !important;
-}
-
-.cm-rule-icon-button.mod-warning {
-  color: var(--text-muted);
-}
-
-/* Drag handle (three lines) */
-.cm-drag-handle {
-  cursor: grab;
-  color: var(--text-faint);
-  display: flex;
-  align-items: center;
-  padding: 6px;
-  border-radius: 6px;
-  font-weight: 600;
-  user-select: none;
-}
-
-.cm-drag-handle:hover {
-  color: var(--text-normal);
-  background-color: var(--background-modifier-hover);
-}
-
-.cm-rule-ghost {
-  opacity: 0.75;
-  transform: scale(0.99);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
-  transition: transform 0.12s ease;
-}
-
-.cm-rule-item.newly-added {
-  animation: fadeInScale 0.35s ease-out;
-}
-
-@keyframes fadeInScale {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-.cm-rule-item.removing {
-  animation: fadeOutSlide 0.12s ease-in forwards;
-}
-
-@keyframes fadeOutSlide {
-  from {
-    opacity: 1;
-    transform: translateX(0);
-  }
-  to {
-    opacity: 0;
-    transform: translateX(20px);
-  }
-}
-
-/* ==================================================== */
-
-.cm-drag-handle {
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  padding: 0 !important;
-  opacity: 0.6;
-  cursor: grab;
-}
-
-.cm-drag-handle:hover {
-  opacity: 1;
-}
-
-/* Ensure official variables apply in editor & preview */
-
-/* Inline code */
-.cm-s-obsidian span.cm-inline-code,
-.markdown-preview-view code:not(pre code) {
-  color: var(--code-normal) !important;
-  background-color: var(--code-background) !important;
-}
-
-/* Highlighted text */
-.cm-s-obsidian span.cm-highlight,
-.markdown-preview-view mark,
-.markdown-preview-view .highlight {
-  background-color: var(--text-highlight-bg, #ffff0066) !important;
-}
-
-/* ==================================================== */
-
-.cm-search-icon svg {
-  width: 16px;
-  height: 16px;
-}
-
-.cm-search-wrapper .cm-search-input {
-  width: 100%;
-  padding: 8px 12px 8px 38px !important;
-  background-color: var(--background-secondary);
-  border: 1px solid var(--background-modifier-border);
-  border-radius: 8px;
-  color: var(--text-normal);
-  font-size: 14px;
-  transition: all 0.2s ease-in-out;
-}
-
-.cm-search-wrapper .cm-search-input:focus {
-  outline: none;
-  border-color: var(--interactive-accent);
-  box-shadow: 0 0 0 2px rgba(0, 170, 255, 0.2);
-}
-
-/* ==================================================== */
-
-.cm-duplicate-modal-icon {
-  position: relative;
-  top: -2px;
-}
-
-.cm-duplicate-modal-icon svg {
-  width: 22px;
-  height: 22px;
-  color: var(--interactive-warning);
-}
-
-.cm-duplicate-modal-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  border-bottom: 1px solid var(--background-modifier-border);
-  padding-bottom: 10px;
-  margin-bottom: 5px;
-}
-
-.cm-duplicate-modal .setting-item {
-  margin-top: -10px;
-  border-top: none;
-}
-
-.color-master-modal .cm-duplicate-modal-header h3 {
-  margin-top: 0;
-  margin-bottom: 0;
-  border-bottom: none;
-}
-
-.cm-duplicate-modal-content h3 {
-  margin-top: 0;
-  margin-bottom: 8px;
-}
-
-.cm-duplicate-modal strong {
-  color: var(--text-accent);
-  font-weight: 600;
-}
-
-.cm-duplicate-modal .setting-item-description {
-  line-height: 1.4;
-  margin-bottom: 5px;
-}
-
-.cm-duplicate-modal .setting-item {
-  border-top: none;
-}
-
-/* --- New layout for the Notification Rules window --- */
-
-.cm-rules-modal-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  border-bottom: 1px solid var(--background-modifier-border);
-  padding-bottom: 10px;
-  margin-bottom: 15px;
-}
-
-.color-master-modal .cm-rules-modal-header h3 {
-  border-bottom: none;
-  margin-top: 0;
-  margin-bottom: 0;
-  padding-bottom: 0;
-}
-
-.cm-rules-modal-header-icon svg {
-  width: 22px;
-  height: 22px;
-  color: var(--text-accent);
-}
-
-.cm-rules-modal-header-icon {
-  position: relative;
-  top: 3.5px;
-}
-
-.cm-rules-modal-desc {
-  font-size: var(--font-ui-smaller);
-  color: var(--text-muted);
-  margin-top: -5px;
-  margin-bottom: 20px;
-  line-height: 1.5;
-}
-
-/* --- Animation to alert the user when typing a duplicate word --- */
-
-.cm-tag-item.cm-tag-duplicate-flash {
-  animation: cm-flash-red 1s ease-out, cm-shake 0.5s ease-in-out;
-}
-
-@keyframes cm-flash-red {
-  0% {
-    background-color: var(--interactive-error);
-  }
-  100% {
-    background-color: var(--interactive-accent);
-  }
-}
-
-/* Definition of light vibration animation */
-@keyframes cm-shake {
-  10%,
-  90% {
-    transform: translateX(-1px);
-  }
-  20%,
-  80% {
-    transform: translateX(1px);
-  }
-  30%,
-  50%,
-  70% {
-    transform: translateX(-3px);
-  }
-  40%,
-  60% {
-    transform: translateX(3px);
-  }
-}
-
-/* --- Color Master: Blockquote Background Support --- */
-.markdown-preview-view blockquote,
-.cm-s-obsidian span.cm-quote {
-  background-color: var(--blockquote-bg) !important;
-}
-
-/* --- Variables to control the size of the clip list --- */
-:root {
-  --cm-snippet-row-min-height: 40px;
-  --cm-snippet-toggle-scale: 0.85;
-  --cm-snippet-icon-size: 18px;
-  --cm-snippet-drag-area-spacing: 4px;
-  --cm-snippet-handle-vertical-nudge: 2px;
-}
-/* -------------------------------------------------- */
-
-/* --- Final formatting improvements to the Snippets and Rules lists --- */
-
-.cm-rule-item {
-  align-items: center !important;
-}
-
-.color-master-settings-tab .cm-snippet-item.setting-item {
-  align-items: center !important;
-  min-height: var(--cm-snippet-row-min-height);
-  padding-top: 4px !important;
-  padding-bottom: 4px !important;
-  transition: transform 0.16s ease;
-  gap: 4px !important;
-}
-
-.cm-snippet-item .setting-item-info {
-  display: flex;
-  align-items: center;
-}
-
-/* Snippet specific edit to add space to handle */
-
-.cm-snippet-item {
-  padding-left: 10px !important;
-}
-
-/* --- (Modified) Control the size of the icons and the activation button --- */
-
-.cm-snippet-item .checkbox-container {
-  transform: scale(var(--cm-snippet-toggle-scale));
-}
-.cm-snippet-item .setting-item-control button .svg-icon {
-  width: var(--cm-snippet-icon-size);
-  height: var(--cm-snippet-icon-size);
-}
-/* ------------------------------------------------- */
-
-/* Make the background of icon buttons transparent and consistent */
-.cm-snippet-item .setting-item-control button {
-  background-color: transparent;
-  border: none;
-  box-shadow: none;
-  color: var(--text-muted);
-  padding: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 28px;
-  width: 28px;
-}
-
-.cm-snippet-item .setting-item-control button:hover {
-  background-color: var(--background-modifier-hover);
-  color: var(--text-normal);
-}
-
-/* Drag handle container formats (for clippings) */
-.cm-snippet-drag-container {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-right: var(--cm-snippet-drag-area-spacing);
-}
-
-/* Vertical line layout */
-.cm-snippet-divider {
-  color: var(--background-modifier-border);
-  font-size: 16px;
-  opacity: 0.8;
-}
-
-/* Serial Number Format (for Clips) */
-.cm-snippet-order-number {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-muted);
-  width: auto;
-  padding-left: 6px;
-  text-align: center;
-}
-
-/* Drag icon format (for clippings) */
-.cm-snippet-drag-handle {
-  cursor: grab;
-  color: var(--text-faint);
-  opacity: 0.7;
-  position: relative;
-  top: var(--cm-snippet-handle-vertical-nudge);
-}
-.cm-snippet-drag-handle:hover {
-  opacity: 1;
-  color: var(--text-normal);
-}
-
-/* Format the "ghost" element while dragging (for clippings) */
-.cm-snippet-ghost {
-  opacity: 0.75;
-  transform: scale(0.99);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
-  transition: transform 0.12s ease;
-}
-
-/* To remove the white background while dragging the clip */
-.cm-snippet-item.cm-snippet-dragged {
-  background-color: var(--background-secondary) !important;
-}
-
-/* --- Notification Rules Window Fixes --- */
-.cm-rule-item .cm-rule-actions {
-  display: flex;
-  align-items: center;
-  align-self: stretch;
-}
-.cm-rule-item .cm-rule-input-wrapper {
-  display: flex;
-  align-items: center;
-}
-
-/* --- Other formats for clippings --- */
+/* --- CSS Snippets List --- */
 .cm-snippets-header {
   display: flex;
   justify-content: space-between;
@@ -1252,17 +2143,29 @@ body.color-master-rtl .notice {
   margin: 0;
   white-space: nowrap;
 }
-.cm-snippets-header .setting-item.cm-snippets-add-button {
+.cm-snippets-header .cm-snippets-add-button.setting-item {
   border: none;
   padding: 0;
   margin: 0;
 }
+.cm-snippets-header .cm-snippets-add-button.setting-item button {
+  background-color: transparent;
+  border: 1px solid var(--interactive-accent);
+  color: var(--interactive-accent);
+  transition: all 0.2s ease-in-out;
+}
+.cm-snippets-header .cm-snippets-add-button.setting-item button:hover {
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+
 .cm-snippets-list-container {
   display: flex;
   flex-direction: column;
   gap: 8px;
   margin-bottom: 20px;
 }
+
 .cm-snippets-empty-state {
   color: var(--text-muted);
   font-style: italic;
@@ -1270,431 +2173,110 @@ body.color-master-rtl .notice {
   text-align: center;
 }
 
-/* ======================================================= */
-
-.cm-snippet-item .setting-item-control button,
-.cm-snippet-item .setting-item-control button .svg-icon {
-  transition: all 0.2s ease-in-out;
+.cm-snippet-item.setting-item {
+  align-items: center !important;
+  min-height: 40px;
+  padding: 4px 10px !important;
+  transition: transform 0.16s ease;
+  gap: 4px !important;
 }
-
-.cm-snippet-item .setting-item-control button.is-success {
-  color: #00ff08;
-}
-
-.cm-snippet-item .setting-item-control button.is-success .svg-icon {
-  transform: scale(1.2);
-}
-
-.cm-snippet-item .setting-item-info {
+.cm-snippet-item.setting-item .setting-item-info {
   flex: 1;
   min-width: 0;
   margin-right: 10px;
 }
-
-.cm-snippet-item .setting-item-control {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-/* ======================================================= */
-
-.cm-add-variable-setting.setting-item {
-  border-bottom: 1px solid var(--background-modifier-border);
-}
-
-.color-master-settings-tab > hr {
-  border: none;
-  height: 1px;
-  background-color: var(--background-modifier-border);
-  margin: -1px 0px;
-}
-
-/* --- Fixed some RTL support bugs in new languages. --- */
-
-.modal-container:has(.color-master-settings-tab[dir="rtl"]) .modal,
-.modal-container:has(.color-master-modal[dir="rtl"]) .modal {
-  direction: rtl;
-}
-
-[dir="rtl"] .modal-content h3,
-[dir="rtl"] .modal-content p,
-[dir="rtl"] .modal-content label,
-[dir="rtl"] .setting-item-name,
-[dir="rtl"] .setting-item-description {
-  text-align: right !important;
-}
-
-[dir="rtl"] .modal-content .setting-item {
-  flex-direction: row-reverse !important;
-}
-
-[dir="rtl"] .modal-button-container {
-  flex-direction: row-reverse !important;
-  justify-content: flex-end !important;
-}
-
-[dir="rtl"] .color-master-text-input {
-  margin-right: 8px;
-  margin-left: 0;
-}
-
-.color-master-modal,
-.color-master-modal .modal-content,
-.cm-plugin-modal,
-.cm-modal {
-  display: block;
-  box-sizing: border-box;
-}
-
-.color-master-modal .setting-item:not(.cm-hidden),
-.cm-plugin-modal .setting-item:not(.cm-hidden),
-.modal-content .setting-item:not(.cm-hidden),
-.modal-content .setting-row:not(.cm-hidden) {
-  display: flex !important;
-  width: 100% !important;
-  align-items: center !important;
-  gap: 10px !important;
-  margin-bottom: 0px !important;
-  box-sizing: border-box !important;
-  min-width: 0 !important;
-}
-
-:dir(ltr) .color-master-modal .setting-item,
-:dir(ltr) .cm-plugin-modal .setting-item {
-  flex-direction: row !important;
-}
-:dir(ltr) .color-master-modal .setting-item > .setting-label,
-:dir(ltr) .cm-plugin-modal .setting-item > .setting-label {
-  order: 1 !important;
-}
-:dir(ltr) .color-master-modal .setting-item > .setting-item-control,
-:dir(ltr) .cm-plugin-modal .setting-item > .setting-item-control {
-  order: 2 !important;
-  flex: 1 1 auto !important;
-  min-width: 0 !important;
-}
-
-:dir(rtl) .color-master-modal .setting-item,
-:dir(rtl) .cm-plugin-modal .setting-item {
-  flex-direction: row !important;
-}
-:dir(rtl) .color-master-modal .setting-item > .setting-label,
-:dir(rtl) .cm-plugin-modal .setting-item > .setting-label {
-  order: 2 !important;
-}
-:dir(rtl) .color-master-modal .setting-item > .setting-item-control,
-:dir(rtl) .cm-plugin-modal .setting-item > .setting-item-control {
-  order: 1 !important;
-  flex: 1 1 auto !important;
-  min-width: 0 !important;
-}
-
-.color-master-modal .modal-content h3,
-.color-master-modal .modal-content p,
-.color-master-modal .modal-content label,
-.color-master-modal .setting-item .setting-item-description,
-.cm-plugin-modal .modal-content h3,
-.cm-plugin-modal .modal-content p {
-  unicode-bidi: isolate !important;
-}
-
-:dir(rtl) .color-master-modal .modal-content h3,
-:dir(rtl) .color-master-modal .modal-content p,
-:dir(rtl) .color-master-modal .modal-content label,
-:dir(rtl) .color-master-modal .setting-item .setting-item-description {
-  direction: rtl !important;
-  text-align: right !important;
-}
-
-:dir(ltr) .color-master-modal .modal-content h3,
-:dir(ltr) .color-master-modal .modal-content p,
-:dir(ltr) .color-master-modal .modal-content label,
-:dir(ltr) .color-master-modal .setting-item .setting-item-description {
-  direction: ltr !important;
-  text-align: left !important;
-}
-
-.color-master-modal .modal-button-container,
-.cm-plugin-modal .modal-button-container,
-.modal-button-container,
-.modal-footer,
-.modal-actions,
-.modal-buttons {
-  display: flex !important;
-  width: 100% !important;
-  box-sizing: border-box !important;
-  gap: 8px !important;
-  margin-top: 12px !important;
-  padding-top: 6px !important;
-  flex-wrap: wrap !important;
-  align-items: center !important;
-}
-
-:dir(ltr) .modal-button-container,
-:dir(ltr) .modal-footer,
-:dir(ltr) .modal-actions,
-:dir(ltr) .modal-buttons {
-  justify-content: flex-end !important;
-}
-
-:dir(rtl) .modal-button-container,
-:dir(rtl) .modal-footer,
-:dir(rtl) .modal-actions,
-:dir(rtl) .modal-buttons {
-  justify-content: flex-start !important;
-}
-
-.modal-button-container button,
-.modal-footer button,
-.modal-actions button,
-.modal-buttons button {
-  min-width: 84px !important;
-  padding: 6px 10px !important;
-  white-space: nowrap !important;
-  align-self: center !important;
-}
-
-body.color-master-rtl .color-master-modal .modal-content h3,
-body.color-master-rtl .color-master-modal .modal-content p,
-body.color-master-rtl
-  .color-master-modal
-  .setting-item
-  .setting-item-description {
-  direction: rtl !important;
-  unicode-bidi: isolate !important;
-  text-align: right !important;
-}
-
-body.color-master-rtl .color-master-modal .modal-content {
-  direction: rtl;
-}
-
-body.color-master-rtl .color-master-modal .modal-content h3,
-body.color-master-rtl .color-master-modal .modal-content p {
-  text-align: right;
-}
-
-/* ---  Notification Rules Window Formats --- */
-
-.cm-rules-modal .setting-item {
-  border: none;
-}
-
-.cm-rules-container {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-top: 16px;
-  border-top: 1px solid var(--background-modifier-border);
-  padding-top: 16px;
-}
-
-.cm-rule-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px;
-  border-radius: 6px;
-  background-color: var(--background-secondary);
-}
-
-.cm-rule-item .text-input {
-  flex-grow: 1;
-}
-
-.cm-regex-container {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: var(--font-ui-smaller);
-  color: var(--text-muted);
-}
-
-/* Corrected the interface layout for the LTR language in Obsidian Arabic. */
-
-.color-master-settings-tab[dir="ltr"] {
-  direction: ltr !important;
-}
-
-.color-master-settings-tab[dir="ltr"] .setting-item {
-  flex-direction: row !important;
-}
-
-.color-master-settings-tab[dir="ltr"] h2,
-.color-master-settings-tab[dir="ltr"] h3,
-.color-master-settings-tab[dir="ltr"] .setting-item-name,
-.color-master-settings-tab[dir="ltr"] .setting-item-description {
-  text-align: left !important;
-}
-
-.color-master-settings-tab[dir="ltr"] .setting-item-info {
-  margin-right: 10px !important;
-  margin-left: 0 !important;
-}
-
-.color-master-settings-tab[dir="ltr"] .cm-search-container,
-.color-master-settings-tab[dir="ltr"] .cm-profile-actions,
-.color-master-settings-tab[dir="ltr"] .cm-snippets-header {
-  flex-direction: row !important;
-}
-
-.color-master-settings-tab[dir="ltr"] .cm-search-icon {
-  left: 10px !important;
-  right: auto !important;
-}
-
-.color-master-settings-tab[dir="ltr"] .cm-search-input {
-  padding: 8px 12px 8px 38px !important;
-}
-
-.color-master-settings-tab[dir="ltr"] .cm-accessibility-checker {
-  margin-left: 10px !important;
-  margin-right: 0 !important;
-}
-
-.cm-search-icon-button:hover {
-  opacity: 1;
-  background-color: var(--background-modifier-hover) !important;
-}
-
-/* Makes all icons in the profile line transparent and with a uniform design. */
-.setting-item-control .cm-control-button {
-  background-color: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  color: var(--text-normal);
-  transition: all 0.2s ease-in-out;
-}
-
-.setting-item-control .cm-control-button:hover {
-  background-color: var(--background-modifier-hover) !important;
-  color: var(--text-normal);
-  border-color: var(--background-modifier-border-hover) !important;
-}
-
-/* --- Modify to make controls transparent and uniform design --- */
-
-/* Target all required buttons and dropdowns to make transparent */
-.color-master-settings-tab .cm-profile-action-btn,
-.color-master-settings-tab .cm-add-variable-setting button,
-.color-master-settings-tab .setting-item-control select,
-.color-master-settings-tab .cm-search-small {
-  background-color: transparent;
-  border: 1px solid var(--background-modifier-border); /* Light border for clarity */
-  box-shadow: none;
-  transition: all 0.2s ease-in-out;
-}
-
-/* * Add a simple effect when the mouse is hovered over elements. */
-.color-master-settings-tab .cm-profile-action-btn:hover,
-.color-master-settings-tab .cm-add-variable-setting button:hover,
-.color-master-settings-tab .setting-item-control select:hover,
-.color-master-settings-tab .cm-search-small:hover {
-  background-color: var(--background-modifier-hover);
-  border-color: var(--background-modifier-border-hover);
-}
-
-/* * A special modification for buttons with a distinct color (blue and green)
-* To preserve their color, we'll make them transparent
-*/
-.color-master-settings-tab .cm-profile-action-btn.mod-cta {
-  border-color: var(--interactive-accent);
-  color: var(--interactive-accent);
-}
-
-.color-master-settings-tab .cm-profile-action-btn.mod-cta:hover {
-  background-color: var(--interactive-accent);
-  color: var(--text-on-accent);
-}
-
-/* Make the Create Snippet button transparent */
-.cm-snippets-header .cm-snippets-add-button button {
-  background-color: transparent;
-  border: 1px solid var(--interactive-accent);
-  color: var(--interactive-accent);
-  transition: all 0.2s ease-in-out;
-}
-.cm-snippets-header .cm-snippets-add-button button:hover {
-  background-color: var(--interactive-accent);
-  color: var(--text-on-accent);
-}
-
-/* Make color input fields transparent. */
-.color-master-text-input {
-  background-color: transparent;
-  border: 1px solid var(--background-modifier-border);
-}
-.color-master-text-input:focus {
-  border-color: var(--background-modifier-border-focus);
-}
-
-/* Slider design */
-.color-master-settings-tab input[type="range"] {
-  -webkit-appearance: none;
-  appearance: none;
-  background: transparent;
-  cursor: pointer;
-  width: 100px;
-}
-/* --- Track following slider --- */
-.color-master-settings-tab input[type="range"]::-webkit-slider-runnable-track {
-  background-color: var(--background-modifier-border);
-  height: 4px;
-  border-radius: 4px;
-}
-.color-master-settings-tab input[type="range"]::-moz-range-track {
-  background-color: var(--background-modifier-border);
-  height: 4px;
-  border-radius: 4px;
-}
-/* --- Slider handle --- */
-.color-master-settings-tab input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  margin-top: 0px;
-  background-color: var(--text-muted);
-  height: 16px;
-  width: 16px;
-  border-radius: 50%;
-  border: 2px solid var(--background-primary);
-}
-.color-master-settings-tab input[type="range"]::-webkit-slider-thumb:hover {
-  background-color: var(--text-normal);
-}
-.color-master-settings-tab input[type="range"]::-moz-range-thumb {
-  background-color: var(--text-muted);
-  height: 16px;
-  width: 16px;
-  border-radius: 50%;
-  border: 2px solid var(--background-primary);
-}
-.color-master-settings-tab input[type="range"]::-moz-range-thumb:hover {
-  background-color: var(--text-normal);
-}
-
-/* Make color input fields transparent */
-
-.color-master-settings-tab .color-master-text-input {
-  background-color: transparent !important;
-  border: 1px solid var(--background-modifier-border) !important;
-  box-shadow: none !important;
-}
-
-/* --- Styles to bring Profile Manager buttons closer --- */
-.cm-profile-manager-controls .setting-item-control button {
-  margin-left: -2px;
-  margin-right: -2px;
-}
-
-/* --- Snippet Name Container --- */
-.cm-snippet-item .setting-item-name {
+.cm-snippet-item.setting-item .setting-item-name {
   display: flex;
   align-items: center;
   gap: 8px;
 }
+.cm-snippet-item.setting-item .setting-item-control {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.cm-snippet-item.setting-item .setting-item-control .checkbox-container {
+  transform: scale(0.85);
+}
+.cm-snippet-item.setting-item .setting-item-control button {
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+  color: var(--text-muted);
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  width: 28px;
+  transition: all 0.2s ease-in-out;
+}
+.cm-snippet-item.setting-item .setting-item-control button .svg-icon {
+  width: 18px;
+  height: 18px;
+  transition: all 0.2s ease-in-out;
+}
+.cm-snippet-item.setting-item .setting-item-control button:hover {
+  background-color: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+.cm-snippet-item.setting-item .setting-item-control button.is-success {
+  color: #00ff08;
+}
+.cm-snippet-item.setting-item .setting-item-control button.is-success .svg-icon {
+  transform: scale(1.2);
+}
+.cm-snippet-item.setting-item {
+  /* Drag Handle & Divider */
+}
+.cm-snippet-item.setting-item .cm-snippet-drag-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 4px;
+}
+.cm-snippet-item.setting-item .cm-snippet-divider {
+  color: var(--background-modifier-border);
+  font-size: 16px;
+  opacity: 0.8;
+}
+.cm-snippet-item.setting-item .cm-snippet-order-number {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  width: auto;
+  padding-left: 6px;
+  text-align: center;
+}
+.cm-snippet-item.setting-item .cm-snippet-drag-handle {
+  cursor: grab;
+  color: var(--text-faint);
+  opacity: 0.7;
+  position: relative;
+  top: 2px;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+.cm-snippet-item.setting-item .cm-snippet-drag-handle:hover {
+  opacity: 1;
+  color: var(--text-normal);
+}
+.cm-snippet-item.setting-item {
+  /* Drag States */
+}
+.cm-snippet-item.setting-item.cm-snippet-ghost {
+  opacity: 0.75;
+  transform: scale(0.99);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+  transition: transform 0.12s ease;
+}
+.cm-snippet-item.setting-item.cm-snippet-dragged {
+  background-color: var(--background-secondary) !important;
+}
 
-/* --- Global Snippet Badge --- */
+/* --- Badges --- */
 .cm-snippet-global-badge {
   display: inline-block;
   font-size: 9px;
@@ -1709,862 +2291,102 @@ body.color-master-rtl .color-master-modal .modal-content p {
   position: relative;
   top: 1px;
 }
-/* ======================== */
 
-.cm-import-textarea {
-  width: 100%;
-  margin-bottom: 15px;
-}
-
-.modal-button-container {
-  justify-content: flex-end;
-}
-
-/* For modals.ts */
-.cm-large-textarea {
-  width: 100%;
-}
-
-.cm-rules-header {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 15px;
-}
-
-.cm-rules-header p.cm-rules-modal-desc {
-  margin-bottom: 0;
-  flex-grow: 1;
-}
-
-.cm-rules-add-button-setting {
-  padding: 0;
-  border-top: none;
-}
-
-.cm-theme-warning-icon {
-  display: inline-block;
-  margin-left: 8px; /* Spacing from the element next to it */
-  color: var(--interactive-warning);
-  cursor: help; /* Change cursor to 'help' */
-  vertical-align: middle; /* Vertically align with the text */
-}
-
-/* RTL support */
-.is-rtl .cm-theme-warning-icon {
-  margin-left: 0;
-  margin-right: 8px;
-}
-
-.cm-theme-warning-icon svg {
-  width: 16px; /* Appropriate icon size */
-  height: 16px;
-  position: relative;
-  top: -1px; /* Fine-tuning vertical position */
-}
-/* Fix for the double border and excess space in the theme import modal */
-.color-master-modal .cm-theme-importer-setting.setting-item {
-  border-top: none; /* Remove the top border that causes the double line */
-  padding-top: 0;
-  margin-top: 12px; /* Reduce top margin to fix the visual gap */
-  margin-bottom: 20px; /* Add bottom spacing to better organize the layout */
-}
-/* Style the warning message in the CSS import modal */
-.cm-modal-warning-note {
-  font-size: var(--font-ui-smaller);
-  color: var(--interactive-warning);
-  margin-bottom: 10px;
-  margin-top: 4px;
-  text-align: center;
-}
-
-/* Fix hover/active color clash on search buttons */
-.color-master-settings-tab .cm-search-small.is-active:hover {
-  background-color: var(
-    --interactive-accent-hover
-  ) !important; /* Slightly lighter blue color on hover */
-  color: var(--text-on-accent);
-}
-
-/* Pointer for activated buttons only */
-.color-master-settings-tab .cm-control-button:not([disabled]),
-.color-master-settings-tab .cm-profile-action-btn,
-.color-master-settings-tab .cm-settings-header-icon,
-.color-master-settings-tab .cm-snippet-item .setting-item-control button,
-.color-master-settings-tab .cm-snippets-add-button button,
-.color-master-settings-tab .cm-add-variable-setting button,
-.color-master-settings-tab .cm-theme-toggle-icon,
-.color-master-settings-tab select {
-  cursor: pointer;
-}
-
-/* Not-Allowed indicator for disabled buttons */
-.color-master-settings-tab .cm-control-button[disabled],
-.color-master-settings-tab .cm-control-button.is-disabled {
-  cursor: not-allowed;
-}
-
-/* Unified dropdown styling with theme-aware arrows */
-.color-master-settings-tab .setting-item-control select,
-.color-master-modal .setting-item-control select,
-.color-master-settings-tab .cm-search-controls select {
-  color: var(--text-normal) !important;
-  -webkit-appearance: none !important;
-  appearance: none !important;
-  background-repeat: no-repeat !important;
-}
-
-/* --- fix for highlighted tags with underscores in Live Preview --- */
-
-.cm-s-obsidian span.cm-hashtag,
-.cm-s-obsidian span.cm-hashtag-begin,
-.cm-s-obsidian span.cm-hashtag-end {
-  background-color: var(--tag-bg) !important;
-  color: var(--tag-color) !important;
-  padding-top: 2px;
-  padding-bottom: 2px;
-}
-
-.cm-s-obsidian span.cm-hashtag {
-  border-radius: 0;
-  padding-left: 0;
-  padding-right: 0;
-}
-
-.cm-s-obsidian span.cm-hashtag-begin {
-  padding-inline-start: 8px;
-  border-start-start-radius: 12px;
-  border-end-start-radius: 12px;
-}
-
-.cm-s-obsidian span.cm-hashtag-end {
-  padding-inline-end: 8px;
-  border-start-end-radius: 12px;
-  border-end-end-radius: 12px;
-}
-
-/* --- Styles for Advanced Settings Section Layout --- */
-
-/* Main grid container for the cards */
-.cm-advanced-settings-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr; /* Two equal columns */
-  gap: 15px; /* Space between cards */
-  margin-top: 15px;
-  margin-bottom: 20px;
-}
-
-/* Style for each setting card (WITHOUT the extra background) */
-.cm-advanced-settings-grid .setting-item.cm-card-with-header-control {
-  border: 1px solid var(--background-modifier-border);
-  border-radius: var(--input-border-radius);
-  padding: 15px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
-
-/* The header of the card (name + control) */
-.cm-card-with-header-control .setting-item-name {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  margin-bottom: 8px; /* Space between header and description */
-}
-
-/* The description text inside the card */
-.cm-card-with-header-control .setting-item-description {
-  margin: 0;
-  flex-grow: 1;
-  line-height: 1.5;
-  color: var(--text-muted);
-}
-
-/* THE FIX for disappearing controls: Use '>' to hide ONLY the original empty container */
-.cm-card-with-header-control > .setting-item-control {
-  display: none;
-}
-
-/* Style for the "Add New Variable" button to make it transparent */
-.cm-add-variable-button {
-  background-color: transparent !important;
-  border: 1px solid var(--interactive-accent) !important;
-  color: var(--interactive-accent) !important;
-  transition: all 0.2s ease-in-out;
-  cursor: pointer;
-}
-
-.cm-add-variable-button:hover {
-  background-color: var(--interactive-accent) !important;
-  color: var(--text-on-accent) !important;
-}
-
-/* Style for the Reset Plugin icon button */
-.cm-reset-plugin-icon-button {
-  background-color: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  color: var(--text-muted) !important;
-  padding: 4px !important;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-s);
-  transition: all 0.2s ease-in-out;
-  cursor: pointer;
-}
-
-.cm-reset-plugin-icon-button:hover {
-  background-color: var(--interactive-error) !important;
-  color: var(--text-on-accent) !important;
-}
-
-/* --- New Search Bar UI --- */
-.cm-search-setting.setting-item {
-  border-top: none;
-  padding: 8px 0;
-  margin-bottom: 12px;
-}
-
-.cm-search-setting .setting-item-control {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.cm-search-input-container {
-  flex-grow: 1;
-  position: relative;
-}
-
-.cm-search-input-icon {
-  position: absolute;
-  top: 50%;
-  left: 10px;
-  transform: translateY(-50%);
-  color: var(--text-muted);
-  pointer-events: none;
-  top: calc(50% + 2px) !important;
-}
-
-.color-master-settings-tab[dir="rtl"] .cm-search-input-icon {
-  left: auto;
-  right: 10px;
-}
-
-.cm-search-input-container .cm-search-input {
-  width: 100%;
-  padding-left: 36px !important;
-}
-
-.color-master-settings-tab[dir="rtl"]
-  .cm-search-input-container
-  .cm-search-input {
-  padding-left: 12px !important;
-  padding-right: 36px !important;
-}
-
-.cm-search-actions {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.cm-search-action-btn {
-  background-color: transparent;
-  border: none;
-  box-shadow: none;
-  color: var(--text-muted);
-  opacity: 0.7;
-  cursor: pointer;
-  padding: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-s);
-  transition: all 0.1s ease-in-out;
-}
-
-.cm-search-action-btn:hover {
-  background-color: var(--background-modifier-hover);
-  opacity: 1;
-}
-
-.cm-search-action-btn.is-active {
-  background-color: var(--interactive-accent);
-  color: var(--text-on-accent);
-  opacity: 1;
-}
-
-.cm-search-action-btn.is-active:hover {
-  background-color: var(--interactive-accent-hover);
-}
-
-.cm-search-filter-options {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 2px;
-  border-radius: var(--radius-m);
-  background-color: var(--background-secondary);
-  margin-left: 4px;
-}
-
-.cm-search-filter-options.is-hidden {
-  display: none;
-}
-
-.cm-search-action-btn {
-  background-color: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  color: var(--text-muted) !important;
-  opacity: 0.8;
-}
-
-.cm-search-action-btn:hover {
-  background-color: var(--background-modifier-hover) !important;
-  color: var(--text-normal) !important;
-  opacity: 1;
-}
-
-.cm-search-action-btn.is-active {
-  background-color: var(--interactive-accent) !important;
-  color: var(--text-on-accent) !important;
-  opacity: 1;
-}
-
-.cm-search-action-btn.is-active:hover {
-  background-color: var(--interactive-accent-hover) !important;
-}
-
-.cm-search-filter-options {
-  border-radius: 6px !important;
-}
-
-.cm-search-filter-options select.cm-search-small:hover {
-  border-color: var(--background-modifier-border-hover);
-}
-
-.cm-search-filter-options .cm-search-action-btn {
-  background-color: transparent !important;
-  border: none !important;
-  color: var(--text-muted) !important;
-  opacity: 0.7;
-}
-
-.cm-search-filter-options .cm-search-action-btn:hover {
-  opacity: 1;
-  color: var(--text-normal) !important;
-  background-color: var(--background-modifier-hover) !important;
-}
-
-.cm-search-filter-options .cm-search-action-btn .setting-editor-button-text {
-  display: none;
-}
-
-.cm-setting-icon {
-  display: inline-block;
-  margin-right: 5px;
-  position: relative;
-  top: 4px;
-  opacity: 0.7;
-}
-
-.color-master-settings-tab[dir="rtl"] .cm-setting-icon {
-  margin-right: 0;
-  margin-left: 5px;
-}
-
-.cm-search-bar-container {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  margin-bottom: 20px;
-}
-
-.cm-search-filter-options select.cm-search-small {
-  -webkit-appearance: none !important;
-  appearance: none !important;
-  background-repeat: no-repeat !important;
-  background-position: right 8px center !important;
-  padding-right: 30px !important;
-}
-
-.cm-search-filter-options {
-  border: none !important;
-  padding: 0 !important;
-}
-
-/* --- Custom Background Image Styles --- */
-
-body.cm-workspace-background-active {
-  background-image: var(--cm-background-image);
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-}
-
-/* Make key UI layers transparent when background is active */
-body.cm-workspace-background-active .workspace-split.mod-root,
-body.cm-workspace-background-active .workspace-leaf,
-body.cm-workspace-background-active .workspace-leaf-content,
-body.cm-workspace-background-active .view-header,
-body.cm-workspace-background-active .workspace-tab-header-container {
-  background-color: transparent !important;
-}
-
-/* 4. This handles the settings tab background separately IF a background is not on workspace */
-body.cm-settings-background-active .color-master-settings-tab {
-  background-image: var(--cm-background-image);
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-}
-
-/* Add a subtle overlay to modals to improve readability */
-body.cm-workspace-background-active .modal-container .modal {
-  background-color: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(5px);
-}
-
-.cm-control-icon-button {
-  background-color: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  color: var(--text-muted) !important;
-  padding: 4px !important;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-s);
-  transition: all 0.2s ease-in-out;
-  cursor: pointer;
-}
-
-.cm-control-icon-button:hover {
-  background-color: var(--background-modifier-hover) !important;
-  color: var(--text-normal) !important;
-}
-
-.cm-modal .cm-wide-text-input {
-  width: 100%;
-}
-.cm-modal .cm-full-width-control {
-  width: 100%;
-}
-
-/* Make text inputs in modals wider */
-.cm-modal .cm-wide-text-input {
-  width: 100%;
-}
-.cm-modal .cm-full-width-control {
-  width: 100%;
-}
-
-/* Paste box visual feedback on drag-over */
-.cm-paste-box.is-over {
-  border-color: var(--interactive-accent);
-  background-color: var(--background-modifier-hover);
-  color: var(--interactive-accent);
-}
-
-/* --- Image Browser Modal Styles --- */
-.cm-image-browser-modal .modal-content {
-  padding-bottom: 15px;
-}
-
-.cm-image-gallery {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 15px;
-  margin-top: 15px;
-  max-height: 400px;
-  overflow-y: auto;
-  padding: 5px;
-  border: 1px solid var(--background-modifier-border);
-  border-radius: var(--radius-m);
-}
-
-.cm-image-card {
-  display: flex;
-  flex-direction: column;
-  border: 1px solid var(--background-modifier-border);
-  border-radius: var(--radius-s);
-  overflow: hidden;
-  background: var(--background-secondary);
-}
-
-.cm-image-card-preview {
-  width: 100%;
-  height: 80px; /* Keep the fixed height */
-  /* Use contain to ensure the whole SVG is visible without cropping */
-  object-fit: contain;
-  background-color: var(--background-primary);
-  border-bottom: 1px solid var(--background-modifier-border);
-  /* Add some padding in case the SVG is borderless */
-  padding: 3px;
-  box-sizing: border-box; /* Include padding in height */
-}
-
-.cm-image-card-name {
-  font-size: var(--font-ui-smaller);
-  padding: 8px;
-  text-align: center;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  border-bottom: 1px solid var(--background-modifier-border);
-}
-
-.cm-image-card-controls {
-  display: flex;
-  justify-content: space-around;
-  padding: 4px;
-}
-
-.cm-image-card-controls .setting-editor-button {
-  padding: 6px 8px;
-  font-size: 12px;
-  flex-grow: 1;
-  cursor: pointer;
-}
-
-/* Style the delete button in the image card like the main settings delete button */
-.cm-image-card-controls button.mod-warning {
-  background-color: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  color: var(--text-muted) !important;
-  padding: 4px !important;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-s);
-  transition: all 0.2s ease-in-out;
-  cursor: pointer;
-  flex-grow: 0;
-  line-height: 0;
-}
-
-/* Red color only on hover */
-.cm-image-card-controls button.mod-warning:hover {
-  background-color: var(--interactive-error) !important;
-  color: var(--text-on-accent) !important;
-}
-
-/* Ensure the SVG icon size is consistent */
-.cm-image-card-controls button.mod-warning .svg-icon {
-  width: 16px;
-  height: 16px;
-}
-
-.cm-image-card-controls .setting-editor-button.mod-warning:hover {
-  background-color: var(--interactive-error);
-  color: var(--text-on-accent);
-}
-
-.cm-image-browser-empty {
-  text-align: center;
-  padding: 30px;
-  color: var(--text-muted);
-  grid-column: 1 / -1;
-  font-style: italic;
-}
-
-/* Style for the new editable image name */
-.cm-image-card .setting-item.cm-image-card-name-input {
-  border-top: 1px solid var(--background-modifier-border);
-  border-bottom: 1px solid var(--background-modifier-border);
-  padding: 0px 8px;
-  min-height: 0;
-}
-
-.cm-image-card-name-input .setting-item-control {
-  width: 100%;
-}
-
-.cm-image-card .cm-image-card-name-input input[type="text"] {
-  width: 100%;
-  background-color: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  text-align: center;
-  font-size: var(--font-ui-smaller);
-  padding: 8px 0px;
-}
-
-.cm-image-card .cm-image-card-name-input input[type="text"]:focus {
-  background-color: transparent !important;
-  box-shadow: none !important;
-}
-
-/* New Two-Part Input Styles */
-.cm-name-input-container {
-  display: flex;
-  align-items: baseline;
-  justify-content: center;
-  background-color: transparent;
-  border: none;
-  box-shadow: none;
-  border-radius: var(--radius-s);
-  padding: 0;
-  transition: all 0.2s ease-in-out;
-  margin: 0 auto;
-}
-
-/* --- Hover/Focus states for the *whole container* --- */
-
-/* Change text colors on hover/focus */
-.cm-name-input-container:hover .cm-name-input-basename,
-.cm-name-input-container:has(.cm-name-input-basename:focus)
-  .cm-name-input-basename {
-  color: var(--text-normal);
-}
-.cm-name-input-container:hover .cm-name-input-extension,
-.cm-name-input-container:has(.cm-name-input-basename:focus)
-  .cm-name-input-extension {
-  color: var(--text-muted);
-}
-
-.cm-name-input-basename {
-  /* Reset input styles */
-  border: none;
-  outline: none;
-  box-shadow: none;
-  background-color: transparent;
-
-  /* Sizing and text */
-  text-align: right;
-  font-size: var(--font-ui-smaller);
-  color: var(--text-muted);
-
-  /* Make it part of the container */
-  padding: 4px 0 4px 12px;
-  border-top-left-radius: var(--radius-s);
-  border-bottom-left-radius: var(--radius-s);
-
-  /* Sizing & Ellipsis */
-  flex-grow: 1;
-  min-width: 30px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: none;
-}
-
-.cm-name-input-extension {
-  font-size: var(--font-ui-smaller);
-  color: var(--text-faint);
-
-  /* Make it part of the container */
-  padding: 4px 12px 4px 2px;
-  border-top-right-radius: var(--radius-s);
-  border-bottom-right-radius: var(--radius-s);
-  user-select: none;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-/* --- Hover/Focus states for the *whole container* --- */
-
-.cm-name-input-container:hover {
-  background-color: var(--background-modifier-hover) !important;
-}
-
-/* New marching ants animation that moves clockwise */
-@keyframes cm-marching-ants {
-  to {
-    background-position: 10px 0, 100% 10px, -10px 100%, 0 -10px;
+/* --- Animations (Keyframes) --- */
+@keyframes cm-glowing-border {
+  0% {
+    border-image-source: linear-gradient(to right, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3);
+  }
+  14% {
+    border-image-source: linear-gradient(to right, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000);
+  }
+  28% {
+    border-image-source: linear-gradient(to right, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000, #ff7f00);
+  }
+  42% {
+    border-image-source: linear-gradient(to right, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000, #ff7f00, #ffff00);
+  }
+  56% {
+    border-image-source: linear-gradient(to right, #0000ff, #4b0082, #9400d3, #ff0000, #ff7f00, #ffff00, #00ff00);
+  }
+  70% {
+    border-image-source: linear-gradient(to right, #4b0082, #9400d3, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff);
+  }
+  84% {
+    border-image-source: linear-gradient(to right, #9400d3, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082);
+  }
+  100% {
+    border-image-source: linear-gradient(to right, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3);
   }
 }
-
-.cm-paste-box {
-  border: none;
-  border-radius: var(--radius-m);
-  padding: 30px;
-  text-align: center;
-  color: var(--text-muted);
-  background-color: var(--background-secondary);
-  transition: all 0.2s ease-in-out;
-  cursor: pointer;
-  caret-color: transparent;
-  margin-top: 15px;
-
-  /* This creates the border using 4 gradients (top, right, bottom, left) */
-  background-image: linear-gradient(
-      to right,
-      var(--text-faint) 50%,
-      transparent 50%
-    ),
-    linear-gradient(to bottom, var(--text-faint) 50%, transparent 50%),
-    linear-gradient(to right, var(--text-faint) 50%, transparent 50%),
-    linear-gradient(to bottom, var(--text-faint) 50%, transparent 50%);
-  background-repeat: repeat-x, repeat-y, repeat-x, repeat-y;
-  background-size: 10px 2px, 2px 10px, 10px 2px, 2px 10px;
-  background-position: 0 0, 100% 0, 0 100%, 0 0;
+@keyframes cm-border-animation {
+  to {
+    transform: translateX(-25%);
+  }
 }
-
-.cm-paste-box:hover {
-  color: var(--text-normal);
-  background-color: var(--background-modifier-hover);
-  outline: none;
-
-  /* Change border color to blue (static) */
-  background-image: linear-gradient(
-      to right,
-      var(--interactive-accent) 50%,
-      transparent 50%
-    ),
-    linear-gradient(to bottom, var(--interactive-accent) 50%, transparent 50%),
-    linear-gradient(to right, var(--interactive-accent) 50%, transparent 50%),
-    linear-gradient(to bottom, var(--interactive-accent) 50%, transparent 50%);
-
-  /* NO animation here */
-  animation: none;
+@keyframes cm-progress {
+  from {
+    width: 0;
+  }
+  to {
+    width: var(--skill-percentage);
+    opacity: 1;
+  }
 }
-
-.cm-paste-box:focus,
-.cm-paste-box.is-over {
-  color: var(--text-normal);
-  background-color: var(--background-modifier-hover);
-  outline: none;
-
-  /* Change border color to blue AND start animation */
-  background-image: linear-gradient(
-      to right,
-      var(--interactive-accent) 50%,
-      transparent 50%
-    ),
-    linear-gradient(to bottom, var(--interactive-accent) 50%, transparent 50%),
-    linear-gradient(to right, var(--interactive-accent) 50%, transparent 50%),
-    linear-gradient(to bottom, var(--interactive-accent) 50%, transparent 50%);
-
-  /* This is the NEW line to add. It resets the position for the animation */
-  background-position: 0 0, 100% 0, 0 100%, 0 0;
-
-  /* Add animation only on focus or drag-over */
-  animation: cm-marching-ants 0.2s linear infinite;
-}
-
-.cm-name-input-container:hover,
-.cm-name-input-container:has(.cm-name-input-basename:focus) {
-  background-color: transparent !important;
-  box-shadow: none !important;
-}
-
-.cm-profile-list-modal {
-  margin-top: 10px;
-  margin-bottom: 5px;
-}
-.cm-profile-list-modal strong {
-  color: var(--text-accent);
+/* --- UI Elements --- */
+.cm-segmented-control button.is-active {
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
   font-weight: 600;
 }
-
-/* --- Badge for Not Installed Plugin --- */
-.cm-not-installed-badge {
-  display: inline-block;
-  font-size: 9px;
-  font-weight: 600;
-  color: var(--interactive-warning);
-  padding: 1px 6px;
-  border-radius: 10px;
-  border: 1px solid var(--background-modifier-border);
-  background: var(--background-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  position: relative;
-  top: -1px;
-  margin-left: 8px;
-  cursor: help;
+.cm-segmented-control button:hover:not(.is-active) {
+  background-color: var(--background-modifier-hover);
 }
 
-.color-master-settings-tab[dir="rtl"] .cm-not-installed-badge {
-  margin-left: 0;
-  margin-right: 8px;
+.notice,
+.toast {
+  padding: 8px 12px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  max-width: 300px;
+  border-radius: 6px !important;
+  min-width: 120px !important;
+  box-sizing: border-box !important;
 }
 
-/* --- Video Background Styles --- */
-#cm-background-video {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  object-fit: cover;
-  z-index: -1;
-  pointer-events: none;
-  transition: opacity 0.3s ease;
-}
-
-/* Browser window video preview format */
-.cm-image-card-preview[src*=".mp4"],
-.cm-image-card-preview[src*=".webm"] {
-  object-fit: cover;
-}
-
-/* Old background code to become public */
-body.cm-workspace-background-active {
-  background-image: var(--cm-background-image);
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-}
-
-/* --- Split Settings Container Formats --- */
-.cm-settings-group {
-  border-top: 1px solid var(--background-modifier-border);
-  margin-top: 0px;
-  padding-top: 10px;
-}
-
-/* --- Interactive video preview formats --- */
-.cm-media-preview-container {
-  position: relative;
-  width: 100%;
-  height: 80px;
-  background-color: var(--background-primary);
-  border-bottom: 1px solid var(--background-modifier-border);
-  cursor: pointer;
-}
-
-.cm-media-preview-container .cm-image-card-preview {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.cm-media-play-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+/* --- Language Menu (Flyout) --- */
+.cm-flyout-menu-container {
   display: flex;
   align-items: center;
-  justify-content: center;
-  color: white;
-  background-color: rgba(0, 0, 0, 0.4);
-  opacity: 1;
-  transition: opacity 0.2s ease;
+  gap: 8px;
+}
+.cm-flyout-menu-container .cm-flyout-menu-buttons {
+  display: flex;
+  align-items: center;
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  gap: 4px;
+  border-radius: var(--radius-m);
+  border: 1px solid var(--background-modifier-border);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0;
   pointer-events: none;
 }
 
-.cm-media-play-overlay svg {
-  width: 32px;
-  height: 32px;
+.color-master-settings-tab[dir=ltr] .cm-flyout-menu-buttons {
+  transform: translateX(15px);
+}
+.color-master-settings-tab[dir=ltr] .cm-flyout-menu-buttons.is-open {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
 }
 
-.cm-image-card.is-active {
-  border: 2px solid var(--interactive-accent);
-  box-shadow: 0 0 10px var(--interactive-accent);
-  transform: scale(1.02);
-  transition: all 0.2s ease-in-out;
+.color-master-settings-tab[dir=rtl] .cm-flyout-menu-buttons {
+  transform: translateX(-15px);
+}
+.color-master-settings-tab[dir=rtl] .cm-flyout-menu-buttons.is-open {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
 }

@@ -6,6 +6,7 @@ import {
   PluginSettingTab,
   Setting,
   setIcon,
+  SearchComponent,
 } from "obsidian";
 import { DEFAULT_VARS, TEXT_TO_BG_MAP } from "../constants";
 import { t } from "../i18n/strings";
@@ -23,20 +24,23 @@ import { drawOptionsSection } from "./components/options-section";
 import { drawProfileManager } from "./components/profile-manager";
 import { drawCssSnippetsUI } from "./components/snippets-ui";
 import { LanguageSettingsModal } from "./modals";
-import Sortable = require("sortablejs");
+import Sortable from "sortablejs";
+import { loadLanguage } from "../i18n/strings";
+import { CORE_LANGUAGES, LocaleCode } from "../i18n/types";
+import {
+  AddNewLanguageModal,
+  LanguageTranslatorModal,
+  ConfirmationModal,
+  LanguageInfoModal,
+} from "./modals";
 
 export class ColorMasterSettingTab extends PluginSettingTab {
   plugin: ColorMaster;
-  graphViewTempState: Record<string, string> | null;
-  graphViewWorkingState: Record<string, string> | null;
-  graphHeaderButtonsEl: HTMLElement | null;
   searchContainer: HTMLElement;
   searchInput: HTMLInputElement;
   caseToggle: HTMLButtonElement;
   regexToggle: HTMLButtonElement;
   sectionSelect: HTMLSelectElement;
-  searchInfo: HTMLElement;
-  clearBtn: HTMLButtonElement;
   _searchState: {
     query: string;
     regex: boolean;
@@ -44,16 +48,13 @@ export class ColorMasterSettingTab extends PluginSettingTab {
     section: string;
   };
   staticContentContainer: HTMLDivElement;
-  resetPinBtn: ButtonComponent;
-  pinBtn: ButtonComponent;
+  resetPinBtn: ButtonComponent | null = null;
+  pinBtn: ButtonComponent | null = null;
   snippetSortable: Sortable | null;
 
   constructor(app: App, plugin: ColorMaster) {
     super(app, plugin);
     this.plugin = plugin;
-    this.graphViewTempState = null;
-    this.graphViewWorkingState = null;
-    this.graphHeaderButtonsEl = null;
     this.snippetSortable = null;
   }
 
@@ -61,25 +62,59 @@ export class ColorMasterSettingTab extends PluginSettingTab {
     textInput: HTMLInputElement,
     colorPicker: HTMLInputElement
   ) {
-    if (textInput.value.toLowerCase() === "transparent") {
+    const value = textInput.value.toLowerCase().trim();
+
+    if (value === "transparent" || value === "") {
       colorPicker.classList.add("is-transparent");
+      colorPicker.value = "#ffffff";
+    } else if (
+      value.startsWith("#") &&
+      (value.length === 9 || value.length === 5)
+    ) {
+      colorPicker.classList.remove("is-transparent");
+
+      let rgbHex = "#ffffff";
+      if (value.length === 9) {
+        rgbHex = value.substring(0, 7);
+      } else if (value.length === 5) {
+        const r = value[1];
+        const g = value[2];
+        const b = value[3];
+        rgbHex = `#${r}${r}${g}${g}${b}${b}`;
+      }
+
+      try {
+        colorPicker.value = rgbHex;
+      } catch {
+        console.warn(`Color Master: Invalid HEX for color picker: ${rgbHex}`);
+        colorPicker.value = "#ffffff";
+      }
     } else {
       colorPicker.classList.remove("is-transparent");
+      try {
+        colorPicker.value = value;
+      } catch {
+        colorPicker.value = "#ffffff";
+      }
     }
   }
 
   _clearSearchAndFilters() {
     if (!this.searchInput || !this.sectionSelect) return;
 
-    // 1. Clear the search field and reset the drop-down list
     this.searchInput.value = "";
     this.sectionSelect.value = "";
 
-    // 2. Reset the search "state".
     this._searchState.query = "";
     this._searchState.section = "";
 
-    // 3. Update the interface: hide filters and deactivate buttons
+    // Clear saved settings
+    this.plugin.settings.lastSearchQuery = "";
+    this.plugin.settings.lastSearchSection = "";
+    void this.plugin.saveData(this.plugin.settings).catch((err) => {
+      console.error("Failed to save search input state:", err);
+    });
+
     const filterButton = this.containerEl.querySelector(
       'button[data-cm-action="filter"]'
     );
@@ -91,37 +126,48 @@ export class ColorMasterSettingTab extends PluginSettingTab {
     if (filterOptionsContainer)
       filterOptionsContainer.classList.add("is-hidden");
 
-    // 4. Reapply the filter to display everything again
     this._applySearchFilter();
   }
 
   initSearchUI(containerEl: HTMLElement) {
+    // Load saved section here
     this._searchState = {
       query: this.plugin.settings.lastSearchQuery || "",
       regex: false,
       caseSensitive: false,
-      section: "",
+      section: this.plugin.settings.lastSearchSection || "",
     };
 
     const searchBarContainer = containerEl.createDiv({
       cls: "cm-search-bar-container",
     });
-    const originalPlaceholder = t("settings.searchPlaceholder");
 
-    //---1. Input field section---
+    // --- 1. Input field section ---
     const searchInputContainer = searchBarContainer.createDiv({
       cls: "cm-search-input-container",
     });
-    const searchIcon = searchInputContainer.createDiv({
-      cls: "cm-search-input-icon",
+
+    const searchComponent = new SearchComponent(searchInputContainer)
+      .setPlaceholder(t("settings.searchPlaceholder"))
+      .setValue(this._searchState.query)
+      .onChange((value) => {
+        if (this._searchState.regex) return;
+        this._searchState.query = value;
+        this.plugin.settings.lastSearchQuery = value;
+        void this.plugin.saveData(this.plugin.settings).catch((err) => {
+          console.error("Failed to save search/filter reset state:", err);
+        });
+        debouncedFilter();
+      });
+
+    this.searchInput = searchComponent.inputEl;
+
+    this.searchInput.addEventListener("keydown", (e: KeyboardEvent) => {
+      if (e.key === "Enter" && this._searchState.regex) {
+        this._searchState.query = (e.target as HTMLInputElement).value;
+        debouncedFilter();
+      }
     });
-    setIcon(searchIcon, "search");
-    this.searchInput = searchInputContainer.createEl("input", {
-      cls: "cm-search-input",
-      type: "search",
-      placeholder: originalPlaceholder,
-    });
-    this.searchInput.value = this._searchState.query;
 
     // --- 2. Control buttons section ---
     const searchActions = searchBarContainer.createDiv({
@@ -141,14 +187,18 @@ export class ColorMasterSettingTab extends PluginSettingTab {
     this.regexToggle.setAttr("aria-label", t("settings.ariaRegex"));
 
     const filterOptionsContainer = searchActions.createDiv({
-      cls: "cm-search-filter-options is-hidden", // We start by hiding it
+      cls: "cm-search-filter-options is-hidden",
     });
 
-    // --- New code using the official component ---
     const dropdown = new DropdownComponent(filterOptionsContainer)
       .addOption("", t("settings.allSections"))
       .onChange(async (value) => {
         this._searchState.section = value;
+
+        // Save the filter section
+        this.plugin.settings.lastSearchSection = value;
+        await this.plugin.saveData(this.plugin.settings);
+
         filterOptionsContainer.classList.toggle(
           "is-filter-active",
           value !== ""
@@ -156,28 +206,31 @@ export class ColorMasterSettingTab extends PluginSettingTab {
         debouncedFilter();
       });
 
-    // Add the rest of the options to the list
+    // Restore filter state
+    dropdown.setValue(this._searchState.section);
+    if (this._searchState.section) {
+      filterOptionsContainer.classList.remove("is-hidden");
+    }
+
     try {
       Object.keys(DEFAULT_VARS || {}).forEach((category) => {
         let categoryKey: string;
         const lowerCategory = category.toLowerCase();
 
-        if (lowerCategory === "interactive elements") {
+        if (lowerCategory === "interactive elements")
           categoryKey = "interactive";
-        } else if (lowerCategory === "ui elements") {
-          categoryKey = "ui";
-        } else if (lowerCategory === "graph view") {
-          categoryKey = "graph";
-        } else if (lowerCategory === "plugin integrations") {
+        else if (lowerCategory === "ui elements") categoryKey = "ui";
+        else if (lowerCategory === "graph view") categoryKey = "graph";
+        else if (lowerCategory === "plugin integrations")
           categoryKey = "pluginintegrations";
-        } else {
-          categoryKey = lowerCategory.replace(/ /g, "");
-        }
+        else categoryKey = lowerCategory.replace(/ /g, "");
 
         const translatedCategory = t(`categories.${categoryKey}`) || category;
         dropdown.addOption(category, translatedCategory);
       });
-    } catch (e) {}
+    } catch {
+      // ignore invalid category translation
+    }
 
     const activeProfile =
       this.plugin.settings.profiles[this.plugin.settings.activeProfile];
@@ -188,45 +241,19 @@ export class ColorMasterSettingTab extends PluginSettingTab {
       dropdown.addOption("Custom", t("categories.custom"));
     }
 
-    // Add our own format and maintain a reference to the element
     dropdown.selectEl.classList.add("cm-search-small");
     this.sectionSelect = dropdown.selectEl;
-
-    this.clearBtn = filterOptionsContainer.createEl("button", {
-      cls: "cm-search-action-btn",
-    });
-    setIcon(this.clearBtn, "x");
-    this.clearBtn.setAttr("aria-label", t("settings.clear"));
 
     const filterButton = searchActions.createEl("button", {
       cls: "cm-search-action-btn",
     });
-    setIcon(filterButton, "filter");
+    setIcon(filterButton, "sliders-horizontal");
     filterButton.dataset.cmAction = "filter";
 
-    this.searchInfo = searchActions.createEl("div", { cls: "cm-search-info" });
-    this.searchInfo.style.display = "none";
+    // Activate button if section is saved
+    if (this._searchState.section) filterButton.classList.add("is-active");
 
     const debouncedFilter = debounce(() => this._applySearchFilter(), 180);
-
-    this.searchInput.addEventListener("input", (e: Event) => {
-      if (this._searchState.regex) return;
-      const query = (e.target as HTMLInputElement).value;
-      this._searchState.query = query;
-      this.plugin.settings.lastSearchQuery = query;
-      this.plugin.saveData(this.plugin.settings);
-      debouncedFilter();
-    });
-
-    this.searchInput.addEventListener("keydown", (e: KeyboardEvent) => {
-      if (e.key === "Enter") {
-        // Make sure we are in Regex mode before performing the search.
-        if (this._searchState.regex) {
-          this._searchState.query = (e.target as HTMLInputElement).value;
-          debouncedFilter();
-        }
-      }
-    });
 
     this.caseToggle.addEventListener("click", () => {
       this._searchState.caseSensitive = !this._searchState.caseSensitive;
@@ -235,20 +262,13 @@ export class ColorMasterSettingTab extends PluginSettingTab {
     });
 
     this.regexToggle.addEventListener("click", () => {
-      // Toggle Regex State
       this._searchState.regex = !this._searchState.regex;
       this.regexToggle.toggleClass("is-active", this._searchState.regex);
-
-      // Check Regex State to Change Temporary Text
       if (this._searchState.regex) {
-        // If Regex is enabled, change the temporary text
-        this.searchInput.placeholder = t("settings.regexPlaceholder");
+        searchComponent.setPlaceholder(t("settings.regexPlaceholder"));
       } else {
-        // If Regex is deactivated, return the original temporary text
-        this.searchInput.placeholder = originalPlaceholder;
+        searchComponent.setPlaceholder(t("settings.searchPlaceholder"));
       }
-
-      // Reapply filter immediately if text exists
       this._searchState.query = this.searchInput.value;
       debouncedFilter();
     });
@@ -266,12 +286,6 @@ export class ColorMasterSettingTab extends PluginSettingTab {
       this._searchState.section = (e.target as HTMLSelectElement).value;
       debouncedFilter();
     });
-
-    this.clearBtn.addEventListener("click", () => {
-      this._clearSearchAndFilters();
-      this.plugin.settings.lastSearchQuery = "";
-      this.plugin.saveData(this.plugin.settings);
-    });
   }
 
   _applySearchFilter() {
@@ -283,17 +297,18 @@ export class ColorMasterSettingTab extends PluginSettingTab {
       this.staticContentContainer.toggleClass("cm-hidden", isSearching);
     }
     const rows = Array.from(
-      this.containerEl.querySelectorAll(".cm-var-row, .cm-searchable-row")
-    ) as HTMLElement[];
+      this.containerEl.querySelectorAll<HTMLElement>(
+        ".cm-var-row, .cm-searchable-row"
+      )
+    );
 
-    let visibleCount = 0;
     let qRegex: RegExp | null = null;
 
     if (s.query && s.query.trim()) {
       if (s.regex) {
         try {
           qRegex = new RegExp(s.query, s.caseSensitive ? "" : "i");
-        } catch (e) {
+        } catch {
           qRegex = null;
         }
       }
@@ -302,9 +317,8 @@ export class ColorMasterSettingTab extends PluginSettingTab {
     rows.forEach((row) => {
       const varName = row.dataset.var || "";
       const snippetName = row.dataset.name || "";
-      const textInput = row.querySelector(
-        "input[type='text']"
-      ) as HTMLInputElement;
+      const textInput =
+        row.querySelector<HTMLInputElement>("input[type='text']");
       const varValue = textInput ? textInput.value.trim() : "";
 
       let displayName = "";
@@ -361,13 +375,12 @@ export class ColorMasterSettingTab extends PluginSettingTab {
       }
 
       row.classList.remove("cm-hidden");
-      visibleCount++;
       this._highlightRowMatches(row, s);
     });
 
-    const headings = this.containerEl.querySelectorAll(
+    const headings = this.containerEl.querySelectorAll<HTMLElement>(
       ".cm-category-container"
-    ) as NodeListOf<HTMLElement>;
+    );
     headings.forEach((heading) => {
       const category = heading.dataset.category;
       const hasVisibleRows = this.containerEl.querySelector(
@@ -380,18 +393,6 @@ export class ColorMasterSettingTab extends PluginSettingTab {
         heading.classList.add("cm-hidden");
       }
     });
-
-    const query = this._searchState.query.trim();
-
-    // If in search text, show the number of results
-    if (query) {
-      this.searchInfo.setText(t("settings.searchResultsFound", visibleCount));
-      this.searchInfo.style.display = "inline-block"; // Make sure it is shown
-    } else {
-      // If the search field is empty, hide the counter
-      this.searchInfo.setText("");
-      this.searchInfo.style.display = "none";
-    }
   }
 
   _highlightRowMatches(row: HTMLElement, state: typeof this._searchState) {
@@ -427,22 +428,20 @@ export class ColorMasterSettingTab extends PluginSettingTab {
           if (match.index > lastIndex) {
             element.appendText(originalText.substring(lastIndex, match.index));
           }
-          element.createSpan({ cls: "cm-highlight", text: match[0] });
+          element.createSpan({ cls: "cm-search-match", text: match[0] });
           lastIndex = regex.lastIndex;
         }
 
         if (lastIndex < originalText.length) {
           element.appendText(originalText.substring(lastIndex));
         }
-      } catch (e) {
+      } catch {
         element.setText(originalText);
       }
     };
 
-    const nameEl = row.querySelector(".cm-var-name") as HTMLElement;
-    const descEl = row.querySelector(
-      ".setting-item-description"
-    ) as HTMLElement;
+    const nameEl = row.querySelector<HTMLElement>(".cm-var-name");
+    const descEl = row.querySelector<HTMLElement>(".setting-item-description");
 
     highlightElement(nameEl);
     highlightElement(descEl);
@@ -513,7 +512,6 @@ export class ColorMasterSettingTab extends PluginSettingTab {
     new Notice(t("notices.exportSuccess"));
   }
 
-  // --- Smart update function for contrast checkers ---
   updateAccessibilityCheckers() {
     const activeProfileVars =
       this.plugin.settings.profiles[this.plugin.settings.activeProfile].vars;
@@ -548,18 +546,34 @@ export class ColorMasterSettingTab extends PluginSettingTab {
     });
   }
 
-  display() {
+  display(): void {
+    // call the async renderer and handle any error
+    void this.renderDisplay().catch((err) => {
+      console.error("Error in SettingsTab.renderDisplay:", err);
+    });
+  }
+
+  private async renderDisplay(): Promise<void> {
+    const themeDefaults = await this.plugin.getThemeDefaults();
+
     const { containerEl } = this;
     containerEl.classList.add("color-master-settings-tab");
     containerEl.empty();
-    containerEl.style.visibility = "hidden";
+    containerEl.classList.add("color-master-hidden");
 
-    const lang = this.plugin.settings.language;
-    const isRTL =
-      (lang === "ar" || lang === "fa") && this.plugin.settings.useRtlLayout;
+    const langCode = this.plugin.settings.language;
+    const customLang = this.plugin.settings.customLanguages?.[langCode];
+    const isCoreRtlLang = langCode === "ar" || langCode === "fa";
+    const isCustomRtlLang = customLang?.isRtl === true;
+    const isRtlCapable = isCoreRtlLang || isCustomRtlLang;
+    const isRtlEnabled = this.plugin.settings.useRtlLayout;
+    const isRTL = isRtlCapable && isRtlEnabled;
+    const isCustom = !!customLang;
+    const isCore = !!CORE_LANGUAGES[langCode as LocaleCode];
+
     this.containerEl.setAttribute("dir", isRTL ? "rtl" : "ltr");
 
-    containerEl.createEl("h2", { text: t("plugin.name") });
+    new Setting(containerEl).setName(t("plugin.name")).setHeading();
 
     new Setting(containerEl)
       .setName(t("settings.enablePlugin"))
@@ -594,45 +608,166 @@ export class ColorMasterSettingTab extends PluginSettingTab {
     setIcon(langIcon, "languages");
     languageSetting.nameEl.prepend(langIcon);
 
-    if (
-      this.plugin.settings.language === "ar" ||
-      this.plugin.settings.language === "fa"
-    ) {
-      languageSetting.addExtraButton((button) => {
-        button
-          .setIcon("settings-2")
-          .setTooltip("settings.languageSettingsModalTitle")
-          .onClick(() => {
-            new LanguageSettingsModal(this.app, this.plugin).open();
-          });
+    const flyoutContainer = languageSetting.controlEl.createDiv({
+      cls: "cm-flyout-menu-container",
+    });
+
+    const buttonListEl = flyoutContainer.createDiv({
+      cls: "cm-flyout-menu-buttons",
+    });
+
+    const triggerBtn = new ButtonComponent(flyoutContainer)
+      .setIcon("settings")
+      .setTooltip(t("tooltips.langMenu"))
+      .setClass("cm-flyout-trigger-btn")
+      .onClick(() => {
+        buttonListEl.toggleClass(
+          "is-open",
+          !buttonListEl.classList.contains("is-open")
+        );
+      });
+    triggerBtn.buttonEl.classList.add("cm-control-icon-button");
+
+    // Info Button
+    new ButtonComponent(buttonListEl)
+      .setIcon("info")
+      .setTooltip(t("tooltips.langInfo"))
+      .setClass("cm-control-icon-button")
+      .onClick(() => {
+        new LanguageInfoModal(this.app, this.plugin).open();
       });
 
-      languageSetting.addDropdown((dropdown) => {
-        dropdown.addOption("en", "English");
-        dropdown.addOption("ar", "العَرَبيَّةُ");
-        dropdown.addOption("fa", "فارسی");
-        dropdown.addOption("fr", "Français");
-        dropdown.setValue(this.plugin.settings.language);
-        dropdown.onChange(async (value) => {
-          this.plugin.settings.language = value;
-          await this.plugin.saveSettings();
-          this.display();
-        });
+    // Edit Button
+    new ButtonComponent(buttonListEl)
+      .setIcon("pencil")
+      .setTooltip(t("tooltips.editLang"))
+      .setClass("cm-control-icon-button")
+      .onClick(() => {
+        const langCode = this.plugin.settings.language;
+        new LanguageTranslatorModal(
+          this.app,
+          this.plugin,
+          this,
+          langCode
+        ).open();
       });
-    } else {
-      languageSetting.addDropdown((dropdown) => {
-        dropdown.addOption("en", "English");
-        dropdown.addOption("ar", "العَرَبيَّةُ");
-        dropdown.addOption("fa", "فارسی");
-        dropdown.addOption("fr", "Français");
-        dropdown.setValue(this.plugin.settings.language);
-        dropdown.onChange(async (value) => {
-          this.plugin.settings.language = value;
-          await this.plugin.saveSettings();
-          this.display();
-        });
+
+    // Add Button
+    new ButtonComponent(buttonListEl)
+      .setIcon("plus")
+      .setTooltip(t("modals.addLang.title"))
+      .setClass("cm-control-icon-button")
+      .onClick(() => {
+        new AddNewLanguageModal(this.app, this.plugin, this).open();
       });
+
+    // RTL Button
+    if (isRtlCapable) {
+      new ButtonComponent(buttonListEl)
+        .setIcon("settings-2") //
+        .setTooltip(t("settings.languageSettingsModalTitle"))
+        .setClass("cm-control-icon-button")
+        .onClick(() => {
+          new LanguageSettingsModal(this.app, this.plugin).open();
+        });
     }
+
+    // History/Restore Button for Core Languages that are customized
+    if (isCore && isCustom) {
+      const restoreBtn = new ButtonComponent(buttonListEl)
+        .setIcon("history")
+        .setTooltip(t("tooltips.restoreDefaultLang"))
+        .setClass("mod-warning")
+        .onClick(() => {
+          new ConfirmationModal(
+            this.app,
+            this.plugin,
+            t("modals.confirmation.restoreLangTitle"),
+            t(
+              "modals.confirmation.restoreLangDesc",
+              CORE_LANGUAGES[langCode as LocaleCode]
+            ),
+            () => {
+              void (async () => {
+                if (this.plugin.settings.customLanguages) {
+                  delete this.plugin.settings.customLanguages[langCode];
+                  loadLanguage(this.plugin.settings);
+                  await this.plugin.saveSettings();
+                  this.display();
+                  new Notice(t("notices.langRestored"));
+                }
+              })().catch((err) => {
+                // Short human comment in English (as you requested)
+                console.error("Failed to restore language:", err);
+              });
+            },
+            { buttonText: t("buttons.restore"), buttonClass: "mod-warning" }
+          ).open();
+        });
+      restoreBtn.buttonEl.classList.add("cm-control-icon-button");
+    }
+
+    if (isCustom && !isCore) {
+      const deleteBtn = new ButtonComponent(buttonListEl)
+        .setIcon("trash")
+        .setTooltip(t("buttons.delete") + ` (${customLang.languageName})`)
+        .setClass("mod-warning")
+        .onClick(() => {
+          new ConfirmationModal(
+            this.app,
+            this.plugin,
+            t("modals.confirmation.deleteLangTitle"),
+            t("modals.confirmation.deleteLangDesc", customLang.languageName),
+            () => {
+              void (async () => {
+                if (!this.plugin.settings.customLanguages) return;
+                delete this.plugin.settings.customLanguages[langCode];
+                this.plugin.settings.language = "en";
+                loadLanguage(this.plugin.settings);
+                await this.plugin.saveSettings();
+                this.display();
+                new Notice(t("notices.langDeleted", customLang.languageName));
+              })().catch((err) => {
+                console.error("Failed to delete custom language:", err);
+              });
+            },
+            { buttonText: t("buttons.delete"), buttonClass: "mod-warning" }
+          ).open();
+        });
+      deleteBtn.buttonEl.classList.add("cm-control-icon-button");
+    }
+
+    languageSetting.addDropdown((dropdown) => {
+      const customLangs = this.plugin.settings.customLanguages || {};
+
+      // 1. Add Core languages FIRST
+      for (const code in CORE_LANGUAGES) {
+        // Use custom name if it exists, otherwise use core name
+        let displayName = CORE_LANGUAGES[code as LocaleCode];
+        if (customLangs[code]) {
+          displayName = customLangs[code].languageName;
+        }
+        dropdown.addOption(code, displayName);
+      }
+
+      // 2. Add purely Custom languages (that are NOT core overrides)
+      const customCodes = Object.keys(customLangs);
+      for (const code of customCodes) {
+        if (CORE_LANGUAGES[code as LocaleCode]) continue;
+
+        const langName = customLangs[code].languageName;
+        dropdown.addOption(code, langName);
+      }
+
+      dropdown.setValue(this.plugin.settings.language);
+      dropdown.onChange(async (value) => {
+        this.plugin.settings.language = value;
+        loadLanguage(this.plugin.settings);
+
+        await this.plugin.saveSettings();
+        this.display();
+      });
+    });
 
     this.initSearchUI(containerEl);
     this.staticContentContainer = containerEl.createDiv({
@@ -643,7 +778,7 @@ export class ColorMasterSettingTab extends PluginSettingTab {
     drawOptionsSection(this.staticContentContainer, this);
     this.staticContentContainer.createEl("hr");
     drawCssSnippetsUI(this.staticContentContainer, this);
-    drawColorPickers(this.containerEl, this);
+    drawColorPickers(this.containerEl, this, themeDefaults);
     containerEl.createEl("hr");
     drawLikePluginCard(containerEl, this);
 
@@ -655,9 +790,9 @@ export class ColorMasterSettingTab extends PluginSettingTab {
     if (this._searchState.query) {
       setTimeout(() => {
         // Find the first "visible" line
-        const firstVisibleRow = this.containerEl.querySelector(
+        const firstVisibleRow = this.containerEl.querySelector<HTMLElement>(
           ".cm-var-row:not(.cm-hidden)"
-        ) as HTMLElement;
+        );
 
         if (firstVisibleRow) {
           firstVisibleRow.scrollIntoView({
@@ -667,16 +802,18 @@ export class ColorMasterSettingTab extends PluginSettingTab {
         }
       }, 0);
     }
-    const scrollContainer = this.containerEl.closest(
+    const scrollContainer = this.containerEl.closest<HTMLElement>(
       ".vertical-tab-content"
-    ) as HTMLElement | null;
+    );
 
     if (!scrollContainer) {
       console.warn("Color Master: Could not find scroll container.");
     } else {
       const debouncedScrollSave = debounce(() => {
         this.plugin.settings.lastScrollPosition = scrollContainer.scrollTop;
-        this.plugin.saveData(this.plugin.settings);
+        void this.plugin.saveData(this.plugin.settings).catch((err) => {
+          console.error("Failed to save scroll position:", err);
+        });
       }, 200);
 
       this.plugin.registerDomEvent(
@@ -693,124 +830,6 @@ export class ColorMasterSettingTab extends PluginSettingTab {
       }
     }
 
-    containerEl.style.visibility = "visible";
-  }
-
-  // ---------- Replacement hide() that acts like "Cancel" on accidental close ----------
-  hide() {
-    // If user had pending graph edits, treat closing the settings as a CANCEL action.
-    if (this.graphViewTempState) {
-      console.log(
-        "Color Master: Settings closed with pending Graph edits. Performing Cancel (revert) instead of applying partial state."
-      );
-
-      // 1) Restore saved profile vars from the temp snapshot
-      const profileVars =
-        this.plugin.settings.profiles[this.plugin.settings.activeProfile]
-          .vars || {};
-      Object.assign(profileVars, this.graphViewTempState);
-
-      // 2) Enqueue them so visuals update immediately (works for FPS==0 or >0)
-      for (const k in this.graphViewTempState) {
-        if (Object.prototype.hasOwnProperty.call(this.graphViewTempState, k)) {
-          this.plugin.pendingVarUpdates[k] = this.graphViewTempState[k];
-        }
-      }
-
-      // 3) Apply pending now to force visual restore
-      try {
-        this.plugin.applyPendingNow();
-      } catch (e) {
-        console.warn("Color Master: applyPendingNow failed during hide()", e);
-        // fallback: trigger css-change
-        this.app.workspace.trigger("css-change");
-      }
-
-      // 4) Clean up internal temporary state and UI buttons (but do NOT call this.display())
-      this.graphViewTempState = null;
-      this.graphViewWorkingState = null;
-      this.hideGraphActionButtons && this.hideGraphActionButtons();
-
-      // 5) Refresh graph views if plugin enabled
-      if (this.plugin.settings.pluginEnabled) {
-        try {
-          this.plugin.refreshOpenGraphViews();
-        } catch (e) {
-          console.warn(
-            "Color Master: refreshOpenGraphViews failed during hide()",
-            e
-          );
-        }
-      }
-
-      this.app.workspace.trigger("css-change");
-    }
-  }
-
-  async onGraphApply() {
-    if (!this.graphViewWorkingState) return;
-    const profileVars =
-      this.plugin.settings.profiles[this.plugin.settings.activeProfile].vars ||
-      {};
-
-    Object.assign(profileVars, this.graphViewWorkingState);
-
-    await this.plugin.saveSettings();
-
-    this.graphViewTempState = null;
-    this.graphViewWorkingState = null;
-    this.hideGraphActionButtons();
-    new Notice(t("notices.graphColorsApplied"));
-  }
-
-  onGraphCancel() {
-    if (!this.graphViewTempState) {
-      this.hideGraphActionButtons();
-      return;
-    }
-
-    const profileVars =
-      this.plugin.settings.profiles[this.plugin.settings.activeProfile].vars ||
-      {};
-
-    Object.assign(profileVars, this.graphViewTempState);
-
-    for (const key in this.graphViewTempState) {
-      this.plugin.pendingVarUpdates[key] = this.graphViewTempState[key];
-    }
-    this.plugin.applyPendingNow();
-
-    this.graphViewTempState = null;
-    this.graphViewWorkingState = null;
-    this.hideGraphActionButtons();
-    this.display();
-  }
-
-  showGraphActionButtons() {
-    if (!this.graphHeaderButtonsEl) return;
-
-    this.graphHeaderButtonsEl.empty();
-
-    const applyButton = this.graphHeaderButtonsEl.createEl("button", {
-      text: "Apply",
-      cls: "mod-cta",
-    });
-    applyButton.addEventListener("click", () => this.onGraphApply());
-
-    const cancelButton = this.graphHeaderButtonsEl.createEl("button", {
-      text: "Cancel",
-    });
-    cancelButton.addEventListener("click", () => this.onGraphCancel());
-  }
-
-  // ---------- Ensure hideGraphActionButtons also clears workingState ----------
-  hideGraphActionButtons() {
-    // Clear both states
-    this.graphViewTempState = null;
-    this.graphViewWorkingState = null;
-
-    if (this.graphHeaderButtonsEl) {
-      this.graphHeaderButtonsEl.empty();
-    }
+    containerEl.classList.remove("color-master-hidden");
   }
 }

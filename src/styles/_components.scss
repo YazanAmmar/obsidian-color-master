@@ -1,0 +1,525 @@
+/* ==========================================================================
+   Component Styles
+   Reusable UI elements: Cards, Snippet Lists, Badges, Menus.
+   ========================================================================== */
+
+/* --- Like Plugin Card (Promo) --- */
+.cm-like-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: stretch;
+  padding: 10px;
+  margin-top: 20px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0.02));
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.28);
+  position: relative;
+  border: 4px solid transparent;
+  border-image-slice: 1;
+  animation: cm-glowing-border 2s linear infinite;
+
+  .cm-banner-container .cm-banner-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .cm-content-wrapper {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    width: 100%;
+    padding: 0 4px;
+  }
+
+  .cm-like-stats {
+    flex: 3;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 12px;
+    width: 100%;
+  }
+
+  .cm-like-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-self: stretch;
+    flex: 2;
+    max-width: 150px;
+  }
+}
+
+/* --- Stats Progress Bars --- */
+.cm-stat-box {
+  width: 100%;
+
+  .cm-stat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 6px;
+
+    .title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+    .value {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-normal);
+    }
+  }
+
+  .skill-bar {
+    height: 8px;
+    width: 100%;
+    border-radius: 6px;
+    background-color: var(--background-modifier-border);
+    overflow: hidden;
+  }
+
+  .skill-per {
+    position: relative;
+    overflow: hidden;
+    display: block;
+    height: 100%;
+    width: 0%; /* Animated via JS/CSS var */
+    border-radius: 6px;
+    animation: cm-progress 0.8s ease-out forwards;
+    background: none;
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 400%;
+      height: 100%;
+      background: linear-gradient(
+        115deg,
+        #33ff00,
+        #ffcc00,
+        #8000ff,
+        #00b7ff,
+        #00ff66
+      );
+      background-size: 25% 100%;
+      animation: cm-border-animation 2s linear infinite;
+    }
+  }
+}
+
+/* --- Animated Gradient Buttons --- */
+.codepen-button {
+  display: block;
+  cursor: pointer;
+  color: white;
+  position: relative;
+  text-decoration: none;
+  font-weight: 600;
+  border-radius: 6px;
+  overflow: hidden;
+  padding: 2px;
+  isolation: isolate;
+  width: 100%;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 400%;
+    height: 100%;
+    background: linear-gradient(
+      115deg,
+      #33ff00,
+      #ffcc00,
+      #8000ff,
+      #00b7ff,
+      #00ff66
+    );
+    background-size: 25% 100%;
+    animation: cm-border-animation 1.5s linear infinite;
+    animation-play-state: running;
+  }
+
+  span {
+    position: relative;
+    display: block;
+    text-align: center;
+    padding: 8px 12px;
+    font-size: 13px;
+    background: var(--background-secondary);
+    border-radius: 4px;
+    height: 100%;
+  }
+
+  /* Light Mode Fallback */
+  .theme-light & span {
+    color: #000000;
+    background: #f0f2f5;
+  }
+}
+
+.cm-promo-container {
+  border-top: 1px solid var(--background-modifier-border);
+  text-align: center;
+  width: 100%;
+}
+
+/* --- CSS Snippets List --- */
+.cm-snippets-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  margin-bottom: 16px;
+
+  h3 {
+    margin: 0;
+    white-space: nowrap;
+  }
+
+  .cm-snippets-add-button.setting-item {
+    border: none;
+    padding: 0;
+    margin: 0;
+
+    button {
+      background-color: transparent;
+      border: 1px solid var(--interactive-accent);
+      color: var(--interactive-accent);
+      transition: all 0.2s ease-in-out;
+
+      &:hover {
+        background-color: var(--interactive-accent);
+        color: var(--text-on-accent);
+      }
+    }
+  }
+}
+
+.cm-snippets-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.cm-snippets-empty-state {
+  color: var(--text-muted);
+  font-style: italic;
+  padding: 10px;
+  text-align: center;
+}
+
+.cm-snippet-item.setting-item {
+  align-items: center !important;
+  min-height: 40px;
+  padding: 4px 10px !important;
+  transition: transform 0.16s ease;
+  gap: 4px !important;
+
+  .setting-item-info {
+    flex: 1;
+    min-width: 0;
+    margin-right: 10px;
+  }
+
+  .setting-item-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .setting-item-control {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    .checkbox-container {
+      transform: scale(0.85);
+    }
+
+    button {
+      background-color: transparent;
+      border: none;
+      box-shadow: none;
+      color: var(--text-muted);
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 28px;
+      width: 28px;
+      transition: all 0.2s ease-in-out;
+
+      .svg-icon {
+        width: 18px;
+        height: 18px;
+        transition: all 0.2s ease-in-out;
+      }
+
+      &:hover {
+        background-color: var(--background-modifier-hover);
+        color: var(--text-normal);
+      }
+
+      &.is-success {
+        color: #00ff08;
+        .svg-icon {
+          transform: scale(1.2);
+        }
+      }
+    }
+  }
+
+  /* Drag Handle & Divider */
+  .cm-snippet-drag-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-right: 4px;
+  }
+
+  .cm-snippet-divider {
+    color: var(--background-modifier-border);
+    font-size: 16px;
+    opacity: 0.8;
+  }
+
+  .cm-snippet-order-number {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-muted);
+    width: auto;
+    padding-left: 6px;
+    text-align: center;
+  }
+
+  .cm-snippet-drag-handle {
+    cursor: grab;
+    color: var(--text-faint);
+    opacity: 0.7;
+    position: relative;
+    top: 2px;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+
+    &:hover {
+      opacity: 1;
+      color: var(--text-normal);
+    }
+  }
+
+  /* Drag States */
+  &.cm-snippet-ghost {
+    opacity: 0.75;
+    transform: scale(0.99);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+    transition: transform 0.12s ease;
+  }
+  &.cm-snippet-dragged {
+    background-color: var(--background-secondary) !important;
+  }
+}
+
+/* --- Badges --- */
+.cm-snippet-global-badge {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--text-accent);
+  padding: 1px 6px;
+  border-radius: 10px;
+  border: 1px solid var(--interactive-accent-hover);
+  background: rgba(14, 165, 233, 0.1);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: relative;
+  top: 1px;
+}
+
+/* --- Animations (Keyframes) --- */
+@keyframes cm-glowing-border {
+  0% {
+    border-image-source: linear-gradient(
+      to right,
+      #ff0000,
+      #ff7f00,
+      #ffff00,
+      #00ff00,
+      #0000ff,
+      #4b0082,
+      #9400d3
+    );
+  }
+  14% {
+    border-image-source: linear-gradient(
+      to right,
+      #ff7f00,
+      #ffff00,
+      #00ff00,
+      #0000ff,
+      #4b0082,
+      #9400d3,
+      #ff0000
+    );
+  }
+  28% {
+    border-image-source: linear-gradient(
+      to right,
+      #ffff00,
+      #00ff00,
+      #0000ff,
+      #4b0082,
+      #9400d3,
+      #ff0000,
+      #ff7f00
+    );
+  }
+  42% {
+    border-image-source: linear-gradient(
+      to right,
+      #00ff00,
+      #0000ff,
+      #4b0082,
+      #9400d3,
+      #ff0000,
+      #ff7f00,
+      #ffff00
+    );
+  }
+  56% {
+    border-image-source: linear-gradient(
+      to right,
+      #0000ff,
+      #4b0082,
+      #9400d3,
+      #ff0000,
+      #ff7f00,
+      #ffff00,
+      #00ff00
+    );
+  }
+  70% {
+    border-image-source: linear-gradient(
+      to right,
+      #4b0082,
+      #9400d3,
+      #ff0000,
+      #ff7f00,
+      #ffff00,
+      #00ff00,
+      #0000ff
+    );
+  }
+  84% {
+    border-image-source: linear-gradient(
+      to right,
+      #9400d3,
+      #ff0000,
+      #ff7f00,
+      #ffff00,
+      #00ff00,
+      #0000ff,
+      #4b0082
+    );
+  }
+  100% {
+    border-image-source: linear-gradient(
+      to right,
+      #ff0000,
+      #ff7f00,
+      #ffff00,
+      #00ff00,
+      #0000ff,
+      #4b0082,
+      #9400d3
+    );
+  }
+}
+
+@keyframes cm-border-animation {
+  to {
+    transform: translateX(-25%);
+  }
+}
+
+@keyframes cm-progress {
+  from {
+    width: 0;
+  }
+  to {
+    width: var(--skill-percentage);
+    opacity: 1;
+  }
+}
+
+/* --- UI Elements --- */
+.cm-segmented-control button {
+  &.is-active {
+    background-color: var(--interactive-accent);
+    color: var(--text-on-accent);
+    font-weight: 600;
+  }
+  &:hover:not(.is-active) {
+    background-color: var(--background-modifier-hover);
+  }
+}
+
+.notice,
+.toast {
+  padding: 8px 12px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  max-width: 300px;
+  border-radius: 6px !important;
+  min-width: 120px !important;
+  box-sizing: border-box !important;
+}
+
+/* --- Language Menu (Flyout) --- */
+.cm-flyout-menu-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  .cm-flyout-menu-buttons {
+    display: flex;
+    align-items: center;
+    background-color: transparent;
+    border: none;
+    padding: 0;
+    gap: 4px;
+    border-radius: var(--radius-m);
+    border: 1px solid var(--background-modifier-border);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+.color-master-settings-tab[dir="ltr"] .cm-flyout-menu-buttons {
+  transform: translateX(15px);
+  &.is-open {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
+  }
+}
+
+.color-master-settings-tab[dir="rtl"] .cm-flyout-menu-buttons {
+  transform: translateX(-15px);
+  &.is-open {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
+  }
+}

@@ -1,15 +1,22 @@
-import { Notice } from "obsidian";
+import { Notice, App } from "obsidian";
 import { t } from "../i18n/strings";
 import type ColorMaster from "../main";
+
+interface AppWithSetting extends App {
+  setting: {
+    open: () => void;
+    openTabById: (id: string) => void;
+  };
+}
 
 /**
  * Registers all commands for the Color Master plugin.
  * @param plugin - The instance of the Color Master plugin.
  */
 export function registerCommands(plugin: ColorMaster) {
-  // Command to toggle the plugin on and off.
+  // Toggle plugin on/off
   plugin.addCommand({
-    id: "toggle-color-master",
+    id: "toggle",
     name: t("commands.enableDisable"),
     callback: async () => {
       plugin.settings.pluginEnabled = !plugin.settings.pluginEnabled;
@@ -22,9 +29,9 @@ export function registerCommands(plugin: ColorMaster) {
     },
   });
 
-  // Command to cycle to the next color profile in the list.
+  // Select next profile
   plugin.addCommand({
-    id: "cycle-next-color-profile",
+    id: "profile-next",
     name: t("commands.cycleNext"),
     callback: async () => {
       const names = Object.keys(plugin.settings.profiles || {});
@@ -40,9 +47,9 @@ export function registerCommands(plugin: ColorMaster) {
     },
   });
 
-  // Command to cycle to the previous color profile in the list.
+  // Select previous profile
   plugin.addCommand({
-    id: "cycle-previous-color-profile",
+    id: "profile-prev",
     name: t("commands.cyclePrevious"),
     callback: async () => {
       const names = Object.keys(plugin.settings.profiles || {});
@@ -60,26 +67,27 @@ export function registerCommands(plugin: ColorMaster) {
     },
   });
 
-  // Command to open the plugin's settings tab directly.
+  // Open plugin settings
   plugin.addCommand({
-    id: "open-color-master-settings-tab",
+    id: "open-settings",
     name: t("commands.openSettings"),
     callback: () => {
-      (plugin.app as any).setting.open();
-      (plugin.app as any).setting.openTabById(plugin.manifest.id);
+      const app = plugin.app as AppWithSetting;
+      app.setting.open();
+      app.setting.openTabById(plugin.manifest.id);
     },
   });
 
-  // Command to cycle through the active profile's theme (light, dark, auto).
+  // Toggle active profile theme
   plugin.addCommand({
-    id: "toggle-active-profile-theme",
+    id: "toggle-theme",
     name: t("commands.toggleTheme"),
     callback: async () => {
       const activeProfileName = plugin.settings.activeProfile;
       const activeProfile = plugin.settings.profiles[activeProfileName];
 
       if (!activeProfile) {
-        new Notice("notices.profileNotFound");
+        new Notice(t("notices.profileNotFound"));
         return;
       }
 

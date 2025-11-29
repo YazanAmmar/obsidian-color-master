@@ -1,11 +1,14 @@
 {
   "name": "obsidian-color-master",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "Full control of Obsidian's appearance. Create and share color profiles, use advanced CSS snippets, and override any theme with a powerful, live UI.",
   "main": "main.js",
   "scripts": {
-    "build": "esbuild src/main.ts --bundle --platform=browser --format=cjs --outfile=main.js --minify --external:obsidian",
-    "dev": "npm run build && copy main.js \"C:\\Users\\user\\Documents\\Obsidian\\My Notes\\.obsidian\\plugins\\obsidian-color-master\" && copy styles.css \"C:\\Users\\user\\Documents\\Obsidian\\My Notes\\.obsidian\\plugins\\obsidian-color-master\" && copy manifest.json \"C:\\Users\\user\\Documents\\Obsidian\\My Notes\\.obsidian\\plugins\\obsidian-color-master\""
+    "build:js": "esbuild src/main.ts --bundle --platform=browser --format=cjs --outfile=main.js --minify --external:obsidian",
+    "build:css": "sass src/styles/main.scss styles.css --no-source-map",
+    "build": "npm run build:js && npm run build:css",
+    "dev": "npm run build && copy main.js \"C:\\Users\\user\\Documents\\Obsidian\\My Notes\\.obsidian\\plugins\\obsidian-color-master\" && copy styles.css \"C:\\Users\\user\\Documents\\Obsidian\\My Notes\\.obsidian\\plugins\\obsidian-color-master\" && copy manifest.json \"C:\\Users\\user\\Documents\\Obsidian\\My Notes\\.obsidian\\plugins\\obsidian-color-master\"",
+    "lint": "eslint \"src/**/*.{ts,tsx}\""
   },
   "keywords": [],
   "author": "Yazan Ammar",
@@ -17,8 +20,15 @@
   "devDependencies": {
     "@types/node": "^24.5.2",
     "@types/sortablejs": "^1.15.8",
+    "@typescript-eslint/utils": "^8.47.0",
     "esbuild": "^0.25.9",
+    "esbuild-sass-plugin": "^3.3.1",
+    "eslint": "^9.39.1",
+    "eslint-plugin-obsidianmd": "^0.1.9",
+    "globals": "^16.5.0",
     "obsidian": "^1.8.7",
-    "typescript": "^5.9.2"
+    "sass": "^1.93.3",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.47.0"
   }
 }

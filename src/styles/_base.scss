@@ -1,0 +1,311 @@
+/* ==========================================================================
+   Base Styles
+   Variables, LTR/RTL layouts, animations, and core editor overrides.
+   ========================================================================== */
+
+:root {
+  /* Snippet List UI Variables */
+  --cm-snippet-row-min-height: 40px;
+  --cm-snippet-toggle-scale: 0.85;
+  --cm-snippet-icon-size: 18px;
+  --cm-snippet-drag-area-spacing: 4px;
+  --cm-snippet-handle-vertical-nudge: 2px;
+}
+
+/* --- Animations --- */
+
+@keyframes cm-flash-red {
+  0% {
+    background-color: var(--interactive-error);
+  }
+  100% {
+    background-color: var(--interactive-accent);
+  }
+}
+
+@keyframes cm-shake {
+  10%,
+  90% {
+    transform: translateX(-1px);
+  }
+  20%,
+  80% {
+    transform: translateX(1px);
+  }
+  30%,
+  50%,
+  70% {
+    transform: translateX(-3px);
+  }
+  40%,
+  60% {
+    transform: translateX(3px);
+  }
+}
+
+/* --- Layout Directionality (LTR/RTL) --- */
+
+.is-ltr {
+  direction: ltr !important;
+
+  h2,
+  h3,
+  .setting-item-name,
+  .setting-item-description {
+    text-align: left !important;
+  }
+
+  .setting-item,
+  .modal-content .setting-item {
+    flex-direction: row !important;
+  }
+
+  /* Refactor modal-specific logic to dedicated files later */
+  .modal-content .setting-item-info {
+    text-align: left !important;
+    margin-right: 10px;
+    margin-left: 0;
+  }
+
+  .color-master-text-input {
+    margin-left: 8px;
+  }
+}
+
+.is-rtl {
+  direction: rtl;
+
+  .color-master-text-input {
+    margin-right: 8px;
+  }
+
+  .setting-item-name,
+  .setting-item-description,
+  h2,
+  h3 {
+    text-align: right;
+  }
+}
+
+/* Global RTL override for notices */
+body.color-master-rtl {
+  .notice {
+    direction: rtl;
+    text-align: right;
+  }
+}
+
+/* --- Global Backgrounds --- */
+
+#cm-background-video {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  z-index: -1;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+body.cm-workspace-background-active {
+  background-image: var(--cm-background-image);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+
+  /* Ensure workspace transparency to reveal background */
+  .workspace-split.mod-root,
+  .workspace-leaf,
+  .workspace-leaf-content,
+  .view-header,
+  .workspace-tab-header-container {
+    background-color: transparent !important;
+  }
+
+  /* Add backdrop blur for legibility in modals */
+  .modal-container .modal {
+    background-color: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(5px);
+  }
+}
+
+/* Scoped background for settings tab */
+body.cm-settings-background-active .color-master-settings-tab {
+  background-image: var(--cm-background-image);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+/* --- Editor & Markdown Overrides --- */
+
+/* Tag Styling */
+.tag {
+  color: var(--tag-color) !important;
+  background-color: var(--tag-bg) !important;
+  padding: 2px 8px;
+  border-radius: 12px;
+  text-decoration: none;
+
+  &:hover {
+    color: var(--tag-color-hover) !important;
+  }
+}
+
+/* Live Preview Tags */
+.cm-s-obsidian span.cm-hashtag {
+  background-color: var(--tag-bg) !important;
+  color: var(--tag-color) !important;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  border-radius: 0;
+  padding-left: 0;
+  padding-right: 0;
+
+  &-begin {
+    background-color: var(--tag-bg) !important;
+    color: var(--tag-color) !important;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-inline-start: 8px;
+    border-start-start-radius: 12px;
+    border-end-start-radius: 12px;
+  }
+
+  &-end {
+    background-color: var(--tag-bg) !important;
+    color: var(--tag-color) !important;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-inline-end: 8px;
+    border-start-end-radius: 12px;
+    border-end-end-radius: 12px;
+  }
+}
+
+/* Inline Code */
+.cm-s-obsidian span.cm-inline-code,
+.markdown-preview-view code:not(pre code) {
+  color: var(--code-normal) !important;
+  background-color: var(--code-background) !important;
+}
+
+/* Highlights */
+.markdown-source-view.mod-cm6 .cm-highlight,
+.markdown-preview-view mark,
+.markdown-preview-view .highlight {
+  background-color: var(--text-highlight-bg) !important;
+}
+
+/* Blockquotes */
+.markdown-preview-view blockquote,
+.cm-s-obsidian span.cm-quote {
+  background-color: var(--blockquote-bg) !important;
+}
+
+/* --- Utilities --- */
+
+/* Search Highlight (Unified with Editor Highlight) */
+.cm-search-match {
+  background-color: var(--text-highlight-bg);
+  color: var(--text-normal);
+  border-radius: 2px;
+  padding: 0 2px;
+}
+
+.cm-keyword-highlight {
+  font-weight: 600;
+}
+
+/* --- Modals --- */
+
+/* Language Info Modal */
+.cm-info-modal {
+  max-width: 650px;
+
+  .modal-content {
+    max-height: unset;
+    padding: 0;
+  }
+
+  .cm-info-content {
+    border-bottom: 1px solid var(--background-modifier-border);
+    padding: 0 var(--size-4-4) var(--size-4-4) var(--size-4-4);
+    margin-bottom: var(--size-4-4);
+    max-height: unset;
+    overflow-y: visible;
+
+    p {
+      margin-bottom: var(--size-4-2);
+    }
+    ul,
+    ol {
+      margin-inline-start: var(--size-4-6);
+      margin-bottom: var(--size-4-2);
+    }
+    li {
+      margin-bottom: var(--size-4-1);
+    }
+    code {
+      background-color: var(--background-modifier-hover);
+      color: var(--text-normal);
+      padding: 2px 4px;
+      border-radius: var(--radius-s);
+    }
+  }
+}
+
+/* Translator Modal - Flex layout for scrollable list */
+.cm-translator-modal {
+  .modal-content {
+    display: flex;
+    flex-direction: column;
+    height: 65vh;
+    max-height: 65vh;
+  }
+
+  .cm-translator-list {
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  .cm-translator-controls,
+  .cm-translator-main-controls {
+    flex: 0 0 auto;
+  }
+
+  .cm-translator-main-controls {
+    padding: 0;
+    border: none;
+    margin-top: var(--size-4-2);
+  }
+}
+
+.cm-translator-toggle {
+  font-size: var(--font-ui-small);
+  color: var(--text-accent);
+  cursor: pointer;
+  margin-top: 4px;
+  display: inline-block;
+
+  &:hover {
+    color: var(--text-accent-hover);
+  }
+}
+
+/* Notice Rules List */
+.cm-rules-modal .cm-rule-item {
+  .cm-rule-icon-button {
+    margin-left: 4px;
+  }
+
+  .cm-rule-icon-button.is-active {
+    color: var(--text-accent);
+    background-color: var(--background-modifier-hover);
+    box-shadow: 0 0 0 1px var(--background-modifier-border-focus);
+  }
+}

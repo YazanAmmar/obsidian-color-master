@@ -8,6 +8,7 @@ export function drawImportExport(
 ) {
   const actionsEl = containerEl.createDiv("cm-profile-actions");
 
+  // --- 1. Output Actions (Export / Copy) ---
   actionsEl
     .createEl("button", {
       text: t("buttons.exportFile"),
@@ -20,11 +21,16 @@ export function drawImportExport(
       text: t("buttons.copyJson"),
       cls: "cm-profile-action-btn",
     })
+    .addEventListener("click", () => {
+      void settingTab._copyProfileToClipboard().catch((err) => {
+        console.error("Failed to copy profile to clipboard:", err);
+      });
+    });
 
-    .addEventListener("click", () => settingTab._copyProfileToClipboard());
-
+  // Spacer to push input actions to the right
   actionsEl.createDiv({ cls: "cm-profile-action-spacer" });
 
+  // --- 2. Input Actions (Import CSS / JSON) ---
   const pasteCssBtn = actionsEl.createEl("button", {
     text: t("buttons.importCss"),
     cls: "cm-profile-action-btn cm-paste-css-btn",

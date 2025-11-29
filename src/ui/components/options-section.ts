@@ -7,6 +7,7 @@ import {
   BackgroundImageSettingsModal,
   AddBackgroundModal,
   ProfileImageBrowserModal,
+  AdvancedResetModal,
 } from "../modals";
 
 export function drawOptionsSection(
@@ -55,21 +56,25 @@ export function drawOptionsSection(
             settingTab.app,
             plugin,
             settingTab,
-            async (result) => {
-              if (!activeProfile.customVarMetadata) {
-                activeProfile.customVarMetadata = {};
-              }
+            (result) => {
+              void (async () => {
+                if (!activeProfile.customVarMetadata) {
+                  activeProfile.customVarMetadata = {};
+                }
 
-              activeProfile.vars[result.varName] = result.varValue;
-              activeProfile.customVarMetadata[result.varName] = {
-                name: result.displayName,
-                desc: result.description,
-                type: result.varType,
-              };
+                activeProfile.vars[result.varName] = result.varValue;
+                activeProfile.customVarMetadata[result.varName] = {
+                  name: result.displayName,
+                  desc: result.description,
+                  type: result.varType,
+                };
 
-              await plugin.saveSettings();
-              new Notice(t("notices.varAdded", result.varName));
-              settingTab.display();
+                await plugin.saveSettings();
+                new Notice(t("notices.varAdded", result.varName));
+                settingTab.display();
+              })().catch((err) => {
+                console.error("Failed to add custom variable:", err);
+              });
             }
           ).open();
         });
@@ -86,16 +91,7 @@ export function drawOptionsSection(
         .setButtonText(t("options.resetPluginButton"))
         .setWarning()
         .onClick(() => {
-          new ConfirmationModal(
-            settingTab.app,
-            plugin,
-            t("modals.confirmation.resetPluginTitle"),
-            t("modals.confirmation.resetPluginDesc"),
-            () => {
-              plugin.resetPluginData();
-            },
-            { buttonText: t("buttons.delete"), buttonClass: "mod-warning" }
-          ).open();
+          new AdvancedResetModal(settingTab.app, plugin).open();
         });
       setIcon(button.buttonEl, "database-backup");
       button.buttonEl.classList.add("cm-reset-plugin-icon-button");
@@ -151,7 +147,7 @@ export function drawOptionsSection(
         .setIcon("trash")
         .setTooltip(t("tooltips.removeBg"))
         .setClass("cm-control-icon-button")
-        .onClick(async () => {
+        .onClick(() => {
           const profile =
             plugin.settings.profiles[plugin.settings.activeProfile];
           const imagePathToDelete = profile?.backgroundPath;
@@ -161,7 +157,6 @@ export function drawOptionsSection(
             return;
           }
 
-          // Find all profiles using this specific image path
           const profilesUsingImage: string[] = [];
           for (const profileName in plugin.settings.profiles) {
             if (
@@ -172,7 +167,6 @@ export function drawOptionsSection(
             }
           }
 
-          // Build the warning message
           const messageFragment = new DocumentFragment();
           messageFragment.append(t("modals.confirmation.deleteGlobalBgDesc"));
 
@@ -190,9 +184,13 @@ export function drawOptionsSection(
             plugin,
             t("modals.confirmation.deleteGlobalBgTitle"),
             messageFragment,
-            async () => {
-              await plugin.removeBackgroundMediaByPath(imagePathToDelete);;
-              new Notice(t("notices.bgDeleted"));
+            () => {
+              void (async () => {
+                await plugin.removeBackgroundMediaByPath(imagePathToDelete);
+                new Notice(t("notices.bgDeleted"));
+              })().catch((err) => {
+                console.error("Failed to delete background image:", err);
+              });
             },
             {
               buttonText: t("buttons.deleteAnyway"),

@@ -12,3 +12,7 @@ build/
 .env
 .env.*
 *.bak
+
+styles.css
+main.js
+manifest.json

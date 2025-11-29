@@ -1,23 +1,116 @@
 import {
   App,
-  Modal,
-  Setting,
   ButtonComponent,
-  Notice,
-  setIcon,
-  TextComponent,
-  TextAreaComponent,
   DropdownComponent,
+  MarkdownRenderer,
+  Modal,
+  Notice,
+  SearchComponent,
+  setIcon,
+  Setting,
+  TextAreaComponent,
+  TextComponent,
+  requestUrl,
+  Component,
 } from "obsidian";
-import { t } from "../i18n/strings";
+import Sortable from "sortablejs";
+import { DEFAULT_VARS, DEFAULT_PROFILE } from "../constants";
+import {
+  CORE_LOCALES,
+  flattenStrings,
+  getFallbackStrings,
+  loadLanguage,
+  t,
+} from "../i18n/strings";
+import { type LocaleCode, CORE_LANGUAGES, LocalizedValue } from "../i18n/types";
 import type ColorMaster from "../main";
+import type {
+  CustomTranslation,
+  CustomVarType,
+  NoticeRule,
+  Profile,
+  Snippet,
+} from "../types";
+import { debounce, flattenVars, unflattenStrings } from "../utils";
 import type { ColorMasterSettingTab } from "./settingsTab";
-import type { Profile, Snippet, NoticeRule, CustomVarType } from "../types";
-import Sortable = require("sortablejs");
-import { DEFAULT_VARS } from "../constants";
-import { flattenVars, debounce } from "../utils";
 
-export class ProfileJsonImportModal extends Modal {
+/**
+ * A new Base Modal that all Color Master modals should extend from.
+ * It automatically handles applying the correct RTL/LTR direction.
+ */
+class ColorMasterBaseModal extends Modal {
+  plugin: ColorMaster;
+
+  constructor(app: App, plugin: ColorMaster) {
+    super(app);
+    this.plugin = plugin;
+    this.modalEl.classList.add("color-master-modal");
+  }
+
+  /**
+   * Overridden onOpen to apply RTL settings automatically.
+   * Child classes MUST call super.onOpen() if they override this.
+   */
+  onOpen() {
+    const langCode = this.plugin.settings.language;
+    const customLang = this.plugin.settings.customLanguages?.[langCode];
+    const isCoreRtlLang = langCode === "ar" || langCode === "fa";
+    const isCustomRtlLang = customLang?.isRtl === true;
+    const isRtlEnabled = this.plugin.settings.useRtlLayout;
+    const isRTL = (isCoreRtlLang || isCustomRtlLang) && isRtlEnabled;
+
+    this.modalEl.setAttribute("dir", isRTL ? "rtl" : "ltr");
+  }
+}
+
+/**
+ * A simple modal for showing informational text, rendered as markdown.
+ */
+export class LanguageInfoModal extends ColorMasterBaseModal {
+  constructor(app: App, plugin: ColorMaster) {
+    super(app, plugin);
+  }
+
+  onOpen() {
+    super.onOpen();
+    const { contentEl } = this;
+    contentEl.empty();
+    this.modalEl.classList.add("color-master-modal", "cm-info-modal");
+
+    contentEl.createEl("h3", { text: t("modals.langInfo.title") });
+
+    const infoContainer = contentEl.createDiv({ cls: "cm-info-content" });
+
+    const comp = new Component();
+
+    void MarkdownRenderer.render(
+      this.app,
+      t("modals.langInfo.desc"),
+      infoContainer,
+      "",
+      comp
+    ).catch((err) => {
+      console.error("Failed to render markdown:", err);
+    });
+
+    const buttonContainer = contentEl.createDiv({
+      cls: "modal-button-container",
+    });
+
+    new ButtonComponent(buttonContainer)
+      .setButtonText(t("buttons.apply"))
+      .setCta()
+      .onClick(() => {
+        this.close();
+      });
+  }
+
+  onClose() {
+    this.contentEl.empty();
+  }
+}
+
+export class ProfileJsonImportModal extends ColorMasterBaseModal {
   plugin: ColorMaster;
   settingTab: ColorMasterSettingTab;
   textarea: HTMLTextAreaElement;
@@ -29,17 +122,12 @@ export class ProfileJsonImportModal extends Modal {
     plugin: ColorMaster,
     settingTabInstance: ColorMasterSettingTab
   ) {
-    super(app);
-    this.modalEl.classList.add("color-master-modal");
-    this.plugin = plugin;
+    super(app, plugin);
     this.settingTab = settingTabInstance;
   }
 
   onOpen() {
-    const lang = this.plugin.settings.language;
-    const isRTL =
-      (lang === "ar" || lang === "fa") && this.plugin.settings.useRtlLayout;
-    this.modalEl.setAttribute("dir", isRTL ? "rtl" : "ltr");
+    super.onOpen();
 
     const { contentEl } = this;
     contentEl.empty();
@@ -61,8 +149,29 @@ export class ProfileJsonImportModal extends Modal {
     });
     this.textarea = contentEl.createEl("textarea", {
       cls: "cm-search-input cm-import-textarea",
-      attr: { rows: "12", placeholder: t("modals.jsonImport.placeholder") },
+      attr: { rows: "20", placeholder: t("modals.jsonImport.placeholder") },
     });
+
+    // Add an 'input' event listener to parse JSON on-the-fly
+    const debouncedParse = debounce(() => {
+      const content = this.textarea.value;
+      if (!content.trim()) return;
+
+      try {
+        const parsed = JSON.parse(content);
+
+        // Check if the parsed object has a 'name' property and it's a string
+        if (parsed && typeof parsed.name === "string" && parsed.name) {
+          this.nameInput.setValue(parsed.name);
+          this.profileName = parsed.name;
+        }
+      } catch {
+        // ignore invalid JSON
+      }
+    }, 0);
+
+    // Attach the debounced function to the textarea's input event
+    this.textarea.addEventListener("input", debouncedParse);
 
     // File import button
     new Setting(contentEl)
@@ -75,14 +184,13 @@ export class ProfileJsonImportModal extends Modal {
       });
 
     // Action buttons (Replace/Create New)
-    const ctrl = contentEl.createDiv({ cls: "cm-profile-actions" });
-    ctrl.createDiv({ cls: "cm-profile-action-spacer" });
+    const ctrl = contentEl.createDiv({ cls: "modal-button-container" });
     const replaceBtn = ctrl.createEl("button", {
       text: t("modals.jsonImport.replaceActiveButton"),
     });
     const createBtn = ctrl.createEl("button", {
       text: t("modals.jsonImport.createNewButton"),
-      cls: "cm-profile-action-btn mod-cta",
+      cls: "mod-cta",
     });
 
     replaceBtn.addEventListener(
@@ -93,16 +201,17 @@ export class ProfileJsonImportModal extends Modal {
   }
 
   _handleFileImport() {
-    const input = createEl("input", {
-      type: "file",
-      attr: { accept: ".json" },
-    });
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".json";
+
     input.onchange = () => {
-      (async () => {
+      void (async () => {
         if (!input.files || input.files.length === 0) return;
         const file = input.files[0];
         const content = await file.text();
         this.textarea.value = content;
+
         try {
           const parsed = JSON.parse(content);
           const profileNameFromJson =
@@ -110,12 +219,14 @@ export class ProfileJsonImportModal extends Modal {
             file.name.replace(".profile.json", "").replace(".json", "");
           this.nameInput.setValue(profileNameFromJson);
           this.profileName = profileNameFromJson;
-        } catch (e) {
-          /* ignore json parsing errors here */
+        } catch {
+          // ignore json parsing errors
         }
 
         new Notice(t("notices.fileLoaded", file.name));
-      })();
+      })().catch((err) => {
+        console.error("Failed to load profile JSON:", err);
+      });
     };
     input.click();
   }
@@ -145,7 +256,7 @@ export class ProfileJsonImportModal extends Modal {
     let parsed;
     try {
       parsed = JSON.parse(raw);
-    } catch (e) {
+    } catch {
       new Notice(t("notices.invalidJson"));
       return;
     }
@@ -173,7 +284,7 @@ export class ProfileJsonImportModal extends Modal {
     let parsed;
     try {
       parsed = JSON.parse(raw);
-    } catch (e) {
+    } catch {
       new Notice(t("notices.invalidJson"));
       return;
     }
@@ -213,11 +324,11 @@ export class ProfileJsonImportModal extends Modal {
 
     this.settingTab.display();
     this.close();
-    new Notice(t("notices.profileImportedSuccess", mode));
+    new Notice(t("notices.profileImportedSuccess"));
   }
 }
 
-export class NewProfileModal extends Modal {
+export class NewProfileModal extends ColorMasterBaseModal {
   onSubmit: (result: {
     name: string;
     themeType: "auto" | "dark" | "light";
@@ -232,17 +343,12 @@ export class NewProfileModal extends Modal {
       themeType: "auto" | "dark" | "light";
     }) => void
   ) {
-    super(app);
-    this.plugin = plugin;
-    this.modalEl.classList.add("color-master-modal");
+    super(app, plugin);
     this.onSubmit = onSubmit;
   }
 
   onOpen() {
-    const lang = this.plugin.settings.language;
-    const isRTL =
-      (lang === "ar" || lang === "fa") && this.plugin.settings.useRtlLayout;
-    this.modalEl.setAttribute("dir", isRTL ? "rtl" : "ltr");
+    super.onOpen();
 
     const { contentEl } = this;
     contentEl.empty();
@@ -316,7 +422,7 @@ export class NewProfileModal extends Modal {
   }
 }
 
-export class ConfirmationModal extends Modal {
+export class ConfirmationModal extends ColorMasterBaseModal {
   plugin: ColorMaster;
   title: string;
   message: string | DocumentFragment;
@@ -332,9 +438,7 @@ export class ConfirmationModal extends Modal {
     onConfirm: () => void,
     options: { buttonText?: string; buttonClass?: string } = {}
   ) {
-    super(app);
-    this.plugin = plugin;
-    this.modalEl.classList.add("color-master-modal");
+    super(app, plugin);
     this.title = title;
     this.message = message;
     this.onConfirm = onConfirm;
@@ -343,10 +447,7 @@ export class ConfirmationModal extends Modal {
   }
 
   onOpen() {
-    const lang = this.plugin.settings.language;
-    const isRTL =
-      (lang === "ar" || lang === "fa") && this.plugin.settings.useRtlLayout;
-    this.modalEl.setAttribute("dir", isRTL ? "rtl" : "ltr");
+    super.onOpen();
 
     const { contentEl } = this;
     contentEl.empty();
@@ -377,7 +478,7 @@ export class ConfirmationModal extends Modal {
   }
 }
 
-export class PasteCssModal extends Modal {
+export class PasteCssModal extends ColorMasterBaseModal {
   plugin: ColorMaster;
   settingTab: ColorMasterSettingTab;
   existingProfileData: {
@@ -403,9 +504,7 @@ export class PasteCssModal extends Modal {
       id?: string;
     } | null = null
   ) {
-    super(app);
-    this.modalEl.classList.add("color-master-modal");
-    this.plugin = plugin;
+    super(app, plugin);
     this.settingTab = settingTab;
     this.existingProfileData = existingProfileData;
     this.isEditing = !!existingProfileData;
@@ -413,27 +512,26 @@ export class PasteCssModal extends Modal {
   }
 
   _handleFileImport() {
-    const input = createEl("input", {
-      type: "file",
-      attr: { accept: ".css" },
-    });
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".css";
+
     input.onchange = () => {
-      (async () => {
+      void (async () => {
         if (!input.files || input.files.length === 0) return;
         const file = input.files[0];
         const content = await file.text();
         this.cssTextarea.value = content;
         new Notice(t("notices.fileLoaded", file.name));
-      })();
+      })().catch((err) => {
+        console.error("Failed to load CSS file:", err);
+      });
     };
     input.click();
   }
 
   onOpen() {
-    const lang = this.plugin.settings.language;
-    const isRTL =
-      (lang === "ar" || lang === "fa") && this.plugin.settings.useRtlLayout;
-    this.modalEl.setAttribute("dir", isRTL ? "rtl" : "ltr");
+    super.onOpen();
 
     const { contentEl } = this;
     contentEl.empty();
@@ -446,7 +544,7 @@ export class PasteCssModal extends Modal {
 
     this.modalTitleEl = titleContainer.createEl("h3", { text: titleText });
 
-    const installedThemes = (this.app as any).customCss.themes || {};
+    const installedThemes = (this.app as unknown).customCss.themes || {};
     const themeNames = Object.keys(installedThemes);
     let selectedTheme = themeNames.length > 0 ? themeNames[0] : "";
 
@@ -515,7 +613,7 @@ export class PasteCssModal extends Modal {
     this.cssTextarea = contentEl.createEl("textarea", {
       cls: "cm-search-input cm-large-textarea",
       attr: {
-        rows: "12",
+        rows: "18",
         placeholder: t("modals.snippetEditor.cssPlaceholder"),
       },
     });
@@ -597,11 +695,15 @@ export class PasteCssModal extends Modal {
         text: this.isEditing ? t("buttons.update") : t("buttons.create"),
         cls: "mod-cta",
       })
-      .addEventListener("click", () => this.handleSave());
+      .addEventListener("click", () => {
+        void this.handleSave().catch((err) => {
+          console.error("Failed to save CSS snippet:", err);
+        });
+      });
     setTimeout(() => this.nameInput.inputEl.focus(), 0);
   }
 
-  handleSave() {
+  async handleSave() {
     if (this.isEditing && !this.existingProfileData) {
       console.error(
         "Attempted to save in editing mode without an existing snippet."
@@ -633,8 +735,64 @@ export class PasteCssModal extends Modal {
       return;
     }
 
+    // 1. UI Feedback
+    const saveBtn = this.contentEl.querySelector<HTMLButtonElement>(".mod-cta");
+    if (saveBtn) {
+      saveBtn.textContent = t("modals.addBackground.processing") + "...";
+      saveBtn.disabled = true;
+    }
+
+    // 2. Backup Current State
+    const customCss = (this.app as unknown).customCss;
+    const originalObsidianTheme = customCss?.theme;
+
+    // 3. SWITCH TO GHOST PROFILE
+    // Create a temporary blank profile in settings so we can switch to it
+    const tempProfileName = "__cm_temp_clean_slate__";
+    this.plugin.settings.profiles[tempProfileName] = JSON.parse(
+      JSON.stringify(DEFAULT_PROFILE)
+    );
+    this.plugin.settings.activeProfile = tempProfileName;
+
+    // Force apply the blank profile (removes all plugin colors instantly)
+    await this.plugin.applyStyles();
+
+    // 4. Disable Obsidian Theme (Back to Default)
+    if (originalObsidianTheme) {
+      customCss.setTheme("");
+    }
+
+    // 5. FORCE REFLOW & WAIT
+    void document.body.offsetHeight;
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    // 6. Inject New CSS (Minimal)
+    // eslint-disable-next-line obsidianmd/no-forbidden-elements
+    const tempStyleEl = document.createElement("style");
+    tempStyleEl.id = "cm-temp-import-style";
+    tempStyleEl.textContent = cssText;
+    document.head.appendChild(tempStyleEl);
+
+    // 7. Wait for Paint
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    // 8. Capture Colors (Pure CSS + Default Base)
+    const capturedVars = await this.plugin.captureCurrentComputedVars();
+
+    // 9. Cleanup Temporary Stuff
+    tempStyleEl.remove();
+
+    // Restore Obsidian Theme
+    if (originalObsidianTheme) {
+      customCss.setTheme(originalObsidianTheme);
+    }
+
+    // Delete the Ghost Profile
+    delete this.plugin.settings.profiles[tempProfileName];
+
+    // --- Save New Profile ---
     if (this.isEditing && this.existingProfileData) {
-      // Logic for editing a CSS-based profile
       const oldName = this.existingProfileData.name;
       const oldProfileData = this.plugin.settings.profiles[oldName] || {};
 
@@ -644,35 +802,40 @@ export class PasteCssModal extends Modal {
             this.plugin.settings.pinnedSnapshots[oldName];
           delete this.plugin.settings.pinnedSnapshots[oldName];
         }
-
         delete this.plugin.settings.profiles[oldName];
       }
+
       this.plugin.settings.profiles[name] = {
         ...oldProfileData,
         isCssProfile: true,
         customCss: cssText,
+        vars: capturedVars,
       };
+
       this.plugin.settings.activeProfile = name;
       new Notice(t("notices.profileUpdated", name));
     } else {
-      // Logic for creating a new CSS-based profile
       this.plugin.settings.profiles[name] = {
-        vars: {},
+        vars: capturedVars,
         themeType: "auto",
         isCssProfile: true,
         customCss: cssText,
         snippets: [],
+        noticeRules: { text: [], background: [] },
       };
+
       this.plugin.settings.activeProfile = name;
       new Notice(t("notices.profileCreatedFromCss", name));
     }
 
     this.isSaving = true;
-    this.plugin.saveSettings().then(() => {
-      this.plugin.applyCssSnippets();
-      this.settingTab.display();
-      this.close();
-    });
+    this.plugin.pendingVarUpdates = {};
+
+    await this.plugin.saveSettings();
+    this.plugin.applyCssSnippets();
+
+    this.settingTab.display();
+    this.close();
   }
 
   onClose() {
@@ -691,7 +854,7 @@ export class PasteCssModal extends Modal {
   }
 }
 
-export class SnippetCssModal extends Modal {
+export class SnippetCssModal extends ColorMasterBaseModal {
   plugin: ColorMaster;
   settingTab: ColorMasterSettingTab;
   existingSnippet: Snippet | null;
@@ -704,9 +867,9 @@ export class SnippetCssModal extends Modal {
   isGlobalSnippet: boolean;
   isSaving: boolean = false;
 
-  _debounce(func: (...args: any[]) => void, delay: number) {
+  _debounce(func: (...args: unknown[]) => void, delay: number) {
     let timeout: number;
-    return (...args: any[]) => {
+    return (...args: unknown[]) => {
       clearTimeout(timeout);
       timeout = window.setTimeout(() => func.apply(this, args), delay);
     };
@@ -718,9 +881,7 @@ export class SnippetCssModal extends Modal {
     settingTab: ColorMasterSettingTab,
     existingSnippet: Snippet | null = null
   ) {
-    super(app);
-    this.modalEl.classList.add("color-master-modal");
-    this.plugin = plugin;
+    super(app, plugin);
     this.settingTab = settingTab;
     this.existingSnippet = existingSnippet;
     this.isEditing = !!existingSnippet;
@@ -729,27 +890,26 @@ export class SnippetCssModal extends Modal {
   }
 
   _handleFileImport() {
-    const input = createEl("input", {
-      type: "file",
-      attr: { accept: ".css" },
-    });
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".css";
+
     input.onchange = () => {
-      (async () => {
+      void (async () => {
         if (!input.files || input.files.length === 0) return;
         const file = input.files[0];
         const content = await file.text();
         this.cssTextarea.inputEl.value = content;
         new Notice(t("notices.fileLoaded", file.name));
-      })();
+      })().catch((err) => {
+        console.error("Failed to load CSS file:", err);
+      });
     };
     input.click();
   }
 
   onOpen() {
-    const lang = this.plugin.settings.language;
-    const isRTL =
-      (lang === "ar" || lang === "fa") && this.plugin.settings.useRtlLayout;
-    this.modalEl.setAttribute("dir", isRTL ? "rtl" : "ltr");
+    super.onOpen();
 
     const { contentEl } = this;
     contentEl.empty();
@@ -762,7 +922,7 @@ export class SnippetCssModal extends Modal {
 
     this.modalTitleEl = titleContainer.createEl("h3", { text: titleText });
 
-    const installedSnippets = (this.app as any).customCss.snippets || [];
+    const installedSnippets = (this.app as unknown).customCss.snippets || [];
     let selectedSnippet =
       installedSnippets.length > 0 ? installedSnippets[0] : "";
 
@@ -857,7 +1017,7 @@ export class SnippetCssModal extends Modal {
       "cm-search-input",
       "cm-large-textarea"
     );
-    this.cssTextarea.inputEl.rows = 12;
+    this.cssTextarea.inputEl.rows = 18;
     this.cssTextarea.setPlaceholder(t("modals.snippetEditor.cssPlaceholder"));
 
     const historyId =
@@ -1006,11 +1166,16 @@ export class SnippetCssModal extends Modal {
     }
 
     this.isSaving = true;
-    this.plugin.saveSettings().then(() => {
-      this.plugin.applyCssSnippets();
-      this.settingTab.display();
-      this.close();
-    });
+    void this.plugin
+      .saveSettings()
+      .then(() => {
+        this.plugin.applyCssSnippets();
+        this.settingTab.display();
+        this.close();
+      })
+      .catch((err) => {
+        console.error("Failed to save settings:", err);
+      });
   }
 
   onClose() {
@@ -1027,7 +1192,7 @@ export class SnippetCssModal extends Modal {
   }
 }
 
-export class NoticeRulesModal extends Modal {
+export class NoticeRulesModal extends ColorMasterBaseModal {
   plugin: ColorMaster;
   settingTab: ColorMasterSettingTab;
   ruleType: "text" | "background";
@@ -1042,8 +1207,7 @@ export class NoticeRulesModal extends Modal {
     settingTab: ColorMasterSettingTab,
     ruleType: "text" | "background"
   ) {
-    super(app);
-    this.plugin = plugin;
+    super(app, plugin);
     this.settingTab = settingTab;
     this.ruleType = ruleType; // 'text' or 'background'
     const activeProfile =
@@ -1057,15 +1221,13 @@ export class NoticeRulesModal extends Modal {
         keywords: "",
         color: this.ruleType === "text" ? "#ffffff" : "#444444",
         isRegex: false,
+        highlightOnly: false,
       });
     }
   }
 
   onOpen() {
-    const lang = this.plugin.settings.language;
-    const isRTL =
-      (lang === "ar" || lang === "fa") && this.plugin.settings.useRtlLayout;
-    this.modalEl.setAttribute("dir", isRTL ? "rtl" : "ltr");
+    super.onOpen();
 
     const { contentEl } = this;
     contentEl.empty();
@@ -1104,6 +1266,7 @@ export class NoticeRulesModal extends Modal {
               keywords: "",
               color: this.ruleType === "text" ? "#ffffff" : "#444444",
               isRegex: false,
+              highlightOnly: false,
             };
             this.localRules.push(newRule);
 
@@ -1129,41 +1292,51 @@ export class NoticeRulesModal extends Modal {
 
     buttonContainer
       .createEl("button", { text: t("buttons.apply"), cls: "mod-cta" })
-      .addEventListener("click", async () => {
-        const allTagInputs =
-          this.rulesContainer.querySelectorAll<HTMLInputElement>(
-            ".cm-tag-input-field"
-          );
-        allTagInputs.forEach((inputEl, index) => {
-          const newKeyword = inputEl.value.trim().replace(/,/g, "");
-          if (newKeyword) {
-            const rule = this.localRules[index];
-            if (rule) {
-              const keywords =
-                typeof rule.keywords === "string" && rule.keywords
-                  ? rule.keywords
-                      .split(",")
-                      .map((k) => k.trim())
-                      .filter(Boolean)
-                  : [];
+      .addEventListener("click", () => {
+        void (async () => {
+          const allTagInputs =
+            this.rulesContainer.querySelectorAll<HTMLInputElement>(
+              ".cm-tag-input-field"
+            );
 
-              if (!keywords.includes(newKeyword)) {
-                rule.keywords = [...keywords, newKeyword].join(",");
+          allTagInputs.forEach((inputEl, index) => {
+            const newKeyword = inputEl.value.trim().replace(/,/g, "");
+            if (newKeyword) {
+              const rule = this.localRules[index];
+              if (rule) {
+                const keywords =
+                  typeof rule.keywords === "string" && rule.keywords
+                    ? rule.keywords
+                        .split(",")
+                        .map((k) => k.trim())
+                        .filter(Boolean)
+                    : [];
+
+                if (!keywords.includes(newKeyword)) {
+                  rule.keywords = [...keywords, newKeyword].join(",");
+                }
               }
             }
-          }
-        });
-        const activeProfile =
-          this.plugin.settings.profiles[this.plugin.settings.activeProfile];
-        if (!activeProfile.noticeRules)
-          activeProfile.noticeRules = { text: [], background: [] };
-        activeProfile.noticeRules[this.ruleType] = this.localRules;
-        await this.plugin.saveSettings();
-        this.plugin.liveNoticeRules = null;
-        this.plugin.liveNoticeRuleType = null;
+          });
 
-        new Notice(t("notices.settingsSaved"));
-        this.close();
+          const activeProfile =
+            this.plugin.settings.profiles[this.plugin.settings.activeProfile];
+
+          if (!activeProfile.noticeRules) {
+            activeProfile.noticeRules = { text: [], background: [] };
+          }
+
+          activeProfile.noticeRules[this.ruleType] = this.localRules;
+
+          await this.plugin.saveSettings();
+          this.plugin.liveNoticeRules = null;
+          this.plugin.liveNoticeRuleType = null;
+
+          new Notice(t("notices.settingsSaved"));
+          this.close();
+        })().catch((err) => {
+          console.error("Failed to save notice rules:", err);
+        });
       });
   }
 
@@ -1230,15 +1403,33 @@ export class NoticeRulesModal extends Modal {
           colorInput.classList.add("is-transparent");
         });
 
-      const regexContainer = ruleEl.createDiv({ cls: "cm-regex-container" });
-      regexContainer.createSpan({ text: t("modals.noticeRules.useRegex") });
-      const regexCheckbox = regexContainer.createEl("input", {
-        type: "checkbox",
-      });
-      regexCheckbox.checked = rule.isRegex;
-      regexCheckbox.addEventListener("change", () => {
-        rule.isRegex = regexCheckbox.checked;
-      });
+      const regexBtn = new ButtonComponent(ruleEl)
+        .setIcon("regex")
+        .setClass("cm-rule-icon-button")
+        .setTooltip(t("modals.noticeRules.useRegex"))
+        .onClick(() => {
+          rule.isRegex = !rule.isRegex;
+          regexBtn.buttonEl.classList.toggle("is-active", rule.isRegex);
+        });
+      regexBtn.buttonEl.classList.toggle("is-active", rule.isRegex);
+
+      if (this.ruleType === "text") {
+        const highlightBtn = new ButtonComponent(ruleEl)
+          .setIcon("highlighter")
+          .setClass("cm-rule-icon-button")
+          .setTooltip(t("modals.noticeRules.highlightOnly"))
+          .onClick(() => {
+            (rule as unknown).highlightOnly = !(rule as unknown).highlightOnly;
+            highlightBtn.buttonEl.classList.toggle(
+              "is-active",
+              (rule as unknown).highlightOnly
+            );
+          });
+        highlightBtn.buttonEl.classList.toggle(
+          "is-active",
+          (rule as unknown).highlightOnly
+        );
+      }
 
       new ButtonComponent(ruleEl)
         .setIcon("bell")
@@ -1408,6 +1599,7 @@ export class NoticeRulesModal extends Modal {
           keywords: "",
           color: this.ruleType === "text" ? "#ffffff" : "#444444",
           isRegex: false,
+          highlightOnly: false,
         };
         this.localRules.push(newRule);
         this.newlyAddedRuleId = newRule.id;
@@ -1420,7 +1612,7 @@ export class NoticeRulesModal extends Modal {
   _handleTestRule(rule: NoticeRule & { _lastTestIndex?: number }) {
     const keywordsString = rule.keywords || "";
     if (!keywordsString.trim()) {
-      new Notice("This rule has no keywords to test.");
+      new Notice(t("notices.noKeywordsToTest"));
       return;
     }
 
@@ -1429,7 +1621,7 @@ export class NoticeRulesModal extends Modal {
       .map((k) => k.trim())
       .filter(Boolean);
     if (keywordsArray.length === 0) {
-      new Notice("This rule has no keywords to test.");
+      new Notice(t("notices.noKeywordsToTest"));
       return;
     }
     if (rule._lastTestIndex === undefined || rule._lastTestIndex === null) {
@@ -1442,7 +1634,7 @@ export class NoticeRulesModal extends Modal {
 
     const sequentialKeyword = keywordsArray[rule._lastTestIndex];
     const fragment = new DocumentFragment();
-    const text = t("NOTICE_TEST_SENTENCE", sequentialKeyword).split(
+    const text = t("notices.testSentence", sequentialKeyword).split(
       new RegExp(`(${sequentialKeyword})`, "i")
     );
 
@@ -1458,106 +1650,7 @@ export class NoticeRulesModal extends Modal {
   }
 }
 
-export class DuplicateProfileModal extends Modal {
-  plugin: ColorMaster;
-  existingName: string;
-  parsedProfile: Profile;
-  settingTab: ColorMasterSettingTab;
-  onSubmit: (newName: string) => void;
-  newName: string = "";
-
-  constructor(
-    app: App,
-    plugin: ColorMaster,
-    existingName: string,
-    parsedProfile: Profile,
-    settingTab: ColorMasterSettingTab,
-    onSubmit: (newName: string) => void
-  ) {
-    super(app);
-    this.plugin = plugin;
-    this.existingName = existingName;
-    this.parsedProfile = parsedProfile;
-    this.settingTab = settingTab;
-    this.onSubmit = onSubmit;
-  }
-
-  onOpen() {
-    const lang = this.plugin.settings.language;
-    const isRTL =
-      (lang === "ar" || lang === "fa") && this.plugin.settings.useRtlLayout;
-    this.modalEl.setAttribute("dir", isRTL ? "rtl" : "ltr");
-
-    const { contentEl } = this;
-    contentEl.empty();
-    this.modalEl.classList.add("color-master-modal", "cm-duplicate-modal");
-
-    const headerContainer = contentEl.createDiv({
-      cls: "cm-duplicate-modal-header",
-    });
-    const iconContainer = headerContainer.createDiv({
-      cls: "cm-duplicate-modal-icon",
-    });
-    setIcon(iconContainer, "alert-triangle");
-    headerContainer.createEl("h3", {
-      text: t("modals.duplicateProfile.title"),
-    });
-
-    const descriptionFragment = new DocumentFragment();
-    const [part1, part2] = t("modals.duplicateProfile.descParts") as [
-      string,
-      string
-    ];
-    descriptionFragment.append(part1);
-    descriptionFragment.createEl("strong", { text: this.existingName });
-    descriptionFragment.append(part2);
-
-    new Setting(contentEl).setDesc(descriptionFragment).addText((text) => {
-      text
-        .setPlaceholder(t("modals.duplicateProfile.placeholder"))
-        .onChange((value) => {
-          this.newName = value.trim();
-        });
-
-      text.inputEl.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") {
-          e.preventDefault();
-          this.handleConfirm();
-        }
-      });
-    });
-
-    const buttonContainer = contentEl.createDiv({
-      cls: "modal-button-container",
-    });
-    new ButtonComponent(buttonContainer)
-      .setButtonText(t("buttons.cancel"))
-      .onClick(() => this.close());
-    new ButtonComponent(buttonContainer)
-      .setButtonText(t("buttons.create"))
-      .setCta()
-      .onClick(() => this.handleConfirm());
-  }
-
-  handleConfirm() {
-    if (!this.newName) {
-      new Notice(t("notices.varNameEmpty"));
-      return;
-    }
-    if (this.plugin.settings.profiles[this.newName]) {
-      new Notice(t("notices.profileNameExists", this.newName));
-      return;
-    }
-    this.onSubmit(this.newName);
-    this.close();
-  }
-
-  onClose() {
-    this.contentEl.empty();
-  }
-}
-
-export class CustomVariableMetaModal extends Modal {
+export class CustomVariableMetaModal extends ColorMasterBaseModal {
   plugin: ColorMaster;
   settingTab: ColorMasterSettingTab;
   onSubmit: (details: {
@@ -1570,10 +1663,10 @@ export class CustomVariableMetaModal extends Modal {
 
   // Instance variables
   varName: string = "";
-  varValue: string = "#ffffff"; // The default value will be color
+  varValue: string = "";
   displayName: string = "";
   description: string = "";
-  varType: CustomVarType = "color"; // Default type
+  varType: CustomVarType = "color";
   sizeUnit: string = "px";
   valueInputContainer: HTMLElement;
 
@@ -1589,8 +1682,7 @@ export class CustomVariableMetaModal extends Modal {
       varType: CustomVarType;
     }) => void
   ) {
-    super(app);
-    this.plugin = plugin;
+    super(app, plugin);
     this.settingTab = settingTab;
     this.onSubmit = onSubmit;
   }
@@ -1603,10 +1695,12 @@ export class CustomVariableMetaModal extends Modal {
       .setDesc(t("modals.customVar.varValueDesc"));
 
     switch (this.varType) {
-      case "color":
-        // If the current value is not a color, return it to default
-        if (!this.varValue.match(/^(#|rgb|hsl|transparent)/)) {
-          this.varValue = "#ffffff";
+      case "color": {
+        if (
+          this.varValue !== "" &&
+          !this.varValue.match(/^(#|rgb|hsl|transparent|var\(--)/i)
+        ) {
+          this.varValue = "";
         }
 
         const colorPicker = valueSetting.controlEl.createEl("input", {
@@ -1625,14 +1719,17 @@ export class CustomVariableMetaModal extends Modal {
           textInput.value = newColor;
           this.varValue = newColor;
         });
+
         textInput.addEventListener("change", (e) => {
           const newColor = (e.target as HTMLInputElement).value;
           colorPicker.value = newColor;
           this.varValue = newColor;
         });
-        break;
 
-      case "size":
+        break;
+      }
+
+      case "size": {
         // If the current value is not a size, return it to the default
         if (!this.varValue.match(/^(-?\d+)(\.\d+)?(px|em|rem|%)$/)) {
           this.varValue = "10px";
@@ -1640,62 +1737,81 @@ export class CustomVariableMetaModal extends Modal {
 
         // Extract the number and unit
         const sizeMatch = this.varValue.match(/(-?\d+)(\.\d+)?(\D+)/);
+
         let num = sizeMatch
           ? (sizeMatch[1] || "") + (sizeMatch[2] || "")
           : "10";
+
         let unit = sizeMatch ? sizeMatch[3] || "" : "px";
         if (!["px", "em", "rem", "%"].includes(unit)) unit = "px";
+
         this.sizeUnit = unit;
 
         const sizeInput = valueSetting.controlEl.createEl("input", {
           type: "number",
           cls: "color-master-text-input",
         });
-        sizeInput.style.width = "80px";
+        sizeInput.setCssProps({ width: "80px" });
         sizeInput.value = num;
 
         const unitDropdown = new DropdownComponent(valueSetting.controlEl);
+
+        // eslint-disable-next-line obsidianmd/ui/sentence-case
         unitDropdown.addOption("px", "px");
+        // eslint-disable-next-line obsidianmd/ui/sentence-case
         unitDropdown.addOption("em", "em");
+        // eslint-disable-next-line obsidianmd/ui/sentence-case
         unitDropdown.addOption("rem", "rem");
         unitDropdown.addOption("%", "%");
+
         unitDropdown.setValue(this.sizeUnit);
 
         const updateSizeValue = () => {
           this.varValue = (sizeInput.value || "0") + this.sizeUnit;
         };
+
         sizeInput.addEventListener("change", updateSizeValue);
+
         unitDropdown.onChange((newUnit) => {
           this.sizeUnit = newUnit;
           updateSizeValue();
         });
-        break;
 
-      case "text":
+        break;
+      }
+
+      case "text": {
         // Dump the value if the type is different
         if (this.varType !== "text") this.varValue = "";
+
         valueSetting.addTextArea((text) => {
           text
             .setValue(this.varValue)
-            .setPlaceholder("modals.customVar.textValuePlaceholder")
+            .setPlaceholder(t("modals.customVar.textValuePlaceholder"))
             .onChange((value) => {
               this.varValue = value;
             });
-          text.inputEl.style.width = "100%";
-          text.inputEl.style.height = "80px";
-        });
-        break;
 
-      case "number":
-        // If the value is not a number, return it to 0
+          text.inputEl.setCssProps({ width: "100%" });
+          text.inputEl.classList.add("cm-textarea-size");
+        });
+
+        break;
+      }
+
+      case "number": {
+        // If the value is NaN, return it to 0
         if (isNaN(parseFloat(this.varValue))) this.varValue = "0";
+
         valueSetting.addText((text) => {
           text.inputEl.type = "number";
           text.setValue(this.varValue).onChange((value) => {
             this.varValue = value;
           });
         });
+
         break;
+      }
     }
   }
 
@@ -1704,10 +1820,7 @@ export class CustomVariableMetaModal extends Modal {
     contentEl.empty();
     this.modalEl.classList.add("color-master-modal");
 
-    const lang = this.plugin.settings.language;
-    const isRTL =
-      (lang === "ar" || lang === "fa") && this.plugin.settings.useRtlLayout;
-    this.modalEl.setAttribute("dir", isRTL ? "rtl" : "ltr");
+    super.onOpen();
 
     contentEl.createEl("h3", { text: t("modals.customVar.title") });
     contentEl.createEl("p", { text: t("modals.customVar.desc") });
@@ -1759,7 +1872,7 @@ export class CustomVariableMetaModal extends Modal {
 
             switch (value) {
               case "color":
-                this.varValue = "#ffffff";
+                this.varValue = "";
                 break;
               case "size":
                 this.varValue = "10px";
@@ -1841,24 +1954,17 @@ export class CustomVariableMetaModal extends Modal {
   }
 }
 
-export class LanguageSettingsModal extends Modal {
+export class LanguageSettingsModal extends ColorMasterBaseModal {
   plugin: ColorMaster;
 
   constructor(app: App, plugin: ColorMaster) {
-    super(app);
-    this.plugin = plugin;
+    super(app, plugin);
   }
 
   onOpen() {
+    super.onOpen();
     this.modalEl.classList.add("color-master-modal");
     const { contentEl } = this;
-    const lang = this.plugin.settings.language;
-    this.modalEl.setAttribute(
-      "dir",
-      (lang === "ar" || lang === "fa") && this.plugin.settings.useRtlLayout
-        ? "rtl"
-        : "ltr"
-    );
 
     contentEl.empty();
     contentEl.createEl("h3", {
@@ -1886,25 +1992,17 @@ export class LanguageSettingsModal extends Modal {
   }
 }
 
-export class IconizeSettingsModal extends Modal {
+export class IconizeSettingsModal extends ColorMasterBaseModal {
   plugin: ColorMaster;
 
   constructor(app: App, plugin: ColorMaster) {
-    super(app);
-    this.plugin = plugin;
+    super(app, plugin);
   }
 
   onOpen() {
+    super.onOpen();
     this.modalEl.classList.add("color-master-modal");
     const { contentEl } = this;
-    const lang = this.plugin.settings.language;
-    this.modalEl.setAttribute(
-      "dir",
-      (lang === "ar" || lang === "fa") && this.plugin.settings.useRtlLayout
-        ? "rtl"
-        : "ltr"
-    );
-
     contentEl.empty();
     contentEl.createEl("h3", { text: t("options.iconizeModalTitle") });
 
@@ -1917,7 +2015,7 @@ export class IconizeSettingsModal extends Modal {
           .onChange(async (value) => {
             if (value) {
               const iconizeIDs = ["obsidian-icon-folder", "iconize"];
-              const pluginManager = (this.app as any).plugins;
+              const pluginManager = (this.app as unknown).plugins;
               const isIconizeInstalled = iconizeIDs.some(
                 (id: string) => !!pluginManager.getPlugin(id)
               );
@@ -1955,27 +2053,19 @@ export class IconizeSettingsModal extends Modal {
   }
 }
 
-export class BackgroundImageSettingsModal extends Modal {
+export class BackgroundImageSettingsModal extends ColorMasterBaseModal {
   plugin: ColorMaster;
 
   constructor(app: App, plugin: ColorMaster) {
-    super(app);
-    this.plugin = plugin;
+    super(app, plugin);
   }
 
   onOpen() {
+    super.onOpen();
     this.modalEl.classList.add("color-master-modal");
     const { contentEl } = this;
-    const lang = this.plugin.settings.language;
     const activeProfile =
       this.plugin.settings.profiles[this.plugin.settings.activeProfile];
-
-    this.modalEl.setAttribute(
-      "dir",
-      (lang === "ar" || lang === "fa") && this.plugin.settings.useRtlLayout
-        ? "rtl"
-        : "ltr"
-    );
 
     contentEl.empty();
     contentEl.createEl("h3", {
@@ -1995,7 +2085,7 @@ export class BackgroundImageSettingsModal extends Modal {
             profile.backgroundEnabled = value;
             await this.plugin.saveSettings();
           }
-          this.onOpen(); // Redraw the window
+          this.onOpen();
         });
       });
 
@@ -2007,10 +2097,10 @@ export class BackgroundImageSettingsModal extends Modal {
     let videoButton: ButtonComponent;
 
     const imageSettingsEl = contentEl.createDiv("cm-settings-group");
-    imageSettingsEl.style.display = "none"; // It starts hidden
+    imageSettingsEl.setCssProps({ display: "none" });
 
     const videoSettingsEl = contentEl.createDiv("cm-settings-group");
-    videoSettingsEl.style.display = "none"; // It starts hidden
+    videoSettingsEl.setCssProps({ display: "none" });
 
     // --- Fill the Image Settings container ---
     new Setting(imageSettingsEl)
@@ -2038,7 +2128,7 @@ export class BackgroundImageSettingsModal extends Modal {
             .setLimits(1, 100, 1)
             .setValue(activeProfile?.jpgQuality || 85)
             .setDynamicTooltip()
-            .onChange(async (value) => {
+            .onChange((value) => {
               this.debouncedSaveSettings(value);
             });
         });
@@ -2060,11 +2150,11 @@ export class BackgroundImageSettingsModal extends Modal {
 
         slider.sliderEl.oninput = (e) => {
           const value = parseFloat((e.target as HTMLInputElement).value);
-          const videoEl = document.getElementById(
-            "cm-background-video"
-          ) as HTMLVideoElement;
+          const videoEl = document.querySelector<HTMLVideoElement>(
+            "#cm-background-video"
+          );
           if (videoEl) {
-            videoEl.style.opacity = value.toString();
+            videoEl.setCssProps({ opacity: value.toString() });
           }
         };
       });
@@ -2079,9 +2169,9 @@ export class BackgroundImageSettingsModal extends Modal {
             activeProfile.videoMuted = value;
             await this.plugin.saveSettings();
 
-            const videoEl = document.getElementById(
-              "cm-background-video"
-            ) as HTMLVideoElement;
+            const videoEl = document.querySelector<HTMLVideoElement>(
+              "#cm-background-video"
+            );
             if (videoEl) {
               videoEl.muted = value;
             }
@@ -2093,13 +2183,13 @@ export class BackgroundImageSettingsModal extends Modal {
       if (active === "image") {
         imageButton.setCta();
         videoButton.buttonEl.classList.remove("mod-cta");
-        imageSettingsEl.style.display = "block";
-        videoSettingsEl.style.display = "none";
+        imageSettingsEl.setCssProps({ display: "block" });
+        videoSettingsEl.setCssProps({ display: "none" });
       } else {
         imageButton.buttonEl.classList.remove("mod-cta");
         videoButton.setCta();
-        imageSettingsEl.style.display = "none";
-        videoSettingsEl.style.display = "block";
+        imageSettingsEl.setCssProps({ display: "none" });
+        videoSettingsEl.setCssProps({ display: "block" });
       }
     };
 
@@ -2121,19 +2211,24 @@ export class BackgroundImageSettingsModal extends Modal {
     setActiveButton(currentType);
   }
 
-  debouncedSaveSettings = debounce(async (value: number) => {
-    const profile =
-      this.plugin.settings.profiles[this.plugin.settings.activeProfile];
-    if (profile) {
-      profile.jpgQuality = value;
-      await this.plugin.saveSettings();
-      new Notice("notices.jpgQualitySet");
-    }
-  }, 500);
+  debouncedSaveSettings = debounce((value: number) => {
+    void (async () => {
+      const profile =
+        this.plugin.settings.profiles[this.plugin.settings.activeProfile];
 
-  debounce(func: (...args: any[]) => void, wait: number) {
-    let timeout: NodeJS.Timeout | null;
-    return (...args: any[]) => {
+      if (profile) {
+        profile.jpgQuality = value;
+        await this.plugin.saveSettings();
+        new Notice(t("notices.jpgQualitySet", value));
+      }
+    })().catch((err) => {
+      console.error("Failed to save JPG quality:", err);
+    });
+  }, 0);
+
+  debounce(func: (...args: unknown[]) => void, wait: number) {
+    let timeout: ReturnType<typeof setTimeout> | null;
+    return (...args: unknown[]) => {
       const later = () => {
         timeout = null;
         func(...args);
@@ -2152,7 +2247,7 @@ export class BackgroundImageSettingsModal extends Modal {
 }
 
 // Modal shown when adding a background image that already exists
-export class FileConflictModal extends Modal {
+export class FileConflictModal extends ColorMasterBaseModal {
   plugin: ColorMaster;
   arrayBuffer: ArrayBuffer; // The image data to save
   fileName: string; // The conflicting filename
@@ -2165,15 +2260,14 @@ export class FileConflictModal extends Modal {
     fileName: string,
     onResolve: (choice: "replace" | "keep") => void
   ) {
-    super(app);
-    this.plugin = plugin;
+    super(app, plugin);
     this.arrayBuffer = arrayBuffer;
     this.fileName = fileName;
     this.onResolve = onResolve;
-    this.modalEl.classList.add("color-master-modal");
   }
 
   onOpen() {
+    super.onOpen();
     const { contentEl } = this;
     contentEl.empty();
 
@@ -2190,7 +2284,7 @@ export class FileConflictModal extends Modal {
     new ButtonComponent(buttonContainer)
       .setButtonText(t("modals.fileConflict.replaceButton"))
 
-      .onClick(async () => {
+      .onClick(() => {
         this.onResolve("replace");
         this.close();
       });
@@ -2199,7 +2293,7 @@ export class FileConflictModal extends Modal {
     new ButtonComponent(buttonContainer)
       .setButtonText(t("modals.fileConflict.keepButton"))
       .setCta()
-      .onClick(async () => {
+      .onClick(() => {
         this.onResolve("keep");
         this.close();
       });
@@ -2211,7 +2305,7 @@ export class FileConflictModal extends Modal {
 }
 
 // Modal for adding a new background image via file upload, paste, or drag/drop
-export class AddBackgroundModal extends Modal {
+export class AddBackgroundModal extends ColorMasterBaseModal {
   plugin: ColorMaster;
   settingTab: ColorMasterSettingTab;
 
@@ -2220,23 +2314,19 @@ export class AddBackgroundModal extends Modal {
     plugin: ColorMaster,
     settingTab: ColorMasterSettingTab
   ) {
-    super(app);
-    this.plugin = plugin;
+    super(app, plugin);
     this.settingTab = settingTab;
-    this.modalEl.classList.add("color-master-modal");
   }
 
   // Process pasted image files
   async handlePastedFile(file: File) {
-    new Notice(`Pasted image "${file.name}"`);
+    new Notice(t("notices.pastedImage", file.name));
     await this.processFileWithProgress(file);
   }
 
   // Process pasted URLs (http/https or data URLs)
   async handlePastedUrl(url: string) {
-    const pasteBox = this.contentEl.querySelector(
-      ".cm-paste-box"
-    ) as HTMLElement;
+    const pasteBox = this.contentEl.querySelector<HTMLElement>(".cm-paste-box");
 
     // Handle data URLs directly
     if (url.startsWith("data:image")) {
@@ -2244,13 +2334,13 @@ export class AddBackgroundModal extends Modal {
         if (pasteBox) {
           pasteBox.textContent = t("modals.addBackground.processing") + "...";
         }
-        const response = await fetch(url);
-        const blob = await response.blob();
-        const arrayBuffer = await blob.arrayBuffer();
+        const response = await requestUrl({ url });
+        const arrayBuffer = response.arrayBuffer;
+        const contentType = response.headers["content-type"] || "image/png";
         const fileName = `pasted-image-${Date.now()}.${
-          blob.type.split("/")[1] || "png"
+          contentType.split("/")[1]
         }`;
-        new Notice("Pasted Base64 image");
+        new Notice(t("notices.pastedBase64Image"));
 
         await this.plugin.setBackgroundMedia(arrayBuffer, fileName, "prompt");
         this.close();
@@ -2265,7 +2355,7 @@ export class AddBackgroundModal extends Modal {
 
     // Handle regular URLs
     if (url.startsWith("http://") || url.startsWith("https://")) {
-      new Notice(`Downloading from ${url}...`);
+      new Notice(t("notices.downloadingFromUrl", url));
       if (pasteBox) {
         // Show processing (no percentage)
         pasteBox.textContent = t("modals.addBackground.processing") + "...";
@@ -2280,10 +2370,9 @@ export class AddBackgroundModal extends Modal {
 
   // Read file as ArrayBuffer, update progress, and call setBackgroundImage
   async processFileWithProgress(file: File) {
+    await Promise.resolve();
     const reader = new FileReader();
-    const pasteBox = this.contentEl.querySelector(
-      ".cm-paste-box"
-    ) as HTMLElement;
+    const pasteBox = this.contentEl.querySelector<HTMLElement>(".cm-paste-box");
 
     // Update progress text in paste box
     reader.onprogress = (event) => {
@@ -2301,7 +2390,7 @@ export class AddBackgroundModal extends Modal {
       }
       const arrayBuffer = reader.result as ArrayBuffer;
       await this.plugin.setBackgroundMedia(arrayBuffer, file.name, "prompt");
-      this.close(); // Close modal on success
+      this.close();
     };
 
     // Handle read errors
@@ -2318,16 +2407,9 @@ export class AddBackgroundModal extends Modal {
   }
 
   onOpen() {
+    super.onOpen();
     const { contentEl } = this;
     contentEl.empty();
-
-    const lang = this.plugin.settings.language;
-    this.modalEl.setAttribute(
-      "dir",
-      (lang === "ar" || lang === "fa") && this.plugin.settings.useRtlLayout
-        ? "rtl"
-        : "ltr"
-    );
 
     contentEl.createEl("h3", { text: t("modals.addBackground.title") });
 
@@ -2337,24 +2419,22 @@ export class AddBackgroundModal extends Modal {
       .setDesc(t("modals.addBackground.importFromFileDesc"))
       .addButton((button) => {
         // Hidden input element to handle file selection
-        const input = createEl("input", {
-          type: "file",
-          attr: { accept: "image/*, video/mp4, video/webm" }, // Allow standard image types
-        });
+        const input = document.createElement("input");
+        input.type = "file";
+        input.accept = "image/*, video/mp4, video/webm";
 
         button
-          .setIcon("upload")
           .setCta()
           .setButtonText(t("buttons.chooseFile"))
           .onClick(() => {
-            input.click(); // Open file dialog
+            input.click();
           });
 
         input.onchange = async () => {
           if (!input.files || input.files.length === 0) return;
           const file = input.files[0];
 
-          await this.processFileWithProgress(file); // Process selected file
+          await this.processFileWithProgress(file);
         };
       });
 
@@ -2365,7 +2445,7 @@ export class AddBackgroundModal extends Modal {
       cls: "cm-paste-box",
       text: t("modals.addBackground.pasteBoxPlaceholder"),
     });
-    pasteBox.setAttribute("contenteditable", "true"); // Allow paste
+    pasteBox.setAttribute("contenteditable", "true");
 
     pasteBox.addEventListener("paste", (event: ClipboardEvent) => {
       event.preventDefault();
@@ -2377,7 +2457,9 @@ export class AddBackgroundModal extends Modal {
       if (clipboardData.files && clipboardData.files.length > 0) {
         const file = clipboardData.files[0];
         if (file.type.startsWith("image/") || file.type.startsWith("video/")) {
-          this.handlePastedFile(file);
+          void this.handlePastedFile(file).catch((err) => {
+            console.error("Failed to handle pasted file:", err);
+          });
           return;
         }
       }
@@ -2390,7 +2472,9 @@ export class AddBackgroundModal extends Modal {
           pastedText.startsWith("https://") ||
           pastedText.startsWith("data:image"))
       ) {
-        this.handlePastedUrl(pastedText);
+        void this.handlePastedUrl(pastedText).catch((err) => {
+          console.error("Failed to handle pasted URL:", err);
+        });
         return;
       }
       // If neither worked
@@ -2420,7 +2504,7 @@ export class AddBackgroundModal extends Modal {
       if (event.dataTransfer.files && event.dataTransfer.files.length > 0) {
         const file = event.dataTransfer.files[0];
         if (file.type.startsWith("image/")) {
-          this.handlePastedFile(file);
+          void this.handlePastedFile(file);
           return;
         }
       }
@@ -2430,7 +2514,7 @@ export class AddBackgroundModal extends Modal {
         event.dataTransfer.getData("text/uri-list") ||
         event.dataTransfer.getData("text/plain");
       if (url && (url.startsWith("http") || url.startsWith("data:image"))) {
-        this.handlePastedUrl(url);
+        void this.handlePastedUrl(url);
         return;
       }
       // If neither worked
@@ -2444,11 +2528,12 @@ export class AddBackgroundModal extends Modal {
 }
 
 // Modal for browsing, selecting, renaming, and deleting background images for the active profile
-export class ProfileImageBrowserModal extends Modal {
+export class ProfileImageBrowserModal extends ColorMasterBaseModal {
   plugin: ColorMaster;
   settingTab: ColorMasterSettingTab;
-  closeCallback: () => void; // Used to potentially close the parent 'AddBackgroundModal'
-  galleryEl: HTMLElement; // Container for image cards
+  closeCallback: () => void;
+  galleryEl: HTMLElement;
+  private videoPlayers: HTMLVideoElement[] = [];
 
   constructor(
     app: App,
@@ -2456,27 +2541,34 @@ export class ProfileImageBrowserModal extends Modal {
     settingTab: ColorMasterSettingTab,
     closeCallback: () => void
   ) {
-    super(app);
-    this.plugin = plugin;
+    super(app, plugin);
     this.settingTab = settingTab;
     this.closeCallback = closeCallback; // Store the callback
-    this.modalEl.classList.add("color-master-modal", "cm-image-browser-modal");
   }
 
-  async onOpen() {
+  onOpen(): void {
+    super.onOpen();
     const { contentEl } = this;
     contentEl.empty();
+    this.videoPlayers = [];
     contentEl.createEl("h3", { text: t("modals.backgroundBrowser.title") });
 
     this.galleryEl = contentEl.createDiv({ cls: "cm-image-gallery" });
-    await this.displayImages(); // Load and display images
+
+    // run async tasks safely
+    void this._renderImages().catch((err) => {
+      console.error("Failed to render images:", err);
+    });
   }
 
-  // Fetches and displays image cards in the gallery
+  private async _renderImages(): Promise<void> {
+    await this.displayImages();
+  }
+
+  // Fetches media from vault and populates the gallery UI
   async displayImages() {
     this.galleryEl.empty();
-    // Construct path to the global backgrounds folder
-    const backgroundsPath = `.obsidian/backgrounds`;
+    const backgroundsPath = `${this.app.vault.configDir}/backgrounds`;
     const mediaExtensions = [
       ".png",
       ".jpg",
@@ -2490,21 +2582,18 @@ export class ProfileImageBrowserModal extends Modal {
 
     let files: string[] = [];
     try {
-      // List files only if the profile's background folder exists
       if (await this.app.vault.adapter.exists(backgroundsPath)) {
         const list = await this.app.vault.adapter.list(backgroundsPath);
-        files = list.files; // Get the list of file paths
+        files = list.files;
       }
     } catch (e) {
       console.warn("Color Master: Error listing background folder.", e);
     }
 
-    // Filter the list to include only supported image types
     const mediaFiles = files.filter((path) =>
       mediaExtensions.some((ext) => path.toLowerCase().endsWith(ext))
     );
 
-    // Show empty state message if no images found
     if (mediaFiles.length === 0) {
       this.galleryEl.createDiv({
         cls: "cm-image-browser-empty",
@@ -2513,27 +2602,38 @@ export class ProfileImageBrowserModal extends Modal {
       return;
     }
 
-    // Create a card for each image file
     const activeProfile =
       this.plugin.settings.profiles[this.plugin.settings.activeProfile];
     const activeMediaPath = activeProfile?.backgroundPath;
 
-    // Create a card for each image file
-    for (const mediaPath of mediaFiles) {
-      const cardEl = this.galleryEl.createDiv({ cls: "cm-image-card" });
-
-      if (mediaPath === activeMediaPath) {
-        cardEl.classList.add("is-active");
+    // Optimization: Helper to parse filenames (defined once outside the loop)
+    const splitName = (fullFileName: string) => {
+      const decoded = decodeURIComponent(fullFileName || "");
+      const lastDot = decoded.lastIndexOf(".");
+      if (lastDot > 0 && lastDot < decoded.length - 1) {
+        return {
+          basename: decoded.substring(0, lastDot),
+          ext: decoded.substring(lastDot),
+        };
       }
+      return { basename: decoded, ext: "" };
+    };
+
+    // Optimization: Use DocumentFragment to minimize DOM reflows
+    const fragment = document.createDocumentFragment();
+
+    for (const mediaPath of mediaFiles) {
+      const cardEl = document.createElement("div");
+      cardEl.className = "cm-image-card";
+      if (mediaPath === activeMediaPath) cardEl.classList.add("is-active");
 
       const mediaUrl = this.app.vault.adapter.getResourcePath(mediaPath);
       const fileName = mediaPath.split("/").pop();
-
-      // --- 1. Image/Video Preview ---
       const isVideo =
         mediaPath.toLowerCase().endsWith(".mp4") ||
         mediaPath.toLowerCase().endsWith(".webm");
 
+      // --- Media Preview Section ---
       const previewContainer = cardEl.createDiv({
         cls: "cm-media-preview-container",
       });
@@ -2550,18 +2650,68 @@ export class ProfileImageBrowserModal extends Modal {
           },
         });
 
+        this.videoPlayers.push(videoEl);
+
         const playOverlay = previewContainer.createDiv({
           cls: "cm-media-play-overlay",
         });
         setIcon(playOverlay, "play");
 
+        const muteButton = previewContainer.createDiv({
+          cls: "cm-media-mute-toggle",
+        });
+
+        const updateMuteIcon = () => {
+          setIcon(muteButton, videoEl.muted ? "volume-x" : "volume-2");
+          muteButton.setCssProps({ opacity: "0" });
+        };
+        updateMuteIcon();
+
+        // Mute Toggle Logic
+        muteButton.addEventListener("click", (e) => {
+          e.stopPropagation();
+          videoEl.muted = !videoEl.muted;
+          updateMuteIcon();
+          muteButton.setCssProps({
+            opacity: videoEl.muted ? "0.8" : "1",
+          });
+        });
+
+        // Video Play/Pause & Exclusive Play Logic
         previewContainer.addEventListener("click", () => {
+          // Pause other playing videos
+          for (const player of this.videoPlayers) {
+            if (player !== videoEl && !player.paused) {
+              player.pause();
+              const container = player.closest<HTMLElement>(
+                ".cm-media-preview-container"
+              );
+              if (container) {
+                const playOverlay = container.querySelector<HTMLElement>(
+                  ".cm-media-play-overlay"
+                );
+                const muteToggle = container.querySelector<HTMLElement>(
+                  ".cm-media-mute-toggle"
+                );
+
+                playOverlay?.setCssProps({ opacity: "1" });
+                muteToggle?.setCssProps({ opacity: "0" });
+              }
+            }
+          }
+
           if (videoEl.paused) {
-            videoEl.play();
-            playOverlay.style.opacity = "0";
+            void videoEl.play().catch((err) => {
+              console.error("Failed to play video:", err);
+            });
+            playOverlay.setCssProps({ opacity: "0" });
+            muteButton.setCssProps({
+              opacity: videoEl.muted ? "0.8" : "1",
+            });
           } else {
+            muteButton.setCssProps({ opacity: "0" });
             videoEl.pause();
-            playOverlay.style.opacity = "1";
+            playOverlay.setCssProps({ opacity: "1" });
           }
         });
       } else {
@@ -2570,17 +2720,18 @@ export class ProfileImageBrowserModal extends Modal {
           attr: { src: mediaUrl, "data-path": mediaPath },
         });
       }
-      // --- 2. Editable File Name (Basename + Extension) ---
+
+      // --- Rename Input Section ---
       const nameSettingEl = cardEl.createDiv({
         cls: "setting-item cm-image-card-name-input",
       });
       const nameControlEl = nameSettingEl.createDiv({
         cls: "setting-item-control",
       });
-
       const nameInputContainer = nameControlEl.createDiv({
         cls: "cm-name-input-container",
       });
+
       const nameInput = nameInputContainer.createEl("input", {
         type: "text",
         cls: "cm-name-input-basename",
@@ -2589,182 +2740,1056 @@ export class ProfileImageBrowserModal extends Modal {
         cls: "cm-name-input-extension",
       });
 
-      // Helper to safely split filename into basename and extension
-      const splitName = (fullFileName: string) => {
-        // Decode potential URI encoding in filenames
-        const decodedName = decodeURIComponent(fullFileName || "");
-        const lastDot = decodedName.lastIndexOf(".");
-        // Check for valid extension (dot exists, not first char, content after dot)
-        if (lastDot > 0 && lastDot < decodedName.length - 1) {
-          return {
-            basename: decodedName.substring(0, lastDot),
-            ext: decodedName.substring(lastDot),
-          };
-        }
-        // Fallback if no valid extension
-        return { basename: decodedName, ext: "" };
-      };
-
+      // State tracking for rename logic
       let currentImagePath = mediaPath;
-      let currentFileName = fileName || ""; // Track path locally for updates after rename
-
-      // Set initial values
+      let currentFileName = fileName || "";
       let { basename, ext } = splitName(currentFileName);
+
       nameInput.value = basename;
       extensionSpan.setText(ext);
 
-      // Select basename text on focus for easier editing
-      nameInput.addEventListener("focus", (e) => {
-        (e.target as HTMLInputElement).select();
-      });
+      nameInput.addEventListener("focus", (e) =>
+        (e.target as HTMLInputElement).select()
+      );
 
-      // --- Save Rename Logic ---
       const saveName = async () => {
         const newBasename = nameInput.value.trim();
-        const currentBasename = splitName(currentFileName).basename; // Split again to get current state
+        const currentBase = splitName(currentFileName).basename;
 
-        // Only proceed if basename is valid and changed
-        if (newBasename && newBasename !== currentBasename) {
-          const newFullName = newBasename + ext; // Get current extension
-
-          // Call main plugin rename function (returns new path or false)
+        if (newBasename && newBasename !== currentBase) {
+          const newFullName = newBasename + ext;
           const renameResult = await this.plugin.renameBackgroundMedia(
             currentImagePath,
             newFullName
           );
 
           if (renameResult && typeof renameResult === "string") {
-            // Update local state and necessary UI elements
-            const newPath = renameResult;
-            currentImagePath = newPath; // Update path for subsequent actions
-            currentFileName = newPath.split("/").pop() || ""; // Update filename from the returned path
+            // Update local state upon success
+            currentImagePath = renameResult;
+            currentFileName = renameResult.split("/").pop() || "";
             const updatedSplit = splitName(currentFileName);
-            basename = updatedSplit.basename; // Update displayed basename if needed
-            // ext remains the same
+            basename = updatedSplit.basename;
 
-            // Update associated elements (preview, buttons) without full redraw
-            const imgEl = cardEl.querySelector(
+            // Partial UI update to avoid full reload
+            const imgEl = cardEl.querySelector<HTMLImageElement>(
               ".cm-image-card-preview"
-            ) as HTMLImageElement | null;
-            const selectBtn = cardEl.querySelector(
+            );
+            const selectBtn = cardEl.querySelector<HTMLButtonElement>(
               ".cm-image-card-select-btn"
-            ) as HTMLButtonElement | null;
-            const deleteBtn = cardEl.querySelector(
+            );
+            const deleteBtn = cardEl.querySelector<HTMLButtonElement>(
               ".cm-image-card-delete-btn"
-            ) as HTMLButtonElement | null;
+            );
 
-            if (imgEl) {
-              imgEl.src = this.app.vault.adapter.getResourcePath(newPath);
-            }
-            if (selectBtn) {
-              selectBtn.onclick = () => this.selectMedia(newPath);
-            }
-            if (deleteBtn) {
-              deleteBtn.onclick = () => this.deleteMedia(newPath, cardEl);
-            }
+            if (imgEl)
+              imgEl.src = this.app.vault.adapter.getResourcePath(renameResult);
+            if (selectBtn)
+              selectBtn.onclick = () => this.selectMedia(renameResult);
+            if (deleteBtn)
+              deleteBtn.onclick = () => this.deleteMedia(renameResult, cardEl);
           } else {
-            // FAILURE - Revert input to the last known good basename
-            nameInput.value = currentBasename;
+            nameInput.value = currentBase; // Revert on failure
           }
         } else {
-          // If name empty or unchanged, ensure input reflects current basename
-          nameInput.value = currentBasename;
+          nameInput.value = currentBase;
         }
       };
 
-      // Trigger save on Enter or losing focus
-      nameInput.addEventListener("keydown", (e: KeyboardEvent) => {
+      nameInput.addEventListener("keydown", (e) => {
         if (e.key === "Enter") {
           e.preventDefault();
-          nameInput.blur(); // Trigger focusout event to save
+          nameInput.blur(); // Triggers focusout
         }
       });
       nameInput.addEventListener("focusout", () => {
-        saveName(); // Triggers focusout
+        void saveName().catch((err) => {
+          console.error("Failed to save snippet name:", err);
+        });
       });
 
-      // --- 3. Action Buttons (Select/Delete) ---
-      // Added directly to nameControlEl for inline display
-      // Select Button (Icon + Tooltip)
+      // --- Actions (Select / Delete) ---
       const controlsEl = cardEl.createDiv({ cls: "cm-image-card-controls" });
 
-      // Select Button
-      const selectButton = new ButtonComponent(controlsEl) // Add to name control container
+      const selectButton = new ButtonComponent(controlsEl)
         .setButtonText(t("buttons.select"))
         .setCta()
-        .onClick(() => this.selectMedia(currentImagePath)); // Use current path
+        .onClick(() => this.selectMedia(currentImagePath));
       selectButton.buttonEl.classList.add("cm-image-card-select-btn");
 
-      // Delete Button
       const deleteButton = new ButtonComponent(controlsEl)
         .setIcon("trash")
         .setClass("mod-warning")
-        .onClick(() => this.deleteMedia(currentImagePath, cardEl)); // Use currentImagePath
+        .onClick(() => this.deleteMedia(currentImagePath, cardEl));
       deleteButton.buttonEl.classList.add("cm-image-card-delete-btn");
+
+      fragment.appendChild(cardEl);
     }
+
+    // Single DOM injection
+    this.galleryEl.appendChild(fragment);
   }
 
-  // Action when user clicks the 'select' (check) button on an background card
   async selectMedia(path: string) {
+    // Infer media type from extension to ensure correct rendering tag (img vs video)
     const fileExt = path.split(".").pop()?.toLowerCase();
     const mediaType: "image" | "video" =
       fileExt === "mp4" || fileExt === "webm" ? "video" : "image";
 
     await this.plugin.selectBackgroundMedia(path, mediaType);
-    this.settingTab.display(); // Refresh settings tab
+
+    this.settingTab.display();
     this.closeCallback();
     this.close();
   }
 
-  // Action when user clicks the 'delete' (trash) button on an image card
-  async deleteMedia(path: string, cardEl: HTMLElement) {
-    const fileName = path.split("/").pop();
+  deleteMedia(path: string, cardEl: HTMLElement) {
+    // Identify profiles currently using this background to warn the user
+    const profiles = this.plugin.settings.profiles;
+    const affectedProfiles = Object.keys(profiles).filter(
+      (name) => profiles[name].backgroundPath === path
+    );
 
-    // Find all profiles using this specific image path
-    const profilesUsingImage: string[] = [];
-    for (const profileName in this.plugin.settings.profiles) {
-      if (this.plugin.settings.profiles[profileName].backgroundPath === path) {
-        profilesUsingImage.push(profileName);
-      }
-    }
-
-    // Build the warning message
+    // Construct warning UI with list of affected profiles
     const messageFragment = new DocumentFragment();
     messageFragment.append(t("modals.confirmation.deleteGlobalBgDesc"));
 
-    if (profilesUsingImage.length > 0) {
-      const profileListEl = messageFragment.createEl("ul", {
+    if (affectedProfiles.length > 0) {
+      const listEl = messageFragment.createEl("ul", {
         cls: "cm-profile-list-modal",
       });
-      profilesUsingImage.forEach((name) => {
-        profileListEl.createEl("li").createEl("strong", { text: name });
+      affectedProfiles.forEach((name) => {
+        listEl.createEl("li").createEl("strong", { text: name });
       });
     }
 
-    // Show confirmation dialog before deleting
     new ConfirmationModal(
       this.app,
       this.plugin,
       t("modals.confirmation.deleteBackgroundTitle"),
       messageFragment,
-      async () => {
-        await this.plugin.removeBackgroundMediaByPath(path);
+      () => {
+        void (async () => {
+          // Perform deletion
+          await this.plugin.removeBackgroundMediaByPath(path);
+          new Notice(t("notices.bgDeleted"));
 
-        new Notice(t("notices.bgDeleted"));
-        cardEl.remove();
+          // Update browser UI
+          cardEl.remove();
 
-        // Check if gallery is now empty
-        if (this.galleryEl.childElementCount === 0) {
-          this.galleryEl.createDiv({
-            cls: "cm-image-browser-empty",
-            text: t("modals.imageBrowser.noImages"),
-          });
-        }
-        // Refresh settings tab in case we deleted the active image
-        this.settingTab.display();
+          if (this.galleryEl.childElementCount === 0) {
+            this.galleryEl.createDiv({
+              cls: "cm-image-browser-empty",
+              text: t("modals.backgroundBrowser.noImages"),
+            });
+          }
+
+          // Sync main settings tab
+          this.settingTab.display();
+        })().catch((err) => {
+          console.error("Failed to delete background:", err);
+        });
       },
       { buttonText: t("buttons.deleteAnyway"), buttonClass: "mod-warning" }
     ).open();
+  }
+
+  onClose() {
+    for (const player of this.videoPlayers) {
+      player.pause();
+    }
+    this.videoPlayers = [];
+    this.contentEl.empty();
+  }
+}
+
+/**
+ * Modal for granular data reset operations.
+ * Allows users to select specific data categories to wipe or preserve.
+ */
+export class AdvancedResetModal extends ColorMasterBaseModal {
+  plugin: ColorMaster;
+
+  private defaultResetOptions = {
+    deleteProfiles: false,
+    deleteSnippets: false,
+    deleteSettings: false,
+    deleteBackgrounds: false,
+    deleteLanguages: false,
+  };
+
+  resetOptions = {
+    // Merge saved preferences with defaults, prioritizing saved state
+    ...(this.plugin.settings.advancedResetOptions || this.defaultResetOptions),
+    // Safety: Ensure background deletion defaults to false unless explicitly saved
+    deleteBackgrounds:
+      this.plugin.settings.advancedResetOptions?.deleteBackgrounds ||
+      this.defaultResetOptions.deleteBackgrounds,
+  };
+
+  deleteButton: ButtonComponent;
+
+  constructor(app: App, plugin: ColorMaster) {
+    super(app, plugin);
+  }
+
+  onOpen() {
+    super.onOpen();
+    const { contentEl } = this;
+
+    contentEl.empty();
+    contentEl.createEl("h3", { text: t("modals.advancedReset.title") });
+    contentEl.createEl("p", { text: t("modals.advancedReset.desc") });
+    contentEl.addClass("cm-advanced-reset-options");
+
+    // 1. Profiles & Snapshots
+    new Setting(contentEl)
+      .setName(t("modals.advancedReset.profilesLabel"))
+      .addExtraButton((btn) => {
+        btn.setIcon("info").setTooltip(t("modals.advancedReset.profilesDesc"));
+      })
+      .addToggle((toggle) => {
+        toggle.setValue(this.resetOptions.deleteProfiles).onChange((value) => {
+          this.resetOptions.deleteProfiles = value;
+          this.validateButton();
+        });
+        toggle.toggleEl.blur();
+      });
+
+    // 2. Snippets
+    new Setting(contentEl)
+      .setName(t("modals.advancedReset.snippetsLabel"))
+      .addExtraButton((btn) => {
+        btn.setIcon("info").setTooltip(t("modals.advancedReset.snippetsDesc"));
+      })
+      .addToggle((toggle) => {
+        toggle.setValue(this.resetOptions.deleteSnippets).onChange((value) => {
+          this.resetOptions.deleteSnippets = value;
+          this.validateButton();
+        });
+        toggle.toggleEl.blur();
+      });
+
+    // 3. Plugin Settings
+    new Setting(contentEl)
+      .setName(t("modals.advancedReset.settingsLabel"))
+      .addExtraButton((btn) => {
+        btn.setIcon("info").setTooltip(t("modals.advancedReset.settingsDesc"));
+      })
+      .addToggle((toggle) => {
+        toggle.setValue(this.resetOptions.deleteSettings).onChange((value) => {
+          this.resetOptions.deleteSettings = value;
+          this.validateButton();
+        });
+        toggle.toggleEl.blur();
+      });
+
+    // 4. Backgrounds Folder
+    new Setting(contentEl)
+      .setName(t("modals.advancedReset.backgroundsLabel"))
+      .addExtraButton((btn) => {
+        btn
+          .setIcon("info")
+          .setTooltip(t("modals.advancedReset.backgroundsDesc"));
+      })
+      .addToggle((toggle) => {
+        toggle
+          .setValue(this.resetOptions.deleteBackgrounds)
+          .onChange((value) => {
+            this.resetOptions.deleteBackgrounds = value;
+            this.validateButton();
+          });
+        toggle.toggleEl.blur();
+      });
+
+    // 5. Custom Languages (Handles optional type safely)
+    new Setting(contentEl)
+      .setName(t("modals.advancedReset.languagesLabel"))
+      .addExtraButton((btn) => {
+        btn.setIcon("info").setTooltip(t("modals.advancedReset.languagesDesc"));
+      })
+      .addToggle((toggle) => {
+        toggle
+          .setValue(this.resetOptions.deleteLanguages ?? false)
+          .onChange((value) => {
+            this.resetOptions.deleteLanguages = value;
+            this.validateButton();
+          });
+        toggle.toggleEl.blur();
+      });
+
+    // --- Action Buttons ---
+    const buttonContainer = contentEl.createDiv({
+      cls: "modal-button-container",
+    });
+
+    new ButtonComponent(buttonContainer)
+      .setButtonText(t("buttons.cancel"))
+      .onClick(() => this.close());
+
+    this.deleteButton = new ButtonComponent(buttonContainer)
+      .setButtonText(t("buttons.delete"))
+      .setWarning()
+      .onClick(() => {
+        if (Object.values(this.resetOptions).every((v) => v === false)) return;
+
+        this.plugin.settings.advancedResetOptions = this.resetOptions;
+        void this.plugin.resetPluginData(this.resetOptions).catch((err) => {
+          console.error("Failed to reset plugin data:", err);
+        });
+
+        this.close();
+      });
+
+    this.validateButton();
+  }
+
+  validateButton() {
+    const hasSelection = Object.values(this.resetOptions).some(
+      (v) => v === true
+    );
+    this.deleteButton.setDisabled(!hasSelection);
+    this.deleteButton.setButtonText(
+      hasSelection ? t("buttons.delete") : t("buttons.selectOption")
+    );
+  }
+
+  onClose() {
+    this.contentEl.empty();
+  }
+}
+
+/**
+ * Modal for creating a new custom language definition.
+ */
+export class AddNewLanguageModal extends ColorMasterBaseModal {
+  settingTab: ColorMasterSettingTab;
+  langName: string = "";
+  langCode: string = "";
+  isRtl: boolean = false;
+
+  constructor(
+    app: App,
+    plugin: ColorMaster,
+    settingTab: ColorMasterSettingTab
+  ) {
+    super(app, plugin);
+    this.settingTab = settingTab;
+  }
+
+  onOpen() {
+    super.onOpen();
+    const { contentEl } = this;
+    contentEl.empty();
+
+    contentEl.createEl("h3", { text: t("modals.addLang.title") });
+    contentEl.createEl("p", { text: t("modals.addLang.desc") });
+
+    // 1. Language Name Input
+    new Setting(contentEl)
+      .setName(t("modals.addLang.nameLabel"))
+      .setDesc(t("modals.addLang.nameDesc"))
+      .addText((text) => {
+        text
+          .setPlaceholder(t("modals.addLang.namePlaceholder"))
+          .onChange((value) => {
+            this.langName = value.trim();
+          });
+      });
+
+    // 2. Language Code Input (Sanitized)
+    new Setting(contentEl)
+      .setName(t("modals.addLang.codeLabel"))
+      .setDesc(t("modals.addLang.codeDesc"))
+      .addText((text) => {
+        text
+          .setPlaceholder(t("modals.addLang.codePlaceholder"))
+          .onChange((value) => {
+            // Enforce lowercase alphanumeric format for safe keys
+            this.langCode = value
+              .trim()
+              .toLowerCase()
+              .replace(/[^a-z0-9_-]/g, "");
+            if (text.inputEl.value !== this.langCode) {
+              text.setValue(this.langCode);
+            }
+          });
+      });
+
+    // 3. RTL Toggle
+    new Setting(contentEl)
+      .setName(t("modals.addLang.rtlLabel"))
+      .setDesc(t("modals.addLang.rtlDesc"))
+      .addToggle((toggle) => {
+        toggle.setValue(this.isRtl).onChange((value) => {
+          this.isRtl = value;
+        });
+      });
+
+    // 4. Action Buttons
+    const buttonContainer = contentEl.createDiv({
+      cls: "modal-button-container",
+    });
+
+    new ButtonComponent(buttonContainer)
+      .setButtonText(t("buttons.cancel"))
+      .onClick(() => this.close());
+
+    new ButtonComponent(buttonContainer)
+      .setButtonText(t("buttons.create"))
+      .setCta()
+      .onClick(() => this.handleCreate());
+  }
+
+  async handleCreate() {
+    // --- Validation ---
+    if (!this.langName) {
+      new Notice(t("notices.langNameEmpty"));
+      return;
+    }
+    if (!this.langCode) {
+      new Notice(t("notices.langCodeEmpty"));
+      return;
+    }
+
+    // Prevent overriding core languages
+    const coreCodes = ["en", "ar", "fa", "fr"];
+    if (coreCodes.includes(this.langCode)) {
+      new Notice(t("notices.langCodeCore", this.langCode));
+      return;
+    }
+
+    if (!this.plugin.settings.customLanguages) {
+      this.plugin.settings.customLanguages = {};
+    }
+
+    // Check for duplicate codes
+    if (this.plugin.settings.customLanguages[this.langCode]) {
+      new Notice(t("notices.langCodeExists", this.langCode));
+      return;
+    }
+
+    // Check for duplicate names (Custom)
+    const existingLangs = Object.values(this.plugin.settings.customLanguages);
+    const nameExists = existingLangs.some(
+      (lang) => lang.languageName.toLowerCase() === this.langName.toLowerCase()
+    );
+    if (nameExists) {
+      new Notice(t("notices.langNameExists", this.langName));
+      return;
+    }
+
+    // Check for duplicate names (Core)
+    const coreLangNames = Object.values(CORE_LANGUAGES).map((name) =>
+      name.toLowerCase()
+    );
+    if (coreLangNames.includes(this.langName.toLowerCase())) {
+      new Notice(t("notices.langNameCore", this.langName));
+      return;
+    }
+
+    // --- Creation & Activation ---
+    this.plugin.settings.customLanguages[this.langCode] = {
+      languageName: this.langName,
+      translations: {},
+      isRtl: this.isRtl,
+    };
+
+    // Auto-switch to the new language
+    this.plugin.settings.language = this.langCode;
+
+    await this.plugin.saveSettings();
+    loadLanguage(this.plugin.settings); // Refresh i18n engine
+    new Notice(t("notices.langCreated", this.langName));
+    this.settingTab.display(); // Refresh UI
+    this.close();
+
+    // Open translator immediately for convenience
+    new LanguageTranslatorModal(
+      this.app,
+      this.plugin,
+      this.settingTab,
+      this.langCode
+    ).open();
+  }
+
+  onClose() {
+    this.contentEl.empty();
+  }
+}
+
+/**
+ * Complex modal for editing language translation strings.
+ * Features a recursive tree view, live search, and import/export capabilities.
+ */
+export class LanguageTranslatorModal extends ColorMasterBaseModal {
+  settingTab: ColorMasterSettingTab;
+  langCode: string;
+  langName: string;
+  translations: CustomTranslation;
+  fallbackStrings: Record<string, LocalizedValue>;
+  nestedFallback: Record<string, LocalizedValue | Record<string, unknown>>; // Optimization: Cache nested structure
+  listContainer: HTMLElement;
+  isCoreLanguage: boolean;
+  isRtl: boolean = false;
+  searchQuery: string = "";
+  caseSensitive: boolean = false;
+  filterMissing: boolean = false;
+  searchInput: HTMLInputElement;
+  debouncedRender: () => void;
+
+  constructor(
+    app: App,
+    plugin: ColorMaster,
+    settingTab: ColorMasterSettingTab,
+    langCode: string
+  ) {
+    super(app, plugin);
+    this.settingTab = settingTab;
+    this.langCode = langCode;
+    this.fallbackStrings = getFallbackStrings();
+
+    // Pre-calculate nested structure once to avoid overhead during render loops
+    this.nestedFallback = unflattenStrings(
+      this.fallbackStrings as CustomTranslation
+    );
+
+    const customLangData = this.plugin.settings.customLanguages?.[langCode];
+    const coreLangNameString = CORE_LANGUAGES[langCode as LocaleCode];
+
+    // Handle Core Languages smarter (Base + Overrides)
+    if (coreLangNameString) {
+      this.isCoreLanguage = true;
+      this.langName = coreLangNameString;
+
+      // 1. Load the BASE core strings from source code
+      const flatCoreLang = flattenStrings(CORE_LOCALES[langCode as LocaleCode]);
+      const baseStrings: CustomTranslation = {};
+      for (const key in flatCoreLang) {
+        if (typeof flatCoreLang[key] === "string")
+          baseStrings[key] = flatCoreLang[key];
+      }
+
+      // 2. If we have saved overrides, merge them on top of base strings
+      if (customLangData && customLangData.translations) {
+        this.translations = { ...baseStrings, ...customLangData.translations };
+        this.isRtl =
+          customLangData.isRtl ?? (langCode === "ar" || langCode === "fa");
+      } else {
+        // No overrides yet, just show full base strings
+        this.translations = baseStrings;
+        this.isRtl = langCode === "ar" || langCode === "fa";
+      }
+    } else if (customLangData) {
+      // Purely custom language (not core) - load as is
+      this.langName = customLangData.languageName;
+      this.translations = JSON.parse(
+        JSON.stringify(customLangData.translations || {})
+      );
+      this.isCoreLanguage = false;
+      this.isRtl = customLangData.isRtl || false;
+    } else {
+      // Brand new custom language
+      this.langName = langCode;
+      this.translations = {};
+      this.isCoreLanguage = false;
+    }
+  }
+
+  onOpen() {
+    super.onOpen();
+    const { contentEl } = this;
+    contentEl.empty();
+    this.modalEl.classList.add(
+      "color-master-modal",
+      "cm-translator-modal",
+      "cm-translator-tree-modal"
+    );
+
+    contentEl.createEl("h3", {
+      text: t("modals.translator.title", this.langName),
+    });
+
+    this.debouncedRender = debounce(() => {
+      this.renderTranslationTree();
+    }, 250);
+
+    this.renderControls(contentEl);
+    this.listContainer = contentEl.createDiv("cm-translator-list");
+    this.renderTranslationTree();
+
+    const mainControls = new Setting(contentEl)
+      .addButton((button) => {
+        button
+          .setButtonText(t("buttons.apply"))
+          .setCta()
+          .onClick(() => this.handleSave());
+      })
+      .addButton((button) => {
+        button.setButtonText(t("buttons.cancel")).onClick(() => this.close());
+      });
+    mainControls.settingEl.classList.add(
+      "cm-translator-main-controls",
+      "modal-button-container"
+    );
+  }
+
+  renderControls(containerEl: HTMLElement) {
+    const controlsEl = containerEl.createDiv("cm-translator-controls");
+
+    // --- 1. Search Bar (Using Obsidian Component) ---
+    const searchBarContainer = controlsEl.createDiv({
+      cls: "cm-search-bar-container",
+    });
+
+    const searchComponent = new SearchComponent(searchBarContainer)
+      .setPlaceholder(t("modals.translator.searchPlaceholder"))
+      .setValue(this.searchQuery)
+      .onChange((value) => {
+        this.searchQuery = value;
+        this.debouncedRender();
+      });
+
+    this.searchInput = searchComponent.inputEl;
+
+    searchBarContainer.addClass("cm-search-input-container");
+
+    const searchActions = searchBarContainer.createDiv({
+      cls: "cm-search-actions",
+    });
+
+    // Case Sensitivity Toggle
+    const caseToggle = searchActions.createEl("button", {
+      cls: "cm-search-action-btn",
+      text: "Aa",
+    });
+    caseToggle.setAttr("aria-label", t("settings.ariaCase"));
+    caseToggle.classList.toggle("is-active", this.caseSensitive);
+    caseToggle.addEventListener("click", () => {
+      this.caseSensitive = !this.caseSensitive;
+      caseToggle.classList.toggle("is-active", this.caseSensitive);
+      this.debouncedRender();
+    });
+
+    // Filter Missing Toggle
+    const missingToggle = searchActions.createEl("button", {
+      cls: "cm-search-action-btn",
+    });
+    setIcon(missingToggle, "filter");
+    missingToggle.setAttr("aria-label", t("modals.translator.showMissing"));
+    missingToggle.classList.toggle("is-active", this.filterMissing);
+    missingToggle.addEventListener("click", () => {
+      this.filterMissing = !this.filterMissing;
+      missingToggle.classList.toggle("is-active", this.filterMissing);
+      this.debouncedRender();
+    });
+
+    // --- 2. IO Buttons (Import/Export) ---
+    const ioControls = controlsEl.createDiv("cm-translator-io-controls");
+
+    new Setting(ioControls)
+      .addButton((btn) =>
+        btn
+          .setIcon("copy")
+          .setTooltip(t("modals.translator.copyJson"))
+          .onClick(() => this._copyJson())
+      )
+      .addButton((btn) =>
+        btn
+          .setIcon("paste")
+          .setTooltip(t("modals.translator.pasteJson"))
+          .onClick(() => this._pasteJson())
+      )
+      .addButton((btn) =>
+        btn
+          .setIcon("download")
+          .setTooltip(t("modals.translator.importFile"))
+          .onClick(() => this._importLanguageFile())
+      )
+      .addButton((btn) =>
+        btn
+          .setIcon("upload")
+          .setTooltip(t("modals.translator.exportFile"))
+          .onClick(() => this._exportLanguageFile())
+      );
+  }
+
+  renderTranslationTree() {
+    this.listContainer.empty();
+
+    // Use cached structure instead of recalculating
+    const counter = { index: 1 };
+    const query = this.caseSensitive
+      ? this.searchQuery
+      : this.searchQuery.toLowerCase();
+
+    const totalRendered = this.renderGroup(
+      this.listContainer,
+      this.nestedFallback,
+      "",
+      counter,
+      query
+    );
+
+    if (totalRendered === 0 && (this.searchQuery || this.filterMissing)) {
+      this.listContainer.createEl("p", {
+        cls: "cm-translator-empty",
+        text: t("modals.translator.noMatches"),
+      });
+    }
+  }
+
+  /**
+   * Recursively renders groups and items.
+   * Returns the count of visible items to handle filtering logic.
+   */
+  renderGroup(
+    container: HTMLElement,
+    fallbackGroup: Record<string, unknown>,
+    path: string,
+    counter: { index: number },
+    query: string
+  ): number {
+    let itemsRenderedInThisGroup = 0;
+
+    // Sort: Groups (objects) first, then individual keys, alphabetically
+    const keys = Object.keys(fallbackGroup).sort((a, b) => {
+      const aVal = fallbackGroup[a];
+      const bVal = fallbackGroup[b];
+      const aIsObj = typeof aVal === "object" && aVal !== null;
+      const bIsObj = typeof bVal === "object" && bVal !== null;
+
+      if (aIsObj && !bIsObj) return -1;
+      if (!aIsObj && bIsObj) return 1;
+      return a.localeCompare(b);
+    });
+
+    for (const key of keys) {
+      const newPath = path ? `${path}.${key}` : key;
+      const fallbackValue = fallbackGroup[key];
+      const currentValue = this.translations[newPath];
+
+      // Prepare search terms once
+      const keyStr = this.caseSensitive ? key : key.toLowerCase();
+
+      let displayFallback = "";
+      if (typeof fallbackValue === "string") {
+        displayFallback = fallbackValue;
+      } else if (typeof fallbackValue === "function") {
+        displayFallback = t("modals.translator.dynamicValue");
+      }
+
+      const fallbackStr = this.caseSensitive
+        ? displayFallback
+        : displayFallback.toLowerCase();
+
+      const valStr =
+        typeof currentValue === "string"
+          ? this.caseSensitive
+            ? currentValue
+            : currentValue.toLowerCase()
+          : "";
+
+      const isMatch =
+        !query ||
+        keyStr.includes(query) ||
+        fallbackStr.includes(query) ||
+        valStr.includes(query);
+
+      // Recursive Case: Group/Folder (Must be object and NOT null)
+      if (typeof fallbackValue === "object" && fallbackValue !== null) {
+        const details = container.createEl("details", {
+          cls: "cm-translator-group",
+        });
+        const summary = details.createEl("summary", {
+          cls: "cm-translator-group-title",
+        });
+        summary.createSpan({ text: key });
+
+        const groupContainer = details.createDiv("cm-translator-group-content");
+
+        const childrenCount = this.renderGroup(
+          groupContainer,
+          fallbackValue as Record<string, unknown>,
+          newPath,
+          counter,
+          query
+        );
+
+        // Prune empty groups if filtering is active
+        if (childrenCount > 0) {
+          itemsRenderedInThisGroup += childrenCount;
+          if (query || this.filterMissing) {
+            details.open = true; // Auto-expand relevant groups
+          }
+        } else {
+          details.remove();
+        }
+      }
+      // Base Case: Translation Item (String OR Function)
+      else if (
+        typeof fallbackValue === "string" ||
+        typeof fallbackValue === "function"
+      ) {
+        const isMissing = !currentValue;
+        const matchesFilter = !this.filterMissing || isMissing;
+
+        if (matchesFilter && isMatch) {
+          itemsRenderedInThisGroup++;
+
+          const itemEl = container.createDiv({
+            cls: "cm-translator-item setting-item",
+          });
+          itemEl.createSpan({
+            cls: "cm-translator-index",
+            text: `${counter.index++}.`,
+          });
+
+          const infoEl = itemEl.createDiv("setting-item-info");
+          const nameEl = infoEl.createDiv(
+            "setting-item-name cm-translator-key"
+          );
+
+          const keySpan = nameEl.createSpan();
+          this.highlightMatch(keySpan, key, query);
+
+          const descEl = infoEl.createDiv({
+            cls: "setting-item-description",
+          });
+
+          const isLongText = displayFallback.length > 100;
+          const isDesc =
+            newPath.endsWith(".desc") ||
+            newPath.endsWith("Desc") ||
+            newPath.includes("langInfo");
+
+          if (isDesc && isLongText) {
+            const truncatedText = displayFallback.substring(0, 100) + "...";
+
+            this.highlightMatch(descEl, truncatedText, query);
+
+            const toggleBtn = infoEl.createEl("a", {
+              cls: "cm-translator-toggle",
+              text: t("modals.translator.showMore"),
+            });
+
+            let isExpanded = false;
+            toggleBtn.onclick = () => {
+              isExpanded = !isExpanded;
+              const textToShow = isExpanded ? displayFallback : truncatedText;
+
+              this.highlightMatch(descEl, textToShow, query);
+
+              toggleBtn.setText(
+                isExpanded
+                  ? t("modals.translator.showLess")
+                  : t("modals.translator.showMore")
+              );
+            };
+          } else {
+            this.highlightMatch(descEl, displayFallback, query);
+          }
+
+          const controlEl = itemEl.createDiv("setting-item-control");
+
+          // Use TextArea for long strings
+          const isMultiLine = this.isLongString(displayFallback);
+          const component = isMultiLine
+            ? new TextAreaComponent(controlEl)
+            : new TextComponent(controlEl);
+
+          component
+            .setValue(currentValue || "")
+            .setPlaceholder(displayFallback)
+            .onChange((value) => {
+              if (value) {
+                this.translations[newPath] = value;
+              } else {
+                delete this.translations[newPath];
+              }
+            });
+        }
+      }
+    }
+    return itemsRenderedInThisGroup;
+  }
+
+  highlightMatch(element: HTMLElement, text: string, query: string) {
+    element.empty();
+
+    if (!query) {
+      element.setText(text);
+      return;
+    }
+
+    try {
+      const flags = this.caseSensitive ? "g" : "gi";
+      const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const regex = new RegExp(escapedQuery, flags);
+
+      let lastIndex = 0;
+      let match;
+
+      while ((match = regex.exec(text)) !== null) {
+        if (match.index > lastIndex) {
+          element.appendText(text.substring(lastIndex, match.index));
+        }
+        element.createSpan({ cls: "cm-search-match", text: match[0] });
+
+        lastIndex = regex.lastIndex;
+      }
+
+      if (lastIndex < text.length) {
+        element.appendText(text.substring(lastIndex));
+      }
+    } catch {
+      element.setText(text);
+    }
+  }
+
+  isLongString(str: string): boolean {
+    return str.length > 50 || str.includes("\n");
+  }
+
+  async handleSave() {
+    if (!this.plugin.settings.customLanguages) {
+      this.plugin.settings.customLanguages = {};
+    }
+
+    let finalTranslations = this.translations;
+
+    // If it's a Core Language, save ONLY the differences (Deltas)
+    if (this.isCoreLanguage) {
+      const flatCoreLang = flattenStrings(
+        CORE_LOCALES[this.langCode as LocaleCode] as unknown as Record<
+          string,
+          unknown
+        >
+      );
+      const diffs: CustomTranslation = {};
+
+      for (const key in this.translations) {
+        const currentValue = this.translations[key];
+        const originalValue = flatCoreLang[key];
+
+        // Save only if value is different from original AND not empty
+        // If user cleared the text, we assume they want to revert to default (so we don't save it)
+        if (currentValue !== originalValue && currentValue !== undefined) {
+          diffs[key] = currentValue;
+        }
+      }
+
+      // If no changes at all, we store an empty object (effectively restoring default)
+      finalTranslations = diffs;
+    }
+
+    const finalLangName = this.langName;
+
+    this.plugin.settings.customLanguages[this.langCode] = {
+      languageName: finalLangName,
+      translations: finalTranslations,
+      isRtl: this.isRtl,
+    };
+    await this.plugin.saveSettings();
+
+    if (this.plugin.settings.language === this.langCode) {
+      loadLanguage(this.plugin.settings);
+    }
+
+    new Notice(t("notices.langSaved", this.langName));
+    this.settingTab.display();
+    this.close();
+  }
+
+  _exportLanguageFile() {
+    const nestedData = unflattenStrings(this.translations);
+    const data = JSON.stringify(nestedData, null, 2);
+    const blob = new Blob([data], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${this.langCode}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    a.remove();
+    new Notice(t("notices.langExported", this.langCode));
+  }
+
+  _importLanguageFile() {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".json";
+
+    input.onchange = () => {
+      void (async () => {
+        if (!input.files || input.files.length === 0) return;
+        const file = input.files[0];
+
+        try {
+          const content = await file.text();
+          const nestedJson = JSON.parse(content);
+          const importedTranslations = flattenStrings(
+            nestedJson
+          ) as CustomTranslation;
+
+          this.translations = {
+            ...this.translations,
+            ...importedTranslations,
+          };
+
+          new Notice(t("notices.langImported", file.name));
+          this.renderTranslationTree();
+        } catch (e) {
+          new Notice(t("notices.invalidJson"));
+          console.error("Failed to import language file:", e);
+        }
+      })().catch((err) => {
+        console.error("Unhandled file import error:", err);
+      });
+    };
+
+    input.click();
+  }
+
+  _copyJson() {
+    const nestedData = unflattenStrings(this.translations);
+    const jsonText = JSON.stringify(nestedData, null, 2);
+
+    void navigator.clipboard.writeText(jsonText).catch((err) => {
+      console.error("Failed to copy JSON to clipboard:", err);
+    });
+
+    new Notice(t("notices.langCopiedJson"));
+  }
+
+  _pasteJson(): void {
+    // run async safely
+    void (async () => {
+      try {
+        const pastedText = await navigator.clipboard.readText();
+        if (!pastedText) return;
+
+        const nestedJson = JSON.parse(pastedText);
+        const parsedJson = flattenStrings(nestedJson) as CustomTranslation;
+
+        let updateCount = 0;
+        for (const key in parsedJson) {
+          if (Object.prototype.hasOwnProperty.call(parsedJson, key)) {
+            if (this.fallbackStrings[key] !== undefined) {
+              this.translations[key] = parsedJson[key];
+              updateCount++;
+            }
+          }
+        }
+
+        new Notice(t("notices.langPastedJson", updateCount));
+        this.renderTranslationTree();
+      } catch (e) {
+        new Notice(t("notices.invalidJson"));
+        console.error("Failed to paste JSON from clipboard:", e);
+      }
+    })().catch((err) => {
+      console.error("Unhandled paste JSON error:", err);
+    });
   }
 
   onClose() {

@@ -12,14 +12,14 @@ import type { ColorMasterSettingTab } from "../settingsTab";
 
 export function drawColorPickers(
   containerEl: HTMLElement,
-  settingTab: ColorMasterSettingTab
+  settingTab: ColorMasterSettingTab,
+  themeDefaults: Record<string, string>
 ) {
   const plugin = settingTab.plugin;
-  const activeProfileVars =
-    plugin.settings.profiles[plugin.settings.activeProfile].vars;
+  const activeProfile = plugin.settings.profiles[plugin.settings.activeProfile];
+  const activeProfileVars = activeProfile.vars;
 
   for (const [category, vars] of Object.entries(DEFAULT_VARS)) {
-    // Map specific category names to their short keys defined in i18n.ts
     let categoryKey: string;
     const lowerCategory = category.toLowerCase();
 
@@ -30,36 +30,23 @@ export function drawColorPickers(
     } else if (lowerCategory === "graph view") {
       categoryKey = "graph";
     } else if (lowerCategory === "plugin integrations") {
-      // Handle this explicitly too for safety
       categoryKey = "pluginintegrations";
     } else {
-      // Default: remove spaces for other potential categories
       categoryKey = lowerCategory.replace(/ /g, "");
     }
 
-    const headingText = t(`categories.${categoryKey}`) || category; // Use the derived categoryKey
+    const headingText = t(`categories.${categoryKey}`) || category;
     const categoryContainerClasses = ["cm-category-container"];
-
-    if (category === "Graph View") {
-      categoryContainerClasses.push("cm-graph-header");
-    }
 
     const categoryContainer = containerEl.createDiv({
       cls: categoryContainerClasses.join(" "),
     });
     categoryContainer.dataset.category = category;
     categoryContainer.createEl("h3", { text: headingText });
-    if (category === "Graph View") {
-      const buttonContainer = categoryContainer.createDiv({
-        cls: "cm-buttons-wrapper",
-      });
-      settingTab.graphHeaderButtonsEl = buttonContainer.createDiv({
-        cls: "cm-temporary-buttons",
-      });
-    }
 
-    for (const [varName, defaultValue] of Object.entries(vars)) {
-      const lang = plugin.settings.language;
+    for (const [varName, originalDefaultValue] of Object.entries(vars)) {
+      const defaultValue = themeDefaults[varName] || "";
+
       const description = t(`colors.descriptions.${varName}`) || "";
 
       const setting = new Setting(containerEl)
@@ -116,7 +103,8 @@ export function drawColorPickers(
         let textColor = activeProfileVars[varName] || defaultValue;
         let bgColor =
           activeProfileVars[bgVarForTextColor] ||
-          flattenVars(DEFAULT_VARS)[bgVarForTextColor];
+          themeDefaults[bgVarForTextColor] ||
+          "#ffffff";
 
         if (varName === "--text-highlight-bg") {
           [textColor, bgColor] = [bgColor, textColor];
@@ -140,17 +128,19 @@ export function drawColorPickers(
         cls: "color-master-text-input",
       });
 
-      let initialValue;
-      if (
-        category === "Graph View" &&
-        settingTab.graphViewWorkingState &&
-        settingTab.graphViewWorkingState[varName] !== undefined
-      ) {
-        initialValue = settingTab.graphViewWorkingState[varName];
-      } else {
-        initialValue = activeProfileVars[varName] || defaultValue;
-      }
-      colorPicker.value = initialValue;
+      const isModified = Object.prototype.hasOwnProperty.call(
+        activeProfileVars,
+        varName
+      );
+
+      const initialValue = isModified
+        ? activeProfileVars[varName]
+        : defaultValue;
+
+      setting.settingEl.classList.add(
+        isModified ? "is-modified" : "is-pristine"
+      );
+
       textInput.value = initialValue;
       settingTab.updateColorPickerAppearance(textInput, colorPicker);
 
@@ -163,64 +153,58 @@ export function drawColorPickers(
       });
 
       const handleFinalChange = (newColor: string) => {
+        // 1. Update visual state of inputs
+        textInput.value = newColor;
         settingTab.updateColorPickerAppearance(textInput, colorPicker);
 
+        // 2. Get profile and old color (for history)
         const profile = plugin.settings.profiles[plugin.settings.activeProfile];
-        const oldColor = profile.vars[varName] || defaultValue;
+        const oldColor = Object.prototype.hasOwnProperty.call(
+          activeProfileVars,
+          varName
+        )
+          ? activeProfileVars[varName]
+          : defaultValue;
 
+        // 3. Update history if change is meaningful
         if (oldColor.toLowerCase() !== newColor.toLowerCase()) {
           profile.history = profile.history || {};
           profile.history[varName] = profile.history[varName] || [];
           profile.history[varName].unshift(oldColor);
           profile.history[varName] = profile.history[varName].slice(0, 5);
         }
-        if (category === "Graph View") {
-          if (!settingTab.graphViewTempState) {
-            settingTab.graphViewTempState = {};
-            const profileVars =
-              plugin.settings.profiles[plugin.settings.activeProfile].vars ||
-              {};
-            Object.keys(DEFAULT_VARS["Graph View"]).forEach((key) => {
-              if (!settingTab.graphViewTempState) {
-                settingTab.graphViewTempState = {};
-              }
-              settingTab.graphViewTempState[key] =
-                profileVars[key] ??
-                DEFAULT_VARS["Graph View"][
-                  key as keyof (typeof DEFAULT_VARS)["Graph View"]
-                ];
-            });
-          }
 
-          if (!settingTab.graphViewWorkingState) {
-            settingTab.graphViewWorkingState = {
-              ...settingTab.graphViewTempState,
-            };
-          }
-
-          settingTab.graphViewWorkingState[varName] = newColor;
-          settingTab.showGraphActionButtons();
-
-          plugin.pendingVarUpdates[varName] = newColor;
-          if (plugin.settings.colorUpdateFPS === 0) {
-            plugin.applyPendingNow();
-          } else {
-            plugin.startColorUpdateLoop();
-          }
-          return;
+        // 4. Decide UI state (Pristine/Modified) and update data
+        if (
+          newColor.trim() === "" ||
+          newColor.toLowerCase() === defaultValue.toLowerCase()
+        ) {
+          setting.settingEl.classList.remove("is-modified");
+          setting.settingEl.classList.add("is-pristine");
+          delete activeProfileVars[varName];
+        } else {
+          // If it's a new and custom color
+          setting.settingEl.classList.remove("is-pristine");
+          setting.settingEl.classList.add("is-modified");
+          activeProfileVars[varName] = newColor;
         }
-
-        activeProfileVars[varName] = newColor;
+        // 5. Apply changes and save
+        const valueToApply =
+          newColor.trim() === "" ||
+          newColor.toLowerCase() === defaultValue.toLowerCase()
+            ? ""
+            : newColor;
 
         if (plugin.settings.colorUpdateFPS === 0) {
-          plugin.pendingVarUpdates[varName] = newColor;
+          plugin.pendingVarUpdates[varName] = valueToApply;
           plugin.applyPendingNow();
-          plugin.saveSettings();
+          void plugin.saveSettings();
           return;
         }
 
-        plugin.pendingVarUpdates[varName] = newColor;
-        plugin.saveSettings();
+        plugin.pendingVarUpdates[varName] = valueToApply;
+        void plugin.saveSettings();
+        settingTab.updateAccessibilityCheckers();
         setTimeout(() => settingTab.app.workspace.trigger("css-change"), 50);
       };
 
@@ -229,7 +213,6 @@ export function drawColorPickers(
       });
 
       textInput.addEventListener("change", (e) => {
-        colorPicker.value = (e.target as HTMLInputElement).value;
         handleFinalChange((e.target as HTMLInputElement).value);
       });
 
@@ -254,15 +237,25 @@ export function drawColorPickers(
               plugin.settings.profiles[plugin.settings.activeProfile];
             const history = profile.history?.[varName];
 
+            const themeDefaultValue =
+              themeDefaults[varName] || originalDefaultValue || "#ffffff";
+
             if (history && history.length > 0) {
               const restoredColor = history.shift();
+              const safeRestoredColor = restoredColor ?? themeDefaultValue;
 
-              const safeRestoredColor = restoredColor ?? defaultValue;
               activeProfileVars[varName] = safeRestoredColor;
-              colorPicker.value = safeRestoredColor;
               textInput.value = safeRestoredColor;
-
               settingTab.updateColorPickerAppearance(textInput, colorPicker);
+
+              if (safeRestoredColor.trim() === "") {
+                setting.settingEl.classList.remove("is-modified");
+                setting.settingEl.classList.add("is-pristine");
+                delete activeProfileVars[varName];
+              } else {
+                setting.settingEl.classList.remove("is-pristine");
+                setting.settingEl.classList.add("is-modified");
+              }
 
               await plugin.saveSettings();
               settingTab.updateAccessibilityCheckers();
@@ -285,7 +278,11 @@ export function drawColorPickers(
   }
 
   if (Object.keys(customVars).length > 0) {
-    const customVarsContainer = containerEl.createDiv();
+    const customVarsContainer = containerEl.createDiv({
+      cls: "cm-category-container",
+    });
+    customVarsContainer.dataset.category = "Custom";
+
     customVarsContainer.createEl("h3", {
       text: t("categories.custom"),
       cls: "cm-section-heading",
@@ -297,15 +294,21 @@ export function drawColorPickers(
     for (const [varName, varValue] of Object.entries(customVars)) {
       // Get metadata, falling back to defaults if not set
       const meta = activeProfile.customVarMetadata?.[varName];
-      const varType = meta?.type || "color"; // Default to 'color' for safety
+      const varType = meta?.type || "color";
       const displayName = meta?.name || varName;
       const displayDesc = meta?.desc || t("categories.customDesc");
+
+      const isModified = varValue !== "";
 
       const setting = new Setting(customVarsContainer)
         .setName(displayName)
         .setDesc(displayDesc);
 
-      setting.settingEl.classList.add("cm-var-row");
+      setting.settingEl.classList.add(
+        "cm-var-row",
+        isModified ? "is-modified" : "is-pristine"
+      );
+
       setting.settingEl.dataset.var = varName;
       setting.settingEl.dataset.category = "Custom";
       setting.nameEl.classList.add("cm-var-name");
@@ -313,20 +316,31 @@ export function drawColorPickers(
       const handleCustomVarChange = (newValue: string) => {
         activeProfile.vars[varName] = newValue;
 
-        if (plugin.settings.colorUpdateFPS > 0) {
-          plugin.pendingVarUpdates[varName] = newValue;
+        if (newValue === "") {
+          setting.settingEl.classList.remove("is-modified");
+          setting.settingEl.classList.add("is-pristine");
         } else {
-          document.body.style.setProperty(varName, newValue);
-          plugin.saveSettings();
+          setting.settingEl.classList.remove("is-pristine");
+          setting.settingEl.classList.add("is-modified");
         }
 
         if (plugin.settings.colorUpdateFPS > 0) {
-          plugin.saveSettings();
+          plugin.pendingVarUpdates[varName] = newValue;
+        } else {
+          document.body.setCssProps({
+            [varName]: newValue || null,
+          });
+
+          void plugin.saveSettings();
+        }
+
+        if (plugin.settings.colorUpdateFPS > 0) {
+          void plugin.saveSettings();
         }
       };
 
       switch (varType) {
-        case "color":
+        case "color": {
           const colorPicker = setting.controlEl.createEl("input", {
             type: "color",
           });
@@ -335,7 +349,6 @@ export function drawColorPickers(
             cls: "color-master-text-input",
           });
 
-          colorPicker.value = varValue;
           textInput.value = varValue;
           settingTab.updateColorPickerAppearance(textInput, colorPicker);
 
@@ -346,16 +359,14 @@ export function drawColorPickers(
               plugin.pendingVarUpdates[varName] = newColor;
             }
           });
+
           colorPicker.addEventListener("change", (e) => {
             handleCustomVarChange((e.target as HTMLInputElement).value);
             settingTab.updateColorPickerAppearance(textInput, colorPicker);
           });
+
           textInput.addEventListener("change", (e) => {
             const newColor = (e.target as HTMLInputElement).value;
-            try {
-              colorPicker.value = newColor;
-            } catch (err) {
-            }
             handleCustomVarChange(newColor);
             settingTab.updateColorPickerAppearance(textInput, colorPicker);
           });
@@ -372,35 +383,45 @@ export function drawColorPickers(
               });
           });
           break;
+        }
 
-        case "size":
+        case "size": {
           const sizeMatch = varValue.match(
             /(-?\d*\.?\d+)\s*(px|em|rem|%|vw|vh|auto)?/
           );
+
           let numValue = sizeMatch?.[1] || "10";
           let unitValue = sizeMatch?.[2] || "px";
+
+          if (varValue === "auto") {
+            numValue = "";
+            unitValue = "auto";
+          }
 
           const sizeInput = setting.controlEl.createEl("input", {
             type: "number",
             cls: "color-master-text-input",
           });
           sizeInput.value = numValue;
-          sizeInput.style.width = "80px";
+          sizeInput.setCssProps({ width: "80px" });
 
           const unitDropdown = setting.controlEl.createEl("select", {
             cls: "dropdown cm-search-small",
           });
+
           const units = ["px", "em", "rem", "%", "vw", "vh", "auto"];
           if (!units.includes(unitValue)) unitValue = "px";
 
           units.forEach((unit) => {
             unitDropdown.createEl("option", { text: unit, value: unit });
           });
+
           unitDropdown.value = unitValue;
 
           const updateSize = () => {
             const newNum = sizeInput.value || "0";
             const newUnit = unitDropdown.value;
+
             const newValue =
               newUnit === "auto" ? "auto" : `${newNum}${newUnit}`;
             sizeInput.disabled = newUnit === "auto";
@@ -411,12 +432,13 @@ export function drawColorPickers(
           sizeInput.addEventListener("change", updateSize);
           unitDropdown.addEventListener("change", updateSize);
 
-          // Run the function the first time to disable the field if the value is 'auto'
           sizeInput.disabled = unitValue === "auto";
           break;
+        }
 
-        case "text":
+        case "text": {
           setting.controlEl.classList.add("cm-full-width-control");
+
           const textInputArea = setting.controlEl.createEl("input", {
             type: "text",
             cls: "cm-wide-text-input",
@@ -427,31 +449,40 @@ export function drawColorPickers(
           textInputArea.addEventListener("change", (e) => {
             handleCustomVarChange((e.target as HTMLInputElement).value);
           });
-          break;
 
-        case "number":
+          break;
+        }
+
+        case "number": {
           const numInput = setting.controlEl.createEl("input", {
             type: "number",
             cls: "color-master-text-input",
           });
           numInput.value = varValue;
-          numInput.style.width = "100px";
+          numInput.setCssProps({ width: "100px" });
 
           numInput.addEventListener("change", (e) => {
             handleCustomVarChange((e.target as HTMLInputElement).value);
           });
-          break;
 
-        default:
+          break;
+        }
+
+        default: {
           setting.controlEl.classList.add("cm-full-width-control");
+
           const defaultInput = setting.controlEl.createEl("input", {
             type: "text",
             cls: "cm-wide-text-input",
           });
           defaultInput.value = varValue;
+
           defaultInput.addEventListener("change", (e) => {
             handleCustomVarChange((e.target as HTMLInputElement).value);
           });
+
+          break;
+        }
       }
 
       setting.addExtraButton((button) => {
@@ -461,7 +492,9 @@ export function drawColorPickers(
           .onClick(async () => {
             delete activeProfile.vars[varName];
             // Remove the property from the DOM
-            document.body.style.removeProperty(varName);
+            document.body.setCssProps({
+              [varName]: null,
+            });
 
             if (activeProfile.customVarMetadata?.[varName]) {
               delete activeProfile.customVarMetadata[varName];

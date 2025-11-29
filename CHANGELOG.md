@@ -1,5 +1,63 @@
 # Changelog
 
+## [v1.2.0](https://github.com/YazanAmmar/obsidian-color-master/releases/tag/1.2.0) - 2025-11-29 (The Theme Engine Update)
+
+This update represents a fundamental shift in how Color Master interacts with Obsidian. We've rewritten the core color engine, overhauled the translation system, and introduced a suite of "smart" UI behaviors that make customizing your vault feel more natural and responsive than ever.
+
+### The New Theme Engine
+
+Color Master is no longer just a list of colors; it's now a smart layer on top of your Obsidian theme.
+
+- **Dynamic Theme Capture:** When you create a new profile or use the "Default" profile, the plugin now **captures the actual CSS values** of your currently active Obsidian theme (e.g., Minimal, Things, ITS). No more hardcoded static colors that clash with your theme.
+- **Smart "Default" Profile:** The default profile is now a clean slate. It acts as a transparent pass-through layer, adopting your current theme's colors automatically. This eliminates conflicts when switching between different community themes while Color Master is active.
+    
+- **Intelligent UI Feedback (Dim/Bright):**
+    
+    - **Pristine State:** Settings that match the default theme value are now **dimmed** (`opacity: 0.6`), letting you focus on what matters.
+    - **Modified State:** As soon as you change a color, its row **lights up** (`opacity: 1`), clearly highlighting your customizations.
+    - **Smart Delete:** Clearing a color value (making it empty) removes the variable from the profile entirely and restores the row to its dimmed state.
+    - **Smart Undo:** The undo button now respects this state, dimming the row if you revert to the original value.
+
+### Complete i18n Overhaul (Translation System)
+
+We've rebuilt the translation architecture from the ground up to be robust, type-safe, and extensible.
+
+- **Custom Languages Support:** You are no longer limited to the built-in languages. You can add **any language** (e.g., Bulgarian, Chinese, Spanish) directly from the settings.
+- **Tree-View Translation Editor:** A powerful new modal allows you to browse and edit translations in a nested tree structure.
+    - **Deep Search:** Search by key, English text, or translated value.
+    - **Highlighting:** Search terms are highlighted in real-time.
+    - **RTL Support:** Custom languages can explicitly set Right-to-Left directionality.
+- **Smart Fallback Engine:** The plugin now gracefully falls back to English for any missing keys, preventing UI crashes or empty labels in incomplete translations.
+- **Management Tools:** Import, Export, Copy, and Paste translations as JSON. Added specific "Delete" and "Restore" actions for managing custom and core language overrides.
+
+### Performance & Graph View
+
+- **Optimized Render Loop:** We've separated lightweight CSS updates from heavy DOM operations (like repainting icons). Dragging color pickers is now significantly smoother.
+- **Instant Graph Refresh:** The Graph View coloring logic has been simplified and optimized. Changes are applied instantly without the need for "Apply" buttons or reloading tabs.
+- **Unified HEX Converter:** All captured colors (RGB, HSL) are automatically converted to standard HEX/HEXA format for consistent editing.
+
+### Advanced Notice Styling
+
+The `processNotice` system has been upgraded for precision styling.
+
+- **Keyword Highlighting:** Added a new "Highlight Only" mode. This uses a `TreeWalker` to surgically wrap specific keywords in `<span>` tags within notices, applying color **only** to the word without affecting the rest of the message.
+- **Priority Rules:** Full-message coloring rules are applied first, followed by specific keyword highlights using `!important` to ensure visibility.
+    
+
+### Quality of Life Improvements
+
+- **Hexa Transparency Support:** Fixed an issue where 8-digit Hex codes (colors with alpha transparency) rendered incorrectly in the color picker.
+- **Refined "Pin" Behavior:** Pinning a snapshot now treats the current state as the "baseline," dimming unmodified rows to allow for a fresh round of iteration.
+- **Selective Data Reset:** The "Reset Plugin" feature is now granular. You can choose to delete only specific categories of data (Profiles, Snippets, Backgrounds, Settings, or Languages).
+- **Custom Variable Polish:** The "Add Custom Variable" modal now initializes with an empty value instead of white, encouraging cleaner overrides.
+- **Snippet Locking:** Added a "Lock" button to the CSS Snippets section to prevent accidental reordering.
+    
+### Housekeeping
+
+- **Removed Legacy Profiles:** The "Cyberpunk" and "Solarized Nebula" profiles have been retired to focus on the new dynamic engine.
+- **SCSS Migration:** The project's styling has been fully migrated to SCSS for better maintainability.
+- **ESLint Implementation:** The codebase now adheres to strict linting rules tailored for Obsidian plugin development, ensuring cleaner and safer code.
+
 ## [v1.1.1](https://github.com/YazanAmmar/obsidian-color-master/releases/tag/1.1.1) - 2025-11-01
 
 This update introduces the plugin's most-requested feature: **Video Backgrounds**. You can now fully customize your workspace with looped videos, alongside a host of performance improvements and smart new settings.

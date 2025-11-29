@@ -1,0 +1,638 @@
+export default {
+  plugin: {
+    name: "متحكم الألوان - v1.2.0",
+    ribbonTooltip: "إعدادات Color Master",
+  },
+  buttons: {
+    new: "جديد",
+    delete: "حذف",
+    selectOption: "اختر خياراً واحداً عالأقل",
+    create: "إنشاء",
+    reset: "إعادة تعيين",
+    update: "تحديث",
+    apply: "تطبيق",
+    cancel: "إلغاء",
+    reload: "إعادة تحميل",
+    exportFile: "تصدير ملف",
+    copyJson: "نسخ JSON",
+    importCss: "استيراد / لصق (.css)",
+    importJson: "استيراد / لصق (.json)",
+    chooseFile: "اختر ملف...",
+    import: "استيراد",
+    select: "اختيار",
+    browse: "استعراض...",
+    deleteAnyway: "حذف على أي حال",
+    restore: "استعادة",
+  },
+  settings: {
+    enablePlugin: "تفعيل متحكم الألوان",
+    enablePluginDesc:
+      "أطفئ هذا الخيار لتعطيل جميع الألوان المخصصة مؤقتاً والعودة إلى ثيم Obsidian النشط.",
+    language: "اللغة",
+    languageDesc: "اختر لغة واجهة الإضافة.",
+    languageSettingsModalTitle: "إعدادات اللغة",
+    rtlLayoutName: "تفعيل تنسيق اليمين لليسار (RTL)",
+    rtlLayoutDesc:
+      "عند تفعيله، يتم قلب واجهة الإضافة لتتناسب مع اللغات التي تكتب من اليمين لليسار.",
+    searchPlaceholder: "ابحث عن المتغيرات (بالاسم أو القيمة)...",
+    regexPlaceholder: "أدخل التعبير النمطي واضغط Enter...",
+    allSections: "كل الأقسام",
+    clear: "تنظيف",
+    ariaCase: "بحث حساس لحالة الأحرف",
+    ariaRegex: "استخدام التعابير النمطية (Regex)",
+    themeWarningTooltip: (currentTheme: string) =>
+      `الثيم "${currentTheme}" مطبّق حالياً، وقد يتعارض مع مظهر الملف الشخصي. للحصول على أفضل النتائج، ننصح بالتبديل إلى الثيم الافتراضي لأوبسيديان، أو يمكنك استيراد ثيم "${currentTheme}" كملف شخصي جديد لتعديله مباشرةً.`,
+  },
+  profileManager: {
+    heading: "إدارة الملفّات الشخصيّة",
+    activeProfile: "الملف الشخصي النشط",
+    activeProfileDesc: "تنقل بين الملفّات الشخصيّة أو أنشئ واحد جديد.",
+    themeType: "نوع ثيم الملف الشخصي",
+    themeTypeDesc:
+      "حدد ما إذا كانت هذا الملف الشخصي سيفرض ثيماً معيناً (غامق/فاتح) عند تفعيله.",
+    themeAuto: "الثيم الافتراضي لأوبسيديان",
+    themeDark: "فرض الوضع الغامق",
+    themeLight: "فرض الوضع الفاتح",
+    tooltipThemeAuto: "الثيم: تلقائي (يتبع أوبسيديان) (اضغط للتبديل للفاتح)",
+    tooltipThemeDark: "الثيم: فرض الوضع الغامق (اضغط للتبديل للتلقائي)",
+    tooltipThemeLight: "الثيم: فرض الوضع الفاتح (اضغط للتبديل للغامق)",
+    tooltipExport: "تصدير الملف الشخصي الحالي كملف JSON",
+    tooltipCopyJson: "نسخ JSON للملف الشخصي الحالي إلى الحافظة",
+  },
+  options: {
+    heading: "إعدادات متقدمة",
+    liveUpdateName: "معدل التحديث المباشر (إطار بالثانية)",
+    liveUpdateDesc:
+      "يحدد عدد مرات تحديث معاينة الألوان في الثانية أثناء السحب (0 = تعطيل المعاينة). القيم المنخفضة تحسن الأداء.",
+    iconizeModalTitle: "إعدادات تكامل Iconize",
+    overrideIconizeName: "تجاوز ألوان إضافة Iconize",
+    overrideIconizeDesc:
+      "اسمح لـ Color Master بالتحكم في كل ألوان أيقونات Iconize. لأفضل النتائج، قم بتعطيل إعدادات الألوان في إضافة Iconize نفسها.",
+    cleanupIntervalName: "فترة التنظيف",
+    cleanupIntervalDesc:
+      "تحدد عدد المرات (بالثواني) التي تتحقق فيها الإضافة من إلغاء تثبيت إضافة Iconize لتنظيف أيقوناتها.",
+    addCustomVarName: "إضافة متغير مخصص",
+    addCustomVarDesc:
+      "أضف متغير CSS جديد غير موجود بالقائمة الافتراضية. يجب أن يبدأ الاسم بـ '--'.",
+    addNewVarButton: "إضافة متغير جديد...",
+    resetPluginName: "إعادة تعيين الإضافة",
+    resetPluginDesc:
+      "سيؤدي هذا إلى حذف جميع الملفات الشخصية، والمقتطفات، والإعدادات، والخلفيات، وإعادة ضبط الإضافة إلى حالتها الأصلية. يتطلب هذا الإجراء إعادة تحميل التطبيق، ولا يمكن التراجع عنه.",
+    resetPluginButton: "إعادة تعيين كل البيانات...",
+    backgroundName: "تعيين خلفية مخصصة",
+    backgroundDesc: "إدارة صورة أو فيديو الخلفية لهذا الملف الشخصي.",
+    backgroundModalSettingsTitle: "إعدادات الخلفية",
+    backgroundEnableName: "تفعيل الخلفية",
+    backgroundEnableDesc:
+      "التحكم بظهور أو إخفاء الخلفية المخصصة لهذا الملف الشخصي.",
+    convertImagesName: "تحويل الصور إلى JPG",
+    convertImagesDesc:
+      "تحويل صور PNG أو WEBP أو BMP تلقائياً إلى JPG عند الرفع لتقليل حجم الملف وتحسين أداء التحميل. (ملاحظة: ستفقد الصور شفافيتها)",
+    jpgQualityName: "جودة JPG",
+    jpgQualityDesc:
+      "حدد جودة الضغط (من 1 إلى 100). القيم الأقل تعني ملفات أصغر ولكن بجودة أدنى.",
+    badgeNotInstalled: "غير مُثبّت",
+    videoOpacityName: "شفافية الفيديو",
+    videoOpacityDesc: "التحكم بشفافية خلفية الفيديو لتحسين قابلية القراءة.",
+    videoMuteName: "كتم الفيديو",
+    videoMuteDesc: "كتم صوت خلفية الفيديو. موصى به بشدة.",
+    settingType: "نوع الإعدادات",
+    settingTypeImage: "صورة",
+    settingTypeVideo: "فيديو",
+  },
+  snippets: {
+    heading: "قصاصات CSS",
+    createButton: "إنشاء قصاصة جديدة",
+    noSnippetsDesc: "لم يتم إنشاء أي قصاصات CSS لهذا الملف الشخصي بعد.",
+    global: "قصاصة عامّة",
+    globalName: "حفظ كقصاصة عامة",
+    globalDesc: "القصاصة العامة يتم تطبيقها على جميع ملفاتك الشخصية.",
+  },
+  categories: {
+    pluginintegrations: "تكامل الإضافات",
+    backgrounds: "الخلفيات",
+    text: "النصوص",
+    interactive: "العناصر التفاعلية",
+    ui: "عناصر الواجهة",
+    misc: "متنوع",
+    graph: "عرض الرسم البياني",
+    markdown: "عناصر الماركدوان",
+    notices: "الإشعارات",
+    custom: "المتغيرات المخصصة",
+    customDesc: "متغير مضاف من قبل المستخدم.",
+    helpTextPre: "لم تجد المتغير الذي تبحث عنه؟ ",
+    helpTextLink: "تصفح قائمة متغيرات CSS الرسمية في Obsidian.",
+  },
+  modals: {
+    newProfile: {
+      title: "إنشاء ملف شخصي جديد",
+      nameLabel: "اسم الملف الشخصي",
+      namePlaceholder: "أدخل اسم الملف الشخصي...",
+    },
+    deleteProfile: {
+      title: "حذف الملف الشخصي",
+      confirmation: (name: string) =>
+        `هل أنت متأكد من رغبتك في حذف الملف الشخصي "${name}"؟ لا يمكن التراجع عن هذا الإجراء.`,
+    },
+    jsonImport: {
+      title: "لصق أو استيراد ملف JSON للملف شخصي",
+      desc1: "يمكنك لصق بيانات الملف الشخصي (JSON) في الصندوق أدناه.",
+      placeholder: '{ "name": "...", "profile": { ... } }',
+      settingName: "استيراد من ملف",
+      settingDesc:
+        "أو، اختر ملف الملف الشخصي (.json) من جهاز الكمبيوتر الخاص بك.",
+      replaceActiveButton: "استبدال النشط",
+      createNewButton: "إنشاء جديدة",
+    },
+    cssImport: {
+      title: "استيراد / لصق CSS وإنشاء ملف شخصي",
+      titleEdit: "تعديل الملف الشخصي",
+      note: "ملاحظة : كود CSS الذي تلصقه قد يؤثر على واجهة البرنامج، استخدم فقط الأكواد الموثوقة.",
+      importFromFile: "استيراد من ملف",
+      importFromFileDesc: "أو، اختر ملف (.css) من جهاز الكمبيوتر الخاص بك.",
+      importFromTheme: "استيراد من ثيم مثبّت",
+      importFromThemeDesc: "قم بتحميل CSS مباشرة من أحد الثيمات المثبتة لديك.",
+      noThemes: "لا يوجد ثيمات مثبتة",
+    },
+    snippetEditor: {
+      title: "إنشاء قصاصة CSS جديدة",
+      titleEdit: "تعديل قصاصة CSS",
+      nameLabel: "اسم القصاصة",
+      namePlaceholder: "أدخل اسم القصاصة...",
+      importFromSnippet: "استيراد من قصاصة مثبتة",
+      importFromSnippetDesc:
+        "قم بتحميل CSS مباشرة من إحدى قصاصات Obsidian المثبتة لديك.",
+      noSnippets: "لا يوجد قصاصات مثبتة",
+      cssPlaceholder: "الصق كود CSS الخاص بك هنا...",
+    },
+    confirmation: {
+      resetProfileTitle: "تأكيد استرجاع الملف الشخصي",
+      resetProfileDesc:
+        "هل أنت متأكد من رغبتك في استرجاع هذا الملف الشخصي لآخر لقطة تم تثبيتها؟ سيتم الكتابة فوق الألوان الحالية ولا يمكن التراجع عن هذا الإجراء.",
+      deleteSnippetTitle: (name: string) => `حذف القصاصة: ${name}`,
+      deleteSnippetDesc:
+        "هل أنت متأكد من رغبتك في حذف هذه القصاصة؟ لا يمكن التراجع عن هذا الإجراء.",
+      resetPluginTitle: "هل أنت متأكد؟",
+      resetPluginDesc:
+        "سيتم حذف جميع بيانات Color Master بشكل دائم (الملفات الشخصية، القصاصات، الإعدادات، والخلفيات). هذا الإجراء لا يمكن التراجع عنه.",
+      deleteGlobalBgTitle: "تأكيد حذف الخلفية",
+      deleteGlobalBgDesc:
+        "هل أنت متأكد من رغبتك في حذف هذه الخلفية بشكل دائم؟ البروفايلات التالية تستخدمها حالياً وسيتم إزالتها منها:",
+      deleteBackgroundTitle: "حذف الخلفية؟",
+      deleteBackgroundDesc: (name: string) =>
+        `هل أنت متأكد من رغبتك في حذف '${name}' بشكل دائم؟`,
+      deleteLangTitle: "حذف اللغة",
+      deleteLangDesc: (name: string) =>
+        `هل أنت متأكد من حذف حزمة اللغة "${name}"؟ لا يمكن التراجع عن هذا الإجراء.`,
+      restoreLangTitle: "استعادة اللغة؟",
+      restoreLangDesc: (name: string) =>
+        `هل أنت متأكد من حذف التعديلات المخصصة للغة ${name} والعودة للافتراضي؟`,
+    },
+    noticeRules: {
+      titleText: "قواعد لون النص المتقدمة",
+      titleBg: "قواعد لون الخلفية المتقدمة",
+      desc: "أنشئ قواعد ذات أولوية لتلوين الإشعارات بناءً على محتواها. سيتم تطبيق أول قاعدة مطابقة من الأعلى إلى الأسفل.",
+      addNewRule: "إضافة قاعدة جديدة",
+      keywordPlaceholder: "اكتب كلمة ثم اضغط مسافة...",
+      useRegex: "Regex",
+      highlightOnly: "تلوين الكلمة فقط",
+    },
+    duplicateProfile: {
+      title: "اسم الملف الشخصي مكرر",
+      descParts: [`الملف الشخصي "`, `" موجود بالفعل. الرجاء اختيار اسم مختلف.`],
+      placeholder: "أدخل اسم الملف الشخصي الجديد...",
+    },
+    customVar: {
+      title: "إضافة متغير CSS مخصص جديد",
+      desc: "حدد متغير CSS جديد (مثال: --my-color: #f00). سيتم إضافة هذا المتغير إلى ملفك الشخصي النشط.",
+      displayName: "اسم العرض",
+      displayNameDesc: "اسم ودي للمتغير الخاص بك (مثال: 'لون أساسي مخصص لي').",
+      displayNamePlaceholder: "مثال: لوني الأساسي",
+      varName: "اسم المتغير",
+      varNameDesc:
+        "الاسم الفعلي لمتغير CSS. يجب أن يبدأ بـ '--' (مثال: '--my-primary-color').",
+      varNamePlaceholder: "مثال: --my-primary-color",
+      varValue: "قيمة المتغير",
+      varType: "نوع المتغير",
+      varTypeDesc: "اختر نوع البيانات التي يحملها هذا المتغير.",
+      types: {
+        color: "لون",
+        size: "حجم (مثل px, em)",
+        text: "نص",
+        number: "رقم",
+      },
+      varValueDesc: "قيمة متغير CSS (مثال: 'red', '#ff0000', 'rgb(255,0,0)').",
+      varValuePlaceholder: "مثال: #FF0000 أو أحمر",
+      description: "الوصف (اختياري)",
+      descriptionDesc: "وصف موجز لما يتحكم فيه هذا المتغير.",
+      descriptionPlaceholder: "مثال: اللون الأساسي للعناوين",
+      addVarButton: "إضافة",
+      textValuePlaceholder: "أدخل القيمة النصية...",
+    },
+    addBackground: {
+      title: "إضافة خلفية جديدة (صورة/فيديو)",
+      importFromFile: "استيراد من ملف",
+      importFromFileDesc: "استيراد ملف صورة أو فيديو من جهاز الكمبيوتر.",
+      pasteBoxPlaceholder: "اسحب وأفلت / أو الصق خلفية / رابط هنا (Ctrl+V)",
+      dropToAdd: "أفلتها لإضافة الخلفية...",
+      processing: "جاري المعالجة",
+    },
+    fileConflict: {
+      title: "الملف موجود",
+      desc: (name: string) =>
+        `يوجد ملف باسم '${name}' موجود مسبقاً في مجلد الخلفيات. ماذا تريد أن تفعل؟`,
+      replaceButton: "استبدال الملف",
+      keepButton: "الاحتفاظ بكليهما (إعادة تسمية)",
+    },
+    backgroundBrowser: {
+      title: "استعراض الخلفيات",
+      noImages: "لا توجد صور أو فيديوهات في مجلد الخلفيات.",
+    },
+    advancedReset: {
+      title: "إعادة تعيين متقدمة للبيانات",
+      desc: "اختر أجزاء البيانات التي تريد حذفها نهائياً. هذا الإجراء لا يمكن التراجع عنه.",
+      profilesLabel: "الملفات الشخصية واللقطات",
+      profilesDesc:
+        "حذف جميع الملفات الشخصية المخصصة واللقطات المثبتة. (يحافظ على الملفات المدمجة).",
+      snippetsLabel: "القصاصات العامة والخاصة",
+      snippetsDesc:
+        "حذف جميع قصاصات CSS، سواء العامة أو الموجودة داخل الملفات الشخصية.",
+      backgroundsLabel: "مجلد الخلفيات",
+      backgroundsDesc:
+        "حذف مجلد الخلفيات داخل مجلد إعدادات Obsidian (configDir/backgrounds) بالكامل مع جميع الوسائط بداخله.",
+      settingsLabel: "إعدادات الإضافة",
+      settingsDesc:
+        "إعادة تعيين اللغة، معدل التحديث، والتفضيلات الأخرى للوضع الافتراضي.",
+      languagesLabel: "اللغات المخصصة",
+      languagesDesc: "حذف جميع اللغات المخصصة التي أنشأها المستخدم.",
+    },
+    addLang: {
+      title: "إضافة لغة جديدة",
+      desc: "إنشاء حزمة لغة مخصصة جديدة. ستتمكن من تعديل الترجمات بعد الإنشاء.",
+      nameLabel: "اسم اللغة (الأصلي)",
+      nameDesc: "اسم اللغة بخطها الأصلي.",
+      namePlaceholder: "مثال: العَرَبيَّةُ",
+      codeLabel: "رمز اللغة",
+      codeDesc: "رمز ISO 639 فريد (مثل: 'en', 'ar', 'zh').",
+      codePlaceholder: "مثال: ar",
+      rtlLabel: "لغة RTL",
+      rtlDesc:
+        "قم بتفعيل هذا الخيار إذا كانت اللغة تكتب من اليمين إلى اليسار (مثل العبرية، الأردية).",
+    },
+    translator: {
+      title: (langName: string) => `تعديل ترجمات: ${langName}`,
+      searchPlaceholder: "ابحث عن مفاتيح الترجمة...",
+      copyJson: "نسخ JSON",
+      pasteJson: "لصق JSON",
+      exportFile: "تصدير ملف",
+      importFile: "استيراد ملف",
+      showMissing: "عرض المفقودة فقط",
+      showAll: "عرض الكل",
+      showMore: "عرض المزيد",
+      showLess: "عرض أقل",
+      noMatches: "لا توجد ترجمات تطابق بحثك.",
+      dynamicValue: "قيمة ديناميكيّة",
+    },
+    langInfo: {
+      title: "حول اللغات المخصصة",
+      desc: `تتيح لك هذه الميزة إنشاء ترجماتك الخاصة للإضافة.\n\n**لماذا أضفنا هذه الميزة؟**\n\nبصراحة، أنا كمطور وحيد أعمل على هذه الإضافة، ومن الصعب جداً إضافة ميزات جديدة *وترجمتها* بشكل فوري لأكثر من 20 لغة. هذه الميزة هي دعوة لك للمساعدة وجعل الإضافة أفضل للجميع.\n\n**كيف يمكنك المساعدة:**\n\n1.  قم بإنشاء لغة جديدة (مثلاً "الإسبانية").\n2.  انقر على أيقونة "تعديل" (القلم).\n3.  يمكنك استخدام "نسخ JSON" من لغة موجودة (مثل الإنجليزية) وطلب ترجمتها من ChatGPT.\n4.  استخدم "لصق JSON" أو "استيراد ملف" لتحميل ترجمتك.\n5.  عندما تكون راضياً، يمكنك إرسال ملف JSON إلي (عبر Pull Request على GitHub) وسأقوم بدمجه بكل سرور ليصبح **لغة أساسية** جديدة ليستفيد منها الجميع.\n\nتتيح لك هذه الميزة أيضاً إصلاح أي أخطاء إملائية أو تحسين الترجمات في اللغات الأساسية لاستخدامك الخاص.`,
+    },
+  },
+  notices: {
+    pluginEnabled: "تم تفعيل متحكم الألوان",
+    pluginDisabled: "تم تعطيل متحكم الألوان",
+    profilePinned: "تم تثبيت ألوان الملف الشخصي بنجاح!",
+    profileReset: "تمت إعادة تعيين الملف الشخصي إلى اللقطة المثبتة.",
+    noPinnedSnapshot: "لا توجد لقطة مثبتة لهذا الملف الشخصي.",
+    profileNotFound: "تعذر العثور على الملف الشخصي النشط.",
+    noProfilesFound: "لا توجد أيّة ملفات شخصيّة.",
+    activeProfileSwitched: (name: string) => `الملف الشخصي النشط: ${name}`,
+    graphColorsApplied: "تم تطبيق ألوان الرسم البياني!",
+    invalidJson: "ملف JSON غير صالح.",
+    jsonMustHaveName:
+      "يجب أن يحتوي ملف JSON المستورد على خاصية 'name' لإنشاء ملف شخصي جديد.",
+    profileCreatedSuccess: (name: string) =>
+      `تم إنشاء الملف الشخصي "${name}" بنجاح.`,
+    profileImportedSuccess: `تم استيراد الملف الشخصي بنجاح.`,
+    noActiveProfileToCopy: "لا يوجد ملف شخصي نشط لنسخه",
+    noActiveProfileToExport: "لا يوجد ملف شخصي نشط لتصديره.",
+    snippetCssCopied: "تم نسخ CSS القصاصة إلى الحافظة!",
+    snippetEmpty: "هذه القصاصة فارغة.",
+    cssContentEmpty: "لا يمكن أن يكون محتوى CSS فارغاً.",
+    snippetNameExists: (name: string) => `اسم القصاصة "${name}" موجود بالفعل.`,
+    profileNameExists: (name: string) =>
+      `اسم الملف الشخصي "${name}" موجود بالفعل.`,
+    profileUpdated: (name: string) => `تم تحديث الملف الشخصي "${name}".`,
+    snippetUpdated: (name: string) => `تم تحديث القصاصة "${name}".`,
+    snippetCreated: (name: string) => `تم إنشاء القصاصة "${name}" بنجاح!`,
+    snippetDeleted: "تم حذف القصاصة بنجاح.",
+    snippetScopeMove: "استخدم نافذة التعديل لنقل القصاصة بين الأقسام.",
+    profileCreatedFromCss: (name: string) =>
+      `تم إنشاء الملف الشخصي "${name}" بنجاح!`,
+    noColorHistory: "لا يوجد سجل ألوان لاستعادته.",
+    colorRestored: (color: string) => `تمت الاستعادة: ${color}`,
+    textboxEmpty:
+      "صندوق النص فارغ. الصق بعض بيانات JSON أو استورد ملفاً أولاً.",
+    fileLoaded: (fileName: string) =>
+      `تم تحميل الملف "${fileName}" في منطقة النص.`,
+    exportSuccess: "تم تصدير الملف الشخصي بنجاح!",
+    jsonCopied: "تم نسخ JSON للملف الشخصي إلى الحافظة بنجاح!",
+    resetSuccess:
+      "تم حذف بيانات Color Master. يرجى إعادة تحميل Obsidian لتطبيق التغييرات.",
+    fpsUpdated: (value: number) =>
+      `تم تعيين معدل التحديث المباشر إلى: ${value}`,
+    invalidProfileObject: "لا يبدو أن ملف JSON هو كائن ملف شخصي صالح.",
+    profileCreated: (name: string) => `تم إنشاء الملف الشخصي "${name}" بنجاح!`,
+    settingsSaved: "تم تطبيق الإعدادات بنجاح!",
+    testSentence: (word: string) =>
+      `هكذا سيبدو لون إشعار يحتوي على كلمة "${word}"`,
+    varNameEmpty: "اسم المتغير لا يمكن أن يكون فارغاً.",
+    varNameFormat: "يجب أن يبدأ اسم المتغير بـ '--'.",
+    varExists: (name: string) => `المتغير "${name}" موجود بالفعل.`,
+    varAdded: (name: string) => `تمت إضافة المتغير "${name}" بنجاح.`,
+    iconizeNotFound:
+      "إضافة Iconize غير موجودة. يرجى تثبيتها وتفعيلها لاستخدام هذه الميزة.",
+    themeCssLoaded: (theme: string) => `تم تحميل CSS بنجاح من ثيم "${theme}".`,
+    themeReadFailed: (theme: string) =>
+      `تعذّر قراءة ملف الثيم "${theme}". قد يكون الملف محمياً أو مفقوداً.`,
+    snippetLoaded: (snippet: string) =>
+      `تم تحميل CSS بنجاح من قصاصة "${snippet}".`,
+    snippetReadFailed: (snippet: string) =>
+      `تعذّرت قراءة ملف القصاصة "${snippet}".`,
+    themeSwitchedLight: "تم التبديل إلى الوضع الفاتح",
+    themeSwitchedDark: "تم التبديل إلى الوضع الغامق",
+    themeSwitchedAuto: "تم التبديل إلى الوضع التلقائي",
+    bgSet: "تم تعيين الخلفية بنجاح.",
+    bgRemoved: "تمت إزالة الخلفية.",
+    backgroundLoadError: "فشل تحميل الخلفية.",
+    noBgToRemove: "لا توجد خلفية نشطة لهذا الملف الشخصي لإزالتها.",
+    bgDeleted: "تم حذف الخلفية وملفها بنجاح.",
+    backgroundUrlLoadError: "فشل تحميل الخلفية من الرابط.",
+    backgroundPasteError: "المحتوى الذي تم لصقه ليس ملف خلفية أو رابط صالح.",
+    downloadingFromUrl: (url: string) => `جاري التحميل من ${url}...`,
+    pastedBase64Image: "تم لصق صورة Base64",
+    pastedImage: (name: string) => `تم لصق الصورة "${name}"`,
+    invalidFilename: "اسم الملف غير صالح.",
+    filenameExists: (name: string) => `اسم الملف "${name}" موجود مسبقاً.`,
+    renameSuccess: (name: string) => `تمت إعادة التسمية إلى "${name}"`,
+    renameError: "خطأ أثناء إعادة تسمية الملف.",
+    profileDeleted: "تم حذف الملف الشخصي بنجاح.",
+    jpgQualitySet: (value: number) => `تم ضبط جودة JPG على ${value}%`,
+    cannotDeleteLastProfile: "لا يمكنك حذف آخر ملف شخصي.",
+    noKeywordsToTest: "لا تحتوي هذه القاعدة على كلمات مفتاحية لاختبارها.",
+    langNameEmpty: "اسم اللغة لا يمكن أن يكون فارغاً.",
+    langCodeEmpty: "رمز اللغة لا يمكن أن يكون فارغاً.",
+    langCodeCore: (code: string) =>
+      `الرمز "${code}" محجوز للغة أساسية. الرجاء اختيار رمز آخر.`,
+    langCodeExists: (code: string) =>
+      `لغة مخصصة بالرمز "${code}" موجودة مسبقاً.`,
+    langNameExists: (name: string) =>
+      `لغة مخصصة بالاسم "${name}" موجودة مسبقاً.`,
+    langNameCore: (name: string) =>
+      `الاسم "${name}" محجوز للغة أساسية. الرجاء اختيار اسم آخر.`,
+    langCreated: (name: string) => `تم إنشاء اللغة بنجاح: ${name}`,
+    langSaved: (name: string) => `تم حفظ الترجمات بنجاح لـ: ${name}`,
+    langExported: (code: string) => `تم تصدير ${code}.json بنجاح`,
+    langImported: (name: string) => `تم استيراد الترجمات بنجاح من ${name}`,
+    langCopiedJson: "تم نسخ ترجمات JSON إلى الحافظة.",
+    langPastedJson: (count: number) => `تم تطبيق ${count} ترجمة بنجاح.`,
+    langDeleted: (name: string) => `تم حذف اللغة: ${name}`,
+    langRestored: "تمت استعادة اللغة للوضع الافتراضي.",
+    deleteBackgroundsError: (message: string) =>
+      `فشل حذف مجلد الخلفيات: ${message}`,
+    snippetsLocked: "تم قفل القصاصات (تم تعطيل السحب).",
+    snippetsUnlocked: "تم فتح قفل القصاصات.",
+  },
+  tooltips: {
+    editCssProfile: "تعديل تشكيلة CSS",
+    pinSnapshot: "تثبيت الألوان الحالية كلقطة",
+    pinSnapshotDate: (date: string) =>
+      `تم تثبيت الألوان بتاريخ ${date}. انقر لإعادة التثبيت.`,
+    resetToPinned: "إعادة التعيين إلى الألوان المثبتة",
+    editSnippet: "تعديل القصاصة",
+    copySnippetCss: "نسخ كود CSS إلى الحافظة",
+    deleteSnippet: "حذف القصاصة",
+    setTransparent: "تعيين إلى شفاف",
+    undoChange: "تراجع عن آخر تغيير",
+    dragReorder: "اسحب لإعادة الترتيب",
+    testRule: "تجربة القاعدة بكلمة عشوائية",
+    deleteCustomVar: "حذف المتغير المخصص",
+    iconizeSettings: "إعدادات Iconize",
+    themeLight: "الثيم: فرض الوضع الفاتح (اضغط للتبديل للغامق)",
+    themeDark: "الثيم: فرض الوضع الغامق (اضغط للتبديل للتلقائي)",
+    themeAuto: "الثيم: تلقائي (يتبع أوبسيديان) (اضغط للتبديل للفاتح)",
+    addBg: "إضافة خلفية",
+    removeBg: "إزالة الخلفية",
+    bgSettings: "إعدادات الخلفية",
+    browseBg: "استعراض الخلفيات المخزنة",
+    iconizeNotInstalled:
+      "الإضافة غير مُثبتة أو مُعطلة. الرجاء تثبيت وتفعيل 'Iconize' لاستخدام هذه الميزة.",
+    editLang: "تعديل اللغة المحددة",
+    langMenu: "خيارات اللغة",
+    langInfo: "لماذا أقوم بإنشاء/تعديل اللغات؟",
+    restoreDefaultLang: "استعادة الترجمات الافتراضية",
+    lockSnippets: "قفل السحب",
+    unlockSnippets: "فتح السحب",
+  },
+  commands: {
+    toggleTheme: "تبديل ثيم الملف الشخصي النشط",
+    enableDisable: "تفعيل وتعطيل",
+    cycleNext: "الانتقال للبروفايل التالي",
+    cyclePrevious: "الانتقال للبروفايل السابق",
+    openSettings: "فتح نافذة الإعدادات",
+  },
+  likeCard: {
+    profilesStat: (p: number, s: number) =>
+      `ملفّات شخصيّة: ${p} & قصاصات: ${s}`,
+    colorsStat: "ألوان قابلة للتخصيص",
+    integrationsStat: "تكامل الإضافات",
+    daysStat: "أيام الاستخدام",
+    starButton: "أضف  ★ على GitHub",
+    issueButton: "أبلغ عن مشكلة",
+    syncButton: "مزامنة خزنتك",
+    telegramButton: "تيليجرام",
+  },
+  colors: {
+    names: {
+      // Iconize
+      "--iconize-icon-color": "لون أيقونات Iconize",
+      // Backgrounds
+      "--background-primary": "الخلفية الأساسية",
+      "--background-primary-alt": "الخلفية الأساسية (بديل)",
+      "--background-secondary": "الخلفية الثانوية",
+      "--background-secondary-alt": "الخلفية الثانوية (بديل)",
+      "--background-modifier-border": "الإطار",
+      "--background-modifier-border-hover": "الإطار (عند التمرير)",
+      "--background-modifier-border-focus": "الإطار (عند التحديد)",
+      "--background-modifier-flair": "خلفية العناصر الخاصة",
+      "--background-modifier-hover": "خلفية (عند التمرير)",
+      "--background-modifier-active": "خلفية (عند النقر)",
+      // Text
+      "--text-normal": "النص العادي",
+      "--text-muted": "النص الباهت",
+      "--text-faint": "النص الخافت",
+      "--text-on-accent": "النص فوق اللون المميز",
+      "--text-accent": "النص المميز",
+      "--text-accent-hover": "النص المميز (عند التمرير)",
+      "--text-selection": "تحديد النص",
+      "--checklist-done-color": "عنصر منجز",
+      "--tag-color": "نص الوسم (Tag)",
+      "--tag-color-hover": "نص الوسم (عند التمرير)",
+      "--tag-bg": "خلفية الوسم (Tag)",
+      // Headings
+      "--h1-color": "لون H1",
+      "--h2-color": "لون H2",
+      "--h3-color": "لون H3",
+      "--h4-color": "لون H4",
+      "--h5-color": "لون H5",
+      "--h6-color": "لون H6",
+      // Markdown
+      "--hr-color": "الخط الفاصل",
+      "--blockquote-border-color": "إطار الاقتباس",
+      "--blockquote-color": "نص الاقتباس",
+      "--blockquote-bg": "خلفية الاقتباس",
+      "--code-normal": "نص الكود المضمن",
+      "--code-background": "خلفية الكود المضمن",
+      "--text-highlight-bg": "خلفية النص المظلل",
+      // Interactive Elements
+      "--interactive-normal": "عنصر تفاعلي",
+      "--interactive-hover": "عنصر تفاعلي (عند التمرير)",
+      "--interactive-accent": "عنصر تفاعلي مميز",
+      "--interactive-accent-hover": "عنصر تفاعلي مميز (عند التمرير)",
+      "--interactive-success": "لون النجاح",
+      "--interactive-error": "لون الخطأ",
+      "--interactive-warning": "لون التحذير",
+      // UI Elements
+      "--titlebar-background": "خلفية شريط العنوان",
+      "--titlebar-background-focused": "خلفية شريط العنوان (محدد)",
+      "--titlebar-text-color": "نص شريط العنوان",
+      "--sidebar-background": "خلفية الشريط الجانبي",
+      "--sidebar-border-color": "إطار الشريط الجانبي",
+      "--header-background": "خلفية الترويسة",
+      "--header-border-color": "إطار الترويسة",
+      "--vault-name-color": "اسم الخزنة (Vault)",
+      // Notices
+      "--cm-notice-text-default": "لون نص الإشعار الافتراضي",
+      "--cm-notice-bg-default": "لون خلفية الإشعار الافتراضي",
+      // Graph View
+      "--graph-line": "خط الرسم البياني",
+      "--graph-node": "عقدة الرسم البياني",
+      "--graph-text": "نص الرسم البياني",
+      "--graph-node-unresolved": "عقدة (غير موجودة)",
+      "--graph-node-focused": "عقدة (محددة)",
+      "--graph-node-tag": "عقدة وسم (Tag)",
+      "--graph-node-attachment": "عقدة مرفق",
+      // Misc
+      "--scrollbar-thumb-bg": "مقبض شريط التمرير",
+      "--scrollbar-bg": "خلفية شريط التمرير",
+      "--divider-color": "الفاصل",
+    },
+    descriptions: {
+      // Iconize
+      "--iconize-icon-color":
+        "يحدد لون جميع الأيقونات المضافة بواسطة إضافة Iconize. هذا الخيار سيتجاوز إعدادات الألوان الخاصة بالإضافة.",
+      // Backgrounds
+      "--background-primary":
+        "لون الخلفية الأساسي للتطبيق بالكامل، خصوصاً للمحرر وصفحات الملاحظات.",
+      "--background-primary-alt":
+        "لون خلفية بديل، يستخدم غالباً للسطر النشط في المحرر.",
+      "--background-secondary":
+        "خلفية ثانوية، تستخدم عادةً للأشرطة الجانبية واللوحات الأخرى.",
+      "--background-secondary-alt":
+        "خلفية ثانوية بديلة، تستخدم لعناصر مثل الملف النشط في مستكشف الملفات.",
+      "--background-modifier-border":
+        "لون الإطارات (Borders) على مختلف عناصر الواجهة كالأزرار وحقول الإدخال.",
+      "--background-modifier-border-hover":
+        "لون الإطار عند مرور مؤشر الفأرة فوق العنصر.",
+      "--background-modifier-border-focus":
+        "لون الإطار عندما يكون العنصر محدداً، مثل حقل نصي نشط.",
+      "--background-modifier-flair":
+        "لون خلفية لعناصر واجهة خاصة، مثل حالة 'المزامنة' أو 'الفهرسة'.",
+      "--background-modifier-hover":
+        "لون خلفية العناصر عند مرور مؤشر الفأرة فوقها (مثل عناصر القوائم).",
+      "--background-modifier-active":
+        "لون خلفية العنصر عند النقر عليه أو عندما يكون محدداً ونشطاً.",
+      // Text
+      "--text-normal":
+        "لون النص الافتراضي لجميع الملاحظات ومعظم عناصر الواجهة.",
+      "--text-muted":
+        "لون نص باهت قليلاً، يستخدم للمعلومات الأقل أهمية مثل بيانات الملف.",
+      "--text-faint":
+        "أكثر لون نص باهت، يستخدم لنصوص الواجهة الخفية جداً أو العناصر المعطلة.",
+      "--text-on-accent":
+        "لون النص الذي يظهر فوق الخلفيات الملونة (Accent)، مثل نص على زر أساسي.",
+      "--text-accent":
+        "اللون المميز (Accent) الأساسي للنصوص، يستخدم للروابط وعناصر الواجهة الهامة.",
+      "--text-accent-hover":
+        "لون النص المميز (مثل الروابط) عند مرور مؤشر الفأرة فوقه.",
+      "--text-selection": "لون خلفية النص الذي تحدده بمؤشر الفأرة.",
+      "--checklist-done-color":
+        "لون علامة الصح والنص لمهمة منجزة في قائمة المهام.",
+      "--tag-color": "يحدد لون نص التاغات (#tags).",
+      "--tag-color-hover": "يحدد لون نص التاغات عند تمرير الماوس فوقها.",
+      "--tag-bg": "يحدد لون خلفية التاغات، مما يسمح بإنشاء شكل 'الحبة'.",
+      // Headings
+      "--h1-color": "لون نصوص العناوين من نوع H1.",
+      "--h2-color": "لون نصوص العناوين من نوع H2.",
+      "--h3-color": "لون نصوص العناوين من نوع H3.",
+      "--h4-color": "لون نصوص العناوين من نوع H4.",
+      "--h5-color": "لون نصوص العناوين من نوع H5.",
+      "--h6-color": "لون نصوص العناوين من نوع H6.",
+      // Markdown
+      "--hr-color": "لون الخط الفاصل الأفقي الذي يتم إنشاؤه باستخدام `---`.",
+      "--blockquote-border-color":
+        "لون الإطار العمودي الذي يظهر على يسار نص الاقتباس.",
+      "--blockquote-color": "لون النص داخل فقرة الاقتباس.",
+      "--blockquote-bg": "يحدد لون خلفية عناصر الاقتباس (>) في النص.",
+      "--code-normal":
+        "يحدد لون النص داخل الكود المضمن (بين علامات الاقتباس المعكوسة).",
+      "--code-background": "يحدد لون خلفية الكود المضمن.",
+      "--text-highlight-bg": "يحدد لون خلفية النص المظلل (==بهذا الشكل==).",
+      // Interactive Elements
+      "--interactive-normal": "لون خلفية العناصر التفاعلية مثل الأزرار.",
+      "--interactive-hover":
+        "لون خلفية العناصر التفاعلية عند مرور الفأرة فوقها.",
+      "--interactive-accent":
+        "اللون المميز للعناصر التفاعلية الهامة (مثل زر 'إنشاء').",
+      "--interactive-accent-hover":
+        "اللون المميز للعناصر التفاعلية الهامة عند مرور الفأرة فوقها.",
+      "--interactive-success": "لون يدل على عملية ناجحة (مثل الأخضر).",
+      "--interactive-error": "لون يدل على حدوث خطأ (مثل الأحمر).",
+      "--interactive-warning": "لون يدل على وجود تحذير (مثل الأصفر).",
+      // UI Elements
+      "--titlebar-background": "لون خلفية شريط العنوان للنافذة الرئيسية.",
+      "--titlebar-background-focused":
+        "لون خلفية شريط العنوان عندما تكون النافذة نشطة.",
+      "--titlebar-text-color": "لون النص في شريط العنوان.",
+      "--sidebar-background": "يستهدف بشكل خاص خلفية الأشرطة الجانبية.",
+      "--sidebar-border-color": "لون الخط الفاصل بجانب الأشرطة الجانبية.",
+      "--header-background":
+        "خلفية العناوين داخل اللوحات (مثل عنوان الملاحظة).",
+      "--header-border-color": "لون الخط الفاصل تحت عناوين اللوحات.",
+      "--vault-name-color":
+        "لون اسم القبو (Vault) الخاص بك في الزاوية العلوية.",
+      "--cm-notice-text-default":
+        "يحدد لون النص الافتراضي لكل الإشعارات، ما لم يتم تجاوزه بقاعدة مخصصة.",
+      "--cm-notice-bg-default":
+        "يحدد لون الخلفية الافتراضي لكل الإشعارات، ما لم يتم تجاوزه بقاعدة مخصصة.",
+      // Graph View
+      "--graph-line": "لون الخطوط الواصلة بين الملاحظات في عرض الرسم البياني.",
+      "--graph-node": "لون النقاط الدائرية للملاحظات الموجودة.",
+      "--graph-text":
+        "لون النصوص (أسماء الملاحظات) على النقاط في الرسم البياني.",
+      "--graph-node-unresolved":
+        "لون النقاط الخاصة بالملاحظات التي لم يتم إنشاؤها بعد (روابط غير موجودة).",
+      "--graph-node-focused":
+        "لون العقدة التي عليها التركيز (عندما تمرر الفأرة عليها أو تحددها).",
+      "--graph-node-tag":
+        "لون العقد التي تمثل الوسوم (Tags) إذا كانت ظاهرة في الرسم البياني.",
+      "--graph-node-attachment":
+        "لون العقد التي تمثل المرفقات (مثل الصور أو الملفات الأخرى) في الرسم البياني.",
+      // Misc
+      "--scrollbar-thumb-bg": "لون الجزء القابل للسحب من شريط التمرير.",
+      "--scrollbar-bg": "لون مسار شريط التمرير (الخلفية).",
+      "--divider-color":
+        "لون الخطوط الفاصلة في واجهة المستخدم، مثل الخطوط بين الإعدادات.",
+    },
+  },
+};

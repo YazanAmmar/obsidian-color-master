@@ -1,7 +1,8 @@
 import { App, DataAdapter } from "obsidian";
 import type { Profile } from "./types";
 
-export function flattenVars(varsObject: { [key: string]: any }): {
+// Flattens nested variable objects into a single level map
+export function flattenVars(varsObject: { [key: string]: unknown }): {
   [key: string]: string;
 } {
   let flatVars: { [key: string]: string } = {};
@@ -11,6 +12,7 @@ export function flattenVars(varsObject: { [key: string]: any }): {
   return flatVars;
 }
 
+// Standard relative luminance calculation
 export function getLuminance(hex: string): number {
   const rgb = parseInt(hex.startsWith("#") ? hex.substring(1) : hex, 16);
   const r = (rgb >> 16) & 0xff;
@@ -25,6 +27,7 @@ export function getLuminance(hex: string): number {
   return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
 }
 
+// Calculates WCAG contrast ratio between two colors
 export function getContrastRatio(hex1: string, hex2: string): number {
   const lum1 = getLuminance(hex1);
   const lum2 = getLuminance(hex2);
@@ -33,6 +36,7 @@ export function getContrastRatio(hex1: string, hex2: string): number {
   return (brightest + 0.05) / (darkest + 0.05);
 }
 
+// Returns rating (AAA, AA, Fail) based on contrast score
 export function getAccessibilityRating(ratio: number) {
   const score = ratio.toFixed(2);
   if (ratio >= 7) {
@@ -47,62 +51,46 @@ export function getAccessibilityRating(ratio: number) {
   return { text: "Fail", score, cls: "cm-accessibility-fail" };
 }
 
-/**
- * Generic check to see if a plugin is installed AND enabled.
- * @param app The Obsidian App instance.
- * @param pluginIds An ID or array of IDs to check.
- */
+// Checks if a plugin is both installed AND enabled
 export function isPluginEnabled(
   app: App,
   pluginIds: string | string[]
 ): boolean {
-  const pluginManager = (app as any).plugins;
+  const pluginManager = (app as unknown).plugins;
   const idsToCheck = Array.isArray(pluginIds) ? pluginIds : [pluginIds];
 
-  // Check ONLY running plugins (plugins[id] is only populated if installed AND enabled)
   return idsToCheck.some((id) => pluginManager.plugins[id]);
 }
 
-/**
- * Specific check for the Iconize plugin.
- * @param app The Obsidian App instance.
- */
+// Helper check for Iconize or Icon Folder
 export function isIconizeEnabled(app: App): boolean {
   const iconizeIDs = ["obsidian-icon-folder", "iconize"];
   return isPluginEnabled(app, iconizeIDs);
 }
 
-// Debounce function to limit how often a function can run
-// (e.g., for search bars or undo history)
-export function debounce(fn: (...args: any[]) => void, ms = 200) {
-  let t: NodeJS.Timeout | null = null;
-  return (...args: any[]) => {
+// Standard debounce to limit function execution rate
+export function debounce(fn: (...args: unknown[]) => void, ms = 200) {
+  let t: ReturnType<typeof setTimeout> | null = null;
+  return (...args: unknown[]) => {
     if (t) clearTimeout(t);
     t = setTimeout(() => fn.apply(this, args), ms);
   };
 }
 
-/**
- * Helper to find an available file path (e.g., 'image-2.png')
- * @param adapter - The Obsidian DataAdapter (from app.vault.adapter)
- * @param path - The desired file path
- */
+// Auto-increments filename if path exists (e.g., file-2.png)
 export async function findNextAvailablePath(
   adapter: DataAdapter,
   path: string
 ): Promise<string> {
-  // If original path doesn't exist, use it directly.
   if (!(await adapter.exists(path))) {
     return path;
   }
 
-  // Split path into directory, base filename, and extension
   const pathParts = path.split("/");
   const fullFileName = pathParts.pop();
   if (!fullFileName) return path;
 
   const dir = pathParts.join("/");
-  // Check if file has an extension
   const fileNameParts = fullFileName.split(".");
   const ext = fileNameParts.length > 1 ? fileNameParts.pop() : "";
   const baseName = fileNameParts.join(".");
@@ -121,19 +109,12 @@ export async function findNextAvailablePath(
   return newPath;
 }
 
-/**
- * Converts an image to JPG if the active profile settings require it.
- * @param activeProfile - The currently active profile object
- * @param arrayBuffer - The original image data.
- * @param fileName - The original file name.
- * @returns A promise resolving to the (potentially converted) image data and new file name.
- */
+// Converts image to JPG using Canvas if setting is enabled
 export async function maybeConvertToJpg(
   activeProfile: Profile | undefined,
   arrayBuffer: ArrayBuffer,
   fileName: string
 ): Promise<{ arrayBuffer: ArrayBuffer; fileName: string }> {
-  // 1. Check if conversion is needed
   const fileExt = fileName.split(".").pop()?.toLowerCase();
   const isAlreadyJpg = fileExt === "jpg" || fileExt === "jpeg";
   const supportedToConvert = ["png", "webp", "bmp"].includes(fileExt || "");
@@ -144,13 +125,11 @@ export async function maybeConvertToJpg(
     isAlreadyJpg ||
     !supportedToConvert
   ) {
-    // No conversion needed, return original data
     return { arrayBuffer, fileName };
   }
 
-  console.log(`Color Master: Converting ${fileName} to JPG...`);
+  console.debug(`Color Master: Converting ${fileName} to JPG...`);
 
-  // 2. Start conversion process using Canvas
   return new Promise((resolve, reject) => {
     const blob = new Blob([arrayBuffer]);
     const url = URL.createObjectURL(blob);
@@ -167,33 +146,37 @@ export async function maybeConvertToJpg(
         return reject(new Error("Failed to get canvas context"));
       }
 
-      // 3. Fill background with white (JPG doesn't support transparency)
+      // Fill background white since JPG doesn't support alpha
       ctx.fillStyle = "#FFFFFF";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // 4. Draw the original image onto the canvas
       ctx.drawImage(image, 0, 0);
-      URL.revokeObjectURL(url); // Clean up memory
+      URL.revokeObjectURL(url);
 
-      // 5. Get quality setting
-      const quality = (activeProfile.jpgQuality || 85) / 100.0; // Convert 1-100 scale to 0.0-1.0
+      const quality = (activeProfile.jpgQuality || 85) / 100.0;
 
-      // 6. Convert canvas to JPG Blob
       canvas.toBlob(
-        async (jpgBlob) => {
+        (jpgBlob) => {
           if (!jpgBlob) {
-            return reject(new Error("Failed to create JPG blob"));
+            reject(new Error("Failed to create JPG blob"));
+            return;
           }
 
-          // 7. Get ArrayBuffer from new JPG Blob
-          const newArrayBuffer = await jpgBlob.arrayBuffer();
-          const newFileName =
-            fileName.substring(0, fileName.lastIndexOf(".")) + ".jpg";
+          jpgBlob
+            .arrayBuffer()
+            .then((newArrayBuffer) => {
+              const newFileName =
+                fileName.substring(0, fileName.lastIndexOf(".")) + ".jpg";
 
-          console.log(
-            `Color Master: Conversion complete. New size: ${newArrayBuffer.byteLength} bytes`
-          );
-          resolve({ arrayBuffer: newArrayBuffer, fileName: newFileName });
+              console.debug(
+                `Color Master: Conversion complete. New size: ${newArrayBuffer.byteLength} bytes`
+              );
+
+              resolve({ arrayBuffer: newArrayBuffer, fileName: newFileName });
+            })
+            .catch((err) => {
+              reject(err instanceof Error ? err : new Error(String(err)));
+            });
         },
         "image/jpeg",
         quality
@@ -207,4 +190,122 @@ export async function maybeConvertToJpg(
 
     image.src = url;
   });
+}
+
+// Reconstructs nested object from dot-notation keys
+export function unflattenStrings(
+  flatObject: Record<string, string>
+): Record<string, unknown> {
+  const nestedResult: Record<string, unknown> = {};
+
+  for (const key in flatObject) {
+    if (Object.prototype.hasOwnProperty.call(flatObject, key)) {
+      const keys = key.split(".");
+      let currentLevel = nestedResult;
+
+      for (let i = 0; i < keys.length; i++) {
+        const part = keys[i];
+
+        if (i === keys.length - 1) {
+          currentLevel[part] = flatObject[key] as unknown;
+        } else {
+          if (!currentLevel[part] || typeof currentLevel[part] !== "object") {
+            currentLevel[part] = {};
+          }
+          currentLevel = currentLevel[part] as Record<string, unknown>;
+        }
+      }
+    }
+  }
+  return nestedResult;
+}
+
+function componentToHex(c: number): string {
+  const hex = Math.round(c).toString(16);
+  return hex.length == 1 ? "0" + hex : hex;
+}
+
+// Normalizes any CSS color string to Hex/HexA format
+export function convertColorToHex(colorString: string): string {
+  const s = colorString.toLowerCase().trim();
+
+  if (s === "transparent") {
+    return "#00000000";
+  }
+
+  // Expand short hex codes if needed
+  if (s.startsWith("#")) {
+    if (s.length === 4) {
+      const r = s[1];
+      const g = s[2];
+      const b = s[3];
+      return `#${r}${r}${g}${g}${b}${b}`;
+    }
+    if (s.length === 5) {
+      const r = s[1];
+      const g = s[2];
+      const b = s[3];
+      const a = s[4];
+      return `#${r}${r}${g}${g}${b}${b}${a}${a}`;
+    }
+    return s;
+  }
+
+  // Use the DOM to normalize other formats (rgb, hsl, names)
+  const d = document.createElement("div");
+  d.style.color = s;
+  document.body.appendChild(d);
+
+  // Browser always computes to rgb/rgba
+  const computedColor = getComputedStyle(d).color;
+  document.body.removeChild(d);
+
+  const match = computedColor.match(
+    /rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/
+  );
+
+  if (match) {
+    const r = parseInt(match[1]);
+    const g = parseInt(match[2]);
+    const b = parseInt(match[3]);
+    const a = match[4] ? parseFloat(match[4]) : 1;
+
+    const hexR = componentToHex(r);
+    const hexG = componentToHex(g);
+    const hexB = componentToHex(b);
+
+    if (a === 1) {
+      return `#${hexR}${hexG}${hexB}`;
+    } else {
+      const hexA = componentToHex(a * 255);
+      return `#${hexR}${hexG}${hexB}${hexA}`;
+    }
+  }
+
+  return s;
+}
+
+// Polyfill for HTMLElement.setCssProps (Obsidian 1.7+ API)
+declare global {
+  interface HTMLElement {
+    setCssProps(props: Record<string, string | null>): void;
+  }
+}
+
+if (!HTMLElement.prototype.setCssProps) {
+  HTMLElement.prototype.setCssProps = function (props) {
+    for (const key in props) {
+      const value = props[key];
+
+      if (value === null || value === undefined || value === "") {
+        this.style.removeProperty(key);
+      } else {
+        try {
+          this.style.setProperty(key, value);
+        } catch (e) {
+          console.warn(`setCssProps: failed to set ${key} = ${value}`, e);
+        }
+      }
+    }
+  };
 }
