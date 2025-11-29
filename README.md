@@ -558,7 +558,7 @@ You can assign hotkeys to these commands in `Settings` -> `Hotkeys`:
 
 ## Changelog (Summary)
 
-For full details, see [`CHANGELOG.md`](https://github.com/YazanAmmar/obsidian-color-master/blob/main/CHANGELOG.md\).
+For full details, see [`CHANGELOG.md`](https://github.com/YazanAmmar/obsidian-color-master/blob/main/CHANGELOG.md).
 
 - **v1.2.0** - The **Theme Engine Update**. Re-wrote the core to dynamically capture your active theme's colors. UI now shows "Pristine" (dimmed) vs. "Modified" (bright) states. Added a complete **Custom Language** and translation editor system. Implemented granular data reset and SCSS/ESLint.
     
