@@ -54,7 +54,7 @@ export function getAccessibilityRating(ratio: number) {
 // Checks if a plugin is both installed AND enabled
 export function isPluginEnabled(
   app: App,
-  pluginIds: string | string[]
+  pluginIds: string | string[],
 ): boolean {
   const pluginManager = (app as unknown).plugins;
   const idsToCheck = Array.isArray(pluginIds) ? pluginIds : [pluginIds];
@@ -80,7 +80,7 @@ export function debounce(fn: (...args: unknown[]) => void, ms = 200) {
 // Auto-increments filename if path exists (e.g., file-2.png)
 export async function findNextAvailablePath(
   adapter: DataAdapter,
-  path: string
+  path: string,
 ): Promise<string> {
   if (!(await adapter.exists(path))) {
     return path;
@@ -113,7 +113,7 @@ export async function findNextAvailablePath(
 export async function maybeConvertToJpg(
   activeProfile: Profile | undefined,
   arrayBuffer: ArrayBuffer,
-  fileName: string
+  fileName: string,
 ): Promise<{ arrayBuffer: ArrayBuffer; fileName: string }> {
   const fileExt = fileName.split(".").pop()?.toLowerCase();
   const isAlreadyJpg = fileExt === "jpg" || fileExt === "jpeg";
@@ -169,7 +169,7 @@ export async function maybeConvertToJpg(
                 fileName.substring(0, fileName.lastIndexOf(".")) + ".jpg";
 
               console.debug(
-                `Color Master: Conversion complete. New size: ${newArrayBuffer.byteLength} bytes`
+                `Color Master: Conversion complete. New size: ${newArrayBuffer.byteLength} bytes`,
               );
 
               resolve({ arrayBuffer: newArrayBuffer, fileName: newFileName });
@@ -179,7 +179,7 @@ export async function maybeConvertToJpg(
             });
         },
         "image/jpeg",
-        quality
+        quality,
       );
     };
 
@@ -194,7 +194,7 @@ export async function maybeConvertToJpg(
 
 // Reconstructs nested object from dot-notation keys
 export function unflattenStrings(
-  flatObject: Record<string, string>
+  flatObject: Record<string, string>,
 ): Record<string, unknown> {
   const nestedResult: Record<string, unknown> = {};
 
@@ -261,7 +261,7 @@ export function convertColorToHex(colorString: string): string {
   document.body.removeChild(d);
 
   const match = computedColor.match(
-    /rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/
+    /rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/,
   );
 
   if (match) {

@@ -12,7 +12,7 @@ import {
 
 export function drawOptionsSection(
   containerEl: HTMLElement,
-  settingTab: ColorMasterSettingTab
+  settingTab: ColorMasterSettingTab,
 ) {
   const plugin = settingTab.plugin;
   const activeProfile = plugin.settings.profiles[plugin.settings.activeProfile];
@@ -20,7 +20,7 @@ export function drawOptionsSection(
   containerEl.createEl("h3", { text: t("options.heading") });
   containerEl.createEl("hr");
   const advancedSettingsGrid = containerEl.createDiv(
-    "cm-advanced-settings-grid"
+    "cm-advanced-settings-grid",
   );
 
   // --- Live Update FPS ---
@@ -75,7 +75,7 @@ export function drawOptionsSection(
               })().catch((err) => {
                 console.error("Failed to add custom variable:", err);
               });
-            }
+            },
           ).open();
         });
     });
@@ -99,7 +99,7 @@ export function drawOptionsSection(
   resetSetting.nameEl.appendChild(resetSetting.controlEl);
   resetSetting.settingEl.classList.add("cm-card-with-header-control");
   const resetButtonText = resetSetting.controlEl.querySelector(
-    ".setting-editor-button"
+    ".setting-editor-button",
   );
   if (resetButtonText) {
     resetButtonText.textContent = "";
@@ -137,7 +137,7 @@ export function drawOptionsSection(
             settingTab.app,
             plugin,
             settingTab,
-            () => {}
+            () => {},
           ).open();
         });
     })
@@ -195,7 +195,7 @@ export function drawOptionsSection(
             {
               buttonText: t("buttons.deleteAnyway"),
               buttonClass: "mod-warning",
-            }
+            },
           ).open();
         });
     })

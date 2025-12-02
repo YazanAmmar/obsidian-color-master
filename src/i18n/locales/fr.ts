@@ -295,7 +295,7 @@ export default {
       codePlaceholder: "ex: fr",
       rtlLabel: "Langue RTL",
       rtlDesc:
-        "Activez ceci si la langue s'écrit de droite à gauche (par ex. hébreu, ourdou).",
+        "Activez ceci si la langue s'écrit de droite à gauche (par ex. arabe, ourdou).",
     },
     translator: {
       title: (langName: string) => `Modifier les traductions : ${langName}`,

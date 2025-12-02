@@ -13,7 +13,7 @@ import type { ColorMasterSettingTab } from "../settingsTab";
 export function drawColorPickers(
   containerEl: HTMLElement,
   settingTab: ColorMasterSettingTab,
-  themeDefaults: Record<string, string>
+  themeDefaults: Record<string, string>,
 ) {
   const plugin = settingTab.plugin;
   const activeProfile = plugin.settings.profiles[plugin.settings.activeProfile];
@@ -85,7 +85,7 @@ export function drawColorPickers(
               settingTab.app,
               plugin,
               settingTab,
-              ruleType
+              ruleType,
             ).open();
           });
         });
@@ -130,7 +130,7 @@ export function drawColorPickers(
 
       const isModified = Object.prototype.hasOwnProperty.call(
         activeProfileVars,
-        varName
+        varName,
       );
 
       const initialValue = isModified
@@ -138,7 +138,7 @@ export function drawColorPickers(
         : defaultValue;
 
       setting.settingEl.classList.add(
-        isModified ? "is-modified" : "is-pristine"
+        isModified ? "is-modified" : "is-pristine",
       );
 
       textInput.value = initialValue;
@@ -161,7 +161,7 @@ export function drawColorPickers(
         const profile = plugin.settings.profiles[plugin.settings.activeProfile];
         const oldColor = Object.prototype.hasOwnProperty.call(
           activeProfileVars,
-          varName
+          varName,
         )
           ? activeProfileVars[varName]
           : defaultValue;
@@ -306,7 +306,7 @@ export function drawColorPickers(
 
       setting.settingEl.classList.add(
         "cm-var-row",
-        isModified ? "is-modified" : "is-pristine"
+        isModified ? "is-modified" : "is-pristine",
       );
 
       setting.settingEl.dataset.var = varName;
@@ -387,7 +387,7 @@ export function drawColorPickers(
 
         case "size": {
           const sizeMatch = varValue.match(
-            /(-?\d*\.?\d+)\s*(px|em|rem|%|vw|vh|auto)?/
+            /(-?\d*\.?\d+)\s*(px|em|rem|%|vw|vh|auto)?/,
           );
 
           let numValue = sizeMatch?.[1] || "10";

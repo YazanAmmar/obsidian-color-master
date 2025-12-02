@@ -45,7 +45,7 @@ export function loadLanguage(settings: PluginSettings) {
       console.debug(
         `Color Master: Applying ${
           Object.keys(customLang.translations).length
-        } overrides for "${langCode}"`
+        } overrides for "${langCode}"`,
       );
       ACTIVE_STRINGS = { ...baseStrings, ...customLang.translations };
     } else {
@@ -56,7 +56,7 @@ export function loadLanguage(settings: PluginSettings) {
     ACTIVE_STRINGS = customLang.translations;
   } else {
     console.debug(
-      `Color Master: Language "${langCode}" not found, using default.`
+      `Color Master: Language "${langCode}" not found, using default.`,
     );
     ACTIVE_STRINGS = FALLBACK_STRINGS;
   }
@@ -93,7 +93,7 @@ export const t = (key: string, ...args: (string | number)[]): string => {
 export function flattenStrings(
   obj: Record<string, unknown>,
   parentKey = "",
-  result: Record<string, string | LocaleFunc> = {}
+  result: Record<string, string | LocaleFunc> = {},
 ): Record<string, string | LocaleFunc> {
   for (const key in obj) {
     if (Object.prototype.hasOwnProperty.call(obj, key)) {

@@ -13,7 +13,7 @@ import Sortable from "sortablejs";
 
 function initSnippetDrag(
   containerEl: HTMLElement,
-  settingTab: ColorMasterSettingTab
+  settingTab: ColorMasterSettingTab,
 ) {
   const plugin = settingTab.plugin;
   if (settingTab.snippetSortable) {
@@ -81,7 +81,7 @@ function initSnippetDrag(
 
 export function drawCssSnippetsUI(
   containerEl: HTMLElement,
-  settingTab: ColorMasterSettingTab
+  settingTab: ColorMasterSettingTab,
 ) {
   const plugin = settingTab.plugin;
 
@@ -94,7 +94,7 @@ export function drawCssSnippetsUI(
   headerContainer.createEl("h3", { text: t("snippets.heading") });
 
   const controlsContainer = new Setting(headerContainer).setClass(
-    "cm-snippets-add-button"
+    "cm-snippets-add-button",
   );
 
   // --- Lock Button ---
@@ -102,7 +102,7 @@ export function drawCssSnippetsUI(
     btn
       .setIcon(isLocked ? "lock" : "lock-open")
       .setTooltip(
-        isLocked ? t("tooltips.unlockSnippets") : t("tooltips.lockSnippets")
+        isLocked ? t("tooltips.unlockSnippets") : t("tooltips.lockSnippets"),
       )
       .onClick(async () => {
         (plugin.settings as unknown).snippetsLocked = !isLocked;
@@ -111,7 +111,9 @@ export function drawCssSnippetsUI(
         settingTab.display();
 
         new Notice(
-          isLocked ? t("notices.snippetsUnlocked") : t("notices.snippetsLocked")
+          isLocked
+            ? t("notices.snippetsUnlocked")
+            : t("notices.snippetsLocked"),
         );
       });
 
@@ -151,7 +153,7 @@ export function drawCssSnippetsUI(
   const renderSnippet = (
     snippet: Snippet,
     index: number,
-    isGlobal: boolean
+    isGlobal: boolean,
   ) => {
     const snippetEl = snippetsContainer.createDiv({
       cls: "setting-item cm-snippet-item",
@@ -258,17 +260,17 @@ export function drawCssSnippetsUI(
             })().catch((err) => {
               console.error("Failed to delete snippet:", err);
             });
-          }
+          },
         ).open();
       });
   };
 
   globalSnippets.forEach((snippet, index) =>
-    renderSnippet(snippet, index, true)
+    renderSnippet(snippet, index, true),
   );
 
   profileSnippets.forEach((snippet, index) =>
-    renderSnippet(snippet, index + globalSnippets.length, false)
+    renderSnippet(snippet, index + globalSnippets.length, false),
   );
 
   initSnippetDrag(snippetsContainer, settingTab);

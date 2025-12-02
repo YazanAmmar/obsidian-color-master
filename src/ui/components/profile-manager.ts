@@ -11,7 +11,7 @@ interface AppWithCustomCss extends App {
 
 export function drawProfileManager(
   containerEl: HTMLElement,
-  settingTab: ColorMasterSettingTab
+  settingTab: ColorMasterSettingTab,
 ) {
   const plugin = settingTab.plugin;
 
@@ -122,7 +122,7 @@ export function drawProfileManager(
               settingTab.app,
               plugin,
               settingTab,
-              profileData
+              profileData,
             ).open();
           });
       } else {
@@ -169,7 +169,7 @@ export function drawProfileManager(
                 console.error("Failed to reset profile:", err);
               });
             },
-            { buttonText: t("buttons.reset"), buttonClass: "mod-cta" }
+            { buttonText: t("buttons.reset"), buttonClass: "mod-cta" },
           ).open();
         });
       button.buttonEl.classList.add("cm-control-button");
@@ -223,7 +223,7 @@ export function drawProfileManager(
         }
         const message = t(
           "modals.deleteProfile.confirmation",
-          plugin.settings.activeProfile
+          plugin.settings.activeProfile,
         );
         new ConfirmationModal(
           settingTab.app,
@@ -234,13 +234,13 @@ export function drawProfileManager(
             plugin.removeInjectedCustomCss();
             delete plugin.settings.profiles[plugin.settings.activeProfile];
             plugin.settings.activeProfile = Object.keys(
-              plugin.settings.profiles
+              plugin.settings.profiles,
             )[0];
             plugin.pendingVarUpdates = {};
             void plugin.saveSettings();
             settingTab.display();
             new Notice(t("notices.profileDeleted"));
-          }
+          },
         ).open();
       });
       button.buttonEl.classList.add("cm-control-button");
@@ -256,7 +256,7 @@ export function drawProfileManager(
     setIcon(iconEl, "alert-triangle");
     iconEl.setAttr(
       "aria-label",
-      t("settings.themeWarningTooltip", currentTheme)
+      t("settings.themeWarningTooltip", currentTheme),
     );
   }
 

@@ -24,7 +24,7 @@ export function registerCommands(plugin: ColorMaster) {
       new Notice(
         plugin.settings.pluginEnabled
           ? t("notices.pluginEnabled")
-          : t("notices.pluginDisabled")
+          : t("notices.pluginDisabled"),
       );
     },
   });

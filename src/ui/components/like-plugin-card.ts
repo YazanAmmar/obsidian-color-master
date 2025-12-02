@@ -7,7 +7,7 @@ function createStatBar(
   parentEl: HTMLElement,
   label: string,
   value: number,
-  max: number
+  max: number,
 ) {
   const skillBox = parentEl.createDiv("cm-stat-box");
   const header = skillBox.createDiv("cm-stat-header");
@@ -69,7 +69,7 @@ function calcPluginIntegrations(): number {
 
 export function drawLikePluginCard(
   containerEl: HTMLElement,
-  settingTab: ColorMasterSettingTab
+  settingTab: ColorMasterSettingTab,
 ) {
   const likeCardEl = containerEl.createDiv("cm-like-card");
   const bannerContainer = likeCardEl.createDiv("cm-banner-container");
@@ -115,27 +115,27 @@ export function drawLikePluginCard(
   const days = Math.max(
     1,
     Math.floor(
-      (Date.now() - new Date(sinceInstalled).getTime()) / (1000 * 60 * 60 * 24)
-    )
+      (Date.now() - new Date(sinceInstalled).getTime()) / (1000 * 60 * 60 * 24),
+    ),
   );
 
   createStatBar(
     statsContainer,
     t("likeCard.profilesStat", profilesCount, snippetsCount),
     profilesCount + snippetsCount,
-    50
+    50,
   );
   createStatBar(
     statsContainer,
     t("likeCard.colorsStat"),
     calcVarsCount(settingTab),
-    calcVarsCount(settingTab)
+    calcVarsCount(settingTab),
   );
   createStatBar(
     statsContainer,
     t("likeCard.integrationsStat"),
     calcPluginIntegrations(),
-    5
+    5,
   );
   createStatBar(statsContainer, t("likeCard.daysStat"), days, 365);
 
@@ -145,7 +145,7 @@ export function drawLikePluginCard(
   starButtonWrapper.addEventListener("click", () => {
     window.open(
       "https://github.com/YazanAmmar/obsidian-color-master",
-      "_blank"
+      "_blank",
     );
   });
 
@@ -154,7 +154,7 @@ export function drawLikePluginCard(
   reportButtonWrapper.addEventListener("click", () => {
     window.open(
       "https://github.com/YazanAmmar/obsidian-color-master/issues",
-      "_blank"
+      "_blank",
     );
   });
 

@@ -60,7 +60,7 @@ export class ColorMasterSettingTab extends PluginSettingTab {
 
   updateColorPickerAppearance(
     textInput: HTMLInputElement,
-    colorPicker: HTMLInputElement
+    colorPicker: HTMLInputElement,
   ) {
     const value = textInput.value.toLowerCase().trim();
 
@@ -116,10 +116,10 @@ export class ColorMasterSettingTab extends PluginSettingTab {
     });
 
     const filterButton = this.containerEl.querySelector(
-      'button[data-cm-action="filter"]'
+      'button[data-cm-action="filter"]',
     );
     const filterOptionsContainer = this.containerEl.querySelector(
-      ".cm-search-filter-options"
+      ".cm-search-filter-options",
     );
 
     if (filterButton) filterButton.classList.remove("is-active");
@@ -201,7 +201,7 @@ export class ColorMasterSettingTab extends PluginSettingTab {
 
         filterOptionsContainer.classList.toggle(
           "is-filter-active",
-          value !== ""
+          value !== "",
         );
         debouncedFilter();
       });
@@ -298,8 +298,8 @@ export class ColorMasterSettingTab extends PluginSettingTab {
     }
     const rows = Array.from(
       this.containerEl.querySelectorAll<HTMLElement>(
-        ".cm-var-row, .cm-searchable-row"
-      )
+        ".cm-var-row, .cm-searchable-row",
+      ),
     );
 
     let qRegex: RegExp | null = null;
@@ -379,12 +379,12 @@ export class ColorMasterSettingTab extends PluginSettingTab {
     });
 
     const headings = this.containerEl.querySelectorAll<HTMLElement>(
-      ".cm-category-container"
+      ".cm-category-container",
     );
     headings.forEach((heading) => {
       const category = heading.dataset.category;
       const hasVisibleRows = this.containerEl.querySelector(
-        `.cm-var-row[data-category="${category}"]:not(.cm-hidden)`
+        `.cm-var-row[data-category="${category}"]:not(.cm-hidden)`,
       );
 
       if (hasVisibleRows) {
@@ -518,7 +518,7 @@ export class ColorMasterSettingTab extends PluginSettingTab {
     const allDefaultVars = flattenVars(DEFAULT_VARS);
 
     const checkerElements = this.containerEl.querySelectorAll(
-      ".cm-accessibility-checker"
+      ".cm-accessibility-checker",
     );
 
     checkerElements.forEach((checkerEl) => {
@@ -593,7 +593,7 @@ export class ColorMasterSettingTab extends PluginSettingTab {
             await this.plugin.saveSettings();
             this.plugin.restartColorUpdateLoop();
             new Notice(
-              value ? t("notices.pluginEnabled") : t("notices.pluginDisabled")
+              value ? t("notices.pluginEnabled") : t("notices.pluginDisabled"),
             );
           });
       });
@@ -623,7 +623,7 @@ export class ColorMasterSettingTab extends PluginSettingTab {
       .onClick(() => {
         buttonListEl.toggleClass(
           "is-open",
-          !buttonListEl.classList.contains("is-open")
+          !buttonListEl.classList.contains("is-open"),
         );
       });
     triggerBtn.buttonEl.classList.add("cm-control-icon-button");
@@ -648,7 +648,7 @@ export class ColorMasterSettingTab extends PluginSettingTab {
           this.app,
           this.plugin,
           this,
-          langCode
+          langCode,
         ).open();
       });
 
@@ -685,7 +685,7 @@ export class ColorMasterSettingTab extends PluginSettingTab {
             t("modals.confirmation.restoreLangTitle"),
             t(
               "modals.confirmation.restoreLangDesc",
-              CORE_LANGUAGES[langCode as LocaleCode]
+              CORE_LANGUAGES[langCode as LocaleCode],
             ),
             () => {
               void (async () => {
@@ -701,7 +701,7 @@ export class ColorMasterSettingTab extends PluginSettingTab {
                 console.error("Failed to restore language:", err);
               });
             },
-            { buttonText: t("buttons.restore"), buttonClass: "mod-warning" }
+            { buttonText: t("buttons.restore"), buttonClass: "mod-warning" },
           ).open();
         });
       restoreBtn.buttonEl.classList.add("cm-control-icon-button");
@@ -731,7 +731,7 @@ export class ColorMasterSettingTab extends PluginSettingTab {
                 console.error("Failed to delete custom language:", err);
               });
             },
-            { buttonText: t("buttons.delete"), buttonClass: "mod-warning" }
+            { buttonText: t("buttons.delete"), buttonClass: "mod-warning" },
           ).open();
         });
       deleteBtn.buttonEl.classList.add("cm-control-icon-button");
@@ -791,7 +791,7 @@ export class ColorMasterSettingTab extends PluginSettingTab {
       setTimeout(() => {
         // Find the first "visible" line
         const firstVisibleRow = this.containerEl.querySelector<HTMLElement>(
-          ".cm-var-row:not(.cm-hidden)"
+          ".cm-var-row:not(.cm-hidden)",
         );
 
         if (firstVisibleRow) {
@@ -803,7 +803,7 @@ export class ColorMasterSettingTab extends PluginSettingTab {
       }, 0);
     }
     const scrollContainer = this.containerEl.closest<HTMLElement>(
-      ".vertical-tab-content"
+      ".vertical-tab-content",
     );
 
     if (!scrollContainer) {
@@ -819,7 +819,7 @@ export class ColorMasterSettingTab extends PluginSettingTab {
       this.plugin.registerDomEvent(
         scrollContainer,
         "scroll",
-        debouncedScrollSave
+        debouncedScrollSave,
       );
 
       if (!this._searchState.query && this.plugin.settings.lastScrollPosition) {

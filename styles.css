@@ -34,6 +34,71 @@
     transform: translateX(3px);
   }
 }
+@keyframes cm-glowing-border {
+  0% {
+    border-image-source: linear-gradient(to right, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3);
+  }
+  14% {
+    border-image-source: linear-gradient(to right, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000);
+  }
+  28% {
+    border-image-source: linear-gradient(to right, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000, #ff7f00);
+  }
+  42% {
+    border-image-source: linear-gradient(to right, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000, #ff7f00, #ffff00);
+  }
+  56% {
+    border-image-source: linear-gradient(to right, #0000ff, #4b0082, #9400d3, #ff0000, #ff7f00, #ffff00, #00ff00);
+  }
+  70% {
+    border-image-source: linear-gradient(to right, #4b0082, #9400d3, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff);
+  }
+  84% {
+    border-image-source: linear-gradient(to right, #9400d3, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082);
+  }
+  100% {
+    border-image-source: linear-gradient(to right, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3);
+  }
+}
+@keyframes cm-border-animation {
+  to {
+    transform: translateX(-25%);
+  }
+}
+@keyframes cm-progress {
+  from {
+    width: 0;
+  }
+  to {
+    width: var(--skill-percentage);
+    opacity: 1;
+  }
+}
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes fadeOutSlide {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+}
+@keyframes cm-marching-ants {
+  to {
+    background-position: 10px 0, 100% 10px, -10px 100%, 0 -10px;
+  }
+}
 /* --- Layout Directionality (LTR/RTL) --- */
 .is-ltr {
   direction: ltr !important;
@@ -47,14 +112,6 @@
 .is-ltr .setting-item,
 .is-ltr .modal-content .setting-item {
   flex-direction: row !important;
-}
-.is-ltr {
-  /* Refactor modal-specific logic to dedicated files later */
-}
-.is-ltr .modal-content .setting-item-info {
-  text-align: left !important;
-  margin-right: 10px;
-  margin-left: 0;
 }
 .is-ltr .color-master-text-input {
   margin-left: 8px;
@@ -199,80 +256,397 @@ body.cm-settings-background-active .color-master-settings-tab {
   font-weight: 600;
 }
 
-/* --- Modals --- */
-/* Language Info Modal */
-.cm-info-modal {
-  max-width: 650px;
-}
-.cm-info-modal .modal-content {
-  max-height: unset;
-  padding: 0;
-}
-.cm-info-modal .cm-info-content {
-  border-bottom: 1px solid var(--background-modifier-border);
-  padding: 0 var(--size-4-4) var(--size-4-4) var(--size-4-4);
-  margin-bottom: var(--size-4-4);
-  max-height: unset;
-  overflow-y: visible;
-}
-.cm-info-modal .cm-info-content p {
-  margin-bottom: var(--size-4-2);
-}
-.cm-info-modal .cm-info-content ul,
-.cm-info-modal .cm-info-content ol {
-  margin-inline-start: var(--size-4-6);
-  margin-bottom: var(--size-4-2);
-}
-.cm-info-modal .cm-info-content li {
-  margin-bottom: var(--size-4-1);
-}
-.cm-info-modal .cm-info-content code {
-  background-color: var(--background-modifier-hover);
-  color: var(--text-normal);
-  padding: 2px 4px;
-  border-radius: var(--radius-s);
+.notice,
+.toast {
+  padding: 8px 12px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  max-width: 300px;
+  border-radius: 6px !important;
+  min-width: 120px !important;
+  box-sizing: border-box !important;
 }
 
-/* Translator Modal - Flex layout for scrollable list */
-.cm-translator-modal .modal-content {
+/* ==========================================================================
+   Component Styles
+   Reusable UI elements: Cards, Snippet Lists, Badges, Menus.
+   ========================================================================== */
+/* --- Like Plugin Card (Promo) --- */
+.cm-like-card {
   display: flex;
   flex-direction: column;
-  height: 65vh;
-  max-height: 65vh;
+  gap: 16px;
+  align-items: stretch;
+  padding: 10px;
+  margin-top: 20px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0.02));
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.28);
+  position: relative;
+  border: 4px solid transparent;
+  border-image-slice: 1;
+  animation: cm-glowing-border 2s linear infinite;
 }
-.cm-translator-modal .cm-translator-list {
-  flex: 1;
-  overflow-y: auto;
+.cm-like-card .cm-banner-container .cm-banner-svg {
+  display: block;
+  width: 100%;
+  height: auto;
 }
-.cm-translator-modal .cm-translator-controls,
-.cm-translator-modal .cm-translator-main-controls {
-  flex: 0 0 auto;
+.cm-like-card .cm-content-wrapper {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  width: 100%;
+  padding: 0 4px;
 }
-.cm-translator-modal .cm-translator-main-controls {
-  padding: 0;
-  border: none;
-  margin-top: var(--size-4-2);
+.cm-like-card .cm-like-stats {
+  flex: 3;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 12px;
+  width: 100%;
+}
+.cm-like-card .cm-like-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-self: stretch;
+  flex: 2;
+  max-width: 150px;
 }
 
-.cm-translator-toggle {
-  font-size: var(--font-ui-small);
-  color: var(--text-accent);
+/* --- Stats Progress Bars --- */
+.cm-stat-box {
+  width: 100%;
+}
+.cm-stat-box .cm-stat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+}
+.cm-stat-box .cm-stat-header .title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+.cm-stat-box .cm-stat-header .value {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-normal);
+}
+.cm-stat-box .skill-bar {
+  height: 8px;
+  width: 100%;
+  border-radius: 6px;
+  background-color: var(--background-modifier-border);
+  overflow: hidden;
+}
+.cm-stat-box .skill-per {
+  position: relative;
+  overflow: hidden;
+  display: block;
+  height: 100%;
+  width: 0%; /* Animated via JS/CSS var */
+  border-radius: 6px;
+  animation: cm-progress 0.8s ease-out forwards;
+  background: none;
+}
+.cm-stat-box .skill-per::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 400%;
+  height: 100%;
+  background: linear-gradient(115deg, #33ff00, #ffcc00, #8000ff, #00b7ff, #00ff66);
+  background-size: 25% 100%;
+  animation: cm-border-animation 2s linear infinite;
+}
+
+/* --- Animated Gradient Buttons --- */
+.codepen-button {
+  display: block;
   cursor: pointer;
-  margin-top: 4px;
-  display: inline-block;
+  color: white;
+  position: relative;
+  text-decoration: none;
+  font-weight: 600;
+  border-radius: 6px;
+  overflow: hidden;
+  padding: 2px;
+  isolation: isolate;
+  width: 100%;
 }
-.cm-translator-toggle:hover {
-  color: var(--text-accent-hover);
+.codepen-button::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 400%;
+  height: 100%;
+  background: linear-gradient(115deg, #33ff00, #ffcc00, #8000ff, #00b7ff, #00ff66);
+  background-size: 25% 100%;
+  animation: cm-border-animation 1.5s linear infinite;
+  animation-play-state: running;
+}
+.codepen-button span {
+  position: relative;
+  display: block;
+  text-align: center;
+  padding: 8px 12px;
+  font-size: 13px;
+  background: var(--background-secondary);
+  border-radius: 4px;
+  height: 100%;
+}
+.codepen-button {
+  /* Light Mode Fallback */
+}
+.theme-light .codepen-button span {
+  color: #000000;
+  background: #f0f2f5;
 }
 
-/* Notice Rules List */
-.cm-rules-modal .cm-rule-item .cm-rule-icon-button {
-  margin-left: 4px;
+.cm-promo-container {
+  border-top: 1px solid var(--background-modifier-border);
+  text-align: center;
+  width: 100%;
 }
-.cm-rules-modal .cm-rule-item .cm-rule-icon-button.is-active {
-  color: var(--text-accent);
+
+/* --- CSS Snippets List --- */
+.cm-snippets-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  margin-bottom: 16px;
+}
+.cm-snippets-header h3 {
+  margin: 0;
+  white-space: nowrap;
+}
+.cm-snippets-header .cm-snippets-add-button.setting-item {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+.cm-snippets-header .cm-snippets-add-button.setting-item button {
+  background-color: transparent;
+  border: 1px solid var(--interactive-accent);
+  color: var(--interactive-accent);
+  transition: all 0.2s ease-in-out;
+}
+.cm-snippets-header .cm-snippets-add-button.setting-item button:hover {
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+
+.cm-snippet-lock-btn {
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: all 0.2s ease-in-out;
+  border: none !important;
+  box-shadow: none !important;
+  background-color: transparent !important;
+}
+.cm-snippet-lock-btn:hover {
+  color: var(--text-normal);
+  background-color: var(--background-modifier-hover) !important;
+}
+.cm-snippet-lock-btn.is-locked {
+  color: var(--text-normal);
+  opacity: 1;
+}
+
+.cm-snippets-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.cm-snippets-empty-state {
+  color: var(--text-muted);
+  font-style: italic;
+  padding: 10px;
+  text-align: center;
+}
+
+.cm-snippet-item.setting-item {
+  align-items: center !important;
+  min-height: 40px;
+  padding: 4px 10px !important;
+  transition: transform 0.16s ease;
+  gap: 4px !important;
+}
+.cm-snippet-item.setting-item .setting-item-info {
+  flex: 1;
+  min-width: 0;
+  margin-right: 10px;
+}
+.cm-snippet-item.setting-item .setting-item-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cm-snippet-item.setting-item .setting-item-control {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.cm-snippet-item.setting-item .setting-item-control .checkbox-container {
+  transform: scale(0.85);
+}
+.cm-snippet-item.setting-item .setting-item-control button {
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+  color: var(--text-muted);
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  width: 28px;
+  transition: all 0.2s ease-in-out;
+}
+.cm-snippet-item.setting-item .setting-item-control button .svg-icon {
+  width: 18px;
+  height: 18px;
+  transition: all 0.2s ease-in-out;
+}
+.cm-snippet-item.setting-item .setting-item-control button:hover {
   background-color: var(--background-modifier-hover);
-  box-shadow: 0 0 0 1px var(--background-modifier-border-focus);
+  color: var(--text-normal);
+}
+.cm-snippet-item.setting-item .setting-item-control button.is-success {
+  color: #00ff08;
+}
+.cm-snippet-item.setting-item .setting-item-control button.is-success .svg-icon {
+  transform: scale(1.2);
+}
+.cm-snippet-item.setting-item {
+  /* Drag Handle & Divider */
+}
+.cm-snippet-item.setting-item .cm-snippet-drag-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 4px;
+}
+.cm-snippet-item.setting-item .cm-snippet-divider {
+  color: var(--background-modifier-border);
+  font-size: 16px;
+  opacity: 0.8;
+}
+.cm-snippet-item.setting-item .cm-snippet-order-number {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  width: auto;
+  padding-left: 6px;
+  text-align: center;
+}
+.cm-snippet-item.setting-item .cm-snippet-drag-handle {
+  cursor: grab;
+  color: var(--text-faint);
+  opacity: 0.7;
+  position: relative;
+  top: var(--cm-snippet-handle-vertical-nudge);
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+.cm-snippet-item.setting-item .cm-snippet-drag-handle:hover {
+  opacity: 1;
+  color: var(--text-normal);
+}
+.cm-snippet-item.setting-item .cm-snippet-drag-handle.is-locked {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+.cm-snippet-item.setting-item .cm-snippet-drag-handle.is-locked:hover {
+  opacity: 0.4;
+  color: var(--text-faint);
+}
+.cm-snippet-item.setting-item {
+  /* Drag States */
+}
+.cm-snippet-item.setting-item.cm-snippet-ghost {
+  opacity: 0.75;
+  transform: scale(0.99);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+  transition: transform 0.12s ease;
+}
+.cm-snippet-item.setting-item.cm-snippet-dragged {
+  background-color: var(--background-secondary) !important;
+}
+
+/* --- Badges --- */
+.cm-snippet-global-badge {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--text-accent);
+  padding: 1px 6px;
+  border-radius: 10px;
+  border: 1px solid var(--interactive-accent-hover);
+  background: rgba(14, 165, 233, 0.1);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: relative;
+  top: 1px;
+}
+
+/* --- UI Elements --- */
+.cm-segmented-control button.is-active {
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+  font-weight: 600;
+}
+.cm-segmented-control button:hover:not(.is-active) {
+  background-color: var(--background-modifier-hover);
+}
+
+/* --- Language Menu (Flyout) --- */
+.cm-flyout-menu-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cm-flyout-menu-container .cm-flyout-menu-buttons {
+  display: flex;
+  align-items: center;
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  gap: 4px;
+  border-radius: var(--radius-m);
+  border: 1px solid var(--background-modifier-border);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.color-master-settings-tab[dir=ltr] .cm-flyout-menu-buttons {
+  transform: translateX(15px);
+}
+.color-master-settings-tab[dir=ltr] .cm-flyout-menu-buttons.is-open {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+.color-master-settings-tab[dir=rtl] .cm-flyout-menu-buttons {
+  transform: translateX(-15px);
+}
+.color-master-settings-tab[dir=rtl] .cm-flyout-menu-buttons.is-open {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
 }
 
 /* ==========================================================================
@@ -317,7 +691,6 @@ body.cm-settings-background-active .color-master-settings-tab {
 }
 .color-master-modal .setting-item .setting-item-description {
   white-space: normal !important;
-  max-width: 80%;
 }
 .color-master-modal .setting-item {
   /* Focus glow for toggles */
@@ -979,38 +1352,87 @@ body.cm-settings-background-active .color-master-settings-tab {
   margin-top: 10px;
 }
 
-/* --- Animations --- */
-@keyframes fadeInScale {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+/* Language Info Modal */
+.cm-info-modal {
+  max-width: 650px;
 }
-@keyframes fadeOutSlide {
-  from {
-    opacity: 1;
-    transform: translateX(0);
-  }
-  to {
-    opacity: 0;
-    transform: translateX(20px);
-  }
+.cm-info-modal .modal-content {
+  max-height: unset;
+  padding: 0;
 }
-@keyframes cm-marching-ants {
-  to {
-    background-position: 10px 0, 100% 10px, -10px 100%, 0 -10px;
-  }
+.cm-info-modal .cm-info-content {
+  border-bottom: 1px solid var(--background-modifier-border);
+  padding: 0 var(--size-4-4) var(--size-4-4) var(--size-4-4);
+  margin-bottom: var(--size-4-4);
+  max-height: unset;
+  overflow-y: visible;
 }
+.cm-info-modal .cm-info-content p {
+  margin-bottom: var(--size-4-2);
+}
+.cm-info-modal .cm-info-content ul,
+.cm-info-modal .cm-info-content ol {
+  margin-inline-start: var(--size-4-6);
+  margin-bottom: var(--size-4-2);
+}
+.cm-info-modal .cm-info-content li {
+  margin-bottom: var(--size-4-1);
+}
+.cm-info-modal .cm-info-content code {
+  background-color: var(--background-modifier-hover);
+  color: var(--text-normal);
+  padding: 2px 4px;
+  border-radius: var(--radius-s);
+}
+
+/* Translator Modal - Flex layout for scrollable list */
+.cm-translator-modal .modal-content {
+  display: flex;
+  flex-direction: column;
+  height: 65vh;
+  max-height: 65vh;
+}
+.cm-translator-modal .cm-translator-list {
+  flex: 1;
+  overflow-y: auto;
+}
+.cm-translator-modal .cm-translator-controls,
+.cm-translator-modal .cm-translator-main-controls {
+  flex: 0 0 auto;
+}
+.cm-translator-modal .cm-translator-main-controls {
+  padding: 0;
+  border: none;
+  margin-top: var(--size-4-2);
+}
+
+.cm-translator-toggle {
+  font-size: var(--font-ui-small);
+  color: var(--text-accent);
+  cursor: pointer;
+  margin-top: 4px;
+  display: inline-block;
+}
+.cm-translator-toggle:hover {
+  color: var(--text-accent-hover);
+}
+
+/* Notice Rules List */
+.cm-rules-modal .cm-rule-item .cm-rule-icon-button {
+  margin-left: 4px;
+}
+.cm-rules-modal .cm-rule-item .cm-rule-icon-button.is-active {
+  color: var(--text-accent);
+  background-color: var(--background-modifier-hover);
+  box-shadow: 0 0 0 1px var(--background-modifier-border-focus);
+}
+
 /* ==========================================================================
    Settings Tab Styles
    Main configuration interface styling (.color-master-settings-tab).
    ========================================================================== */
 .color-master-settings-tab {
-  /* --- 1. LTR/RTL Localization Overrides --- */
+  /* --- LTR/RTL Localization Overrides --- */
 }
 .color-master-settings-tab[dir=ltr] {
   direction: ltr !important;
@@ -1066,7 +1488,7 @@ body.cm-settings-background-active .color-master-settings-tab {
   margin-left: 5px;
 }
 .color-master-settings-tab {
-  /* --- 2. Search Bar & Filters --- */
+  /* --- Search Bar & Filters --- */
 }
 .color-master-settings-tab .cm-search-bar-container {
   display: flex;
@@ -1174,7 +1596,7 @@ body.cm-settings-background-active .color-master-settings-tab {
   line-height: 1;
 }
 .color-master-settings-tab {
-  /* --- 3. Profile Manager --- */
+  /* --- Profile Manager --- */
 }
 .color-master-settings-tab .cm-profile-actions {
   display: flex;
@@ -1243,7 +1665,7 @@ body.cm-settings-background-active .color-master-settings-tab {
   top: -1px;
 }
 .color-master-settings-tab {
-  /* --- 4. Advanced Settings Section --- */
+  /* --- Advanced Settings Section --- */
 }
 .color-master-settings-tab .cm-advanced-settings-grid {
   display: grid;
@@ -1334,183 +1756,7 @@ body.cm-settings-background-active .color-master-settings-tab {
   color: var(--text-normal) !important;
 }
 .color-master-settings-tab {
-  /* --- 5. Snippets UI --- */
-}
-.color-master-settings-tab .cm-snippets-container {
-  margin-bottom: 20px;
-}
-.color-master-settings-tab .cm-snippets-container h3 {
-  margin-top: -10px;
-  margin-bottom: 15px;
-}
-.color-master-settings-tab .cm-snippets-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 20px;
-  margin-bottom: 16px;
-}
-.color-master-settings-tab .cm-snippets-header h3 {
-  margin: 0;
-  white-space: nowrap;
-}
-.color-master-settings-tab .cm-snippets-header .cm-snippets-add-button.setting-item {
-  border: none;
-  padding: 0;
-  margin: 0;
-}
-.color-master-settings-tab .cm-snippets-header .cm-snippets-add-button button {
-  background-color: transparent;
-  border: 1px solid var(--interactive-accent);
-  color: var(--interactive-accent);
-  transition: all 0.2s ease-in-out;
-  cursor: pointer;
-}
-.color-master-settings-tab .cm-snippets-header .cm-snippets-add-button button:hover {
-  background-color: var(--interactive-accent);
-  color: var(--text-on-accent);
-}
-.color-master-settings-tab .cm-snippets-list-container {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 20px;
-}
-.color-master-settings-tab .cm-snippets-empty-state {
-  color: var(--text-muted);
-  font-style: italic;
-  padding: 10px;
-  text-align: center;
-}
-.color-master-settings-tab {
-  /* Snippet Item Row */
-}
-.color-master-settings-tab .cm-snippet-item.setting-item {
-  align-items: center !important;
-  min-height: var(--cm-snippet-row-min-height);
-  padding-top: 4px !important;
-  padding-bottom: 4px !important;
-  transition: transform 0.16s ease;
-  gap: 4px !important;
-  padding-left: 10px !important;
-}
-.color-master-settings-tab .cm-snippet-item .setting-item-info {
-  display: flex;
-  align-items: center;
-  flex: 1;
-  min-width: 0;
-  margin-right: 10px;
-}
-.color-master-settings-tab .cm-snippet-item .setting-item-name {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.color-master-settings-tab .cm-snippet-item {
-  /* Snippet Actions */
-}
-.color-master-settings-tab .cm-snippet-item .setting-item-control {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-.color-master-settings-tab .cm-snippet-item .setting-item-control button {
-  background-color: transparent;
-  border: none;
-  box-shadow: none;
-  color: var(--text-muted);
-  padding: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 28px;
-  width: 28px;
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
-}
-.color-master-settings-tab .cm-snippet-item .setting-item-control button .svg-icon {
-  width: var(--cm-snippet-icon-size);
-  height: var(--cm-snippet-icon-size);
-  transition: all 0.2s ease-in-out;
-}
-.color-master-settings-tab .cm-snippet-item .setting-item-control button:hover {
-  background-color: var(--background-modifier-hover);
-  color: var(--text-normal);
-}
-.color-master-settings-tab .cm-snippet-item .setting-item-control button.is-success {
-  color: #00ff08;
-}
-.color-master-settings-tab .cm-snippet-item .setting-item-control button.is-success .svg-icon {
-  transform: scale(1.2);
-}
-.color-master-settings-tab .cm-snippet-item .checkbox-container {
-  transform: scale(var(--cm-snippet-toggle-scale));
-}
-.color-master-settings-tab {
-  /* Global Badge */
-}
-.color-master-settings-tab .cm-snippet-global-badge {
-  display: inline-block;
-  font-size: 9px;
-  font-weight: 600;
-  color: var(--text-accent);
-  padding: 1px 6px;
-  border-radius: 10px;
-  border: 1px solid var(--interactive-accent-hover);
-  background: rgba(14, 165, 233, 0.1);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  position: relative;
-  top: 1px;
-}
-.color-master-settings-tab {
-  /* Snippet Drag & Drop Elements */
-}
-.color-master-settings-tab .cm-snippet-drag-container {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-right: var(--cm-snippet-drag-area-spacing);
-}
-.color-master-settings-tab .cm-snippet-divider {
-  color: var(--background-modifier-border);
-  font-size: 16px;
-  opacity: 0.8;
-}
-.color-master-settings-tab .cm-snippet-order-number {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-muted);
-  width: auto;
-  padding-left: 6px;
-  text-align: center;
-}
-.color-master-settings-tab .cm-snippet-drag-handle {
-  cursor: grab;
-  color: var(--text-faint);
-  opacity: 0.7;
-  position: relative;
-  top: var(--cm-snippet-handle-vertical-nudge);
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  padding: 0 !important;
-}
-.color-master-settings-tab .cm-snippet-drag-handle:hover {
-  opacity: 1;
-  color: var(--text-normal);
-}
-.color-master-settings-tab .cm-snippet-ghost {
-  opacity: 0.75;
-  transform: scale(0.99);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
-  transition: transform 0.12s ease;
-}
-.color-master-settings-tab .cm-snippet-item.cm-snippet-dragged {
-  background-color: var(--background-secondary) !important;
-}
-.color-master-settings-tab {
-  /* --- 6. Color Picker Rows --- */
+  /* --- Color Picker Rows --- */
 }
 .color-master-settings-tab .color-master-text-input {
   width: 100px;
@@ -1616,184 +1862,7 @@ body.cm-settings-background-active .color-master-settings-tab {
   border-color: rgba(220, 53, 69, 0.5019607843);
 }
 .color-master-settings-tab {
-  /* --- 7. Like Plugin Card (Promo) --- */
-}
-.color-master-settings-tab .cm-like-card {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  align-items: stretch;
-  padding: 10px;
-  margin-top: 20px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0.02));
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.28);
-  position: relative;
-  border: 4px solid transparent;
-  border-image-slice: 1;
-  animation: cm-glowing-border 2s linear infinite;
-}
-.color-master-settings-tab .cm-banner-svg {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-.color-master-settings-tab .cm-content-wrapper {
-  display: flex;
-  gap: 20px;
-  align-items: center;
-  width: 100%;
-  padding: 0 4px;
-}
-.color-master-settings-tab .cm-like-stats {
-  flex: 3;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  margin-top: 12px;
-  width: 100%;
-}
-.color-master-settings-tab .cm-like-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  align-self: stretch;
-  flex: 2;
-  max-width: 150px;
-}
-.color-master-settings-tab .cm-like-action {
-  width: 100%;
-  justify-content: center;
-}
-.color-master-settings-tab {
-  /* Stats Bars */
-}
-.color-master-settings-tab .cm-stat-box {
-  width: 100%;
-}
-.color-master-settings-tab .cm-stat-box .cm-stat-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: 6px;
-}
-.color-master-settings-tab .cm-stat-box .cm-stat-header .title {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-muted);
-}
-.color-master-settings-tab .cm-stat-box .cm-stat-header .value {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-normal);
-}
-.color-master-settings-tab .cm-stat-box .skill-bar {
-  height: 8px;
-  width: 100%;
-  border-radius: 6px;
-  background-color: var(--background-modifier-border);
-  overflow: hidden;
-}
-.color-master-settings-tab .cm-stat-box .skill-bar .skill-per {
-  position: relative;
-  overflow: hidden;
-  display: block;
-  height: 100%;
-  width: 0%;
-  border-radius: 6px;
-  animation: cm-progress 0.8s ease-out forwards;
-  background: none;
-}
-.color-master-settings-tab .cm-stat-box .skill-bar .skill-per::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 400%;
-  height: 100%;
-  background: linear-gradient(115deg, #33ff00, #ffcc00, #8000ff, #00b7ff, #00ff66);
-  background-size: 25% 100%;
-  animation: cm-border-animation 2s linear infinite;
-}
-.color-master-settings-tab .cm-stat-box .skill-bar .tooltip {
-  position: absolute;
-  right: -18px;
-  top: -30px;
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--text-on-accent);
-  padding: 2px 6px;
-  border-radius: 4px;
-  background-color: var(--interactive-accent);
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-.color-master-settings-tab .cm-stat-box .skill-bar .tooltip::before {
-  content: "";
-  position: absolute;
-  left: 50%;
-  bottom: -3px;
-  height: 6px;
-  width: 6px;
-  background-color: var(--interactive-accent);
-  transform: translateX(-50%) rotate(45deg);
-}
-.color-master-settings-tab .cm-stat-box .skill-bar:hover .tooltip {
-  opacity: 1;
-}
-.color-master-settings-tab {
-  /* Codepen-style Buttons */
-}
-.color-master-settings-tab .codepen-button {
-  display: block;
-  cursor: pointer;
-  color: white;
-  position: relative;
-  text-decoration: none;
-  font-weight: 600;
-  border-radius: 6px;
-  overflow: hidden;
-  padding: 2px;
-  isolation: isolate;
-  width: 100%;
-}
-.color-master-settings-tab .codepen-button::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 400%;
-  height: 100%;
-  background: linear-gradient(115deg, #33ff00, #ffcc00, #8000ff, #00b7ff, #00ff66);
-  background-size: 25% 100%;
-  animation: cm-border-animation 1.5s linear infinite;
-  animation-play-state: running;
-}
-.color-master-settings-tab .codepen-button span {
-  position: relative;
-  display: block;
-  text-align: center;
-  padding: 8px 12px;
-  font-size: 13px;
-  background: var(--background-secondary);
-  border-radius: 4px;
-  height: 100%;
-}
-.color-master-settings-tab {
-  /* Light Mode Fix for Codepen Button */
-}
-.theme-light .color-master-settings-tab .codepen-button span {
-  color: #000000;
-  background: #f0f2f5;
-}
-.color-master-settings-tab .cm-promo-container {
-  border-top: 1px solid var(--background-modifier-border);
-  text-align: center;
-  width: 100%;
-}
-.color-master-settings-tab {
-  /* --- 8. General & Utility Styles --- */
+  /* --- General & Utility Styles --- */
   /* Hide static sections during search */
 }
 .color-master-settings-tab .cm-static-sections.cm-hidden {
@@ -1955,9 +2024,6 @@ body.cm-settings-background-active .color-master-settings-tab {
   border-color: var(--background-modifier-border) !important;
 }
 
-/* ======================================== */
-/* --- 9. Pristine / Modified States ---    */
-/* ======================================== */
 .cm-var-row {
   /* Default State: Dimmed */
 }
@@ -1980,413 +2046,4 @@ body.cm-settings-background-active .color-master-settings-tab {
 
 .color-master-hidden {
   visibility: hidden;
-}
-
-/* ==========================================================================
-   Component Styles
-   Reusable UI elements: Cards, Snippet Lists, Badges, Menus.
-   ========================================================================== */
-/* --- Like Plugin Card (Promo) --- */
-.cm-like-card {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  align-items: stretch;
-  padding: 10px;
-  margin-top: 20px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0.02));
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.28);
-  position: relative;
-  border: 4px solid transparent;
-  border-image-slice: 1;
-  animation: cm-glowing-border 2s linear infinite;
-}
-.cm-like-card .cm-banner-container .cm-banner-svg {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-.cm-like-card .cm-content-wrapper {
-  display: flex;
-  gap: 20px;
-  align-items: center;
-  width: 100%;
-  padding: 0 4px;
-}
-.cm-like-card .cm-like-stats {
-  flex: 3;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  margin-top: 12px;
-  width: 100%;
-}
-.cm-like-card .cm-like-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  align-self: stretch;
-  flex: 2;
-  max-width: 150px;
-}
-
-/* --- Stats Progress Bars --- */
-.cm-stat-box {
-  width: 100%;
-}
-.cm-stat-box .cm-stat-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: 6px;
-}
-.cm-stat-box .cm-stat-header .title {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-muted);
-}
-.cm-stat-box .cm-stat-header .value {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-normal);
-}
-.cm-stat-box .skill-bar {
-  height: 8px;
-  width: 100%;
-  border-radius: 6px;
-  background-color: var(--background-modifier-border);
-  overflow: hidden;
-}
-.cm-stat-box .skill-per {
-  position: relative;
-  overflow: hidden;
-  display: block;
-  height: 100%;
-  width: 0%; /* Animated via JS/CSS var */
-  border-radius: 6px;
-  animation: cm-progress 0.8s ease-out forwards;
-  background: none;
-}
-.cm-stat-box .skill-per::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 400%;
-  height: 100%;
-  background: linear-gradient(115deg, #33ff00, #ffcc00, #8000ff, #00b7ff, #00ff66);
-  background-size: 25% 100%;
-  animation: cm-border-animation 2s linear infinite;
-}
-
-/* --- Animated Gradient Buttons --- */
-.codepen-button {
-  display: block;
-  cursor: pointer;
-  color: white;
-  position: relative;
-  text-decoration: none;
-  font-weight: 600;
-  border-radius: 6px;
-  overflow: hidden;
-  padding: 2px;
-  isolation: isolate;
-  width: 100%;
-}
-.codepen-button::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 400%;
-  height: 100%;
-  background: linear-gradient(115deg, #33ff00, #ffcc00, #8000ff, #00b7ff, #00ff66);
-  background-size: 25% 100%;
-  animation: cm-border-animation 1.5s linear infinite;
-  animation-play-state: running;
-}
-.codepen-button span {
-  position: relative;
-  display: block;
-  text-align: center;
-  padding: 8px 12px;
-  font-size: 13px;
-  background: var(--background-secondary);
-  border-radius: 4px;
-  height: 100%;
-}
-.codepen-button {
-  /* Light Mode Fallback */
-}
-.theme-light .codepen-button span {
-  color: #000000;
-  background: #f0f2f5;
-}
-
-.cm-promo-container {
-  border-top: 1px solid var(--background-modifier-border);
-  text-align: center;
-  width: 100%;
-}
-
-/* --- CSS Snippets List --- */
-.cm-snippets-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 20px;
-  margin-bottom: 16px;
-}
-.cm-snippets-header h3 {
-  margin: 0;
-  white-space: nowrap;
-}
-.cm-snippets-header .cm-snippets-add-button.setting-item {
-  border: none;
-  padding: 0;
-  margin: 0;
-}
-.cm-snippets-header .cm-snippets-add-button.setting-item button {
-  background-color: transparent;
-  border: 1px solid var(--interactive-accent);
-  color: var(--interactive-accent);
-  transition: all 0.2s ease-in-out;
-}
-.cm-snippets-header .cm-snippets-add-button.setting-item button:hover {
-  background-color: var(--interactive-accent);
-  color: var(--text-on-accent);
-}
-
-.cm-snippets-list-container {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 20px;
-}
-
-.cm-snippets-empty-state {
-  color: var(--text-muted);
-  font-style: italic;
-  padding: 10px;
-  text-align: center;
-}
-
-.cm-snippet-item.setting-item {
-  align-items: center !important;
-  min-height: 40px;
-  padding: 4px 10px !important;
-  transition: transform 0.16s ease;
-  gap: 4px !important;
-}
-.cm-snippet-item.setting-item .setting-item-info {
-  flex: 1;
-  min-width: 0;
-  margin-right: 10px;
-}
-.cm-snippet-item.setting-item .setting-item-name {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.cm-snippet-item.setting-item .setting-item-control {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-.cm-snippet-item.setting-item .setting-item-control .checkbox-container {
-  transform: scale(0.85);
-}
-.cm-snippet-item.setting-item .setting-item-control button {
-  background-color: transparent;
-  border: none;
-  box-shadow: none;
-  color: var(--text-muted);
-  padding: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 28px;
-  width: 28px;
-  transition: all 0.2s ease-in-out;
-}
-.cm-snippet-item.setting-item .setting-item-control button .svg-icon {
-  width: 18px;
-  height: 18px;
-  transition: all 0.2s ease-in-out;
-}
-.cm-snippet-item.setting-item .setting-item-control button:hover {
-  background-color: var(--background-modifier-hover);
-  color: var(--text-normal);
-}
-.cm-snippet-item.setting-item .setting-item-control button.is-success {
-  color: #00ff08;
-}
-.cm-snippet-item.setting-item .setting-item-control button.is-success .svg-icon {
-  transform: scale(1.2);
-}
-.cm-snippet-item.setting-item {
-  /* Drag Handle & Divider */
-}
-.cm-snippet-item.setting-item .cm-snippet-drag-container {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-right: 4px;
-}
-.cm-snippet-item.setting-item .cm-snippet-divider {
-  color: var(--background-modifier-border);
-  font-size: 16px;
-  opacity: 0.8;
-}
-.cm-snippet-item.setting-item .cm-snippet-order-number {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-muted);
-  width: auto;
-  padding-left: 6px;
-  text-align: center;
-}
-.cm-snippet-item.setting-item .cm-snippet-drag-handle {
-  cursor: grab;
-  color: var(--text-faint);
-  opacity: 0.7;
-  position: relative;
-  top: 2px;
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  padding: 0 !important;
-}
-.cm-snippet-item.setting-item .cm-snippet-drag-handle:hover {
-  opacity: 1;
-  color: var(--text-normal);
-}
-.cm-snippet-item.setting-item {
-  /* Drag States */
-}
-.cm-snippet-item.setting-item.cm-snippet-ghost {
-  opacity: 0.75;
-  transform: scale(0.99);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
-  transition: transform 0.12s ease;
-}
-.cm-snippet-item.setting-item.cm-snippet-dragged {
-  background-color: var(--background-secondary) !important;
-}
-
-/* --- Badges --- */
-.cm-snippet-global-badge {
-  display: inline-block;
-  font-size: 9px;
-  font-weight: 600;
-  color: var(--text-accent);
-  padding: 1px 6px;
-  border-radius: 10px;
-  border: 1px solid var(--interactive-accent-hover);
-  background: rgba(14, 165, 233, 0.1);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  position: relative;
-  top: 1px;
-}
-
-/* --- Animations (Keyframes) --- */
-@keyframes cm-glowing-border {
-  0% {
-    border-image-source: linear-gradient(to right, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3);
-  }
-  14% {
-    border-image-source: linear-gradient(to right, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000);
-  }
-  28% {
-    border-image-source: linear-gradient(to right, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000, #ff7f00);
-  }
-  42% {
-    border-image-source: linear-gradient(to right, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000, #ff7f00, #ffff00);
-  }
-  56% {
-    border-image-source: linear-gradient(to right, #0000ff, #4b0082, #9400d3, #ff0000, #ff7f00, #ffff00, #00ff00);
-  }
-  70% {
-    border-image-source: linear-gradient(to right, #4b0082, #9400d3, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff);
-  }
-  84% {
-    border-image-source: linear-gradient(to right, #9400d3, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082);
-  }
-  100% {
-    border-image-source: linear-gradient(to right, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3);
-  }
-}
-@keyframes cm-border-animation {
-  to {
-    transform: translateX(-25%);
-  }
-}
-@keyframes cm-progress {
-  from {
-    width: 0;
-  }
-  to {
-    width: var(--skill-percentage);
-    opacity: 1;
-  }
-}
-/* --- UI Elements --- */
-.cm-segmented-control button.is-active {
-  background-color: var(--interactive-accent);
-  color: var(--text-on-accent);
-  font-weight: 600;
-}
-.cm-segmented-control button:hover:not(.is-active) {
-  background-color: var(--background-modifier-hover);
-}
-
-.notice,
-.toast {
-  padding: 8px 12px !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-  max-width: 300px;
-  border-radius: 6px !important;
-  min-width: 120px !important;
-  box-sizing: border-box !important;
-}
-
-/* --- Language Menu (Flyout) --- */
-.cm-flyout-menu-container {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.cm-flyout-menu-container .cm-flyout-menu-buttons {
-  display: flex;
-  align-items: center;
-  background-color: transparent;
-  border: none;
-  padding: 0;
-  gap: 4px;
-  border-radius: var(--radius-m);
-  border: 1px solid var(--background-modifier-border);
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  opacity: 0;
-  pointer-events: none;
-}
-
-.color-master-settings-tab[dir=ltr] .cm-flyout-menu-buttons {
-  transform: translateX(15px);
-}
-.color-master-settings-tab[dir=ltr] .cm-flyout-menu-buttons.is-open {
-  opacity: 1;
-  transform: translateX(0);
-  pointer-events: auto;
-}
-
-.color-master-settings-tab[dir=rtl] .cm-flyout-menu-buttons {
-  transform: translateX(-15px);
-}
-.color-master-settings-tab[dir=rtl] .cm-flyout-menu-buttons.is-open {
-  opacity: 1;
-  transform: translateX(0);
-  pointer-events: auto;
 }

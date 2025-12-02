@@ -204,6 +204,27 @@
   }
 }
 
+// --- Lock Button Styling ---
+.cm-snippet-lock-btn {
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: all 0.2s ease-in-out;
+  border: none !important;
+  box-shadow: none !important;
+  background-color: transparent !important;
+
+  &:hover {
+    color: var(--text-normal);
+    background-color: var(--background-modifier-hover) !important;
+  }
+
+  // --- Locked State ---
+  &.is-locked {
+    color: var(--text-normal);
+    opacity: 1;
+  }
+}
+
 .cm-snippets-list-container {
   display: flex;
   flex-direction: column;
@@ -307,7 +328,7 @@
     color: var(--text-faint);
     opacity: 0.7;
     position: relative;
-    top: 2px;
+    top: var(--cm-snippet-handle-vertical-nudge);
     background: transparent !important;
     border: none !important;
     box-shadow: none !important;
@@ -316,6 +337,16 @@
     &:hover {
       opacity: 1;
       color: var(--text-normal);
+    }
+
+    &.is-locked {
+      cursor: not-allowed;
+      opacity: 0.4;
+
+      &:hover {
+        opacity: 0.4;
+        color: var(--text-faint);
+      }
     }
   }
 
@@ -347,122 +378,6 @@
   top: 1px;
 }
 
-/* --- Animations (Keyframes) --- */
-@keyframes cm-glowing-border {
-  0% {
-    border-image-source: linear-gradient(
-      to right,
-      #ff0000,
-      #ff7f00,
-      #ffff00,
-      #00ff00,
-      #0000ff,
-      #4b0082,
-      #9400d3
-    );
-  }
-  14% {
-    border-image-source: linear-gradient(
-      to right,
-      #ff7f00,
-      #ffff00,
-      #00ff00,
-      #0000ff,
-      #4b0082,
-      #9400d3,
-      #ff0000
-    );
-  }
-  28% {
-    border-image-source: linear-gradient(
-      to right,
-      #ffff00,
-      #00ff00,
-      #0000ff,
-      #4b0082,
-      #9400d3,
-      #ff0000,
-      #ff7f00
-    );
-  }
-  42% {
-    border-image-source: linear-gradient(
-      to right,
-      #00ff00,
-      #0000ff,
-      #4b0082,
-      #9400d3,
-      #ff0000,
-      #ff7f00,
-      #ffff00
-    );
-  }
-  56% {
-    border-image-source: linear-gradient(
-      to right,
-      #0000ff,
-      #4b0082,
-      #9400d3,
-      #ff0000,
-      #ff7f00,
-      #ffff00,
-      #00ff00
-    );
-  }
-  70% {
-    border-image-source: linear-gradient(
-      to right,
-      #4b0082,
-      #9400d3,
-      #ff0000,
-      #ff7f00,
-      #ffff00,
-      #00ff00,
-      #0000ff
-    );
-  }
-  84% {
-    border-image-source: linear-gradient(
-      to right,
-      #9400d3,
-      #ff0000,
-      #ff7f00,
-      #ffff00,
-      #00ff00,
-      #0000ff,
-      #4b0082
-    );
-  }
-  100% {
-    border-image-source: linear-gradient(
-      to right,
-      #ff0000,
-      #ff7f00,
-      #ffff00,
-      #00ff00,
-      #0000ff,
-      #4b0082,
-      #9400d3
-    );
-  }
-}
-
-@keyframes cm-border-animation {
-  to {
-    transform: translateX(-25%);
-  }
-}
-
-@keyframes cm-progress {
-  from {
-    width: 0;
-  }
-  to {
-    width: var(--skill-percentage);
-    opacity: 1;
-  }
-}
-
 /* --- UI Elements --- */
 .cm-segmented-control button {
   &.is-active {
@@ -473,16 +388,6 @@
   &:hover:not(.is-active) {
     background-color: var(--background-modifier-hover);
   }
-}
-
-.notice,
-.toast {
-  padding: 8px 12px !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-  max-width: 300px;
-  border-radius: 6px !important;
-  min-width: 120px !important;
-  box-sizing: border-box !important;
 }
 
 /* --- Language Menu (Flyout) --- */

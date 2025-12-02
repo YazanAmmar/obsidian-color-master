@@ -4,7 +4,7 @@ import type { ColorMasterSettingTab } from "../settingsTab";
 
 export function drawImportExport(
   containerEl: HTMLElement,
-  settingTab: ColorMasterSettingTab
+  settingTab: ColorMasterSettingTab,
 ) {
   const actionsEl = containerEl.createDiv("cm-profile-actions");
 
@@ -41,7 +41,7 @@ export function drawImportExport(
       settingTab.app,
       settingTab.plugin,
       settingTab,
-      null
+      null,
     ).open();
   });
 
@@ -54,7 +54,7 @@ export function drawImportExport(
       new ProfileJsonImportModal(
         settingTab.app,
         settingTab.plugin,
-        settingTab
-      ).open()
+        settingTab,
+      ).open(),
     );
 }

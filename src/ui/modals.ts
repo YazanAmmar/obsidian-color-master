@@ -88,7 +88,7 @@ export class LanguageInfoModal extends ColorMasterBaseModal {
       t("modals.langInfo.desc"),
       infoContainer,
       "",
-      comp
+      comp,
     ).catch((err) => {
       console.error("Failed to render markdown:", err);
     });
@@ -120,7 +120,7 @@ export class ProfileJsonImportModal extends ColorMasterBaseModal {
   constructor(
     app: App,
     plugin: ColorMaster,
-    settingTabInstance: ColorMasterSettingTab
+    settingTabInstance: ColorMasterSettingTab,
   ) {
     super(app, plugin);
     this.settingTab = settingTabInstance;
@@ -195,7 +195,7 @@ export class ProfileJsonImportModal extends ColorMasterBaseModal {
 
     replaceBtn.addEventListener(
       "click",
-      () => void this._applyImport("replace")
+      () => void this._applyImport("replace"),
     );
     createBtn.addEventListener("click", () => void this._applyCreate());
   }
@@ -341,7 +341,7 @@ export class NewProfileModal extends ColorMasterBaseModal {
     onSubmit: (result: {
       name: string;
       themeType: "auto" | "dark" | "light";
-    }) => void
+    }) => void,
   ) {
     super(app, plugin);
     this.onSubmit = onSubmit;
@@ -436,7 +436,7 @@ export class ConfirmationModal extends ColorMasterBaseModal {
     title: string,
     message: string | DocumentFragment,
     onConfirm: () => void,
-    options: { buttonText?: string; buttonClass?: string } = {}
+    options: { buttonText?: string; buttonClass?: string } = {},
   ) {
     super(app, plugin);
     this.title = title;
@@ -502,7 +502,7 @@ export class PasteCssModal extends ColorMasterBaseModal {
       name: string;
       css: string;
       id?: string;
-    } | null = null
+    } | null = null,
   ) {
     super(app, plugin);
     this.settingTab = settingTab;
@@ -585,7 +585,7 @@ export class PasteCssModal extends ColorMasterBaseModal {
             new Notice(t("notices.themeReadFailed", selectedTheme));
             console.error(
               `Color Master: Failed to read theme CSS at ${themePath}`,
-              error
+              error,
             );
           }
         });
@@ -602,7 +602,7 @@ export class PasteCssModal extends ColorMasterBaseModal {
           .setValue(
             this.isEditing && this.existingProfileData
               ? this.existingProfileData.name
-              : ""
+              : "",
           )
           .setPlaceholder(placeholderText)
           .onChange((value) => {
@@ -706,7 +706,7 @@ export class PasteCssModal extends ColorMasterBaseModal {
   async handleSave() {
     if (this.isEditing && !this.existingProfileData) {
       console.error(
-        "Attempted to save in editing mode without an existing snippet."
+        "Attempted to save in editing mode without an existing snippet.",
       );
       return;
     }
@@ -728,7 +728,8 @@ export class PasteCssModal extends ColorMasterBaseModal {
         profileName.toLowerCase() === name.toLowerCase() &&
         (!this.isEditing ||
           (this.existingProfileData &&
-            this.existingProfileData.name.toLowerCase() !== name.toLowerCase()))
+            this.existingProfileData.name.toLowerCase() !==
+              name.toLowerCase())),
     );
     if (isNameTaken) {
       new Notice(t("notices.profileNameExists", name));
@@ -750,7 +751,7 @@ export class PasteCssModal extends ColorMasterBaseModal {
     // Create a temporary blank profile in settings so we can switch to it
     const tempProfileName = "__cm_temp_clean_slate__";
     this.plugin.settings.profiles[tempProfileName] = JSON.parse(
-      JSON.stringify(DEFAULT_PROFILE)
+      JSON.stringify(DEFAULT_PROFILE),
     );
     this.plugin.settings.activeProfile = tempProfileName;
 
@@ -879,7 +880,7 @@ export class SnippetCssModal extends ColorMasterBaseModal {
     app: App,
     plugin: ColorMaster,
     settingTab: ColorMasterSettingTab,
-    existingSnippet: Snippet | null = null
+    existingSnippet: Snippet | null = null,
   ) {
     super(app, plugin);
     this.settingTab = settingTab;
@@ -963,7 +964,7 @@ export class SnippetCssModal extends ColorMasterBaseModal {
             new Notice(t("notices.snippetReadFailed", selectedSnippet));
             console.error(
               `Color Master: Failed to read snippet CSS at ${snippetPath}`,
-              error
+              error,
             );
           }
         });
@@ -981,7 +982,7 @@ export class SnippetCssModal extends ColorMasterBaseModal {
           .setValue(
             this.isEditing && this.existingSnippet
               ? this.existingSnippet.name
-              : ""
+              : "",
           )
           .setPlaceholder(placeholderText)
           .onChange((value) => {
@@ -1015,7 +1016,7 @@ export class SnippetCssModal extends ColorMasterBaseModal {
 
     this.cssTextarea.inputEl.classList.add(
       "cm-search-input",
-      "cm-large-textarea"
+      "cm-large-textarea",
     );
     this.cssTextarea.inputEl.rows = 18;
     this.cssTextarea.setPlaceholder(t("modals.snippetEditor.cssPlaceholder"));
@@ -1113,7 +1114,7 @@ export class SnippetCssModal extends ColorMasterBaseModal {
       (s) =>
         s.name.toLowerCase() === name.toLowerCase() &&
         (!this.isEditing ||
-          (this.existingSnippet && this.existingSnippet.id !== s.id))
+          (this.existingSnippet && this.existingSnippet.id !== s.id)),
     );
 
     if (isNameTaken) {
@@ -1131,7 +1132,7 @@ export class SnippetCssModal extends ColorMasterBaseModal {
         : activeProfile.snippets;
 
       const snippetIndex = originalList.findIndex(
-        (s) => s.id === this.existingSnippet!.id
+        (s) => s.id === this.existingSnippet!.id,
       );
 
       if (snippetIndex > -1) {
@@ -1205,7 +1206,7 @@ export class NoticeRulesModal extends ColorMasterBaseModal {
     app: App,
     plugin: ColorMaster,
     settingTab: ColorMasterSettingTab,
-    ruleType: "text" | "background"
+    ruleType: "text" | "background",
   ) {
     super(app, plugin);
     this.settingTab = settingTab;
@@ -1213,7 +1214,7 @@ export class NoticeRulesModal extends ColorMasterBaseModal {
     const activeProfile =
       this.plugin.settings.profiles[this.plugin.settings.activeProfile];
     this.localRules = JSON.parse(
-      JSON.stringify(activeProfile?.noticeRules?.[this.ruleType] || [])
+      JSON.stringify(activeProfile?.noticeRules?.[this.ruleType] || []),
     );
     if (this.localRules.length === 0) {
       this.localRules.push({
@@ -1274,7 +1275,7 @@ export class NoticeRulesModal extends ColorMasterBaseModal {
 
             this.displayRules();
           });
-      }
+      },
     );
 
     settingEl.settingEl.classList.add("cm-rules-add-button-setting");
@@ -1296,7 +1297,7 @@ export class NoticeRulesModal extends ColorMasterBaseModal {
         void (async () => {
           const allTagInputs =
             this.rulesContainer.querySelectorAll<HTMLInputElement>(
-              ".cm-tag-input-field"
+              ".cm-tag-input-field",
             );
 
           allTagInputs.forEach((inputEl, index) => {
@@ -1422,12 +1423,12 @@ export class NoticeRulesModal extends ColorMasterBaseModal {
             (rule as unknown).highlightOnly = !(rule as unknown).highlightOnly;
             highlightBtn.buttonEl.classList.toggle(
               "is-active",
-              (rule as unknown).highlightOnly
+              (rule as unknown).highlightOnly,
             );
           });
         highlightBtn.buttonEl.classList.toggle(
           "is-active",
-          (rule as unknown).highlightOnly
+          (rule as unknown).highlightOnly,
         );
       }
 
@@ -1549,7 +1550,7 @@ export class NoticeRulesModal extends ColorMasterBaseModal {
           const existingTagEl = container.querySelector(
             `.cm-tag-item[data-keyword="${
               keywords[keywordsLower.indexOf(newKeywordLower)]
-            }"]`
+            }"]`,
           );
           if (existingTagEl) {
             existingTagEl.classList.add("cm-tag-duplicate-flash");
@@ -1635,7 +1636,7 @@ export class NoticeRulesModal extends ColorMasterBaseModal {
     const sequentialKeyword = keywordsArray[rule._lastTestIndex];
     const fragment = new DocumentFragment();
     const text = t("notices.testSentence", sequentialKeyword).split(
-      new RegExp(`(${sequentialKeyword})`, "i")
+      new RegExp(`(${sequentialKeyword})`, "i"),
     );
 
     fragment.append(text[0]);
@@ -1680,7 +1681,7 @@ export class CustomVariableMetaModal extends ColorMasterBaseModal {
       displayName: string;
       description: string;
       varType: CustomVarType;
-    }) => void
+    }) => void,
   ) {
     super(app, plugin);
     this.settingTab = settingTab;
@@ -1834,7 +1835,7 @@ export class CustomVariableMetaModal extends ColorMasterBaseModal {
           .setValue(this.displayName)
           .onChange((value) => {
             this.displayName = value;
-          })
+          }),
       );
 
     new Setting(contentEl)
@@ -1854,7 +1855,7 @@ export class CustomVariableMetaModal extends ColorMasterBaseModal {
             } else {
               this.varName = value;
             }
-          })
+          }),
       );
 
     new Setting(contentEl)
@@ -1901,14 +1902,14 @@ export class CustomVariableMetaModal extends ColorMasterBaseModal {
           .setValue(this.description)
           .onChange((value) => {
             this.description = value;
-          })
+          }),
       );
 
     // Buttons
     new Setting(contentEl)
       .setClass("modal-button-container")
       .addButton((button) =>
-        button.setButtonText(t("buttons.cancel")).onClick(() => this.close())
+        button.setButtonText(t("buttons.cancel")).onClick(() => this.close()),
       )
       .addButton((button) =>
         button
@@ -1945,7 +1946,7 @@ export class CustomVariableMetaModal extends ColorMasterBaseModal {
               varType: this.varType,
             });
             this.close();
-          })
+          }),
       );
   }
 
@@ -2017,7 +2018,7 @@ export class IconizeSettingsModal extends ColorMasterBaseModal {
               const iconizeIDs = ["obsidian-icon-folder", "iconize"];
               const pluginManager = (this.app as unknown).plugins;
               const isIconizeInstalled = iconizeIDs.some(
-                (id: string) => !!pluginManager.getPlugin(id)
+                (id: string) => !!pluginManager.getPlugin(id),
               );
 
               if (!isIconizeInstalled) {
@@ -2090,7 +2091,7 @@ export class BackgroundImageSettingsModal extends ColorMasterBaseModal {
       });
 
     const settingTypeSetting = new Setting(contentEl).setName(
-      t("options.settingType")
+      t("options.settingType"),
     );
 
     let imageButton: ButtonComponent;
@@ -2151,7 +2152,7 @@ export class BackgroundImageSettingsModal extends ColorMasterBaseModal {
         slider.sliderEl.oninput = (e) => {
           const value = parseFloat((e.target as HTMLInputElement).value);
           const videoEl = document.querySelector<HTMLVideoElement>(
-            "#cm-background-video"
+            "#cm-background-video",
           );
           if (videoEl) {
             videoEl.setCssProps({ opacity: value.toString() });
@@ -2170,12 +2171,12 @@ export class BackgroundImageSettingsModal extends ColorMasterBaseModal {
             await this.plugin.saveSettings();
 
             const videoEl = document.querySelector<HTMLVideoElement>(
-              "#cm-background-video"
+              "#cm-background-video",
             );
             if (videoEl) {
               videoEl.muted = value;
             }
-          })
+          }),
       );
 
     // --- Attaching buttons to containers ---
@@ -2258,7 +2259,7 @@ export class FileConflictModal extends ColorMasterBaseModal {
     plugin: ColorMaster,
     arrayBuffer: ArrayBuffer,
     fileName: string,
-    onResolve: (choice: "replace" | "keep") => void
+    onResolve: (choice: "replace" | "keep") => void,
   ) {
     super(app, plugin);
     this.arrayBuffer = arrayBuffer;
@@ -2312,7 +2313,7 @@ export class AddBackgroundModal extends ColorMasterBaseModal {
   constructor(
     app: App,
     plugin: ColorMaster,
-    settingTab: ColorMasterSettingTab
+    settingTab: ColorMasterSettingTab,
   ) {
     super(app, plugin);
     this.settingTab = settingTab;
@@ -2539,7 +2540,7 @@ export class ProfileImageBrowserModal extends ColorMasterBaseModal {
     app: App,
     plugin: ColorMaster,
     settingTab: ColorMasterSettingTab,
-    closeCallback: () => void
+    closeCallback: () => void,
   ) {
     super(app, plugin);
     this.settingTab = settingTab;
@@ -2591,7 +2592,7 @@ export class ProfileImageBrowserModal extends ColorMasterBaseModal {
     }
 
     const mediaFiles = files.filter((path) =>
-      mediaExtensions.some((ext) => path.toLowerCase().endsWith(ext))
+      mediaExtensions.some((ext) => path.toLowerCase().endsWith(ext)),
     );
 
     if (mediaFiles.length === 0) {
@@ -2684,14 +2685,14 @@ export class ProfileImageBrowserModal extends ColorMasterBaseModal {
             if (player !== videoEl && !player.paused) {
               player.pause();
               const container = player.closest<HTMLElement>(
-                ".cm-media-preview-container"
+                ".cm-media-preview-container",
               );
               if (container) {
                 const playOverlay = container.querySelector<HTMLElement>(
-                  ".cm-media-play-overlay"
+                  ".cm-media-play-overlay",
                 );
                 const muteToggle = container.querySelector<HTMLElement>(
-                  ".cm-media-mute-toggle"
+                  ".cm-media-mute-toggle",
                 );
 
                 playOverlay?.setCssProps({ opacity: "1" });
@@ -2749,7 +2750,7 @@ export class ProfileImageBrowserModal extends ColorMasterBaseModal {
       extensionSpan.setText(ext);
 
       nameInput.addEventListener("focus", (e) =>
-        (e.target as HTMLInputElement).select()
+        (e.target as HTMLInputElement).select(),
       );
 
       const saveName = async () => {
@@ -2760,7 +2761,7 @@ export class ProfileImageBrowserModal extends ColorMasterBaseModal {
           const newFullName = newBasename + ext;
           const renameResult = await this.plugin.renameBackgroundMedia(
             currentImagePath,
-            newFullName
+            newFullName,
           );
 
           if (renameResult && typeof renameResult === "string") {
@@ -2772,13 +2773,13 @@ export class ProfileImageBrowserModal extends ColorMasterBaseModal {
 
             // Partial UI update to avoid full reload
             const imgEl = cardEl.querySelector<HTMLImageElement>(
-              ".cm-image-card-preview"
+              ".cm-image-card-preview",
             );
             const selectBtn = cardEl.querySelector<HTMLButtonElement>(
-              ".cm-image-card-select-btn"
+              ".cm-image-card-select-btn",
             );
             const deleteBtn = cardEl.querySelector<HTMLButtonElement>(
-              ".cm-image-card-delete-btn"
+              ".cm-image-card-delete-btn",
             );
 
             if (imgEl)
@@ -2846,7 +2847,7 @@ export class ProfileImageBrowserModal extends ColorMasterBaseModal {
     // Identify profiles currently using this background to warn the user
     const profiles = this.plugin.settings.profiles;
     const affectedProfiles = Object.keys(profiles).filter(
-      (name) => profiles[name].backgroundPath === path
+      (name) => profiles[name].backgroundPath === path,
     );
 
     // Construct warning UI with list of affected profiles
@@ -2889,7 +2890,7 @@ export class ProfileImageBrowserModal extends ColorMasterBaseModal {
           console.error("Failed to delete background:", err);
         });
       },
-      { buttonText: t("buttons.deleteAnyway"), buttonClass: "mod-warning" }
+      { buttonText: t("buttons.deleteAnyway"), buttonClass: "mod-warning" },
     ).open();
   }
 
@@ -3045,11 +3046,11 @@ export class AdvancedResetModal extends ColorMasterBaseModal {
 
   validateButton() {
     const hasSelection = Object.values(this.resetOptions).some(
-      (v) => v === true
+      (v) => v === true,
     );
     this.deleteButton.setDisabled(!hasSelection);
     this.deleteButton.setButtonText(
-      hasSelection ? t("buttons.delete") : t("buttons.selectOption")
+      hasSelection ? t("buttons.delete") : t("buttons.selectOption"),
     );
   }
 
@@ -3070,7 +3071,7 @@ export class AddNewLanguageModal extends ColorMasterBaseModal {
   constructor(
     app: App,
     plugin: ColorMaster,
-    settingTab: ColorMasterSettingTab
+    settingTab: ColorMasterSettingTab,
   ) {
     super(app, plugin);
     this.settingTab = settingTab;
@@ -3171,7 +3172,7 @@ export class AddNewLanguageModal extends ColorMasterBaseModal {
     // Check for duplicate names (Custom)
     const existingLangs = Object.values(this.plugin.settings.customLanguages);
     const nameExists = existingLangs.some(
-      (lang) => lang.languageName.toLowerCase() === this.langName.toLowerCase()
+      (lang) => lang.languageName.toLowerCase() === this.langName.toLowerCase(),
     );
     if (nameExists) {
       new Notice(t("notices.langNameExists", this.langName));
@@ -3180,7 +3181,7 @@ export class AddNewLanguageModal extends ColorMasterBaseModal {
 
     // Check for duplicate names (Core)
     const coreLangNames = Object.values(CORE_LANGUAGES).map((name) =>
-      name.toLowerCase()
+      name.toLowerCase(),
     );
     if (coreLangNames.includes(this.langName.toLowerCase())) {
       new Notice(t("notices.langNameCore", this.langName));
@@ -3208,7 +3209,7 @@ export class AddNewLanguageModal extends ColorMasterBaseModal {
       this.app,
       this.plugin,
       this.settingTab,
-      this.langCode
+      this.langCode,
     ).open();
   }
 
@@ -3241,7 +3242,7 @@ export class LanguageTranslatorModal extends ColorMasterBaseModal {
     app: App,
     plugin: ColorMaster,
     settingTab: ColorMasterSettingTab,
-    langCode: string
+    langCode: string,
   ) {
     super(app, plugin);
     this.settingTab = settingTab;
@@ -3250,7 +3251,7 @@ export class LanguageTranslatorModal extends ColorMasterBaseModal {
 
     // Pre-calculate nested structure once to avoid overhead during render loops
     this.nestedFallback = unflattenStrings(
-      this.fallbackStrings as CustomTranslation
+      this.fallbackStrings as CustomTranslation,
     );
 
     const customLangData = this.plugin.settings.customLanguages?.[langCode];
@@ -3283,7 +3284,7 @@ export class LanguageTranslatorModal extends ColorMasterBaseModal {
       // Purely custom language (not core) - load as is
       this.langName = customLangData.languageName;
       this.translations = JSON.parse(
-        JSON.stringify(customLangData.translations || {})
+        JSON.stringify(customLangData.translations || {}),
       );
       this.isCoreLanguage = false;
       this.isRtl = customLangData.isRtl || false;
@@ -3302,7 +3303,7 @@ export class LanguageTranslatorModal extends ColorMasterBaseModal {
     this.modalEl.classList.add(
       "color-master-modal",
       "cm-translator-modal",
-      "cm-translator-tree-modal"
+      "cm-translator-tree-modal",
     );
 
     contentEl.createEl("h3", {
@@ -3329,7 +3330,7 @@ export class LanguageTranslatorModal extends ColorMasterBaseModal {
       });
     mainControls.settingEl.classList.add(
       "cm-translator-main-controls",
-      "modal-button-container"
+      "modal-button-container",
     );
   }
 
@@ -3391,25 +3392,25 @@ export class LanguageTranslatorModal extends ColorMasterBaseModal {
         btn
           .setIcon("copy")
           .setTooltip(t("modals.translator.copyJson"))
-          .onClick(() => this._copyJson())
+          .onClick(() => this._copyJson()),
       )
       .addButton((btn) =>
         btn
           .setIcon("paste")
           .setTooltip(t("modals.translator.pasteJson"))
-          .onClick(() => this._pasteJson())
+          .onClick(() => this._pasteJson()),
       )
       .addButton((btn) =>
         btn
           .setIcon("download")
           .setTooltip(t("modals.translator.importFile"))
-          .onClick(() => this._importLanguageFile())
+          .onClick(() => this._importLanguageFile()),
       )
       .addButton((btn) =>
         btn
           .setIcon("upload")
           .setTooltip(t("modals.translator.exportFile"))
-          .onClick(() => this._exportLanguageFile())
+          .onClick(() => this._exportLanguageFile()),
       );
   }
 
@@ -3427,7 +3428,7 @@ export class LanguageTranslatorModal extends ColorMasterBaseModal {
       this.nestedFallback,
       "",
       counter,
-      query
+      query,
     );
 
     if (totalRendered === 0 && (this.searchQuery || this.filterMissing)) {
@@ -3447,7 +3448,7 @@ export class LanguageTranslatorModal extends ColorMasterBaseModal {
     fallbackGroup: Record<string, unknown>,
     path: string,
     counter: { index: number },
-    query: string
+    query: string,
   ): number {
     let itemsRenderedInThisGroup = 0;
 
@@ -3512,7 +3513,7 @@ export class LanguageTranslatorModal extends ColorMasterBaseModal {
           fallbackValue as Record<string, unknown>,
           newPath,
           counter,
-          query
+          query,
         );
 
         // Prune empty groups if filtering is active
@@ -3546,7 +3547,7 @@ export class LanguageTranslatorModal extends ColorMasterBaseModal {
 
           const infoEl = itemEl.createDiv("setting-item-info");
           const nameEl = infoEl.createDiv(
-            "setting-item-name cm-translator-key"
+            "setting-item-name cm-translator-key",
           );
 
           const keySpan = nameEl.createSpan();
@@ -3582,7 +3583,7 @@ export class LanguageTranslatorModal extends ColorMasterBaseModal {
               toggleBtn.setText(
                 isExpanded
                   ? t("modals.translator.showLess")
-                  : t("modals.translator.showMore")
+                  : t("modals.translator.showMore"),
               );
             };
           } else {
@@ -3663,7 +3664,7 @@ export class LanguageTranslatorModal extends ColorMasterBaseModal {
         CORE_LOCALES[this.langCode as LocaleCode] as unknown as Record<
           string,
           unknown
-        >
+        >,
       );
       const diffs: CustomTranslation = {};
 
@@ -3728,7 +3729,7 @@ export class LanguageTranslatorModal extends ColorMasterBaseModal {
           const content = await file.text();
           const nestedJson = JSON.parse(content);
           const importedTranslations = flattenStrings(
-            nestedJson
+            nestedJson,
           ) as CustomTranslation;
 
           this.translations = {

@@ -180,7 +180,7 @@ export default class ColorMaster extends Plugin {
       const videoUrl = this.app.vault.adapter.getResourcePath(path);
 
       let videoEl = document.querySelector<HTMLVideoElement>(
-        "#cm-background-video"
+        "#cm-background-video",
       );
       if (!videoEl) {
         videoEl = document.createElement("video");
@@ -272,13 +272,13 @@ export default class ColorMaster extends Plugin {
         // Create the folder if it's missing
         await this.app.vault.adapter.mkdir(backgroundsPath);
         console.debug(
-          `Color Master: Created global backgrounds folder at ${backgroundsPath}`
+          `Color Master: Created global backgrounds folder at ${backgroundsPath}`,
         );
       }
     } catch (error) {
       console.error(
         "Color Master: Failed to create backgrounds folder on startup.",
-        error
+        error,
       );
     }
   }
@@ -340,7 +340,7 @@ export default class ColorMaster extends Plugin {
     } catch (error) {
       console.warn(
         `Color Master: Could not delete background file '${pathToDelete}'.`,
-        error
+        error,
       );
     }
 
@@ -370,7 +370,7 @@ export default class ColorMaster extends Plugin {
   async setBackgroundMedia(
     arrayBuffer: ArrayBuffer,
     fileName: string,
-    conflictChoice: "replace" | "keep" | "prompt" = "prompt"
+    conflictChoice: "replace" | "keep" | "prompt" = "prompt",
   ) {
     const activeProfile = this.settings.profiles?.[this.settings.activeProfile];
     if (!activeProfile) return;
@@ -407,12 +407,12 @@ export default class ColorMaster extends Plugin {
               await this.setBackgroundMedia(
                 finalArrayBuffer,
                 finalFileName,
-                choice
+                choice,
               );
             })().catch((err) => {
               console.error("Failed to set background media:", err);
             });
-          }
+          },
         ).open();
         return;
       }
@@ -420,7 +420,7 @@ export default class ColorMaster extends Plugin {
       if (fileExists && conflictChoice === "keep") {
         targetPath = await findNextAvailablePath(
           this.app.vault.adapter,
-          targetPath
+          targetPath,
         );
       }
       if (fileExists && conflictChoice === "replace") {
@@ -507,7 +507,7 @@ export default class ColorMaster extends Plugin {
       .map((s) => {
         const upgradedCss = s.css.replace(
           /\bbody\s*(?=\{)/g,
-          "body.theme-dark, body.theme-light"
+          "body.theme-dark, body.theme-light",
         );
         return `/* Snippet: ${s.name} ${
           s.isGlobal ? "(Global)" : ""
@@ -575,7 +575,7 @@ export default class ColorMaster extends Plugin {
       customCss: profile.customCss || "",
       snippets: JSON.parse(JSON.stringify(profile.snippets || {})),
       noticeRules: JSON.parse(
-        JSON.stringify(profile.noticeRules || { text: [], background: [] })
+        JSON.stringify(profile.noticeRules || { text: [], background: [] }),
       ),
     };
 
@@ -671,7 +671,7 @@ export default class ColorMaster extends Plugin {
         // Open the settings tab when the icon is clicked
         (this.app as unknown).setting.open();
         (this.app as unknown).setting.openTabById(this.manifest.id);
-      }
+      },
     );
 
     // Store a reference to the settings tab and add it
@@ -770,7 +770,7 @@ export default class ColorMaster extends Plugin {
     }
 
     console.debug(
-      `Color Master: Found ${graphLeaves.length} graph(s). Applying Plan C (programmatic rebuild).`
+      `Color Master: Found ${graphLeaves.length} graph(s). Applying Plan C (programmatic rebuild).`,
     );
 
     for (const leaf of graphLeaves) {
@@ -789,13 +789,13 @@ export default class ColorMaster extends Plugin {
     let computedIconizeColor = null;
     try {
       const cssVal = getComputedStyle(document.body).getPropertyValue(
-        "--iconize-icon-color"
+        "--iconize-icon-color",
       );
       if (cssVal) computedIconizeColor = cssVal.trim();
     } catch (e) {
       console.warn(
         "Color Master: failed to read computed --iconize-icon-color",
-        e
+        e,
       );
       computedIconizeColor = null;
     }
@@ -858,7 +858,7 @@ export default class ColorMaster extends Plugin {
     let settingsChanged = false;
     if (this.settings.overrideIconizeColors === true) {
       console.debug(
-        "Color Master: Iconize plugin not found. Disabling override setting."
+        "Color Master: Iconize plugin not found. Disabling override setting.",
       );
       this.settings.overrideIconizeColors = false;
       settingsChanged = true;
@@ -869,7 +869,7 @@ export default class ColorMaster extends Plugin {
 
     if (orphanedIcons.length > 0) {
       console.debug(
-        `Color Master: Found ${orphanedIcons.length} orphaned Iconize elements. Cleaning up...`
+        `Color Master: Found ${orphanedIcons.length} orphaned Iconize elements. Cleaning up...`,
       );
       orphanedIcons.forEach((icon) => icon.remove());
     }
@@ -878,7 +878,7 @@ export default class ColorMaster extends Plugin {
       void this.saveSettings().catch((err) => {
         console.error(
           "Failed to save settings after removing Iconize leftovers:",
-          err
+          err,
         );
       });
     }
@@ -929,7 +929,7 @@ export default class ColorMaster extends Plugin {
     } else {
       const currentConfig = (this.app.vault as unknown).getConfig("theme");
       const isSystemDark = window.matchMedia(
-        "(prefers-color-scheme: dark)"
+        "(prefers-color-scheme: dark)",
       ).matches;
 
       if (
@@ -1027,13 +1027,13 @@ export default class ColorMaster extends Plugin {
       Object.keys(this.settings.profiles || {}).length > 0
     ) {
       console.debug(
-        "Color Master: Detected old global notice rules. Starting migration..."
+        "Color Master: Detected old global notice rules. Starting migration...",
       );
       for (const profileName in this.settings.profiles) {
         const profile = this.settings.profiles[profileName];
         if (!profile.noticeRules) {
           profile.noticeRules = JSON.parse(
-            JSON.stringify(this.settings.noticeRules)
+            JSON.stringify(this.settings.noticeRules),
           );
         }
       }
@@ -1051,7 +1051,7 @@ export default class ColorMaster extends Plugin {
 
     if (migrationNeeded) {
       console.debug(
-        "Color Master: Notice rules migration complete. Saving new settings structure."
+        "Color Master: Notice rules migration complete. Saving new settings structure.",
       );
       await this.saveData(this.settings);
     }
@@ -1089,7 +1089,7 @@ export default class ColorMaster extends Plugin {
             name: name,
             css: data.css || "",
             enabled: data.enabled !== false,
-          })
+          }),
         );
         profile.snippets = snippetsArray;
       }
@@ -1097,7 +1097,7 @@ export default class ColorMaster extends Plugin {
 
     if (snippetsMigrationNeeded) {
       console.debug(
-        "Color Master: The clipping data structure is being migrated to the new format (array)."
+        "Color Master: The clipping data structure is being migrated to the new format (array).",
       );
       await this.saveData(this.settings);
     }
@@ -1126,7 +1126,7 @@ export default class ColorMaster extends Plugin {
     }
     if (profileMigrationNeeded) {
       console.debug(
-        "Color Master: Setting default backgroundEnabled status for profiles."
+        "Color Master: Setting default backgroundEnabled status for profiles.",
       );
       await this.saveData(this.settings); // Save changes if migration happened
     }
@@ -1150,7 +1150,7 @@ export default class ColorMaster extends Plugin {
 
     // Deep clone defaults to ensure a clean slate before merging preserved data
     const newSettings = JSON.parse(
-      JSON.stringify(DEFAULT_SETTINGS)
+      JSON.stringify(DEFAULT_SETTINGS),
     ) as PluginSettings;
 
     // 1. Preserve Settings (if not deleting)
@@ -1226,7 +1226,7 @@ export default class ColorMaster extends Plugin {
         }
       } catch (folderError) {
         console.error(
-          `Color Master: Error deleting backgrounds: ${folderError.message}`
+          `Color Master: Error deleting backgrounds: ${folderError.message}`,
         );
         new Notice(t("notices.deleteBackgroundsError", folderError.message));
       }
@@ -1293,7 +1293,7 @@ export default class ColorMaster extends Plugin {
             .filter(Boolean);
           if (keywordArray.length > 0) {
             const escaped = keywordArray.map((k: string) =>
-              k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+              k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
             );
             // Enforce whole-word matching to avoid partial false positives
             if (
@@ -1352,7 +1352,7 @@ export default class ColorMaster extends Plugin {
             .filter(Boolean);
           if (keywordArray.length > 0) {
             const escaped = keywordArray.map((k: string) =>
-              k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+              k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
             );
             if (
               new RegExp(`\\b(${escaped.join("|")})\\b`, "i").test(noticeText)
@@ -1379,7 +1379,7 @@ export default class ColorMaster extends Plugin {
         const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, {
           acceptNode: (node) => {
             return node.parentElement?.classList.contains(
-              "cm-keyword-highlight"
+              "cm-keyword-highlight",
             )
               ? NodeFilter.FILTER_REJECT // Skip already highlighted
               : NodeFilter.FILTER_ACCEPT;
@@ -1425,11 +1425,11 @@ export default class ColorMaster extends Plugin {
                 .filter(Boolean);
               if (keywords.length > 0) {
                 const escaped = keywords.map((k: string) =>
-                  k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+                  k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
                 );
                 const ruleRegex = new RegExp(
                   `\\b(${escaped.join("|")})\\b`,
-                  "gi"
+                  "gi",
                 );
                 let match;
                 while ((match = ruleRegex.exec(nodeContent)) !== null) {
@@ -1467,8 +1467,8 @@ export default class ColorMaster extends Plugin {
             if (match.start > lastIndex) {
               fragments.appendChild(
                 document.createTextNode(
-                  nodeContent.substring(lastIndex, match.start)
-                )
+                  nodeContent.substring(lastIndex, match.start),
+                ),
               );
             }
             const span = document.createElement("span");
@@ -1481,7 +1481,7 @@ export default class ColorMaster extends Plugin {
 
           if (lastIndex < nodeContent.length) {
             fragments.appendChild(
-              document.createTextNode(nodeContent.substring(lastIndex))
+              document.createTextNode(nodeContent.substring(lastIndex)),
             );
           }
 
@@ -1500,7 +1500,7 @@ export default class ColorMaster extends Plugin {
     let styleEl = document.getElementById(styleId) as HTMLStyleElement | null;
 
     const notices = document.querySelectorAll<HTMLElement>(
-      "[data-cm-notice-bg], [data-cm-notice-text]"
+      "[data-cm-notice-bg], [data-cm-notice-text]",
     );
     if (notices.length === 0) {
       if (styleEl) styleEl.remove();
@@ -1638,7 +1638,7 @@ export default class ColorMaster extends Plugin {
   // Renames a background file and updates ALL profiles using it.
   async renameBackgroundMedia(
     oldPath: string,
-    newFullName: string
+    newFullName: string,
   ): Promise<string | false> {
     const adapter = this.app.vault.adapter;
 
@@ -1661,7 +1661,7 @@ export default class ColorMaster extends Plugin {
 
     if (oldExt && !newFullName.toLowerCase().endsWith(oldExt.toLowerCase())) {
       console.warn(
-        `Color Master: Rename blocked. Attempted to change extension from "${oldExt}" in "${newFullName}".`
+        `Color Master: Rename blocked. Attempted to change extension from "${oldExt}" in "${newFullName}".`,
       );
       new Notice(t("notices.invalidFilename") + " (Extension mismatch)");
       return false;
@@ -1735,7 +1735,7 @@ export default class ColorMaster extends Plugin {
           } catch (e) {
             console.warn(
               `Failed to convert color ${varName}: ${computedValue}`,
-              e
+              e,
             );
             capturedVars[varName] = computedValue;
           }
@@ -1746,7 +1746,7 @@ export default class ColorMaster extends Plugin {
     }
 
     console.debug(
-      `Color Master: Captured ${Object.keys(capturedVars).length} variables.`
+      `Color Master: Captured ${Object.keys(capturedVars).length} variables.`,
     );
 
     // 2. Restore plugin state
@@ -1773,7 +1773,7 @@ export default class ColorMaster extends Plugin {
     }
 
     console.debug(
-      "Color Master: Cache miss or theme change. Refreshing defaults..."
+      "Color Master: Cache miss or theme change. Refreshing defaults...",
     );
 
     const newDefaults = await this.captureCurrentComputedVars();

@@ -287,7 +287,7 @@ export default {
       codePlaceholder: "e.g., en",
       rtlLabel: "RTL Language",
       rtlDesc:
-        "Enable this if the language is written Right-to-Left (e.g., Hebrew, Urdu).",
+        "Enable this if the language is written Right-to-Left (e.g., Arabic, Urdu).",
     },
     translator: {
       title: (langName: string) => `Edit Translations: ${langName}`,
