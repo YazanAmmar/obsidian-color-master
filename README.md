@@ -550,4 +550,4 @@ MIT — see [LICENSE](https://github.com/YazanAmmar/obsidian-color-master/blob/m
 
 - **GitHub Repo**: [https://github.com/YazanAmmar/obsidian-color-master](https://github.com/YazanAmmar/obsidian-color-master)
 - **Issues & Features**: [GitHub Issues Page](https://github.com/YazanAmmar/obsidian-color-master/issues)
-- **Telegram Channel**: [https://t.me/ObsidianColorMaster](https://t.me/ObsidianColorMaster)
+- **Telegram Channel**: [https://t.me/ObsidianColorMaster](https://t.me/ThemeEngine)
