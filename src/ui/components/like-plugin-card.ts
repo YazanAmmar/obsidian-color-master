@@ -4,9 +4,9 @@ import { t } from '../../i18n/strings';
 import { flattenVars } from '../../utils';
 import type { ColorMasterSettingTab } from '../settingsTab';
 
-const GITHUB_REPO_URL = 'https://github.com/YazanAmmar/obsidian-theme-engine';
-const ISSUE_URL = 'https://github.com/YazanAmmar/obsidian-theme-engine/issues';
-const SYNC_WIKI_URL = 'https://github.com/YazanAmmar/obsidian-theme-engine/wiki/Sync-Your-Vault';
+const GITHUB_REPO_URL = 'https://github.com/YazanAmmar/obsidian-color-master';
+const ISSUE_URL = 'https://github.com/YazanAmmar/obsidian-color-master/issues';
+const SYNC_WIKI_URL = 'https://github.com/YazanAmmar/SyncEveryThing';
 const TELEGRAM_URL = 'https://t.me/ThemeEngine';
 
 function calcProfilesCount(settingTab: ColorMasterSettingTab): number {
