@@ -16,7 +16,7 @@ function initSnippetDrag(containerEl: HTMLElement, settingTab: ColorMasterSettin
     return;
   }
 
-  const isLocked = (plugin.settings as unknown).snippetsLocked || false;
+  const isLocked = plugin.settings.snippetsLocked || false;
 
   settingTab.snippetSortable = new Sortable(containerEl, {
     handle: '.cm-snippet-drag-handle',
@@ -76,7 +76,7 @@ export function drawCssSnippetsUI(containerEl: HTMLElement, settingTab: ColorMas
     cls: 'cm-snippets-header',
   });
 
-  const isLocked = (plugin.settings as unknown).snippetsLocked || false;
+  const isLocked = plugin.settings.snippetsLocked || false;
 
   headerContainer.createEl('h3', { text: t('snippets.heading') });
 
@@ -88,7 +88,7 @@ export function drawCssSnippetsUI(containerEl: HTMLElement, settingTab: ColorMas
       .setIcon(isLocked ? 'lock' : 'lock-open')
       .setTooltip(isLocked ? t('tooltips.unlockSnippets') : t('tooltips.lockSnippets'))
       .onClick(async () => {
-        (plugin.settings as unknown).snippetsLocked = !isLocked;
+        plugin.settings.snippetsLocked = !isLocked;
         await plugin.saveSettings();
 
         settingTab.display();
@@ -192,15 +192,15 @@ export function drawCssSnippetsUI(containerEl: HTMLElement, settingTab: ColorMas
         }
         await navigator.clipboard.writeText(snippet.css);
         new Notice(t('notices.snippetCssCopied'));
-        const buttonEl = evt.currentTarget as HTMLElement;
+        const buttonEl = evt.currentTarget as HTMLButtonElement;
         if (!buttonEl) return;
         setIcon(buttonEl, 'check');
         buttonEl.classList.add('is-success');
-        (buttonEl as unknown).disabled = true;
+        buttonEl.disabled = true;
         setTimeout(() => {
           buttonEl.classList.remove('is-success');
           setIcon(buttonEl, 'copy');
-          (buttonEl as unknown).disabled = false;
+          buttonEl.disabled = false;
         }, 1000);
       });
 

@@ -57,6 +57,10 @@ export interface CustomLanguage {
   isRtl?: boolean;
 }
 
+export interface PinnedSnapshot {
+  pinnedAt: string;
+  profile: Profile;
+}
 export interface PluginSettings {
   advancedResetOptions?: {
     deleteProfiles: boolean;
@@ -77,8 +81,9 @@ export interface PluginSettings {
   activeProfile: string;
   profiles: { [key: string]: Profile };
   globalSnippets: Snippet[];
-  pinnedSnapshots: { [key: string]: unknown };
+  pinnedSnapshots: Record<string, PinnedSnapshot>;
   useRtlLayout: boolean;
   installDate?: string;
   customLanguages?: Record<string, CustomLanguage>;
+  snippetsLocked?: boolean;
 }

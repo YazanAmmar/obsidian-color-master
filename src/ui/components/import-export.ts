@@ -5,7 +5,7 @@ import type { ColorMasterSettingTab } from '../settingsTab';
 export function drawImportExport(containerEl: HTMLElement, settingTab: ColorMasterSettingTab) {
   const actionsEl = containerEl.createDiv('cm-profile-actions');
 
-  // --- 1. Output Actions (Export / Copy) ---
+  // Output Actions (Export / Copy)
   actionsEl
     .createEl('button', {
       text: t('buttons.exportFile'),
@@ -27,7 +27,7 @@ export function drawImportExport(containerEl: HTMLElement, settingTab: ColorMast
   // Spacer to push input actions to the right
   actionsEl.createDiv({ cls: 'cm-profile-action-spacer' });
 
-  // --- 2. Input Actions (Import CSS / JSON) ---
+  // Input Actions (Import CSS / JSON)
   const pasteCssBtn = actionsEl.createEl('button', {
     text: t('buttons.importCss'),
     cls: 'cm-profile-action-btn cm-paste-css-btn',

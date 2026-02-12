@@ -1,10 +1,16 @@
 import { App, DataAdapter } from 'obsidian';
 import type { Profile } from './types';
 
+interface AppWithPlugins extends App {
+  plugins: {
+    plugins: Record<string, unknown>;
+  };
+}
+
 // Flattens nested variable objects into a single level map
-export function flattenVars(varsObject: { [key: string]: unknown }): {
-  [key: string]: string;
-} {
+export function flattenVars(
+  varsObject: Record<string, Record<string, string>>,
+): Record<string, string> {
   let flatVars: { [key: string]: string } = {};
   for (const category in varsObject) {
     flatVars = { ...flatVars, ...varsObject[category] };
@@ -53,7 +59,7 @@ export function getAccessibilityRating(ratio: number) {
 
 // Checks if a plugin is both installed AND enabled
 export function isPluginEnabled(app: App, pluginIds: string | string[]): boolean {
-  const pluginManager = (app as unknown).plugins;
+  const pluginManager = (app as AppWithPlugins).plugins;
   const idsToCheck = Array.isArray(pluginIds) ? pluginIds : [pluginIds];
 
   return idsToCheck.some((id) => pluginManager.plugins[id]);
