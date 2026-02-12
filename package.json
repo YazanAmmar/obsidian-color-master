@@ -15,23 +15,23 @@
   "author": "Yazan Ammar",
   "license": "MIT",
   "dependencies": {
-    "sortablejs": "^1.15.6",
+    "sortablejs": "^1.15.7",
     "tslib": "^2.8.1"
   },
   "devDependencies": {
-    "@types/node": "^24.5.2",
-    "@types/sortablejs": "^1.15.8",
-    "@typescript-eslint/utils": "^8.47.0",
-    "cpy-cli": "^6.0.0",
-    "esbuild": "^0.25.9",
-    "esbuild-sass-plugin": "^3.3.1",
-    "eslint": "^9.39.1",
+    "@types/node": "^25.2.3",
+    "@types/sortablejs": "^1.15.9",
+    "@typescript-eslint/utils": "^8.55.0",
+    "cpy-cli": "^7.0.0",
+    "esbuild": "^0.27.3",
+    "esbuild-sass-plugin": "^3.6.0",
+    "eslint": "^9.39.2",
     "eslint-plugin-obsidianmd": "^0.1.9",
-    "globals": "^16.5.0",
-    "obsidian": "^1.8.7",
-    "prettier": "^3.7.3",
-    "sass": "^1.93.3",
-    "typescript": "^5.9.2",
-    "typescript-eslint": "^8.47.0"
+    "globals": "^17.3.0",
+    "obsidian": "^1.12.0",
+    "prettier": "^3.8.1",
+    "sass": "^1.97.3",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.55.0"
   }
 }
