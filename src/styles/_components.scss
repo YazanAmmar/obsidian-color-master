@@ -3,159 +3,135 @@
    Reusable UI elements: Cards, Snippet Lists, Badges, Menus.
    ========================================================================== */
 
-/* --- Like Plugin Card (Promo) --- */
+/* --- Like Plugin Card --- */
+
 .cm-like-card {
+  --cm-card-bg: rgba(var(--mono-rgb, 255, 255, 255), 0.04);
+  --cm-card-border: rgba(var(--mono-rgb, 255, 255, 255), 0.12);
+  --cm-card-shadow: rgba(0, 0, 0, 0.22);
+
+  backdrop-filter: blur(8px);
+  background-color: var(--cm-card-bg);
+  border: 1px solid var(--cm-card-border);
+  border-radius: 14px;
+  padding: 22px;
+  margin-top: 28px;
+
+  box-shadow:
+    0 4px 12px var(--cm-card-shadow),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.06);
+
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  align-items: stretch;
-  padding: 10px;
-  margin-top: 20px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0.02));
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.28);
-  position: relative;
-  border: 4px solid transparent;
-  border-image-slice: 1;
-  animation: cm-glowing-border 2s linear infinite;
+  gap: 20px;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
 
-  .cm-banner-container .cm-banner-svg {
-    display: block;
-    width: 100%;
-    height: auto;
-  }
-
-  .cm-content-wrapper {
-    display: flex;
-    gap: 20px;
-    align-items: center;
-    width: 100%;
-    padding: 0 4px;
-  }
-
-  .cm-like-stats {
-    flex: 3;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    margin-top: 12px;
-    width: 100%;
-  }
-
-  .cm-like-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    align-self: stretch;
-    flex: 2;
-    max-width: 150px;
+  &:hover {
+    border-color: var(--interactive-accent);
   }
 }
 
-/* --- Stats Progress Bars --- */
-.cm-stat-box {
-  width: 100%;
+/* Header */
 
-  .cm-stat-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    margin-bottom: 6px;
-
-    .title {
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text-muted);
-    }
-    .value {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text-normal);
-    }
-  }
-
-  .skill-bar {
-    height: 8px;
-    width: 100%;
-    border-radius: 6px;
-    background-color: var(--background-modifier-border);
-    overflow: hidden;
-  }
-
-  .skill-per {
-    position: relative;
-    overflow: hidden;
-    display: block;
-    height: 100%;
-    width: 0%; /* Animated via JS/CSS var */
-    border-radius: 6px;
-    animation: cm-progress 0.8s ease-out forwards;
-    background: none;
-
-    &::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 400%;
-      height: 100%;
-      background: linear-gradient(115deg, #33ff00, #ffcc00, #8000ff, #00b7ff, #00ff66);
-      background-size: 25% 100%;
-      animation: cm-border-animation 2s linear infinite;
-    }
+.cm-like-card-header-text {
+  h3,
+  p {
+    margin-left: 0;
+    padding-left: 0;
   }
 }
 
-/* --- Animated Gradient Buttons --- */
-.codepen-button {
-  display: block;
-  cursor: pointer;
-  color: white;
-  position: relative;
-  text-decoration: none;
-  font-weight: 600;
-  border-radius: 6px;
-  overflow: hidden;
-  padding: 2px;
-  isolation: isolate;
-  width: 100%;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 400%;
-    height: 100%;
-    background: linear-gradient(115deg, #33ff00, #ffcc00, #8000ff, #00b7ff, #00ff66);
-    background-size: 25% 100%;
-    animation: cm-border-animation 1.5s linear infinite;
-    animation-play-state: running;
+.cm-like-card-header-text {
+  h3 {
+    margin: 0;
+    font-size: 1.35em;
+    color: var(--text-normal);
   }
-
-  span {
-    position: relative;
-    display: block;
-    text-align: center;
-    padding: 8px 12px;
-    font-size: 13px;
-    background: var(--background-secondary);
-    border-radius: 4px;
-    height: 100%;
-  }
-
-  /* Light Mode Fallback */
-  .theme-light & span {
-    color: #000000;
-    background: #f0f2f5;
+  p {
+    margin: 3px 0 0;
+    font-size: 0.9em;
+    color: var(--text-muted);
   }
 }
 
-.cm-promo-container {
-  border-top: 1px solid var(--background-modifier-border);
-  text-align: center;
-  width: 100%;
+/* Stats */
+
+.cm-like-card-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 14px;
+}
+
+.cm-stat-item {
+  display: flex;
+  padding: 10px 12px;
+  gap: 12px;
+  align-items: center;
+
+  background-color: rgba(var(--mono-rgb, 255, 255, 255), 0.06);
+  border-radius: 10px;
+  border: 1px solid var(--background-modifier-border);
+
+  .cm-stat-icon svg {
+    color: var(--interactive-accent);
+    width: 20px;
+    height: 20px;
+    opacity: 0.9;
+  }
+
+  .cm-stat-value {
+    font-weight: 600;
+    color: var(--text-normal);
+  }
+
+  .cm-stat-label {
+    color: var(--text-muted);
+    font-size: 0.8em;
+  }
+}
+
+/* Actions */
+
+.cm-like-card-actions {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 14px;
+  border-top: 1px solid var(--cm-card-border);
+}
+
+.cm-action-button {
+  width: 44px;
+  height: 44px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background-color: rgba(var(--mono-rgb, 255, 255, 255), 0.08);
+  border-radius: 50%;
+  border: 1px solid var(--cm-card-border);
+
+  transition: all 0.25s ease;
+
+  svg {
+    width: 20px;
+    height: 20px;
+    opacity: 0.85;
+  }
+
+  &:hover {
+    background-color: var(--interactive-accent);
+    border-color: var(--interactive-accent);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(var(--accent-rgb, 120, 120, 255), 0.4);
+
+    svg {
+      color: var(--text-on-accent);
+      opacity: 1;
+    }
+  }
 }
 
 /* --- CSS Snippets List --- */

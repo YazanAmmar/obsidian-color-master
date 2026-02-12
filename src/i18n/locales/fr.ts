@@ -433,13 +433,16 @@ export default {
     openSettings: 'Ouvrir les paramètres',
   },
   likeCard: {
-    profilesStat: (p: number, s: number) => `Profils: ${p} & Extraits: ${s}`,
-    colorsStat: 'Couleurs personnalisables',
-    integrationsStat: 'Intégrations de plugins',
-    daysStat: "Jours d'utilisation",
-    starButton: 'Étoile sur GitHub',
-    issueButton: 'Signaler un problème',
-    syncButton: 'Synchronisez votre coffre',
+    tagline:
+      'Personnalisez votre Obsidian — modifiez, enregistrez et partagez vos profils de couleurs',
+    description:
+      'Moteur de thèmes pour Obsidian — contrôlez les thèmes et les palettes de couleurs',
+    profilesAndSnippets: 'Profils et extraits',
+    customizableColors: 'Couleurs personnalisables',
+    daysOfUse: "Jours d'utilisation",
+    githubButton: 'Mettre une étoile sur GitHub',
+    reportIssueButton: 'Signaler un problème',
+    syncVaultButton: 'Synchroniser votre coffre',
     telegramButton: 'Telegram',
   },
   colors: {

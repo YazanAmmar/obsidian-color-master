@@ -1,22 +1,13 @@
+import { setIcon } from 'obsidian';
 import { DEFAULT_VARS } from '../../constants';
 import { t } from '../../i18n/strings';
 import { flattenVars } from '../../utils';
 import type { ColorMasterSettingTab } from '../settingsTab';
 
-function createStatBar(parentEl: HTMLElement, label: string, value: number, max: number) {
-  const skillBox = parentEl.createDiv('cm-stat-box');
-  const header = skillBox.createDiv('cm-stat-header');
-  header.createEl('span', { cls: 'title', text: label });
-  header.createEl('span', { cls: 'value', text: String(value) });
-  const skillBar = skillBox.createDiv('skill-bar');
-  const percentage = Math.min(100, Math.round((value / max) * 100));
-  const skillPer = skillBar.createEl('span', {
-    cls: 'skill-per cm-skill-gradient',
-  });
-  skillPer.setCssProps({
-    '--skill-percentage': `${percentage}%`,
-  });
-}
+const GITHUB_REPO_URL = 'https://github.com/YazanAmmar/obsidian-theme-engine';
+const ISSUE_URL = 'https://github.com/YazanAmmar/obsidian-theme-engine/issues';
+const SYNC_WIKI_URL = 'https://github.com/YazanAmmar/obsidian-theme-engine/wiki/Sync-Your-Vault';
+const TELEGRAM_URL = 'https://t.me/ThemeEngine';
 
 function calcProfilesCount(settingTab: ColorMasterSettingTab): number {
   return Object.keys(settingTab.plugin.settings.profiles || {}).length;
@@ -60,92 +51,60 @@ function calcPluginIntegrations(): number {
 
 export function drawLikePluginCard(containerEl: HTMLElement, settingTab: ColorMasterSettingTab) {
   const likeCardEl = containerEl.createDiv('cm-like-card');
-  const bannerContainer = likeCardEl.createDiv('cm-banner-container');
-  const bannerSvgString = `
-  <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="240" viewBox="0 0 1280 240" role="img" aria-label="Color Master banner" class="cm-banner-svg">
-  <defs>
-    <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
-      <stop offset="0%" stop-color="#0066FF"/> <stop offset="14%" stop-color="#7A00FF"/> <stop offset="28%" stop-color="#FF1E56"/>
-      <stop offset="42%" stop-color="#FF3EB5"/> <stop offset="56%" stop-color="#FF7A00"/> <stop offset="70%" stop-color="#FFD200"/>
-      <stop offset="84%" stop-color="#00D166"/> <stop offset="100%" stop-color="#00C2FF"/>
-    </linearGradient>
-    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
-      <feDropShadow dx="6" dy="6" stdDeviation="6" flood-color="#000" flood-opacity="0.45"/>
-    </filter>
-    <filter id="blackEdge" x="-200%" y="-200%" width="400%" height="400%">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="2.0" result="blur"/>
-      <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.6 0" result="edge"/>
-      <feMerge> <feMergeNode in="edge"/> <feMergeNode in="SourceGraphic"/> </feMerge>
-    </filter>
-  </defs>
-  <rect width="1280" height="240" rx="16" ry="16" fill="url(#g)"/>
-  <g filter="url(#shadow)">
-    <text x="50%" y="55%" text-anchor="middle" font-family="Montserrat, 'Poppins', Arial, sans-serif" font-weight="800" font-size="110" fill="#000000" opacity="0.85" font-style="normal" stroke="none" > Color Master </text>
-    <text x="50%" y="55%" text-anchor="middle" font-family="Montserrat, 'Poppins', Arial, sans-serif" font-weight="800" font-size="110" fill="#FFFFFF" stroke="#000000" stroke-width="4.2" stroke-linejoin="round" paint-order="stroke fill" font-style="normal" filter="url(#blackEdge)"> Color Master </text>
-  </g>
-  <text x="50%" y="74%" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="18" fill="#FFFFFF" opacity="0.95"> Theme your Obsidian — edit, save &amp; share color profiles </text>
-  <text x="50%" y="84%" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="18" fill="#FFFFFF" opacity="0.95"> Color Master for Obsidian — control themes &amp; color schemes </text>
-</svg>`;
 
-  const parser = new DOMParser();
-  const svgDoc = parser.parseFromString(bannerSvgString, 'image/svg+xml');
-  const svgElement = svgDoc.documentElement;
+  const headerSection = likeCardEl.createDiv('cm-like-card-header');
 
-  bannerContainer.appendChild(svgElement);
+  const headerText = headerSection.createDiv('cm-like-card-header-text');
+  headerText.createEl('h3', { text: t('plugin.name') });
+  headerText.createEl('p', { text: t('likeCard.description') });
 
-  const contentWrapper = likeCardEl.createDiv('cm-content-wrapper');
+  const statsSection = likeCardEl.createDiv('cm-like-card-stats');
 
-  const statsContainer = contentWrapper.createDiv('cm-like-stats');
   const profilesCount = calcProfilesCount(settingTab);
   const snippetsCount = calcSnippetsCount(settingTab);
+  const varsCount = calcVarsCount(settingTab);
+  const integrationsCount = calcPluginIntegrations();
   const sinceInstalled = settingTab.plugin.settings.installDate || new Date().toISOString();
   const days = Math.max(
     1,
     Math.floor((Date.now() - new Date(sinceInstalled).getTime()) / (1000 * 60 * 60 * 24)),
   );
 
-  createStatBar(
-    statsContainer,
-    t('likeCard.profilesStat', profilesCount, snippetsCount),
-    profilesCount + snippetsCount,
-    50,
+  const createStat = (iconName: string, label: string, value: string | number) => {
+    const statItem = statsSection.createDiv('cm-stat-item');
+    const iconEl = statItem.createDiv('cm-stat-icon');
+    setIcon(iconEl, iconName);
+    const textEl = statItem.createDiv('cm-stat-text');
+    textEl.createDiv({ cls: 'cm-stat-value', text: String(value) });
+    textEl.createDiv({ cls: 'cm-stat-label', text: label });
+  };
+
+  createStat(
+    'folder-tree',
+    t('likeCard.profilesAndSnippets'),
+    `${profilesCount} / ${snippetsCount}`,
   );
-  createStatBar(
-    statsContainer,
-    t('likeCard.colorsStat'),
-    calcVarsCount(settingTab),
-    calcVarsCount(settingTab),
-  );
-  createStatBar(statsContainer, t('likeCard.integrationsStat'), calcPluginIntegrations(), 5);
-  createStatBar(statsContainer, t('likeCard.daysStat'), days, 365);
+  createStat('palette', t('likeCard.customizableColors'), varsCount);
+  createStat('plug-zap', t('categories.pluginintegrations'), integrationsCount);
+  createStat('calendar-clock', t('likeCard.daysOfUse'), days);
 
-  const actions = contentWrapper.createDiv('cm-like-actions');
-  const starButtonWrapper = actions.createDiv({ cls: 'codepen-button' });
-  starButtonWrapper.createEl('span', { text: t('likeCard.starButton') });
-  starButtonWrapper.addEventListener('click', () => {
-    window.open('https://github.com/YazanAmmar/obsidian-color-master', '_blank');
-  });
+  const actionsSection = likeCardEl.createDiv('cm-like-card-actions');
 
-  const reportButtonWrapper = actions.createDiv({ cls: 'codepen-button' });
-  reportButtonWrapper.createEl('span', { text: t('likeCard.issueButton') });
-  reportButtonWrapper.addEventListener('click', () => {
-    window.open('https://github.com/YazanAmmar/obsidian-color-master/issues', '_blank');
-  });
+  const createActionButton = (iconName: string, tooltip: string, url: string) => {
+    const btn = actionsSection.createEl('a', {
+      cls: 'cm-action-button',
+      href: url,
+      attr: {
+        'aria-label': tooltip,
+        target: '_blank',
+        rel: 'noopener noreferrer',
+      },
+    });
+    setIcon(btn, iconName);
+  };
 
-  const syncPromoContainer = actions.createDiv({ cls: 'cm-promo-container' });
-  const syncButtonWrapper = syncPromoContainer.createDiv({
-    cls: 'codepen-button',
-  });
-  syncButtonWrapper.createEl('span', { text: t('likeCard.syncButton') });
-  syncButtonWrapper.addEventListener('click', () => {
-    window.open('https://github.com/YazanAmmar/SyncEveryThing', '_blank');
-  });
-
-  const myGithubButtonWrapper = actions.createDiv({ cls: 'codepen-button' });
-  myGithubButtonWrapper.createEl('span', {
-    text: t('likeCard.telegramButton'),
-  });
-  myGithubButtonWrapper.addEventListener('click', () => {
-    window.open('https://t.me/ObsidianColorMaster', '_blank');
-  });
+  createActionButton('github', t('likeCard.githubButton'), GITHUB_REPO_URL);
+  createActionButton('bug', t('likeCard.reportIssueButton'), ISSUE_URL);
+  createActionButton('git-pull-request-arrow', t('likeCard.syncVaultButton'), SYNC_WIKI_URL);
+  createActionButton('send', t('likeCard.telegramButton'), TELEGRAM_URL);
 }

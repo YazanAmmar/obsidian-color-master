@@ -430,13 +430,14 @@ export interface LocaleStrings {
 
   // Like Plugin Card strings
   likeCard: {
-    profilesStat: (p: number, s: number) => string;
-    colorsStat: string;
-    integrationsStat: string;
-    daysStat: string;
-    starButton: string;
-    issueButton: string;
-    syncButton: string;
+    tagline: string;
+    description: string;
+    profilesAndSnippets: string;
+    customizableColors: string;
+    daysOfUse: string;
+    githubButton: string;
+    reportIssueButton: string;
+    syncVaultButton: string;
     telegramButton: string;
   };
 

@@ -415,14 +415,15 @@ export default {
     openSettings: 'فتح نافذة الإعدادات',
   },
   likeCard: {
-    profilesStat: (p: number, s: number) => `ملفّات شخصيّة: ${p} & قصاصات: ${s}`,
-    colorsStat: 'ألوان قابلة للتخصيص',
-    integrationsStat: 'تكامل الإضافات',
-    daysStat: 'أيام الاستخدام',
-    starButton: 'أضف  ★ على GitHub',
-    issueButton: 'أبلغ عن مشكلة',
-    syncButton: 'مزامنة خزنتك',
-    telegramButton: 'تيليجرام',
+    tagline: 'خصّص ثيم Obsidian الخاص بك — عدّل، احفظ وشارك ملفات الألوان',
+    description: 'Color Master لـ Obsidian — تحكّم بالثيمات وأنظمة الألوان',
+    profilesAndSnippets: 'الملفات ومقتطفات CSS',
+    customizableColors: 'ألوان قابلة للتخصيص',
+    daysOfUse: 'أيام الاستخدام',
+    githubButton: 'إعجاب على GitHub',
+    reportIssueButton: 'الإبلاغ عن مشكلة',
+    syncVaultButton: 'مزامنة المخزن',
+    telegramButton: 'تليجرام',
   },
   colors: {
     names: {
