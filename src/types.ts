@@ -1,4 +1,4 @@
-export type CustomVarType = "color" | "size" | "text" | "number";
+export type CustomVarType = 'color' | 'size' | 'text' | 'number';
 
 export interface Snippet {
   id: string;
@@ -18,7 +18,7 @@ export interface NoticeRule {
 
 export interface Profile {
   vars: { [key: string]: string };
-  themeType: "auto" | "dark" | "light";
+  themeType: 'auto' | 'dark' | 'light';
   snippets: Snippet[];
   isCssProfile?: boolean;
   customCss?: string;
@@ -35,7 +35,7 @@ export interface Profile {
     };
   };
   backgroundPath?: string;
-  backgroundType?: "image" | "video";
+  backgroundType?: 'image' | 'video';
   videoOpacity?: number;
   videoMuted?: boolean;
   backgroundEnabled?: boolean;

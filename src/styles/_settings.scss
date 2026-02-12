@@ -6,7 +6,7 @@
 .color-master-settings-tab {
   /* --- LTR/RTL Localization Overrides --- */
 
-  &[dir="ltr"] {
+  &[dir='ltr'] {
     direction: ltr !important;
 
     .setting-item {
@@ -52,7 +52,7 @@
     }
   }
 
-  &[dir="rtl"] {
+  &[dir='rtl'] {
     .cm-search-input-icon {
       left: auto;
       right: 10px;
@@ -370,7 +370,7 @@
   }
 
   /* Color Swatch Styling */
-  .setting-item-control input[type="color"] {
+  .setting-item-control input[type='color'] {
     appearance: none;
     -webkit-appearance: none;
     width: 28px;
@@ -553,7 +553,7 @@
     }
   }
 
-  &[dir="rtl"] {
+  &[dir='rtl'] {
     .setting-item-control select,
     .cm-search-small {
       padding-right: 7px !important;
@@ -567,7 +567,7 @@
   }
 
   /* Range Slider Styling */
-  input[type="range"] {
+  input[type='range'] {
     -webkit-appearance: none;
     appearance: none;
     background: transparent;

@@ -131,26 +131,10 @@
       outline: none;
       /* Active Border Pattern */
       background-image:
-        linear-gradient(
-          to right,
-          var(--interactive-accent) 50%,
-          transparent 50%
-        ),
-        linear-gradient(
-          to bottom,
-          var(--interactive-accent) 50%,
-          transparent 50%
-        ),
-        linear-gradient(
-          to right,
-          var(--interactive-accent) 50%,
-          transparent 50%
-        ),
-        linear-gradient(
-          to bottom,
-          var(--interactive-accent) 50%,
-          transparent 50%
-        );
+        linear-gradient(to right, var(--interactive-accent) 50%, transparent 50%),
+        linear-gradient(to bottom, var(--interactive-accent) 50%, transparent 50%),
+        linear-gradient(to right, var(--interactive-accent) 50%, transparent 50%),
+        linear-gradient(to bottom, var(--interactive-accent) 50%, transparent 50%);
     }
 
     &:focus,
@@ -484,7 +468,7 @@
     }
 
     /* Transparent swatch fix */
-    input[type="color"].is-transparent {
+    input[type='color'].is-transparent {
       background-color: transparent;
       &::-webkit-color-swatch {
         background-image:
@@ -635,7 +619,7 @@
   }
 
   /* RTL Override */
-  [dir="rtl"] & {
+  [dir='rtl'] & {
     .setting-item-control {
       order: 1;
       justify-content: flex-start;
@@ -809,7 +793,7 @@
     .setting-item-control {
       flex: 1 1 50%;
       padding-left: 10px;
-      input[type="text"],
+      input[type='text'],
       textarea {
         width: 100%;
       }

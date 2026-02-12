@@ -1,12 +1,12 @@
-import type ColorMaster from "../main";
-import type { PluginSettings } from "../types";
-import type { LocaleStrings } from "./types";
-import { DEFAULT_LOCALE, LocaleCode } from "./types";
-import type { LocaleFunc } from "./types";
-import arStrings from "./locales/ar";
-import enStrings from "./locales/en";
-import faStrings from "./locales/fa";
-import frStrings from "./locales/fr";
+import type ColorMaster from '../main';
+import type { PluginSettings } from '../types';
+import type { LocaleStrings } from './types';
+import { DEFAULT_LOCALE, LocaleCode } from './types';
+import type { LocaleFunc } from './types';
+import arStrings from './locales/ar';
+import enStrings from './locales/en';
+import faStrings from './locales/fa';
+import frStrings from './locales/fr';
 
 let T: ColorMaster;
 
@@ -55,9 +55,7 @@ export function loadLanguage(settings: PluginSettings) {
     console.debug(`Color Master: Loading custom language "${langCode}"`);
     ACTIVE_STRINGS = customLang.translations;
   } else {
-    console.debug(
-      `Color Master: Language "${langCode}" not found, using default.`,
-    );
+    console.debug(`Color Master: Language "${langCode}" not found, using default.`);
     ACTIVE_STRINGS = FALLBACK_STRINGS;
   }
 }
@@ -82,7 +80,7 @@ export const t = (key: string, ...args: (string | number)[]): string => {
   }
 
   // Handle dynamic strings with arguments
-  if (typeof string === "function") {
+  if (typeof string === 'function') {
     return string(...args);
   }
 
@@ -92,7 +90,7 @@ export const t = (key: string, ...args: (string | number)[]): string => {
 // Recursively flattens nested objects into dot-notation keys
 export function flattenStrings(
   obj: Record<string, unknown>,
-  parentKey = "",
+  parentKey = '',
   result: Record<string, string | LocaleFunc> = {},
 ): Record<string, string | LocaleFunc> {
   for (const key in obj) {
@@ -101,10 +99,10 @@ export function flattenStrings(
       const value = obj[key];
 
       if (
-        typeof value === "object" &&
+        typeof value === 'object' &&
         value !== null &&
         !Array.isArray(value) &&
-        typeof value !== "function"
+        typeof value !== 'function'
       ) {
         flattenStrings(value, newKey, result);
       } else if (!Array.isArray(value)) {

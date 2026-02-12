@@ -1,185 +1,179 @@
 export default {
   plugin: {
-    name: "Maître des Couleurs - v1.2.0",
-    ribbonTooltip: "Paramètres de Color Master",
+    name: 'Maître des Couleurs - v1.2.0',
+    ribbonTooltip: 'Paramètres de Color Master',
   },
   buttons: {
-    new: "Nouveau",
-    delete: "Supprimer",
-    selectOption: "Sélectionnez une option",
-    create: "Créer",
-    reset: "Réinitialiser",
-    update: "Mettre à jour",
-    apply: "Appliquer",
-    cancel: "Annuler",
-    reload: "Recharger",
-    exportFile: "Exporter le fichier",
-    copyJson: "Copier JSON",
-    importCss: "Importer / Coller (.css)",
-    importJson: "Importer / Coller (.json)",
-    chooseFile: "Choisir un fichier...",
-    import: "Importer",
-    select: "Sélectionner",
-    browse: "Parcourir...",
-    deleteAnyway: "Supprimer quand même",
-    restore: "Restaurer",
+    new: 'Nouveau',
+    delete: 'Supprimer',
+    selectOption: 'Sélectionnez une option',
+    create: 'Créer',
+    reset: 'Réinitialiser',
+    update: 'Mettre à jour',
+    apply: 'Appliquer',
+    cancel: 'Annuler',
+    reload: 'Recharger',
+    exportFile: 'Exporter le fichier',
+    copyJson: 'Copier JSON',
+    importCss: 'Importer / Coller (.css)',
+    importJson: 'Importer / Coller (.json)',
+    chooseFile: 'Choisir un fichier...',
+    import: 'Importer',
+    select: 'Sélectionner',
+    browse: 'Parcourir...',
+    deleteAnyway: 'Supprimer quand même',
+    restore: 'Restaurer',
   },
   settings: {
-    enablePlugin: "Activer Maître des Couleurs",
+    enablePlugin: 'Activer Maître des Couleurs',
     enablePluginDesc:
-      "Désactivez cette option pour désactiver temporairement toutes les couleurs personnalisées et revenir à votre thème Obsidian actif.",
-    language: "Langue",
+      'Désactivez cette option pour désactiver temporairement toutes les couleurs personnalisées et revenir à votre thème Obsidian actif.',
+    language: 'Langue',
     languageDesc: "Définissez la langue de l'interface pour le plugin.",
-    languageSettingsModalTitle: "Paramètres de langue",
-    rtlLayoutName: "Activer la disposition de droite à gauche (RTL)",
+    languageSettingsModalTitle: 'Paramètres de langue',
+    rtlLayoutName: 'Activer la disposition de droite à gauche (RTL)',
     rtlLayoutDesc:
       "Lorsque cette option est activée, l'interface du plugin est inversée pour prendre en charge correctement les langues écrites de droite à gauche.",
-    searchPlaceholder: "Rechercher des variables (nom ou valeur)...",
-    regexPlaceholder: "Entrez Regex et appuyez sur Entrée...",
-    allSections: "Toutes les sections",
-    clear: "Effacer",
-    ariaCase: "Recherche sensible à la casse",
-    ariaRegex: "Utiliser une expression régulière",
+    searchPlaceholder: 'Rechercher des variables (nom ou valeur)...',
+    regexPlaceholder: 'Entrez Regex et appuyez sur Entrée...',
+    allSections: 'Toutes les sections',
+    clear: 'Effacer',
+    ariaCase: 'Recherche sensible à la casse',
+    ariaRegex: 'Utiliser une expression régulière',
     themeWarningTooltip: (currentTheme: string) =>
       `Le thème communautaire "${currentTheme}" est actif, ce qui peut interférer avec l'apparence du profil. Pour de meilleurs résultats, passez au thème par défaut d'Obsidian, ou importez "${currentTheme}" comme un nouveau profil CSS pour le personnaliser directement.`,
   },
   profileManager: {
-    heading: "Gestionnaire de Profils",
-    activeProfile: "Profil Actif",
-    activeProfileDesc: "Gérez et basculez entre les profils de couleurs.",
-    themeType: "Type de thème du profil",
+    heading: 'Gestionnaire de Profils',
+    activeProfile: 'Profil Actif',
+    activeProfileDesc: 'Gérez et basculez entre les profils de couleurs.',
+    themeType: 'Type de thème du profil',
     themeTypeDesc:
-      "Définissez si ce profil doit forcer un thème spécifique (Sombre/Clair) lors de son activation.",
+      'Définissez si ce profil doit forcer un thème spécifique (Sombre/Clair) lors de son activation.',
     themeAuto: "Thème par défaut d'Obsidian",
-    themeDark: "Forcer le mode sombre",
-    themeLight: "Forcer le mode clair",
-    tooltipThemeAuto:
-      "Thème : Auto (Suit Obsidian) (Cliquer pour passer au Clair)",
-    tooltipThemeDark:
-      "Thème : Forcer le mode Sombre (Cliquer pour passer en Auto)",
-    tooltipThemeLight:
-      "Thème : Forcer le mode Clair (Cliquer pour passer au Sombre)",
-    tooltipExport: "Exporter le profil actuel en tant que fichier JSON",
-    tooltipCopyJson: "Copier le JSON du profil actuel dans le presse-papiers",
+    themeDark: 'Forcer le mode sombre',
+    themeLight: 'Forcer le mode clair',
+    tooltipThemeAuto: 'Thème : Auto (Suit Obsidian) (Cliquer pour passer au Clair)',
+    tooltipThemeDark: 'Thème : Forcer le mode Sombre (Cliquer pour passer en Auto)',
+    tooltipThemeLight: 'Thème : Forcer le mode Clair (Cliquer pour passer au Sombre)',
+    tooltipExport: 'Exporter le profil actuel en tant que fichier JSON',
+    tooltipCopyJson: 'Copier le JSON du profil actuel dans le presse-papiers',
   },
   options: {
-    heading: "Paramètres avancés",
-    liveUpdateName: "FPS de la mise à jour en direct",
+    heading: 'Paramètres avancés',
+    liveUpdateName: 'FPS de la mise à jour en direct',
     liveUpdateDesc:
       "Définit le nombre de fois par seconde où l'interface prévisualise les changements de couleur lors du glissement (0 = désactiver l'aperçu en direct). Des valeurs plus basses peuvent améliorer les performances.",
     iconizeModalTitle: "Paramètres d'intégration d'Iconize",
-    overrideIconizeName: "Outrepasser les couleurs du plugin Iconize",
+    overrideIconizeName: 'Outrepasser les couleurs du plugin Iconize',
     overrideIconizeDesc:
       "Laissez Maître des Couleurs contrôler toutes les couleurs d'icônes du plugin Iconize. Pour de meilleurs résultats, désactivez les paramètres de couleur dans Iconize lui-même.",
-    cleanupIntervalName: "Intervalle de nettoyage",
+    cleanupIntervalName: 'Intervalle de nettoyage',
     cleanupIntervalDesc:
-      "Définit la fréquence (en secondes) à laquelle le plugin recherche un plugin Iconize désinstallé pour nettoyer ses icônes.",
-    addCustomVarName: "Ajouter une variable personnalisée",
+      'Définit la fréquence (en secondes) à laquelle le plugin recherche un plugin Iconize désinstallé pour nettoyer ses icônes.',
+    addCustomVarName: 'Ajouter une variable personnalisée',
     addCustomVarDesc:
       "Ajoutez une nouvelle variable CSS qui n'est pas dans la liste par défaut. Le nom doit commencer par '--'.",
-    addNewVarButton: "Ajouter une nouvelle variable...",
-    resetPluginName: "Réinitialiser les paramètres du plugin",
+    addNewVarButton: 'Ajouter une nouvelle variable...',
+    resetPluginName: 'Réinitialiser les paramètres du plugin',
     resetPluginDesc:
       "Cette action supprimera tous les profils, extraits, paramètres et arrière-plans, réinitialisant ainsi l'extension à son état d'origine. Cette action nécessite un rechargement de l'application et est irréversible.",
-    resetPluginButton: "Réinitialiser toutes les données...",
-    backgroundName: "Définir un arrière-plan personnalisé",
+    resetPluginButton: 'Réinitialiser toutes les données...',
+    backgroundName: 'Définir un arrière-plan personnalisé',
     backgroundDesc: "Gérer l'image ou la vidéo d'arrière-plan pour ce profil.",
     backgroundModalSettingsTitle: "Paramètres d'arrière-plan",
     backgroundEnableName: "Activer l'arrière-plan",
     backgroundEnableDesc:
       "Activer/désactiver la visibilité de l'arrière-plan personnalisé pour ce profil.",
-    convertImagesName: "Convertir les images en JPG",
+    convertImagesName: 'Convertir les images en JPG',
     convertImagesDesc:
-      "Convertir automatiquement les images PNG, WEBP ou BMP en JPG lors du téléversement pour réduire la taille du fichier et améliorer les performances de chargement. (Note : La transparence sera perdue)",
-    jpgQualityName: "Qualité JPG",
+      'Convertir automatiquement les images PNG, WEBP ou BMP en JPG lors du téléversement pour réduire la taille du fichier et améliorer les performances de chargement. (Note : La transparence sera perdue)',
+    jpgQualityName: 'Qualité JPG',
     jpgQualityDesc:
-      "Définissez la qualité de compression (1-100). Des valeurs plus basses signifient des fichiers plus petits mais une qualité inférieure.",
-    badgeNotInstalled: "Non installé",
-    videoOpacityName: "Opacité de la vidéo",
+      'Définissez la qualité de compression (1-100). Des valeurs plus basses signifient des fichiers plus petits mais une qualité inférieure.',
+    badgeNotInstalled: 'Non installé',
+    videoOpacityName: 'Opacité de la vidéo',
     videoOpacityDesc:
       "Contrôle la transparence de la vidéo d'arrière-plan pour une meilleure lisibilité.",
-    videoMuteName: "Désactiver le son",
-    videoMuteDesc:
-      "Désactive le son de la vidéo d'arrière-plan. Fortement recommandé.",
-    settingType: "Type de paramètre",
-    settingTypeImage: "Image",
-    settingTypeVideo: "Vidéo",
+    videoMuteName: 'Désactiver le son',
+    videoMuteDesc: "Désactive le son de la vidéo d'arrière-plan. Fortement recommandé.",
+    settingType: 'Type de paramètre',
+    settingTypeImage: 'Image',
+    settingTypeVideo: 'Vidéo',
   },
   snippets: {
-    heading: "Extraits CSS",
-    createButton: "Créer un nouvel extrait",
+    heading: 'Extraits CSS',
+    createButton: 'Créer un nouvel extrait',
     noSnippetsDesc: "Aucun extrait CSS n'a encore été créé pour ce profil.",
-    global: "Extrait global",
-    globalName: "Enregistrer comme extrait global",
-    globalDesc: "Un extrait global est appliqué à tous vos profils.",
+    global: 'Extrait global',
+    globalName: 'Enregistrer comme extrait global',
+    globalDesc: 'Un extrait global est appliqué à tous vos profils.',
   },
   categories: {
-    pluginintegrations: "Intégrations de plugins",
-    backgrounds: "Arrière-plans",
-    text: "Texte",
-    interactive: "Éléments Interactifs",
+    pluginintegrations: 'Intégrations de plugins',
+    backgrounds: 'Arrière-plans',
+    text: 'Texte',
+    interactive: 'Éléments Interactifs',
     ui: "Éléments d'Interface",
-    misc: "Divers",
-    graph: "Vue Graphique",
-    markdown: "Markdown",
-    notices: "Notifications",
-    custom: "Variables personnalisées",
+    misc: 'Divers',
+    graph: 'Vue Graphique',
+    markdown: 'Markdown',
+    notices: 'Notifications',
+    custom: 'Variables personnalisées',
     customDesc: "Variable ajoutée par l'utilisateur.",
-    helpTextPre: "Vous ne trouvez pas la variable que vous cherchez ? ",
+    helpTextPre: 'Vous ne trouvez pas la variable que vous cherchez ? ',
     helpTextLink: "Parcourez la liste officielle des variables CSS d'Obsidian.",
   },
   modals: {
     newProfile: {
-      title: "Créer un nouveau profil",
-      nameLabel: "Nom du profil",
-      namePlaceholder: "Entrez le nom du profil...",
+      title: 'Créer un nouveau profil',
+      nameLabel: 'Nom du profil',
+      namePlaceholder: 'Entrez le nom du profil...',
     },
     deleteProfile: {
-      title: "Supprimer le profil",
+      title: 'Supprimer le profil',
       confirmation: (name: string) =>
         `Êtes-vous sûr de vouloir supprimer le profil "${name}" ? Cette action est irréversible.`,
     },
     jsonImport: {
-      title: "Coller ou Importer le JSON du Profil",
-      desc1: "Vous pouvez coller un JSON de profil dans la case ci-dessous.",
+      title: 'Coller ou Importer le JSON du Profil',
+      desc1: 'Vous pouvez coller un JSON de profil dans la case ci-dessous.',
       placeholder: '{ "name": "...", "profile": { ... } }',
-      settingName: "Importer depuis un fichier",
-      settingDesc:
-        "Ou, sélectionnez un fichier de profil (.json) depuis votre ordinateur.",
+      settingName: 'Importer depuis un fichier',
+      settingDesc: 'Ou, sélectionnez un fichier de profil (.json) depuis votre ordinateur.',
       replaceActiveButton: "Remplacer l'actuel",
-      createNewButton: "Créer un nouveau",
+      createNewButton: 'Créer un nouveau',
     },
     cssImport: {
-      title: "Importer / Coller du CSS et créer un profil",
-      titleEdit: "Modifier le profil CSS",
+      title: 'Importer / Coller du CSS et créer un profil',
+      titleEdit: 'Modifier le profil CSS',
       note: "Remarque : Le CSS collé peut affecter l'interface utilisateur, n'utilisez que du CSS de confiance.",
-      importFromFile: "Importer depuis un fichier",
-      importFromFileDesc:
-        "Ou, sélectionnez un fichier (.css) depuis votre ordinateur.",
-      importFromTheme: "Importer depuis un thème installé",
+      importFromFile: 'Importer depuis un fichier',
+      importFromFileDesc: 'Ou, sélectionnez un fichier (.css) depuis votre ordinateur.',
+      importFromTheme: 'Importer depuis un thème installé',
       importFromThemeDesc:
         "Chargez rapidement le CSS de l'un de vos thèmes communautaires installés.",
-      noThemes: "Aucun thème installé",
+      noThemes: 'Aucun thème installé',
     },
     snippetEditor: {
-      title: "Créer un nouvel extrait CSS",
+      title: 'Créer un nouvel extrait CSS',
       titleEdit: "Modifier l'extrait CSS",
       nameLabel: "Nom de l'extrait",
       namePlaceholder: "Entrez le nom de l'extrait...",
-      importFromSnippet: "Importer depuis un extrait installé",
+      importFromSnippet: 'Importer depuis un extrait installé',
       importFromSnippetDesc:
         "Chargez rapidement le CSS de l'un de vos extraits Obsidian installés.",
-      noSnippets: "Aucun extrait installé",
-      cssPlaceholder: "Collez votre code CSS ici...",
+      noSnippets: 'Aucun extrait installé',
+      cssPlaceholder: 'Collez votre code CSS ici...',
     },
     confirmation: {
-      resetProfileTitle: "Confirmation de la réinitialisation du profil",
+      resetProfileTitle: 'Confirmation de la réinitialisation du profil',
       resetProfileDesc:
-        "Êtes-vous sûr de vouloir réinitialiser ce profil à la dernière capture épinglée ? Cela écrasera vos couleurs actuelles et ne pourra pas être annulé.",
+        'Êtes-vous sûr de vouloir réinitialiser ce profil à la dernière capture épinglée ? Cela écrasera vos couleurs actuelles et ne pourra pas être annulé.',
       deleteSnippetTitle: (name: string) => `Supprimer l'extrait : ${name}`,
       deleteSnippetDesc:
-        "Êtes-vous sûr de vouloir supprimer cet extrait ? Cette action est irréversible.",
-      resetPluginTitle: "Êtes-vous sûr ?",
+        'Êtes-vous sûr de vouloir supprimer cet extrait ? Cette action est irréversible.',
+      resetPluginTitle: 'Êtes-vous sûr ?',
       resetPluginDesc:
         "Cela supprimera définitivement toutes vos données Color Master (profils, extraits, paramètres et arrière-plans). C'est irréversible.",
       deleteGlobalBgTitle: "Confirmer la suppression de l'arrière-plan",
@@ -188,229 +182,198 @@ export default {
       deleteBackgroundTitle: "Supprimer l'arrière-plan ?",
       deleteBackgroundDesc: (name: string) =>
         `Êtes-vous sûr de vouloir supprimer définitivement '${name}' ?`,
-      deleteLangTitle: "Supprimer la langue",
+      deleteLangTitle: 'Supprimer la langue',
       deleteLangDesc: (name: string) =>
         `Êtes-vous sûr de vouloir supprimer le pack de langue "${name}" ? Cette action est irréversible.`,
-      restoreLangTitle: "Restaurer la langue ?",
+      restoreLangTitle: 'Restaurer la langue ?',
       restoreLangDesc: (name: string) =>
         `Êtes-vous sûr de vouloir supprimer les modifications personnalisées pour ${name} et restaurer les valeurs par défaut ?`,
     },
     noticeRules: {
-      titleText: "Règles avancées pour la couleur du texte",
-      titleBg: "Règles avancées pour la couleur de fond",
-      desc: "Créez des règles priorisées pour colorer les notifications en fonction de leur contenu. La première règle correspondante de haut en bas sera appliquée.",
-      addNewRule: "Ajouter une nouvelle règle",
-      keywordPlaceholder: "Tapez un mot-clé et appuyez sur Espace...",
-      useRegex: "Regex",
-      highlightOnly: "Surligner le mot-clé",
+      titleText: 'Règles avancées pour la couleur du texte',
+      titleBg: 'Règles avancées pour la couleur de fond',
+      desc: 'Créez des règles priorisées pour colorer les notifications en fonction de leur contenu. La première règle correspondante de haut en bas sera appliquée.',
+      addNewRule: 'Ajouter une nouvelle règle',
+      keywordPlaceholder: 'Tapez un mot-clé et appuyez sur Espace...',
+      useRegex: 'Regex',
+      highlightOnly: 'Surligner le mot-clé',
     },
     duplicateProfile: {
-      title: "Nom de profil en double",
-      descParts: [
-        `Le nom de profil "`,
-        `" existe déjà. Veuillez choisir un nom différent.`,
-      ],
-      placeholder: "Entrez un nouveau nom de profil...",
+      title: 'Nom de profil en double',
+      descParts: [`Le nom de profil "`, `" existe déjà. Veuillez choisir un nom différent.`],
+      placeholder: 'Entrez un nouveau nom de profil...',
     },
     customVar: {
-      title: "Ajouter une nouvelle variable CSS personnalisée",
-      desc: "Définissez une nouvelle variable CSS (ex: --my-color: #f00). Cette variable sera ajoutée à votre profil actif.",
+      title: 'Ajouter une nouvelle variable CSS personnalisée',
+      desc: 'Définissez une nouvelle variable CSS (ex: --my-color: #f00). Cette variable sera ajoutée à votre profil actif.',
       displayName: "Nom d'affichage",
       displayNameDesc:
         "Un nom convivial pour votre variable (ex: 'Ma couleur primaire personnalisée').",
-      displayNamePlaceholder: "Ex: Ma couleur primaire",
-      varName: "Nom de la variable",
+      displayNamePlaceholder: 'Ex: Ma couleur primaire',
+      varName: 'Nom de la variable',
       varNameDesc:
         "Le nom réel de la variable CSS. Doit commencer par '--' (ex: '--ma-couleur-primaire').",
-      varNamePlaceholder: "Ex: --ma-couleur-primaire",
-      varValue: "Valeur de la variable",
-      varType: "Type de variable",
-      varTypeDesc:
-        "Sélectionnez le type de données que cette variable contient.",
+      varNamePlaceholder: 'Ex: --ma-couleur-primaire',
+      varValue: 'Valeur de la variable',
+      varType: 'Type de variable',
+      varTypeDesc: 'Sélectionnez le type de données que cette variable contient.',
       types: {
-        color: "Couleur",
-        size: "Taille (ex: px, em)",
-        text: "Texte",
-        number: "Nombre",
+        color: 'Couleur',
+        size: 'Taille (ex: px, em)',
+        text: 'Texte',
+        number: 'Nombre',
       },
-      varValueDesc:
-        "La valeur de la variable CSS (ex: 'red', '#ff0000', 'rgb(255,0,0)').",
-      varValuePlaceholder: "Ex: #FF0000 ou rouge",
-      description: "Description (Optionnel)",
-      descriptionDesc:
-        "Une brève description de ce que cette variable contrôle.",
-      descriptionPlaceholder: "Ex: Couleur principale des titres",
-      addVarButton: "Ajouter",
-      textValuePlaceholder: "Entrez la valeur du texte...",
+      varValueDesc: "La valeur de la variable CSS (ex: 'red', '#ff0000', 'rgb(255,0,0)').",
+      varValuePlaceholder: 'Ex: #FF0000 ou rouge',
+      description: 'Description (Optionnel)',
+      descriptionDesc: 'Une brève description de ce que cette variable contrôle.',
+      descriptionPlaceholder: 'Ex: Couleur principale des titres',
+      addVarButton: 'Ajouter',
+      textValuePlaceholder: 'Entrez la valeur du texte...',
     },
     addBackground: {
-      title: "Ajouter un nouvel arrière-plan (Image/Vidéo)",
-      importFromFile: "Importer depuis un fichier",
-      importFromFileDesc:
-        "Importer un fichier image ou vidéo depuis votre ordinateur.",
-      pasteBoxPlaceholder:
-        "Glissez-déposez / Collez un arrière-plan ou URL ici (Ctrl+V)",
+      title: 'Ajouter un nouvel arrière-plan (Image/Vidéo)',
+      importFromFile: 'Importer depuis un fichier',
+      importFromFileDesc: 'Importer un fichier image ou vidéo depuis votre ordinateur.',
+      pasteBoxPlaceholder: 'Glissez-déposez / Collez un arrière-plan ou URL ici (Ctrl+V)',
       dropToAdd: "Relâchez pour ajouter l'arrière-plan...",
-      processing: "Traitement",
+      processing: 'Traitement',
     },
     fileConflict: {
-      title: "Le fichier existe",
+      title: 'Le fichier existe',
       desc: (name: string) =>
         `Un fichier nommé '${name}' existe déjà dans votre dossier d'arrière-plans. Que souhaitez-vous faire ?`,
-      replaceButton: "Remplacer le fichier",
-      keepButton: "Garder les deux (Renommer)",
+      replaceButton: 'Remplacer le fichier',
+      keepButton: 'Garder les deux (Renommer)',
     },
     backgroundBrowser: {
-      title: "Arrière-plans stockés",
-      noImages:
-        "Aucune image ou vidéo trouvée dans votre dossier d'arrière-plans.",
+      title: 'Arrière-plans stockés',
+      noImages: "Aucune image ou vidéo trouvée dans votre dossier d'arrière-plans.",
     },
     advancedReset: {
-      title: "Réinitialisation avancée des données",
+      title: 'Réinitialisation avancée des données',
       desc: "Sélectionnez les composants de données que vous souhaitez supprimer définitivement. C'est irréversible.",
-      profilesLabel: "Profils et Captures",
+      profilesLabel: 'Profils et Captures',
       profilesDesc:
-        "Supprime tous les profils personnalisés et les captures épinglées. (Conserve les profils intégrés).",
-      snippetsLabel: "Extraits globaux et de profil",
-      snippetsDesc:
-        "Supprime tous les extraits CSS, globaux et internes à tous les profils.",
-      backgroundsLabel: "Dossier des arrière-plans",
+        'Supprime tous les profils personnalisés et les captures épinglées. (Conserve les profils intégrés).',
+      snippetsLabel: 'Extraits globaux et de profil',
+      snippetsDesc: 'Supprime tous les extraits CSS, globaux et internes à tous les profils.',
+      backgroundsLabel: 'Dossier des arrière-plans',
       backgroundsDesc:
         "Supprime entièrement le dossier des arrière-plans dans le répertoire de configuration d'Obsidian (configDir/backgrounds), ainsi que tous les médias qu'il contient.",
-      settingsLabel: "Paramètres du plugin",
+      settingsLabel: 'Paramètres du plugin',
       settingsDesc:
-        "Réinitialise la langue, les FPS, la disposition et les autres options par défaut.",
-      languagesLabel: "Langues personnalisées",
-      languagesDesc:
-        "Supprime toutes les langues personnalisées créées par l'utilisateur.",
+        'Réinitialise la langue, les FPS, la disposition et les autres options par défaut.',
+      languagesLabel: 'Langues personnalisées',
+      languagesDesc: "Supprime toutes les langues personnalisées créées par l'utilisateur.",
     },
     addLang: {
-      title: "Ajouter une nouvelle langue",
-      desc: "Créez un nouveau pack de langue personnalisé. Vous pourrez modifier les traductions après la création.",
-      nameLabel: "Nom de la langue (Natif)",
-      nameDesc: "Le nom de la langue dans sa propre écriture.",
-      namePlaceholder: "ex: Français",
-      codeLabel: "Code de la langue",
+      title: 'Ajouter une nouvelle langue',
+      desc: 'Créez un nouveau pack de langue personnalisé. Vous pourrez modifier les traductions après la création.',
+      nameLabel: 'Nom de la langue (Natif)',
+      nameDesc: 'Le nom de la langue dans sa propre écriture.',
+      namePlaceholder: 'ex: Français',
+      codeLabel: 'Code de la langue',
       codeDesc: "Un code ISO 639 unique (ex: 'en', 'ar', 'zh').",
-      codePlaceholder: "ex: fr",
-      rtlLabel: "Langue RTL",
-      rtlDesc:
-        "Activez ceci si la langue s'écrit de droite à gauche (par ex. arabe, ourdou).",
+      codePlaceholder: 'ex: fr',
+      rtlLabel: 'Langue RTL',
+      rtlDesc: "Activez ceci si la langue s'écrit de droite à gauche (par ex. arabe, ourdou).",
     },
     translator: {
       title: (langName: string) => `Modifier les traductions : ${langName}`,
-      searchPlaceholder: "Rechercher des clés de traduction...",
-      copyJson: "Copier JSON",
-      pasteJson: "Coller JSON",
-      exportFile: "Exporter",
-      importFile: "Importer",
-      showMissing: "Afficher manquants",
-      showAll: "Afficher tout",
-      showMore: "Afficher plus",
-      showLess: "Afficher moins",
-      noMatches: "Aucune traduction ne correspond à votre recherche.",
-      dynamicValue: "Valeur dynamique",
+      searchPlaceholder: 'Rechercher des clés de traduction...',
+      copyJson: 'Copier JSON',
+      pasteJson: 'Coller JSON',
+      exportFile: 'Exporter',
+      importFile: 'Importer',
+      showMissing: 'Afficher manquants',
+      showAll: 'Afficher tout',
+      showMore: 'Afficher plus',
+      showLess: 'Afficher moins',
+      noMatches: 'Aucune traduction ne correspond à votre recherche.',
+      dynamicValue: 'Valeur dynamique',
     },
     langInfo: {
-      title: "À propos des langues personnalisées",
+      title: 'À propos des langues personnalisées',
       desc: `Cette fonctionnalité vous permet de créer vos propres traductions pour le plugin.\n\n**Pourquoi cette fonctionnalité ?**\n\nHonnêtement, en tant que seul développeur sur ce plugin, il m'est difficile d'ajouter de nouvelles fonctionnalités *et* de les traduire instantanément dans plus de 20 langues. Cette fonctionnalité est une invitation à aider et à améliorer le plugin pour tout le monde.\n\n**Comment pouvez-vous aider :**\n\n1.  Créez une new langue (par ex. "Espagnol").\n2.  Cliquez sur l'icône "Modifier" (crayon).\n3.  Vous pouvez utiliser "Copier JSON" d'une langue existante (comme l'anglais) et demander à ChatGPT de la traduire.\n4.  Utilisez "Coller JSON" ou "Importer un fichier" pour charger votre traduction.\n5.  Une fois satisfait, envoyez-moi le fichier JSON (via une Pull Request GitHub) et je l'intégrerai volontiers comme nouvelle **langue de base**.\n\nCela vous permet également de corriger les fautes de frappe ou d'améliorer les traductions des langues de base pour votre propre usage.`,
     },
   },
   notices: {
-    pluginEnabled: "Maître des Couleurs activé",
-    pluginDisabled: "Maître des Couleurs désactivé",
-    profilePinned: "Couleurs du profil épinglées avec succès !",
-    profileReset: "Le profil a été réinitialisé à la capture épinglée.",
-    noPinnedSnapshot: "Aucune capture épinglée trouvée pour ce profil.",
+    pluginEnabled: 'Maître des Couleurs activé',
+    pluginDisabled: 'Maître des Couleurs désactivé',
+    profilePinned: 'Couleurs du profil épinglées avec succès !',
+    profileReset: 'Le profil a été réinitialisé à la capture épinglée.',
+    noPinnedSnapshot: 'Aucune capture épinglée trouvée pour ce profil.',
     profileNotFound: "Le profil actif n'a pas pu être trouvé.",
-    noProfilesFound: "Aucun profil trouvé.",
+    noProfilesFound: 'Aucun profil trouvé.',
     activeProfileSwitched: (name: string) => `Profil actif : ${name}`,
-    graphColorsApplied: "Couleurs du graphique appliquées !",
-    invalidJson: "JSON invalide.",
+    graphColorsApplied: 'Couleurs du graphique appliquées !',
+    invalidJson: 'JSON invalide.',
     jsonMustHaveName:
       "Le JSON importé doit avoir une propriété 'name' pour créer un nouveau profil.",
-    profileCreatedSuccess: (name: string) =>
-      `Le profil "${name}" a été créé avec succès.`,
+    profileCreatedSuccess: (name: string) => `Le profil "${name}" a été créé avec succès.`,
     profileImportedSuccess: `Profil importé avec succès.`,
-    noActiveProfileToCopy: "Aucun profil actif à copier.",
-    noActiveProfileToExport: "Aucun profil actif à exporter.",
+    noActiveProfileToCopy: 'Aucun profil actif à copier.',
+    noActiveProfileToExport: 'Aucun profil actif à exporter.',
     snippetCssCopied: "CSS de l'extrait copié dans le presse-papiers !",
-    snippetEmpty: "Cet extrait est vide.",
-    cssContentEmpty: "Le contenu CSS ne peut pas être vide.",
-    snippetNameExists: (name: string) =>
-      `Le nom d'extrait "${name}" existe déjà.`,
-    profileNameExists: (name: string) =>
-      `Le nom de profil "${name}" existe déjà.`,
+    snippetEmpty: 'Cet extrait est vide.',
+    cssContentEmpty: 'Le contenu CSS ne peut pas être vide.',
+    snippetNameExists: (name: string) => `Le nom d'extrait "${name}" existe déjà.`,
+    profileNameExists: (name: string) => `Le nom de profil "${name}" existe déjà.`,
     profileUpdated: (name: string) => `Profil "${name}" mis à jour.`,
     snippetUpdated: (name: string) => `Extrait "${name}" mis à jour.`,
-    snippetCreated: (name: string) =>
-      `L'extrait "${name}" a été créé avec succès !`,
-    snippetDeleted: "Extrait supprimé avec succès.",
-    snippetScopeMove:
-      "Utilisez la fenêtre de modification pour déplacer un extrait.",
-    profileCreatedFromCss: (name: string) =>
-      `Le profil "${name}" a été créé avec succès !`,
-    noColorHistory: "Aucun historique de couleur à restaurer.",
+    snippetCreated: (name: string) => `L'extrait "${name}" a été créé avec succès !`,
+    snippetDeleted: 'Extrait supprimé avec succès.',
+    snippetScopeMove: 'Utilisez la fenêtre de modification pour déplacer un extrait.',
+    profileCreatedFromCss: (name: string) => `Le profil "${name}" a été créé avec succès !`,
+    noColorHistory: 'Aucun historique de couleur à restaurer.',
     colorRestored: (color: string) => `Restauré : ${color}`,
-    textboxEmpty:
-      "La zone de texte est vide. Collez du JSON ou importez d'abord un fichier.",
-    fileLoaded: (fileName: string) =>
-      `Fichier "${fileName}" chargé dans la zone de texte.`,
-    exportSuccess: "Profil exporté avec succès !",
-    jsonCopied: "JSON du profil copié dans le presse-papiers avec succès !",
+    textboxEmpty: "La zone de texte est vide. Collez du JSON ou importez d'abord un fichier.",
+    fileLoaded: (fileName: string) => `Fichier "${fileName}" chargé dans la zone de texte.`,
+    exportSuccess: 'Profil exporté avec succès !',
+    jsonCopied: 'JSON du profil copié dans le presse-papiers avec succès !',
     resetSuccess:
-      "Les données de Color Master ont été supprimées. Veuillez recharger Obsidian pour appliquer les changements.",
-    fpsUpdated: (value: number) =>
-      `FPS de la mise à jour en direct défini sur : ${value}`,
-    invalidProfileObject:
-      "Le JSON ne semble pas être un objet de profil valide.",
-    profileCreated: (name: string) =>
-      `Le profil "${name}" a été créé avec succès !`,
-    settingsSaved: "Paramètres appliqués avec succès !",
-    testSentence: (word: string) =>
-      `La couleur de notification pour "${word}" ressemble à ceci :`,
-    varNameEmpty: "Le nom de la variable ne peut pas être vide.",
+      'Les données de Color Master ont été supprimées. Veuillez recharger Obsidian pour appliquer les changements.',
+    fpsUpdated: (value: number) => `FPS de la mise à jour en direct défini sur : ${value}`,
+    invalidProfileObject: 'Le JSON ne semble pas être un objet de profil valide.',
+    profileCreated: (name: string) => `Le profil "${name}" a été créé avec succès !`,
+    settingsSaved: 'Paramètres appliqués avec succès !',
+    testSentence: (word: string) => `La couleur de notification pour "${word}" ressemble à ceci :`,
+    varNameEmpty: 'Le nom de la variable ne peut pas être vide.',
     varNameFormat: "Le nom de la variable doit commencer par '--'.",
     varExists: (name: string) => `La variable "${name}" existe déjà.`,
-    varAdded: (name: string) =>
-      `La variable "${name}" a été ajoutée avec succès.`,
+    varAdded: (name: string) => `La variable "${name}" a été ajoutée avec succès.`,
     iconizeNotFound:
       "Plugin Iconize non trouvé. Veuillez l'installer et l'activer pour utiliser cette fonctionnalité.",
-    themeCssLoaded: (theme: string) =>
-      `CSS du thème "${theme}" chargé avec succès.`,
+    themeCssLoaded: (theme: string) => `CSS du thème "${theme}" chargé avec succès.`,
     themeReadFailed: (theme: string) =>
       `Impossible de lire le fichier du thème "${theme}". Il est peut-être protégé ou manquant.`,
-    snippetLoaded: (snippet: string) =>
-      `CSS de l'extrait "${snippet}" chargé avec succès.`,
+    snippetLoaded: (snippet: string) => `CSS de l'extrait "${snippet}" chargé avec succès.`,
     snippetReadFailed: (snippet: string) =>
       `Impossible de lire le fichier de l'extrait "${snippet}".`,
-    themeSwitchedLight: "Passage en mode Clair",
-    themeSwitchedDark: "Passage en mode Sombre",
-    themeSwitchedAuto: "Passage en mode Auto",
+    themeSwitchedLight: 'Passage en mode Clair',
+    themeSwitchedDark: 'Passage en mode Sombre',
+    themeSwitchedAuto: 'Passage en mode Auto',
     bgSet: "L'arrière-plan a été défini avec succès.",
     bgRemoved: "L'arrière-plan a été supprimé.",
     backgroundLoadError: "Échec du chargement de l'arrière-plan.",
-    noBgToRemove:
-      "Il n'y a pas d'arrière-plan actif à supprimer for ce profil.",
+    noBgToRemove: "Il n'y a pas d'arrière-plan actif à supprimer for ce profil.",
     bgDeleted: "L'arrière-plan et son fichier ont été supprimés.",
-    backgroundUrlLoadError:
-      "Échec du téléchargement de l'arrière-plan depuis l'URL.",
-    backgroundPasteError:
-      "Le contenu collé n'est pas un fichier d'arrière-plan ou une URL valide.",
+    backgroundUrlLoadError: "Échec du téléchargement de l'arrière-plan depuis l'URL.",
+    backgroundPasteError: "Le contenu collé n'est pas un fichier d'arrière-plan ou une URL valide.",
     downloadingFromUrl: (url: string) => `Téléchargement depuis ${url}...`,
-    pastedBase64Image: "Image Base64 collée",
+    pastedBase64Image: 'Image Base64 collée',
     pastedImage: (name: string) => `Image "${name}" collée`,
-    invalidFilename: "Nom de fichier invalide.",
-    filenameExists: (name: string) =>
-      `Le nom de fichier "${name}" existe déjà.`,
+    invalidFilename: 'Nom de fichier invalide.',
+    filenameExists: (name: string) => `Le nom de fichier "${name}" existe déjà.`,
     renameSuccess: (name: string) => `Renommé en "${name}"`,
-    renameError: "Erreur lors du changement de nom du fichier.",
-    profileDeleted: "Profil supprimé avec succès.",
+    renameError: 'Erreur lors du changement de nom du fichier.',
+    profileDeleted: 'Profil supprimé avec succès.',
     jpgQualitySet: (value: number) => `Qualité JPG réglée sur ${value}%`,
-    cannotDeleteLastProfile: "Vous ne pouvez pas supprimer le dernier profil.",
+    cannotDeleteLastProfile: 'Vous ne pouvez pas supprimer le dernier profil.',
     noKeywordsToTest: "Cette règle n'a pas de mots-clés à tester.",
-    langNameEmpty: "Le nom de la langue ne peut pas être vide.",
-    langCodeEmpty: "Le code de la langue ne peut pas être vide.",
+    langNameEmpty: 'Le nom de la langue ne peut pas être vide.',
+    langCodeEmpty: 'Le code de la langue ne peut pas être vide.',
     langCodeCore: (code: string) =>
       `Le code "${code}" est réservé à une langue de base. Veuillez en choisir un autre.`,
     langCodeExists: (code: string) =>
@@ -420,269 +383,241 @@ export default {
     langNameCore: (name: string) =>
       `Le nom "${name}" est réservé à une langue de base. Veuillez en choisir un autre.`,
     langCreated: (name: string) => `Langue créée avec succès : ${name}`,
-    langSaved: (name: string) =>
-      `Traductions enregistrées avec succès pour : ${name}`,
+    langSaved: (name: string) => `Traductions enregistrées avec succès pour : ${name}`,
     langExported: (code: string) => `${code}.json exporté avec succès`,
-    langImported: (name: string) =>
-      `Traductions importées avec succès depuis ${name}`,
-    langCopiedJson: "Traductions JSON copiées dans le presse-papiers.",
-    langPastedJson: (count: number) =>
-      `${count} traductions appliquées avec succès.`,
+    langImported: (name: string) => `Traductions importées avec succès depuis ${name}`,
+    langCopiedJson: 'Traductions JSON copiées dans le presse-papiers.',
+    langPastedJson: (count: number) => `${count} traductions appliquées avec succès.`,
     langDeleted: (name: string) => `Langue supprimée : ${name}`,
-    langRestored: "Langue restaurée aux valeurs par défaut.",
+    langRestored: 'Langue restaurée aux valeurs par défaut.',
     deleteBackgroundsError: (message: string) =>
       `Échec de la suppression du dossier des arrière-plans : ${message}`,
-    snippetsLocked: "Extraits verrouillés (Glissement désactivé).",
-    snippetsUnlocked: "Extraits déverrouillés.",
+    snippetsLocked: 'Extraits verrouillés (Glissement désactivé).',
+    snippetsUnlocked: 'Extraits déverrouillés.',
   },
   tooltips: {
-    editCssProfile: "Modifier le profil CSS",
-    pinSnapshot: "Épingler les couleurs actuelles comme une capture",
-    pinSnapshotDate: (date: string) =>
-      `Couleurs épinglées le ${date}. Cliquez pour ré-épingler.`,
-    resetToPinned: "Réinitialiser aux couleurs épinglées",
+    editCssProfile: 'Modifier le profil CSS',
+    pinSnapshot: 'Épingler les couleurs actuelles comme une capture',
+    pinSnapshotDate: (date: string) => `Couleurs épinglées le ${date}. Cliquez pour ré-épingler.`,
+    resetToPinned: 'Réinitialiser aux couleurs épinglées',
     editSnippet: "Modifier l'extrait",
-    copySnippetCss: "Copier le CSS dans le presse-papiers",
+    copySnippetCss: 'Copier le CSS dans le presse-papiers',
     deleteSnippet: "Supprimer l'extrait",
-    setTransparent: "Rendre transparent",
-    undoChange: "Annuler la dernière modification",
-    dragReorder: "Glisser pour réorganiser",
-    testRule: "Tester cette règle avec un mot-clé aléatoire",
-    deleteCustomVar: "Supprimer la variable personnalisée",
+    setTransparent: 'Rendre transparent',
+    undoChange: 'Annuler la dernière modification',
+    dragReorder: 'Glisser pour réorganiser',
+    testRule: 'Tester cette règle avec un mot-clé aléatoire',
+    deleteCustomVar: 'Supprimer la variable personnalisée',
     iconizeSettings: "Paramètres d'Iconize",
-    themeLight: "Thème : Forcer le mode Clair (Cliquer pour passer au Sombre)",
-    themeDark: "Thème : Forcer le mode Sombre (Cliquer pour passer en Auto)",
-    themeAuto: "Thème : Auto (Suit Obsidian) (Cliquer pour passer au Clair)",
-    addBg: "Ajouter un arrière-plan",
+    themeLight: 'Thème : Forcer le mode Clair (Cliquer pour passer au Sombre)',
+    themeDark: 'Thème : Forcer le mode Sombre (Cliquer pour passer en Auto)',
+    themeAuto: 'Thème : Auto (Suit Obsidian) (Cliquer pour passer au Clair)',
+    addBg: 'Ajouter un arrière-plan',
     removeBg: "Supprimer l'arrière-plan",
     bgSettings: "Paramètres d'arrière-plan",
-    browseBg: "Parcourir les arrière-plans stockés",
+    browseBg: 'Parcourir les arrière-plans stockés',
     iconizeNotInstalled:
       "Plugin non installé ou désactivé. Veuillez installer et activer 'Iconize' pour utiliser cette fonctionnalité.",
-    editLang: "Modifier la langue sélectionnée",
-    langMenu: "Options de langue",
-    langInfo: "Pourquoi créer/modifier des langues ?",
-    restoreDefaultLang: "Restaurer les traductions par défaut",
-    lockSnippets: "Verrouiller le glissement",
-    unlockSnippets: "Déverrouiller le glissement",
+    editLang: 'Modifier la langue sélectionnée',
+    langMenu: 'Options de langue',
+    langInfo: 'Pourquoi créer/modifier des langues ?',
+    restoreDefaultLang: 'Restaurer les traductions par défaut',
+    lockSnippets: 'Verrouiller le glissement',
+    unlockSnippets: 'Déverrouiller le glissement',
   },
   commands: {
-    toggleTheme: "Changer le thème du profil actif",
-    enableDisable: "Activer & Désactiver",
-    cycleNext: "Profil suivant",
-    cyclePrevious: "Profil précédent",
-    openSettings: "Ouvrir les paramètres",
+    toggleTheme: 'Changer le thème du profil actif',
+    enableDisable: 'Activer & Désactiver',
+    cycleNext: 'Profil suivant',
+    cyclePrevious: 'Profil précédent',
+    openSettings: 'Ouvrir les paramètres',
   },
   likeCard: {
     profilesStat: (p: number, s: number) => `Profils: ${p} & Extraits: ${s}`,
-    colorsStat: "Couleurs personnalisables",
-    integrationsStat: "Intégrations de plugins",
+    colorsStat: 'Couleurs personnalisables',
+    integrationsStat: 'Intégrations de plugins',
     daysStat: "Jours d'utilisation",
-    starButton: "Étoile sur GitHub",
-    issueButton: "Signaler un problème",
-    syncButton: "Synchronisez votre coffre",
-    telegramButton: "Telegram",
+    starButton: 'Étoile sur GitHub',
+    issueButton: 'Signaler un problème',
+    syncButton: 'Synchronisez votre coffre',
+    telegramButton: 'Telegram',
   },
   colors: {
     names: {
       // Iconize
-      "--iconize-icon-color": "Couleur des icônes Iconize",
+      '--iconize-icon-color': 'Couleur des icônes Iconize',
       // Backgrounds
-      "--background-primary": "Arrière-plan principal",
-      "--background-primary-alt": "Arrière-plan principal (Alt)",
-      "--background-secondary": "Arrière-plan secondaire",
-      "--background-secondary-alt": "Arrière-plan secondaire (Alt)",
-      "--background-modifier-border": "Bordure",
-      "--background-modifier-border-hover": "Bordure (Survol)",
-      "--background-modifier-border-focus": "Bordure (Focus)",
-      "--background-modifier-flair": "Arrière-plan Flair",
-      "--background-modifier-hover": "Arrière-plan (Survol)",
-      "--background-modifier-active": "Arrière-plan (Actif)",
+      '--background-primary': 'Arrière-plan principal',
+      '--background-primary-alt': 'Arrière-plan principal (Alt)',
+      '--background-secondary': 'Arrière-plan secondaire',
+      '--background-secondary-alt': 'Arrière-plan secondaire (Alt)',
+      '--background-modifier-border': 'Bordure',
+      '--background-modifier-border-hover': 'Bordure (Survol)',
+      '--background-modifier-border-focus': 'Bordure (Focus)',
+      '--background-modifier-flair': 'Arrière-plan Flair',
+      '--background-modifier-hover': 'Arrière-plan (Survol)',
+      '--background-modifier-active': 'Arrière-plan (Actif)',
       // Text
-      "--text-normal": "Texte normal",
-      "--text-muted": "Texte estompé",
-      "--text-faint": "Texte faible",
-      "--text-on-accent": "Texte sur accent",
-      "--text-accent": "Texte accentué",
-      "--text-accent-hover": "Texte accentué (Survol)",
-      "--text-selection": "Sélection de texte",
-      "--checklist-done-color": "Tâche cochée",
-      "--tag-color": "Texte des tags",
-      "--tag-color-hover": "Texte des tags (Survol)",
-      "--tag-bg": "Fond des tags",
+      '--text-normal': 'Texte normal',
+      '--text-muted': 'Texte estompé',
+      '--text-faint': 'Texte faible',
+      '--text-on-accent': 'Texte sur accent',
+      '--text-accent': 'Texte accentué',
+      '--text-accent-hover': 'Texte accentué (Survol)',
+      '--text-selection': 'Sélection de texte',
+      '--checklist-done-color': 'Tâche cochée',
+      '--tag-color': 'Texte des tags',
+      '--tag-color-hover': 'Texte des tags (Survol)',
+      '--tag-bg': 'Fond des tags',
       // Headings
-      "--h1-color": "Couleur H1",
-      "--h2-color": "Couleur H2",
-      "--h3-color": "Couleur H3",
-      "--h4-color": "Couleur H4",
-      "--h5-color": "Couleur H5",
-      "--h6-color": "Couleur H6",
+      '--h1-color': 'Couleur H1',
+      '--h2-color': 'Couleur H2',
+      '--h3-color': 'Couleur H3',
+      '--h4-color': 'Couleur H4',
+      '--h5-color': 'Couleur H5',
+      '--h6-color': 'Couleur H6',
       // Markdown
-      "--hr-color": "Ligne horizontale",
-      "--blockquote-border-color": "Bordure de citation",
-      "--blockquote-color": "Texte de citation",
-      "--blockquote-bg": "Fond de citation",
-      "--code-normal": "Texte de code en ligne",
-      "--code-background": "Fond de code en ligne",
-      "--text-highlight-bg": "Fond de texte surligné",
+      '--hr-color': 'Ligne horizontale',
+      '--blockquote-border-color': 'Bordure de citation',
+      '--blockquote-color': 'Texte de citation',
+      '--blockquote-bg': 'Fond de citation',
+      '--code-normal': 'Texte de code en ligne',
+      '--code-background': 'Fond de code en ligne',
+      '--text-highlight-bg': 'Fond de texte surligné',
       // Interactive Elements
-      "--interactive-normal": "Interactif Normal",
-      "--interactive-hover": "Interactif (Survol)",
-      "--interactive-accent": "Interactif Accent",
-      "--interactive-accent-hover": "Interactif Accent (Survol)",
-      "--interactive-success": "Couleur de succès",
-      "--interactive-error": "Couleur d'erreur",
-      "--interactive-warning": "Couleur d'avertissement",
+      '--interactive-normal': 'Interactif Normal',
+      '--interactive-hover': 'Interactif (Survol)',
+      '--interactive-accent': 'Interactif Accent',
+      '--interactive-accent-hover': 'Interactif Accent (Survol)',
+      '--interactive-success': 'Couleur de succès',
+      '--interactive-error': "Couleur d'erreur",
+      '--interactive-warning': "Couleur d'avertissement",
       // UI Elements
-      "--titlebar-background": "Fond de la barre de titre",
-      "--titlebar-background-focused": "Fond de la barre de titre (Focus)",
-      "--titlebar-text-color": "Texte de la barre de titre",
-      "--sidebar-background": "Fond de la barre latérale",
-      "--sidebar-border-color": "Bordure de la barre latérale",
-      "--header-background": "Fond de l'en-tête",
-      "--header-border-color": "Bordure de l'en-tête",
-      "--vault-name-color": "Nom du coffre",
+      '--titlebar-background': 'Fond de la barre de titre',
+      '--titlebar-background-focused': 'Fond de la barre de titre (Focus)',
+      '--titlebar-text-color': 'Texte de la barre de titre',
+      '--sidebar-background': 'Fond de la barre latérale',
+      '--sidebar-border-color': 'Bordure de la barre latérale',
+      '--header-background': "Fond de l'en-tête",
+      '--header-border-color': "Bordure de l'en-tête",
+      '--vault-name-color': 'Nom du coffre',
       // Notices
-      "--cm-notice-text-default": "Texte de notification par défaut",
-      "--cm-notice-bg-default": "Fond de notification par défaut",
+      '--cm-notice-text-default': 'Texte de notification par défaut',
+      '--cm-notice-bg-default': 'Fond de notification par défaut',
       // Graph View
-      "--graph-line": "Ligne du graphique",
-      "--graph-node": "Nœud du graphique",
-      "--graph-text": "Texte du graphique",
-      "--graph-node-unresolved": "Nœud non résolu",
-      "--graph-node-focused": "Nœud focalisé",
-      "--graph-node-tag": "Nœud de tag",
-      "--graph-node-attachment": "Nœud de pièce jointe",
+      '--graph-line': 'Ligne du graphique',
+      '--graph-node': 'Nœud du graphique',
+      '--graph-text': 'Texte du graphique',
+      '--graph-node-unresolved': 'Nœud non résolu',
+      '--graph-node-focused': 'Nœud focalisé',
+      '--graph-node-tag': 'Nœud de tag',
+      '--graph-node-attachment': 'Nœud de pièce jointe',
       // Misc
-      "--scrollbar-thumb-bg": "Curseur de la barre de défilement",
-      "--scrollbar-bg": "Fond de la barre de défilement",
-      "--divider-color": "Séparateur",
+      '--scrollbar-thumb-bg': 'Curseur de la barre de défilement',
+      '--scrollbar-bg': 'Fond de la barre de défilement',
+      '--divider-color': 'Séparateur',
     },
     descriptions: {
       // Iconize
-      "--iconize-icon-color":
+      '--iconize-icon-color':
         "Définit la couleur de toutes les icônes ajoutées par le plugin Iconize. Cela remplacera les propres paramètres de couleur d'Iconize.",
       // Backgrounds
-      "--background-primary":
+      '--background-primary':
         "Couleur de fond principale pour toute l'application, en particulier pour les volets d'édition et de notes.",
-      "--background-primary-alt":
+      '--background-primary-alt':
         "Une couleur de fond alternative, souvent utilisée pour la ligne active dans l'éditeur.",
-      "--background-secondary":
+      '--background-secondary':
         "Arrière-plan secondaire, généralement utilisé pour les barres latérales et autres panneaux d'interface.",
-      "--background-secondary-alt":
+      '--background-secondary-alt':
         "Un arrière-plan secondaire alternatif, utilisé pour le fichier actif de l'explorateur de fichiers.",
-      "--background-modifier-border":
+      '--background-modifier-border':
         "La couleur des bordures sur divers éléments de l'interface comme les boutons et les entrées.",
-      "--background-modifier-border-hover":
-        "La couleur de la bordure lorsque vous survolez un élément.",
-      "--background-modifier-border-focus":
-        "La couleur de la bordure pour un élément focalisé, comme un champ de texte sélectionné.",
-      "--background-modifier-flair":
+      '--background-modifier-border-hover':
+        'La couleur de la bordure lorsque vous survolez un élément.',
+      '--background-modifier-border-focus':
+        'La couleur de la bordure pour un élément focalisé, comme un champ de texte sélectionné.',
+      '--background-modifier-flair':
         "Couleur de fond pour les éléments spéciaux de l'interface, comme l'état 'Synchronisation' ou 'Indexation'.",
-      "--background-modifier-hover":
-        "La couleur de fond des éléments lorsque vous les survolez (par exemple, les éléments de liste).",
-      "--background-modifier-active":
+      '--background-modifier-hover':
+        'La couleur de fond des éléments lorsque vous les survolez (par exemple, les éléments de liste).',
+      '--background-modifier-active':
         "La couleur de fond d'un élément lorsqu'il est activement cliqué ou sélectionné.",
       // Text
-      "--text-normal":
+      '--text-normal':
         "La couleur de texte par défaut pour toutes les notes et la plupart de l'interface.",
-      "--text-muted":
-        "Une couleur de texte légèrement estompée, utilisée pour des informations moins importantes comme les métadonnées de fichier.",
-      "--text-faint":
+      '--text-muted':
+        'Une couleur de texte légèrement estompée, utilisée pour des informations moins importantes comme les métadonnées de fichier.',
+      '--text-faint':
         "La couleur de texte la plus estompée, pour un texte d'interface très subtil ou des éléments désactivés.",
-      "--text-on-accent":
-        "Couleur de texte qui apparaît sur des fonds accentués (comme sur un bouton principal).",
-      "--text-accent":
+      '--text-on-accent':
+        'Couleur de texte qui apparaît sur des fonds accentués (comme sur un bouton principal).',
+      '--text-accent':
         "La couleur d'accentuation principale pour le texte, utilisée pour les liens et les éléments d'interface mis en évidence.",
-      "--text-accent-hover":
-        "La couleur du texte accentué (comme les liens) lorsque vous le survolez.",
-      "--text-selection":
-        "La couleur de fond du texte que vous avez sélectionné avec votre curseur.",
-      "--checklist-done-color":
-        "La couleur de la coche et du texte pour une tâche terminée.",
-      "--tag-color": "Définit la couleur du texte des #tags.",
-      "--tag-color-hover":
-        "Définit la couleur du texte des #tags lors du survol.",
-      "--tag-bg":
-        "Définit la couleur de fond des #tags, permettant une forme de 'pilule'.",
+      '--text-accent-hover':
+        'La couleur du texte accentué (comme les liens) lorsque vous le survolez.',
+      '--text-selection':
+        'La couleur de fond du texte que vous avez sélectionné avec votre curseur.',
+      '--checklist-done-color': 'La couleur de la coche et du texte pour une tâche terminée.',
+      '--tag-color': 'Définit la couleur du texte des #tags.',
+      '--tag-color-hover': 'Définit la couleur du texte des #tags lors du survol.',
+      '--tag-bg': "Définit la couleur de fond des #tags, permettant une forme de 'pilule'.",
       // Headings
-      "--h1-color": "La couleur du texte des titres H1.",
-      "--h2-color": "La couleur du texte des titres H2.",
-      "--h3-color": "La couleur du texte des titres H3.",
-      "--h4-color": "La couleur du texte des titres H4.",
-      "--h5-color": "La couleur du texte des titres H5.",
-      "--h6-color": "La couleur du texte des titres H6.",
+      '--h1-color': 'La couleur du texte des titres H1.',
+      '--h2-color': 'La couleur du texte des titres H2.',
+      '--h3-color': 'La couleur du texte des titres H3.',
+      '--h4-color': 'La couleur du texte des titres H4.',
+      '--h5-color': 'La couleur du texte des titres H5.',
+      '--h6-color': 'La couleur du texte des titres H6.',
       // Markdown
-      "--hr-color":
-        "La couleur de la ligne de séparation horizontale créée avec `---`.",
-      "--blockquote-border-color":
+      '--hr-color': 'La couleur de la ligne de séparation horizontale créée avec `---`.',
+      '--blockquote-border-color':
         "La couleur de la bordure verticale sur le côté gauche d'une citation.",
-      "--blockquote-color":
-        "La couleur du texte pour le contenu à l'intérieur d'une citation.",
-      "--blockquote-bg":
-        "Définit la couleur de fond des éléments de citation (>).",
-      "--code-normal":
+      '--blockquote-color': "La couleur du texte pour le contenu à l'intérieur d'une citation.",
+      '--blockquote-bg': 'Définit la couleur de fond des éléments de citation (>).',
+      '--code-normal':
         "Définit la couleur du texte à l'intérieur du code en ligne (entre apostrophes inverses).",
-      "--code-background":
-        "Définit la couleur de fond pour les blocs de code en ligne.",
-      "--text-highlight-bg":
-        "Définit la couleur de fond pour le texte surligné (==comme ceci==).",
+      '--code-background': 'Définit la couleur de fond pour les blocs de code en ligne.',
+      '--text-highlight-bg': 'Définit la couleur de fond pour le texte surligné (==comme ceci==).',
       // Interactive Elements
-      "--interactive-normal":
-        "La couleur de fond pour les éléments interactifs comme les boutons.",
-      "--interactive-hover":
-        "La couleur de fond pour les éléments interactifs lors du survol.",
-      "--interactive-accent":
+      '--interactive-normal': 'La couleur de fond pour les éléments interactifs comme les boutons.',
+      '--interactive-hover': 'La couleur de fond pour les éléments interactifs lors du survol.',
+      '--interactive-accent':
         "La couleur d'accentuation pour les éléments interactifs importants (par exemple, le bouton 'Créer').",
-      "--interactive-accent-hover":
+      '--interactive-accent-hover':
         "La couleur d'accentuation pour les éléments interactifs importants lors du survol.",
-      "--interactive-success":
-        "Couleur indiquant une opération réussie (par exemple, vert).",
-      "--interactive-error":
-        "Couleur indiquant une erreur (par exemple, rouge).",
-      "--interactive-warning":
-        "Couleur indiquant un avertissement (par exemple, jaune).",
+      '--interactive-success': 'Couleur indiquant une opération réussie (par exemple, vert).',
+      '--interactive-error': 'Couleur indiquant une erreur (par exemple, rouge).',
+      '--interactive-warning': 'Couleur indiquant un avertissement (par exemple, jaune).',
       // UI Elements
-      "--titlebar-background":
-        "La couleur de fond de la barre de titre de la fenêtre principale.",
-      "--titlebar-background-focused":
-        "La couleur de fond de la barre de titre lorsque la fenêtre est active.",
-      "--titlebar-text-color": "La couleur du texte dans la barre de titre.",
-      "--sidebar-background":
-        "Cible spécifiquement l'arrière-plan des barres latérales.",
-      "--sidebar-border-color":
-        "La couleur de la bordure à côté des barres latérales.",
-      "--header-background":
+      '--titlebar-background': 'La couleur de fond de la barre de titre de la fenêtre principale.',
+      '--titlebar-background-focused':
+        'La couleur de fond de la barre de titre lorsque la fenêtre est active.',
+      '--titlebar-text-color': 'La couleur du texte dans la barre de titre.',
+      '--sidebar-background': "Cible spécifiquement l'arrière-plan des barres latérales.",
+      '--sidebar-border-color': 'La couleur de la bordure à côté des barres latérales.',
+      '--header-background':
         "L'arrière-plan pour les en-têtes dans les volets (par exemple, l'en-tête du titre de la note).",
-      "--header-border-color":
-        "La couleur de la bordure sous les en-têtes de volet.",
-      "--vault-name-color":
-        "La couleur du nom de votre coffre dans le coin supérieur gauche.",
-      "--cm-notice-text-default":
-        "Définit la couleur de texte par défaut pour toutes les notifications, sauf si elle est remplacée par une règle.",
-      "--cm-notice-bg-default":
-        "Définit la couleur de fond par défaut pour toutes les notifications, sauf si elle est remplacée par une règle.",
+      '--header-border-color': 'La couleur de la bordure sous les en-têtes de volet.',
+      '--vault-name-color': 'La couleur du nom de votre coffre dans le coin supérieur gauche.',
+      '--cm-notice-text-default':
+        'Définit la couleur de texte par défaut pour toutes les notifications, sauf si elle est remplacée par une règle.',
+      '--cm-notice-bg-default':
+        'Définit la couleur de fond par défaut pour toutes les notifications, sauf si elle est remplacée par une règle.',
       // Graph View
-      "--graph-line":
-        "La couleur des lignes de connexion entre les notes dans la vue graphique.",
-      "--graph-node":
-        "La couleur des nœuds circulaires pour les notes existantes.",
-      "--graph-text":
-        "La couleur des étiquettes de texte sur les nœuds du graphique.",
-      "--graph-node-unresolved":
+      '--graph-line': 'La couleur des lignes de connexion entre les notes dans la vue graphique.',
+      '--graph-node': 'La couleur des nœuds circulaires pour les notes existantes.',
+      '--graph-text': 'La couleur des étiquettes de texte sur les nœuds du graphique.',
+      '--graph-node-unresolved':
         "La couleur des nœuds pour les notes qui n'existent pas encore (liens non résolus).",
-      "--graph-node-focused":
-        "Couleur du nœud qui est focalisé ou survolé (nœud en surbrillance).",
-      "--graph-node-tag":
-        "Couleur des nœuds représentant les tags lorsque les tags sont affichés dans le graphique.",
-      "--graph-node-attachment":
-        "Couleur des nœuds représentant les pièces jointes (par exemple, image ou autres fichiers liés).",
+      '--graph-node-focused': 'Couleur du nœud qui est focalisé ou survolé (nœud en surbrillance).',
+      '--graph-node-tag':
+        'Couleur des nœuds représentant les tags lorsque les tags sont affichés dans le graphique.',
+      '--graph-node-attachment':
+        'Couleur des nœuds représentant les pièces jointes (par exemple, image ou autres fichiers liés).',
       // Misc
-      "--scrollbar-thumb-bg":
-        "La couleur de la partie déplaçable de la barre de défilement.",
-      "--scrollbar-bg":
-        "La couleur de la piste de la barre de défilement (l'arrière-plan).",
-      "--divider-color":
+      '--scrollbar-thumb-bg': 'La couleur de la partie déplaçable de la barre de défilement.',
+      '--scrollbar-bg': "La couleur de la piste de la barre de défilement (l'arrière-plan).",
+      '--divider-color':
         "La couleur pour les lignes de séparation générales de l'interface, comme les bordures entre les paramètres.",
     },
   },

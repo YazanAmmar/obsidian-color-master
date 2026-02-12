@@ -1,20 +1,18 @@
-export type LocaleCode = "en" | "ar" | "fa" | "fr";
+export type LocaleCode = 'en' | 'ar' | 'fa' | 'fr';
 export type LocaleFunc = (...args: (string | number)[]) => string;
-export type LocalizedValue =
-  | string
-  | ((...args: (string | number)[]) => string);
+export type LocalizedValue = string | ((...args: (string | number)[]) => string);
 
 /**
  * A dictionary of core language names to display in the list.
  */
 export const CORE_LANGUAGES: Record<LocaleCode, string> = {
-  en: "English",
-  ar: "العَرَبيَّةُ",
-  fa: "فارسی",
-  fr: "Français",
+  en: 'English',
+  ar: 'العَرَبيَّةُ',
+  fa: 'فارسی',
+  fr: 'Français',
 };
 
-export const DEFAULT_LOCALE: LocaleCode = "en";
+export const DEFAULT_LOCALE: LocaleCode = 'en';
 
 export interface LocaleStrings {
   plugin: {

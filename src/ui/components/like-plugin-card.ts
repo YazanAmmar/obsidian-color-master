@@ -1,25 +1,20 @@
-import { DEFAULT_VARS } from "../../constants";
-import { t } from "../../i18n/strings";
-import { flattenVars } from "../../utils";
-import type { ColorMasterSettingTab } from "../settingsTab";
+import { DEFAULT_VARS } from '../../constants';
+import { t } from '../../i18n/strings';
+import { flattenVars } from '../../utils';
+import type { ColorMasterSettingTab } from '../settingsTab';
 
-function createStatBar(
-  parentEl: HTMLElement,
-  label: string,
-  value: number,
-  max: number,
-) {
-  const skillBox = parentEl.createDiv("cm-stat-box");
-  const header = skillBox.createDiv("cm-stat-header");
-  header.createEl("span", { cls: "title", text: label });
-  header.createEl("span", { cls: "value", text: String(value) });
-  const skillBar = skillBox.createDiv("skill-bar");
+function createStatBar(parentEl: HTMLElement, label: string, value: number, max: number) {
+  const skillBox = parentEl.createDiv('cm-stat-box');
+  const header = skillBox.createDiv('cm-stat-header');
+  header.createEl('span', { cls: 'title', text: label });
+  header.createEl('span', { cls: 'value', text: String(value) });
+  const skillBar = skillBox.createDiv('skill-bar');
   const percentage = Math.min(100, Math.round((value / max) * 100));
-  const skillPer = skillBar.createEl("span", {
-    cls: "skill-per cm-skill-gradient",
+  const skillPer = skillBar.createEl('span', {
+    cls: 'skill-per cm-skill-gradient',
   });
   skillPer.setCssProps({
-    "--skill-percentage": `${percentage}%`,
+    '--skill-percentage': `${percentage}%`,
   });
 }
 
@@ -31,9 +26,7 @@ function calcSnippetsCount(settingTab: ColorMasterSettingTab): number {
   const settings = settingTab.plugin.settings;
   const profiles = settings.profiles || {};
 
-  let totalSnippets = settings.globalSnippets
-    ? settings.globalSnippets.length
-    : 0;
+  let totalSnippets = settings.globalSnippets ? settings.globalSnippets.length : 0;
 
   for (const profileName in profiles) {
     const profile = profiles[profileName];
@@ -47,9 +40,7 @@ function calcSnippetsCount(settingTab: ColorMasterSettingTab): number {
 function calcVarsCount(settingTab: ColorMasterSettingTab): number {
   const allVars = new Set(Object.keys(flattenVars(DEFAULT_VARS)));
   const activeProfile =
-    settingTab.plugin.settings.profiles[
-      settingTab.plugin.settings.activeProfile
-    ];
+    settingTab.plugin.settings.profiles[settingTab.plugin.settings.activeProfile];
   if (activeProfile && activeProfile.vars) {
     Object.keys(activeProfile.vars).forEach((varName) => allVars.add(varName));
   }
@@ -58,21 +49,18 @@ function calcVarsCount(settingTab: ColorMasterSettingTab): number {
 
 function calcPluginIntegrations(): number {
   try {
-    if (DEFAULT_VARS && DEFAULT_VARS["Plugin Integrations"]) {
-      return Object.keys(DEFAULT_VARS["Plugin Integrations"]).length;
+    if (DEFAULT_VARS && DEFAULT_VARS['Plugin Integrations']) {
+      return Object.keys(DEFAULT_VARS['Plugin Integrations']).length;
     }
   } catch (e) {
-    console.error("Color Master: Failed to calculate plugin integrations.", e);
+    console.error('Color Master: Failed to calculate plugin integrations.', e);
   }
   return 0;
 }
 
-export function drawLikePluginCard(
-  containerEl: HTMLElement,
-  settingTab: ColorMasterSettingTab,
-) {
-  const likeCardEl = containerEl.createDiv("cm-like-card");
-  const bannerContainer = likeCardEl.createDiv("cm-banner-container");
+export function drawLikePluginCard(containerEl: HTMLElement, settingTab: ColorMasterSettingTab) {
+  const likeCardEl = containerEl.createDiv('cm-like-card');
+  const bannerContainer = likeCardEl.createDiv('cm-banner-container');
   const bannerSvgString = `
   <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="240" viewBox="0 0 1280 240" role="img" aria-label="Color Master banner" class="cm-banner-svg">
   <defs>
@@ -100,78 +88,64 @@ export function drawLikePluginCard(
 </svg>`;
 
   const parser = new DOMParser();
-  const svgDoc = parser.parseFromString(bannerSvgString, "image/svg+xml");
+  const svgDoc = parser.parseFromString(bannerSvgString, 'image/svg+xml');
   const svgElement = svgDoc.documentElement;
 
   bannerContainer.appendChild(svgElement);
 
-  const contentWrapper = likeCardEl.createDiv("cm-content-wrapper");
+  const contentWrapper = likeCardEl.createDiv('cm-content-wrapper');
 
-  const statsContainer = contentWrapper.createDiv("cm-like-stats");
+  const statsContainer = contentWrapper.createDiv('cm-like-stats');
   const profilesCount = calcProfilesCount(settingTab);
   const snippetsCount = calcSnippetsCount(settingTab);
-  const sinceInstalled =
-    settingTab.plugin.settings.installDate || new Date().toISOString();
+  const sinceInstalled = settingTab.plugin.settings.installDate || new Date().toISOString();
   const days = Math.max(
     1,
-    Math.floor(
-      (Date.now() - new Date(sinceInstalled).getTime()) / (1000 * 60 * 60 * 24),
-    ),
+    Math.floor((Date.now() - new Date(sinceInstalled).getTime()) / (1000 * 60 * 60 * 24)),
   );
 
   createStatBar(
     statsContainer,
-    t("likeCard.profilesStat", profilesCount, snippetsCount),
+    t('likeCard.profilesStat', profilesCount, snippetsCount),
     profilesCount + snippetsCount,
     50,
   );
   createStatBar(
     statsContainer,
-    t("likeCard.colorsStat"),
+    t('likeCard.colorsStat'),
     calcVarsCount(settingTab),
     calcVarsCount(settingTab),
   );
-  createStatBar(
-    statsContainer,
-    t("likeCard.integrationsStat"),
-    calcPluginIntegrations(),
-    5,
-  );
-  createStatBar(statsContainer, t("likeCard.daysStat"), days, 365);
+  createStatBar(statsContainer, t('likeCard.integrationsStat'), calcPluginIntegrations(), 5);
+  createStatBar(statsContainer, t('likeCard.daysStat'), days, 365);
 
-  const actions = contentWrapper.createDiv("cm-like-actions");
-  const starButtonWrapper = actions.createDiv({ cls: "codepen-button" });
-  starButtonWrapper.createEl("span", { text: t("likeCard.starButton") });
-  starButtonWrapper.addEventListener("click", () => {
-    window.open(
-      "https://github.com/YazanAmmar/obsidian-color-master",
-      "_blank",
-    );
+  const actions = contentWrapper.createDiv('cm-like-actions');
+  const starButtonWrapper = actions.createDiv({ cls: 'codepen-button' });
+  starButtonWrapper.createEl('span', { text: t('likeCard.starButton') });
+  starButtonWrapper.addEventListener('click', () => {
+    window.open('https://github.com/YazanAmmar/obsidian-color-master', '_blank');
   });
 
-  const reportButtonWrapper = actions.createDiv({ cls: "codepen-button" });
-  reportButtonWrapper.createEl("span", { text: t("likeCard.issueButton") });
-  reportButtonWrapper.addEventListener("click", () => {
-    window.open(
-      "https://github.com/YazanAmmar/obsidian-color-master/issues",
-      "_blank",
-    );
+  const reportButtonWrapper = actions.createDiv({ cls: 'codepen-button' });
+  reportButtonWrapper.createEl('span', { text: t('likeCard.issueButton') });
+  reportButtonWrapper.addEventListener('click', () => {
+    window.open('https://github.com/YazanAmmar/obsidian-color-master/issues', '_blank');
   });
 
-  const syncPromoContainer = actions.createDiv({ cls: "cm-promo-container" });
+  const syncPromoContainer = actions.createDiv({ cls: 'cm-promo-container' });
   const syncButtonWrapper = syncPromoContainer.createDiv({
-    cls: "codepen-button",
+    cls: 'codepen-button',
   });
-  syncButtonWrapper.createEl("span", { text: t("likeCard.syncButton") });
-  syncButtonWrapper.addEventListener("click", () => {
-    window.open("https://github.com/YazanAmmar/SyncEveryThing", "_blank");
+  syncButtonWrapper.createEl('span', { text: t('likeCard.syncButton') });
+  syncButtonWrapper.addEventListener('click', () => {
+    window.open('https://github.com/YazanAmmar/SyncEveryThing', '_blank');
   });
 
-  const myGithubButtonWrapper = actions.createDiv({ cls: "codepen-button" });
-  myGithubButtonWrapper.createEl("span", {
-    text: t("likeCard.telegramButton"),
+  const myGithubButtonWrapper = actions.createDiv({ cls: 'codepen-button' });
+  myGithubButtonWrapper.createEl('span', {
+    text: t('likeCard.telegramButton'),
   });
-  myGithubButtonWrapper.addEventListener("click", () => {
-    window.open("https://t.me/ObsidianColorMaster", "_blank");
+  myGithubButtonWrapper.addEventListener('click', () => {
+    window.open('https://t.me/ObsidianColorMaster', '_blank');
   });
 }

@@ -1,5 +1,5 @@
-import { App, DataAdapter } from "obsidian";
-import type { Profile } from "./types";
+import { App, DataAdapter } from 'obsidian';
+import type { Profile } from './types';
 
 // Flattens nested variable objects into a single level map
 export function flattenVars(varsObject: { [key: string]: unknown }): {
@@ -14,7 +14,7 @@ export function flattenVars(varsObject: { [key: string]: unknown }): {
 
 // Standard relative luminance calculation
 export function getLuminance(hex: string): number {
-  const rgb = parseInt(hex.startsWith("#") ? hex.substring(1) : hex, 16);
+  const rgb = parseInt(hex.startsWith('#') ? hex.substring(1) : hex, 16);
   const r = (rgb >> 16) & 0xff;
   const g = (rgb >> 8) & 0xff;
   const b = (rgb >> 0) & 0xff;
@@ -40,22 +40,19 @@ export function getContrastRatio(hex1: string, hex2: string): number {
 export function getAccessibilityRating(ratio: number) {
   const score = ratio.toFixed(2);
   if (ratio >= 7) {
-    return { text: "AAA", score, cls: "cm-accessibility-pass" };
+    return { text: 'AAA', score, cls: 'cm-accessibility-pass' };
   }
   if (ratio >= 4.5) {
-    return { text: "AA", score, cls: "cm-accessibility-pass" };
+    return { text: 'AA', score, cls: 'cm-accessibility-pass' };
   }
   if (ratio >= 3) {
-    return { text: "AA Large", score, cls: "cm-accessibility-warn" };
+    return { text: 'AA Large', score, cls: 'cm-accessibility-warn' };
   }
-  return { text: "Fail", score, cls: "cm-accessibility-fail" };
+  return { text: 'Fail', score, cls: 'cm-accessibility-fail' };
 }
 
 // Checks if a plugin is both installed AND enabled
-export function isPluginEnabled(
-  app: App,
-  pluginIds: string | string[],
-): boolean {
+export function isPluginEnabled(app: App, pluginIds: string | string[]): boolean {
   const pluginManager = (app as unknown).plugins;
   const idsToCheck = Array.isArray(pluginIds) ? pluginIds : [pluginIds];
 
@@ -64,7 +61,7 @@ export function isPluginEnabled(
 
 // Helper check for Iconize or Icon Folder
 export function isIconizeEnabled(app: App): boolean {
-  const iconizeIDs = ["obsidian-icon-folder", "iconize"];
+  const iconizeIDs = ['obsidian-icon-folder', 'iconize'];
   return isPluginEnabled(app, iconizeIDs);
 }
 
@@ -78,33 +75,26 @@ export function debounce(fn: (...args: unknown[]) => void, ms = 200) {
 }
 
 // Auto-increments filename if path exists (e.g., file-2.png)
-export async function findNextAvailablePath(
-  adapter: DataAdapter,
-  path: string,
-): Promise<string> {
+export async function findNextAvailablePath(adapter: DataAdapter, path: string): Promise<string> {
   if (!(await adapter.exists(path))) {
     return path;
   }
 
-  const pathParts = path.split("/");
+  const pathParts = path.split('/');
   const fullFileName = pathParts.pop();
   if (!fullFileName) return path;
 
-  const dir = pathParts.join("/");
-  const fileNameParts = fullFileName.split(".");
-  const ext = fileNameParts.length > 1 ? fileNameParts.pop() : "";
-  const baseName = fileNameParts.join(".");
+  const dir = pathParts.join('/');
+  const fileNameParts = fullFileName.split('.');
+  const ext = fileNameParts.length > 1 ? fileNameParts.pop() : '';
+  const baseName = fileNameParts.join('.');
 
   let counter = 2;
-  let newPath = ext
-    ? `${dir}/${baseName}-${counter}.${ext}`
-    : `${dir}/${baseName}-${counter}`;
+  let newPath = ext ? `${dir}/${baseName}-${counter}.${ext}` : `${dir}/${baseName}-${counter}`;
 
   while (await adapter.exists(newPath)) {
     counter++;
-    newPath = ext
-      ? `${dir}/${baseName}-${counter}.${ext}`
-      : `${dir}/${baseName}-${counter}`;
+    newPath = ext ? `${dir}/${baseName}-${counter}.${ext}` : `${dir}/${baseName}-${counter}`;
   }
   return newPath;
 }
@@ -115,16 +105,11 @@ export async function maybeConvertToJpg(
   arrayBuffer: ArrayBuffer,
   fileName: string,
 ): Promise<{ arrayBuffer: ArrayBuffer; fileName: string }> {
-  const fileExt = fileName.split(".").pop()?.toLowerCase();
-  const isAlreadyJpg = fileExt === "jpg" || fileExt === "jpeg";
-  const supportedToConvert = ["png", "webp", "bmp"].includes(fileExt || "");
+  const fileExt = fileName.split('.').pop()?.toLowerCase();
+  const isAlreadyJpg = fileExt === 'jpg' || fileExt === 'jpeg';
+  const supportedToConvert = ['png', 'webp', 'bmp'].includes(fileExt || '');
 
-  if (
-    !activeProfile ||
-    !activeProfile.convertImagesToJpg ||
-    isAlreadyJpg ||
-    !supportedToConvert
-  ) {
+  if (!activeProfile || !activeProfile.convertImagesToJpg || isAlreadyJpg || !supportedToConvert) {
     return { arrayBuffer, fileName };
   }
 
@@ -136,18 +121,18 @@ export async function maybeConvertToJpg(
     const image = new Image();
 
     image.onload = () => {
-      const canvas = document.createElement("canvas");
+      const canvas = document.createElement('canvas');
       canvas.width = image.width;
       canvas.height = image.height;
-      const ctx = canvas.getContext("2d");
+      const ctx = canvas.getContext('2d');
 
       if (!ctx) {
         URL.revokeObjectURL(url);
-        return reject(new Error("Failed to get canvas context"));
+        return reject(new Error('Failed to get canvas context'));
       }
 
       // Fill background white since JPG doesn't support alpha
-      ctx.fillStyle = "#FFFFFF";
+      ctx.fillStyle = '#FFFFFF';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       ctx.drawImage(image, 0, 0);
@@ -158,15 +143,14 @@ export async function maybeConvertToJpg(
       canvas.toBlob(
         (jpgBlob) => {
           if (!jpgBlob) {
-            reject(new Error("Failed to create JPG blob"));
+            reject(new Error('Failed to create JPG blob'));
             return;
           }
 
           jpgBlob
             .arrayBuffer()
             .then((newArrayBuffer) => {
-              const newFileName =
-                fileName.substring(0, fileName.lastIndexOf(".")) + ".jpg";
+              const newFileName = fileName.substring(0, fileName.lastIndexOf('.')) + '.jpg';
 
               console.debug(
                 `Color Master: Conversion complete. New size: ${newArrayBuffer.byteLength} bytes`,
@@ -178,14 +162,14 @@ export async function maybeConvertToJpg(
               reject(err instanceof Error ? err : new Error(String(err)));
             });
         },
-        "image/jpeg",
+        'image/jpeg',
         quality,
       );
     };
 
     image.onerror = () => {
       URL.revokeObjectURL(url);
-      reject(new Error("Failed to load image for conversion"));
+      reject(new Error('Failed to load image for conversion'));
     };
 
     image.src = url;
@@ -193,14 +177,12 @@ export async function maybeConvertToJpg(
 }
 
 // Reconstructs nested object from dot-notation keys
-export function unflattenStrings(
-  flatObject: Record<string, string>,
-): Record<string, unknown> {
+export function unflattenStrings(flatObject: Record<string, string>): Record<string, unknown> {
   const nestedResult: Record<string, unknown> = {};
 
   for (const key in flatObject) {
     if (Object.prototype.hasOwnProperty.call(flatObject, key)) {
-      const keys = key.split(".");
+      const keys = key.split('.');
       let currentLevel = nestedResult;
 
       for (let i = 0; i < keys.length; i++) {
@@ -209,7 +191,7 @@ export function unflattenStrings(
         if (i === keys.length - 1) {
           currentLevel[part] = flatObject[key] as unknown;
         } else {
-          if (!currentLevel[part] || typeof currentLevel[part] !== "object") {
+          if (!currentLevel[part] || typeof currentLevel[part] !== 'object') {
             currentLevel[part] = {};
           }
           currentLevel = currentLevel[part] as Record<string, unknown>;
@@ -222,19 +204,19 @@ export function unflattenStrings(
 
 function componentToHex(c: number): string {
   const hex = Math.round(c).toString(16);
-  return hex.length == 1 ? "0" + hex : hex;
+  return hex.length == 1 ? '0' + hex : hex;
 }
 
 // Normalizes any CSS color string to Hex/HexA format
 export function convertColorToHex(colorString: string): string {
   const s = colorString.toLowerCase().trim();
 
-  if (s === "transparent") {
-    return "#00000000";
+  if (s === 'transparent') {
+    return '#00000000';
   }
 
   // Expand short hex codes if needed
-  if (s.startsWith("#")) {
+  if (s.startsWith('#')) {
     if (s.length === 4) {
       const r = s[1];
       const g = s[2];
@@ -252,7 +234,7 @@ export function convertColorToHex(colorString: string): string {
   }
 
   // Use the DOM to normalize other formats (rgb, hsl, names)
-  const d = document.createElement("div");
+  const d = document.createElement('div');
   d.style.color = s;
   document.body.appendChild(d);
 
@@ -260,9 +242,7 @@ export function convertColorToHex(colorString: string): string {
   const computedColor = getComputedStyle(d).color;
   document.body.removeChild(d);
 
-  const match = computedColor.match(
-    /rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/,
-  );
+  const match = computedColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
 
   if (match) {
     const r = parseInt(match[1]);
@@ -297,7 +277,7 @@ if (!HTMLElement.prototype.setCssProps) {
     for (const key in props) {
       const value = props[key];
 
-      if (value === null || value === undefined || value === "") {
+      if (value === null || value === undefined || value === '') {
         this.style.removeProperty(key);
       } else {
         try {

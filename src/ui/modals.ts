@@ -12,27 +12,15 @@ import {
   TextComponent,
   requestUrl,
   Component,
-} from "obsidian";
-import Sortable from "sortablejs";
-import { DEFAULT_VARS, DEFAULT_PROFILE } from "../constants";
-import {
-  CORE_LOCALES,
-  flattenStrings,
-  getFallbackStrings,
-  loadLanguage,
-  t,
-} from "../i18n/strings";
-import { type LocaleCode, CORE_LANGUAGES, LocalizedValue } from "../i18n/types";
-import type ColorMaster from "../main";
-import type {
-  CustomTranslation,
-  CustomVarType,
-  NoticeRule,
-  Profile,
-  Snippet,
-} from "../types";
-import { debounce, flattenVars, unflattenStrings } from "../utils";
-import type { ColorMasterSettingTab } from "./settingsTab";
+} from 'obsidian';
+import Sortable from 'sortablejs';
+import { DEFAULT_VARS, DEFAULT_PROFILE } from '../constants';
+import { CORE_LOCALES, flattenStrings, getFallbackStrings, loadLanguage, t } from '../i18n/strings';
+import { type LocaleCode, CORE_LANGUAGES, LocalizedValue } from '../i18n/types';
+import type ColorMaster from '../main';
+import type { CustomTranslation, CustomVarType, NoticeRule, Profile, Snippet } from '../types';
+import { debounce, flattenVars, unflattenStrings } from '../utils';
+import type { ColorMasterSettingTab } from './settingsTab';
 
 /**
  * A new Base Modal that all Color Master modals should extend from.
@@ -44,7 +32,7 @@ class ColorMasterBaseModal extends Modal {
   constructor(app: App, plugin: ColorMaster) {
     super(app);
     this.plugin = plugin;
-    this.modalEl.classList.add("color-master-modal");
+    this.modalEl.classList.add('color-master-modal');
   }
 
   /**
@@ -54,12 +42,12 @@ class ColorMasterBaseModal extends Modal {
   onOpen() {
     const langCode = this.plugin.settings.language;
     const customLang = this.plugin.settings.customLanguages?.[langCode];
-    const isCoreRtlLang = langCode === "ar" || langCode === "fa";
+    const isCoreRtlLang = langCode === 'ar' || langCode === 'fa';
     const isCustomRtlLang = customLang?.isRtl === true;
     const isRtlEnabled = this.plugin.settings.useRtlLayout;
     const isRTL = (isCoreRtlLang || isCustomRtlLang) && isRtlEnabled;
 
-    this.modalEl.setAttribute("dir", isRTL ? "rtl" : "ltr");
+    this.modalEl.setAttribute('dir', isRTL ? 'rtl' : 'ltr');
   }
 }
 
@@ -75,30 +63,30 @@ export class LanguageInfoModal extends ColorMasterBaseModal {
     super.onOpen();
     const { contentEl } = this;
     contentEl.empty();
-    this.modalEl.classList.add("color-master-modal", "cm-info-modal");
+    this.modalEl.classList.add('color-master-modal', 'cm-info-modal');
 
-    contentEl.createEl("h3", { text: t("modals.langInfo.title") });
+    contentEl.createEl('h3', { text: t('modals.langInfo.title') });
 
-    const infoContainer = contentEl.createDiv({ cls: "cm-info-content" });
+    const infoContainer = contentEl.createDiv({ cls: 'cm-info-content' });
 
     const comp = new Component();
 
     void MarkdownRenderer.render(
       this.app,
-      t("modals.langInfo.desc"),
+      t('modals.langInfo.desc'),
       infoContainer,
-      "",
+      '',
       comp,
     ).catch((err) => {
-      console.error("Failed to render markdown:", err);
+      console.error('Failed to render markdown:', err);
     });
 
     const buttonContainer = contentEl.createDiv({
-      cls: "modal-button-container",
+      cls: 'modal-button-container',
     });
 
     new ButtonComponent(buttonContainer)
-      .setButtonText(t("buttons.apply"))
+      .setButtonText(t('buttons.apply'))
       .setCta()
       .onClick(() => {
         this.close();
@@ -115,13 +103,9 @@ export class ProfileJsonImportModal extends ColorMasterBaseModal {
   settingTab: ColorMasterSettingTab;
   textarea: HTMLTextAreaElement;
   nameInput: TextComponent;
-  profileName: string = "";
+  profileName: string = '';
 
-  constructor(
-    app: App,
-    plugin: ColorMaster,
-    settingTabInstance: ColorMasterSettingTab,
-  ) {
+  constructor(app: App, plugin: ColorMaster, settingTabInstance: ColorMasterSettingTab) {
     super(app, plugin);
     this.settingTab = settingTabInstance;
   }
@@ -131,25 +115,21 @@ export class ProfileJsonImportModal extends ColorMasterBaseModal {
 
     const { contentEl } = this;
     contentEl.empty();
-    contentEl.createEl("h3", { text: t("modals.jsonImport.title") });
-    new Setting(contentEl)
-      .setName(t("modals.newProfile.nameLabel"))
-      .addText((text) => {
-        this.nameInput = text;
-        text
-          .setPlaceholder(t("modals.newProfile.namePlaceholder"))
-          .onChange((value) => {
-            this.profileName = value.trim();
-          });
+    contentEl.createEl('h3', { text: t('modals.jsonImport.title') });
+    new Setting(contentEl).setName(t('modals.newProfile.nameLabel')).addText((text) => {
+      this.nameInput = text;
+      text.setPlaceholder(t('modals.newProfile.namePlaceholder')).onChange((value) => {
+        this.profileName = value.trim();
       });
-    contentEl.createEl("hr");
-
-    contentEl.createEl("p", {
-      text: t("modals.jsonImport.desc1"),
     });
-    this.textarea = contentEl.createEl("textarea", {
-      cls: "cm-search-input cm-import-textarea",
-      attr: { rows: "20", placeholder: t("modals.jsonImport.placeholder") },
+    contentEl.createEl('hr');
+
+    contentEl.createEl('p', {
+      text: t('modals.jsonImport.desc1'),
+    });
+    this.textarea = contentEl.createEl('textarea', {
+      cls: 'cm-search-input cm-import-textarea',
+      attr: { rows: '20', placeholder: t('modals.jsonImport.placeholder') },
     });
 
     // Add an 'input' event listener to parse JSON on-the-fly
@@ -161,7 +141,7 @@ export class ProfileJsonImportModal extends ColorMasterBaseModal {
         const parsed = JSON.parse(content);
 
         // Check if the parsed object has a 'name' property and it's a string
-        if (parsed && typeof parsed.name === "string" && parsed.name) {
+        if (parsed && typeof parsed.name === 'string' && parsed.name) {
           this.nameInput.setValue(parsed.name);
           this.profileName = parsed.name;
         }
@@ -171,39 +151,36 @@ export class ProfileJsonImportModal extends ColorMasterBaseModal {
     }, 0);
 
     // Attach the debounced function to the textarea's input event
-    this.textarea.addEventListener("input", debouncedParse);
+    this.textarea.addEventListener('input', debouncedParse);
 
     // File import button
     new Setting(contentEl)
-      .setName(t("modals.jsonImport.settingName"))
-      .setDesc(t("modals.jsonImport.settingDesc"))
+      .setName(t('modals.jsonImport.settingName'))
+      .setDesc(t('modals.jsonImport.settingDesc'))
       .addButton((button) => {
-        button.setButtonText(t("buttons.chooseFile")).onClick(() => {
+        button.setButtonText(t('buttons.chooseFile')).onClick(() => {
           this._handleFileImport();
         });
       });
 
     // Action buttons (Replace/Create New)
-    const ctrl = contentEl.createDiv({ cls: "modal-button-container" });
-    const replaceBtn = ctrl.createEl("button", {
-      text: t("modals.jsonImport.replaceActiveButton"),
+    const ctrl = contentEl.createDiv({ cls: 'modal-button-container' });
+    const replaceBtn = ctrl.createEl('button', {
+      text: t('modals.jsonImport.replaceActiveButton'),
     });
-    const createBtn = ctrl.createEl("button", {
-      text: t("modals.jsonImport.createNewButton"),
-      cls: "mod-cta",
+    const createBtn = ctrl.createEl('button', {
+      text: t('modals.jsonImport.createNewButton'),
+      cls: 'mod-cta',
     });
 
-    replaceBtn.addEventListener(
-      "click",
-      () => void this._applyImport("replace"),
-    );
-    createBtn.addEventListener("click", () => void this._applyCreate());
+    replaceBtn.addEventListener('click', () => void this._applyImport('replace'));
+    createBtn.addEventListener('click', () => void this._applyCreate());
   }
 
   _handleFileImport() {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = ".json";
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
 
     input.onchange = () => {
       void (async () => {
@@ -215,17 +192,16 @@ export class ProfileJsonImportModal extends ColorMasterBaseModal {
         try {
           const parsed = JSON.parse(content);
           const profileNameFromJson =
-            parsed.name ||
-            file.name.replace(".profile.json", "").replace(".json", "");
+            parsed.name || file.name.replace('.profile.json', '').replace('.json', '');
           this.nameInput.setValue(profileNameFromJson);
           this.profileName = profileNameFromJson;
         } catch {
           // ignore json parsing errors
         }
 
-        new Notice(t("notices.fileLoaded", file.name));
+        new Notice(t('notices.fileLoaded', file.name));
       })().catch((err) => {
-        console.error("Failed to load profile JSON:", err);
+        console.error('Failed to load profile JSON:', err);
       });
     };
     input.click();
@@ -238,18 +214,18 @@ export class ProfileJsonImportModal extends ColorMasterBaseModal {
   async _applyCreate() {
     const name = this.profileName;
     if (!name) {
-      new Notice(t("notices.varNameEmpty"));
+      new Notice(t('notices.varNameEmpty'));
       return;
     }
 
     if (this.plugin.settings.profiles[name]) {
-      new Notice(t("notices.profileNameExists", name));
+      new Notice(t('notices.profileNameExists', name));
       return;
     }
 
     const raw = this.textarea.value.trim();
     if (!raw) {
-      new Notice(t("notices.textboxEmpty"));
+      new Notice(t('notices.textboxEmpty'));
       return;
     }
 
@@ -257,7 +233,7 @@ export class ProfileJsonImportModal extends ColorMasterBaseModal {
     try {
       parsed = JSON.parse(raw);
     } catch {
-      new Notice(t("notices.invalidJson"));
+      new Notice(t('notices.invalidJson'));
       return;
     }
 
@@ -273,45 +249,44 @@ export class ProfileJsonImportModal extends ColorMasterBaseModal {
     await this.plugin.saveSettings();
     this.settingTab.display();
     this.close();
-    new Notice(t("notices.profileCreatedSuccess", name));
+    new Notice(t('notices.profileCreatedSuccess', name));
   }
-  async _applyImport(mode: "replace") {
+  async _applyImport(mode: 'replace') {
     const raw = this.textarea.value.trim();
     if (!raw) {
-      new Notice(t("notices.textboxEmpty"));
+      new Notice(t('notices.textboxEmpty'));
       return;
     }
     let parsed;
     try {
       parsed = JSON.parse(raw);
     } catch {
-      new Notice(t("notices.invalidJson"));
+      new Notice(t('notices.invalidJson'));
       return;
     }
 
     const profileObj = parsed.profile ? parsed.profile : parsed;
-    if (typeof profileObj !== "object" || profileObj === null) {
+    if (typeof profileObj !== 'object' || profileObj === null) {
       // Added null check for safety
-      new Notice(t("notices.invalidProfileObject"));
+      new Notice(t('notices.invalidProfileObject'));
       return;
     }
 
     const activeName = this.plugin.settings.activeProfile;
     const activeProfile = this.plugin.settings.profiles[activeName];
     if (!activeProfile) {
-      new Notice(t("notices.profileNotFound"));
+      new Notice(t('notices.profileNotFound'));
       return;
     }
 
-    const importedVars = "vars" in profileObj ? profileObj.vars : {};
-    const importedSnippets =
-      "snippets" in profileObj ? profileObj.snippets : [];
-    const themeType = "themeType" in profileObj ? profileObj.themeType : "auto";
+    const importedVars = 'vars' in profileObj ? profileObj.vars : {};
+    const importedSnippets = 'snippets' in profileObj ? profileObj.snippets : [];
+    const themeType = 'themeType' in profileObj ? profileObj.themeType : 'auto';
 
-    if (mode === "replace") {
+    if (mode === 'replace') {
       activeProfile.vars = importedVars as { [key: string]: string };
       activeProfile.snippets = importedSnippets as Snippet[];
-      activeProfile.themeType = themeType as "auto" | "dark" | "light";
+      activeProfile.themeType = themeType as 'auto' | 'dark' | 'light';
     }
 
     await this.plugin.saveSettings();
@@ -324,24 +299,18 @@ export class ProfileJsonImportModal extends ColorMasterBaseModal {
 
     this.settingTab.display();
     this.close();
-    new Notice(t("notices.profileImportedSuccess"));
+    new Notice(t('notices.profileImportedSuccess'));
   }
 }
 
 export class NewProfileModal extends ColorMasterBaseModal {
-  onSubmit: (result: {
-    name: string;
-    themeType: "auto" | "dark" | "light";
-  }) => void;
+  onSubmit: (result: { name: string; themeType: 'auto' | 'dark' | 'light' }) => void;
   plugin: ColorMaster;
 
   constructor(
     app: App,
     plugin: ColorMaster,
-    onSubmit: (result: {
-      name: string;
-      themeType: "auto" | "dark" | "light";
-    }) => void,
+    onSubmit: (result: { name: string; themeType: 'auto' | 'dark' | 'light' }) => void,
   ) {
     super(app, plugin);
     this.onSubmit = onSubmit;
@@ -352,46 +321,42 @@ export class NewProfileModal extends ColorMasterBaseModal {
 
     const { contentEl } = this;
     contentEl.empty();
-    contentEl.createEl("h3", { text: t("modals.newProfile.title") });
+    contentEl.createEl('h3', { text: t('modals.newProfile.title') });
 
-    let profileName = "";
-    let themeType: "auto" | "dark" | "light" = "auto";
+    let profileName = '';
+    let themeType: 'auto' | 'dark' | 'light' = 'auto';
 
-    new Setting(contentEl)
-      .setName(t("modals.newProfile.nameLabel"))
-      .addText((text) => {
-        text
-          .setPlaceholder(t("modals.newProfile.namePlaceholder"))
-          .onChange((value) => {
-            profileName = value;
-          });
+    new Setting(contentEl).setName(t('modals.newProfile.nameLabel')).addText((text) => {
+      text.setPlaceholder(t('modals.newProfile.namePlaceholder')).onChange((value) => {
+        profileName = value;
       });
+    });
 
     new Setting(contentEl)
-      .setName(t("profileManager.themeType"))
-      .setDesc(t("profileManager.themeTypeDesc"))
+      .setName(t('profileManager.themeType'))
+      .setDesc(t('profileManager.themeTypeDesc'))
       .addDropdown((dropdown) => {
-        dropdown.addOption("auto", t("profileManager.themeAuto"));
-        dropdown.addOption("dark", t("profileManager.themeDark"));
-        dropdown.addOption("light", t("profileManager.themeLight"));
+        dropdown.addOption('auto', t('profileManager.themeAuto'));
+        dropdown.addOption('dark', t('profileManager.themeDark'));
+        dropdown.addOption('light', t('profileManager.themeLight'));
         dropdown.setValue(themeType);
-        dropdown.onChange((value: "auto" | "dark" | "light") => {
+        dropdown.onChange((value: 'auto' | 'dark' | 'light') => {
           themeType = value;
         });
       });
 
     const buttonContainer = contentEl.createDiv({
-      cls: "modal-button-container",
+      cls: 'modal-button-container',
     });
 
-    const cancelButton = buttonContainer.createEl("button", {
-      text: t("buttons.cancel"),
+    const cancelButton = buttonContainer.createEl('button', {
+      text: t('buttons.cancel'),
     });
-    cancelButton.addEventListener("click", () => this.close());
+    cancelButton.addEventListener('click', () => this.close());
 
-    const createButton = buttonContainer.createEl("button", {
-      text: t("buttons.create"),
-      cls: "mod-cta",
+    const createButton = buttonContainer.createEl('button', {
+      text: t('buttons.create'),
+      cls: 'mod-cta',
     });
 
     const submit = () => {
@@ -399,18 +364,18 @@ export class NewProfileModal extends ColorMasterBaseModal {
       if (trimmedName) {
         this.onSubmit({ name: trimmedName, themeType: themeType });
         this.close();
-        new Notice(t("notices.profileCreated", trimmedName));
+        new Notice(t('notices.profileCreated', trimmedName));
       } else {
-        new Notice(t("notices.varNameEmpty"));
+        new Notice(t('notices.varNameEmpty'));
       }
     };
 
-    createButton.addEventListener("click", submit);
+    createButton.addEventListener('click', submit);
 
     contentEl
       .querySelector('input[type="text"]')
-      ?.addEventListener("keydown", (e: KeyboardEvent) => {
-        if (e.key === "Enter") {
+      ?.addEventListener('keydown', (e: KeyboardEvent) => {
+        if (e.key === 'Enter') {
           e.preventDefault();
           submit();
         }
@@ -442,8 +407,8 @@ export class ConfirmationModal extends ColorMasterBaseModal {
     this.title = title;
     this.message = message;
     this.onConfirm = onConfirm;
-    this.confirmButtonText = options.buttonText || t("buttons.delete");
-    this.confirmButtonClass = options.buttonClass || "mod-warning";
+    this.confirmButtonText = options.buttonText || t('buttons.delete');
+    this.confirmButtonClass = options.buttonClass || 'mod-warning';
   }
 
   onOpen() {
@@ -451,23 +416,23 @@ export class ConfirmationModal extends ColorMasterBaseModal {
 
     const { contentEl } = this;
     contentEl.empty();
-    contentEl.createEl("h3", { text: this.title });
-    contentEl.createEl("p").append(this.message);
+    contentEl.createEl('h3', { text: this.title });
+    contentEl.createEl('p').append(this.message);
 
     const buttonContainer = contentEl.createDiv({
-      cls: "modal-button-container",
+      cls: 'modal-button-container',
     });
 
-    const cancelButton = buttonContainer.createEl("button", {
-      text: t("buttons.cancel"),
+    const cancelButton = buttonContainer.createEl('button', {
+      text: t('buttons.cancel'),
     });
-    cancelButton.addEventListener("click", () => this.close());
+    cancelButton.addEventListener('click', () => this.close());
 
-    const confirmButton = buttonContainer.createEl("button", {
+    const confirmButton = buttonContainer.createEl('button', {
       text: this.confirmButtonText,
       cls: this.confirmButtonClass,
     });
-    confirmButton.addEventListener("click", () => {
+    confirmButton.addEventListener('click', () => {
       this.onConfirm();
       this.close();
     });
@@ -508,13 +473,13 @@ export class PasteCssModal extends ColorMasterBaseModal {
     this.settingTab = settingTab;
     this.existingProfileData = existingProfileData;
     this.isEditing = !!existingProfileData;
-    this.profileName = existingProfileData ? existingProfileData.name : "";
+    this.profileName = existingProfileData ? existingProfileData.name : '';
   }
 
   _handleFileImport() {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = ".css";
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.css';
 
     input.onchange = () => {
       void (async () => {
@@ -522,9 +487,9 @@ export class PasteCssModal extends ColorMasterBaseModal {
         const file = input.files[0];
         const content = await file.text();
         this.cssTextarea.value = content;
-        new Notice(t("notices.fileLoaded", file.name));
+        new Notice(t('notices.fileLoaded', file.name));
       })().catch((err) => {
-        console.error("Failed to load CSS file:", err);
+        console.error('Failed to load CSS file:', err);
       });
     };
     input.click();
@@ -536,22 +501,22 @@ export class PasteCssModal extends ColorMasterBaseModal {
     const { contentEl } = this;
     contentEl.empty();
 
-    const titleContainer = contentEl.createDiv({ cls: "cm-title-container" });
+    const titleContainer = contentEl.createDiv({ cls: 'cm-title-container' });
 
     const titleText = this.isEditing
-      ? t("modals.cssImport.titleEdit")
-      : t("modals.cssImport.title");
+      ? t('modals.cssImport.titleEdit')
+      : t('modals.cssImport.title');
 
-    this.modalTitleEl = titleContainer.createEl("h3", { text: titleText });
+    this.modalTitleEl = titleContainer.createEl('h3', { text: titleText });
 
     const installedThemes = (this.app as unknown).customCss.themes || {};
     const themeNames = Object.keys(installedThemes);
-    let selectedTheme = themeNames.length > 0 ? themeNames[0] : "";
+    let selectedTheme = themeNames.length > 0 ? themeNames[0] : '';
 
     const themeImporterEl = new Setting(contentEl)
-      .setName(t("modals.cssImport.importFromTheme"))
-      .setDesc(t("modals.cssImport.importFromThemeDesc"));
-    themeImporterEl.settingEl.addClass("cm-theme-importer-setting");
+      .setName(t('modals.cssImport.importFromTheme'))
+      .setDesc(t('modals.cssImport.importFromThemeDesc'));
+    themeImporterEl.settingEl.addClass('cm-theme-importer-setting');
 
     themeImporterEl.addDropdown((dropdown) => {
       if (themeNames.length > 0) {
@@ -562,14 +527,14 @@ export class PasteCssModal extends ColorMasterBaseModal {
           selectedTheme = value;
         });
       } else {
-        dropdown.addOption("", t("modals.cssImport.noThemes"));
+        dropdown.addOption('', t('modals.cssImport.noThemes'));
         dropdown.setDisabled(true);
       }
     });
 
     themeImporterEl.addButton((button) => {
       button
-        .setButtonText(t("buttons.import"))
+        .setButtonText(t('buttons.import'))
         .setCta()
         .setDisabled(themeNames.length === 0)
         .onClick(async () => {
@@ -580,53 +545,44 @@ export class PasteCssModal extends ColorMasterBaseModal {
             this.cssTextarea.value = cssContent;
             this.nameInput.setValue(selectedTheme);
             this.profileName = selectedTheme;
-            new Notice(t("notices.themeCssLoaded", selectedTheme));
+            new Notice(t('notices.themeCssLoaded', selectedTheme));
           } catch (error) {
-            new Notice(t("notices.themeReadFailed", selectedTheme));
-            console.error(
-              `Color Master: Failed to read theme CSS at ${themePath}`,
-              error,
-            );
+            new Notice(t('notices.themeReadFailed', selectedTheme));
+            console.error(`Color Master: Failed to read theme CSS at ${themePath}`, error);
           }
         });
     });
 
-    let nameLabelText = t("modals.newProfile.nameLabel");
-    this.nameSetting = new Setting(contentEl)
-      .setName(nameLabelText)
-      .addText((text) => {
-        this.nameInput = text;
-        let placeholderText = t("modals.newProfile.namePlaceholder");
+    let nameLabelText = t('modals.newProfile.nameLabel');
+    this.nameSetting = new Setting(contentEl).setName(nameLabelText).addText((text) => {
+      this.nameInput = text;
+      let placeholderText = t('modals.newProfile.namePlaceholder');
 
-        text
-          .setValue(
-            this.isEditing && this.existingProfileData
-              ? this.existingProfileData.name
-              : "",
-          )
-          .setPlaceholder(placeholderText)
-          .onChange((value) => {
-            this.profileName = value.trim();
-          });
-      });
+      text
+        .setValue(this.isEditing && this.existingProfileData ? this.existingProfileData.name : '')
+        .setPlaceholder(placeholderText)
+        .onChange((value) => {
+          this.profileName = value.trim();
+        });
+    });
 
-    this.cssTextarea = contentEl.createEl("textarea", {
-      cls: "cm-search-input cm-large-textarea",
+    this.cssTextarea = contentEl.createEl('textarea', {
+      cls: 'cm-search-input cm-large-textarea',
       attr: {
-        rows: "18",
-        placeholder: t("modals.snippetEditor.cssPlaceholder"),
+        rows: '18',
+        placeholder: t('modals.snippetEditor.cssPlaceholder'),
       },
     });
 
     contentEl.createDiv({
-      text: t("modals.cssImport.note"),
-      cls: "cm-modal-warning-note",
+      text: t('modals.cssImport.note'),
+      cls: 'cm-modal-warning-note',
     });
     new Setting(contentEl)
-      .setName(t("modals.cssImport.importFromFile"))
-      .setDesc(t("modals.cssImport.importFromFileDesc"))
+      .setName(t('modals.cssImport.importFromFile'))
+      .setDesc(t('modals.cssImport.importFromFileDesc'))
       .addButton((button) => {
-        button.setButtonText(t("buttons.chooseFile")).onClick(() => {
+        button.setButtonText(t('buttons.chooseFile')).onClick(() => {
           this._handleFileImport();
         });
       });
@@ -637,9 +593,7 @@ export class PasteCssModal extends ColorMasterBaseModal {
         : null;
 
     const initialCss =
-      this.isEditing && this.existingProfileData
-        ? this.existingProfileData.css
-        : "";
+      this.isEditing && this.existingProfileData ? this.existingProfileData.css : '';
 
     if (historyId) {
       const lastState = this.plugin.cssHistory[historyId]?.undoStack.last();
@@ -659,21 +613,21 @@ export class PasteCssModal extends ColorMasterBaseModal {
       this.plugin.pushCssHistory(id, value);
     }, 500);
 
-    this.cssTextarea.addEventListener("input", () => {
+    this.cssTextarea.addEventListener('input', () => {
       if (historyId) {
         debouncedPushHistory(historyId, this.cssTextarea.value);
       }
     });
 
-    this.cssTextarea.addEventListener("keydown", (e) => {
+    this.cssTextarea.addEventListener('keydown', (e) => {
       if (historyId && e.ctrlKey) {
-        if (e.key.toLowerCase() === "z") {
+        if (e.key.toLowerCase() === 'z') {
           e.preventDefault();
           const prevState = this.plugin.undoCssHistory(historyId);
           if (prevState !== null) {
             this.cssTextarea.value = prevState;
           }
-        } else if (e.key.toLowerCase() === "y") {
+        } else if (e.key.toLowerCase() === 'y') {
           e.preventDefault();
           const nextState = this.plugin.redoCssHistory(historyId);
           if (nextState !== null) {
@@ -683,21 +637,21 @@ export class PasteCssModal extends ColorMasterBaseModal {
       }
     });
     const buttonContainer = contentEl.createDiv({
-      cls: "modal-button-container",
+      cls: 'modal-button-container',
     });
 
     buttonContainer
-      .createEl("button", { text: t("buttons.cancel") })
-      .addEventListener("click", () => this.close());
+      .createEl('button', { text: t('buttons.cancel') })
+      .addEventListener('click', () => this.close());
 
     buttonContainer
-      .createEl("button", {
-        text: this.isEditing ? t("buttons.update") : t("buttons.create"),
-        cls: "mod-cta",
+      .createEl('button', {
+        text: this.isEditing ? t('buttons.update') : t('buttons.create'),
+        cls: 'mod-cta',
       })
-      .addEventListener("click", () => {
+      .addEventListener('click', () => {
         void this.handleSave().catch((err) => {
-          console.error("Failed to save CSS snippet:", err);
+          console.error('Failed to save CSS snippet:', err);
         });
       });
     setTimeout(() => this.nameInput.inputEl.focus(), 0);
@@ -705,22 +659,19 @@ export class PasteCssModal extends ColorMasterBaseModal {
 
   async handleSave() {
     if (this.isEditing && !this.existingProfileData) {
-      console.error(
-        "Attempted to save in editing mode without an existing snippet.",
-      );
+      console.error('Attempted to save in editing mode without an existing snippet.');
       return;
     }
 
     const cssText = this.cssTextarea.value.trim();
-    let name = (this.profileName || "").trim();
+    let name = (this.profileName || '').trim();
 
     if (!name) {
-      new Notice(t("notices.varNameEmpty"));
+      new Notice(t('notices.varNameEmpty'));
       return;
     }
 
-    const activeProfile =
-      this.plugin.settings.profiles[this.plugin.settings.activeProfile];
+    const activeProfile = this.plugin.settings.profiles[this.plugin.settings.activeProfile];
     if (!activeProfile) return;
 
     const isNameTaken = Object.keys(this.plugin.settings.profiles || {}).some(
@@ -728,18 +679,17 @@ export class PasteCssModal extends ColorMasterBaseModal {
         profileName.toLowerCase() === name.toLowerCase() &&
         (!this.isEditing ||
           (this.existingProfileData &&
-            this.existingProfileData.name.toLowerCase() !==
-              name.toLowerCase())),
+            this.existingProfileData.name.toLowerCase() !== name.toLowerCase())),
     );
     if (isNameTaken) {
-      new Notice(t("notices.profileNameExists", name));
+      new Notice(t('notices.profileNameExists', name));
       return;
     }
 
     // 1. UI Feedback
-    const saveBtn = this.contentEl.querySelector<HTMLButtonElement>(".mod-cta");
+    const saveBtn = this.contentEl.querySelector<HTMLButtonElement>('.mod-cta');
     if (saveBtn) {
-      saveBtn.textContent = t("modals.addBackground.processing") + "...";
+      saveBtn.textContent = t('modals.addBackground.processing') + '...';
       saveBtn.disabled = true;
     }
 
@@ -749,10 +699,8 @@ export class PasteCssModal extends ColorMasterBaseModal {
 
     // 3. SWITCH TO GHOST PROFILE
     // Create a temporary blank profile in settings so we can switch to it
-    const tempProfileName = "__cm_temp_clean_slate__";
-    this.plugin.settings.profiles[tempProfileName] = JSON.parse(
-      JSON.stringify(DEFAULT_PROFILE),
-    );
+    const tempProfileName = '__cm_temp_clean_slate__';
+    this.plugin.settings.profiles[tempProfileName] = JSON.parse(JSON.stringify(DEFAULT_PROFILE));
     this.plugin.settings.activeProfile = tempProfileName;
 
     // Force apply the blank profile (removes all plugin colors instantly)
@@ -760,7 +708,7 @@ export class PasteCssModal extends ColorMasterBaseModal {
 
     // 4. Disable Obsidian Theme (Back to Default)
     if (originalObsidianTheme) {
-      customCss.setTheme("");
+      customCss.setTheme('');
     }
 
     // 5. FORCE REFLOW & WAIT
@@ -769,8 +717,8 @@ export class PasteCssModal extends ColorMasterBaseModal {
 
     // 6. Inject New CSS (Minimal)
     // eslint-disable-next-line obsidianmd/no-forbidden-elements
-    const tempStyleEl = document.createElement("style");
-    tempStyleEl.id = "cm-temp-import-style";
+    const tempStyleEl = document.createElement('style');
+    tempStyleEl.id = 'cm-temp-import-style';
     tempStyleEl.textContent = cssText;
     document.head.appendChild(tempStyleEl);
 
@@ -814,11 +762,11 @@ export class PasteCssModal extends ColorMasterBaseModal {
       };
 
       this.plugin.settings.activeProfile = name;
-      new Notice(t("notices.profileUpdated", name));
+      new Notice(t('notices.profileUpdated', name));
     } else {
       this.plugin.settings.profiles[name] = {
         vars: capturedVars,
-        themeType: "auto",
+        themeType: 'auto',
         isCssProfile: true,
         customCss: cssText,
         snippets: [],
@@ -826,7 +774,7 @@ export class PasteCssModal extends ColorMasterBaseModal {
       };
 
       this.plugin.settings.activeProfile = name;
-      new Notice(t("notices.profileCreatedFromCss", name));
+      new Notice(t('notices.profileCreatedFromCss', name));
     }
 
     this.isSaving = true;
@@ -886,14 +834,14 @@ export class SnippetCssModal extends ColorMasterBaseModal {
     this.settingTab = settingTab;
     this.existingSnippet = existingSnippet;
     this.isEditing = !!existingSnippet;
-    this.snippetName = existingSnippet ? existingSnippet.name : "";
+    this.snippetName = existingSnippet ? existingSnippet.name : '';
     this.isGlobalSnippet = existingSnippet ? !!existingSnippet.isGlobal : false;
   }
 
   _handleFileImport() {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = ".css";
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.css';
 
     input.onchange = () => {
       void (async () => {
@@ -901,9 +849,9 @@ export class SnippetCssModal extends ColorMasterBaseModal {
         const file = input.files[0];
         const content = await file.text();
         this.cssTextarea.inputEl.value = content;
-        new Notice(t("notices.fileLoaded", file.name));
+        new Notice(t('notices.fileLoaded', file.name));
       })().catch((err) => {
-        console.error("Failed to load CSS file:", err);
+        console.error('Failed to load CSS file:', err);
       });
     };
     input.click();
@@ -915,22 +863,21 @@ export class SnippetCssModal extends ColorMasterBaseModal {
     const { contentEl } = this;
     contentEl.empty();
 
-    const titleContainer = contentEl.createDiv({ cls: "cm-title-container" });
+    const titleContainer = contentEl.createDiv({ cls: 'cm-title-container' });
 
     let titleText = this.isEditing
-      ? t("modals.snippetEditor.titleEdit")
-      : t("modals.snippetEditor.title");
+      ? t('modals.snippetEditor.titleEdit')
+      : t('modals.snippetEditor.title');
 
-    this.modalTitleEl = titleContainer.createEl("h3", { text: titleText });
+    this.modalTitleEl = titleContainer.createEl('h3', { text: titleText });
 
     const installedSnippets = (this.app as unknown).customCss.snippets || [];
-    let selectedSnippet =
-      installedSnippets.length > 0 ? installedSnippets[0] : "";
+    let selectedSnippet = installedSnippets.length > 0 ? installedSnippets[0] : '';
 
     const snippetImporterEl = new Setting(contentEl)
-      .setName(t("modals.snippetEditor.importFromSnippet"))
-      .setDesc(t("modals.snippetEditor.importFromSnippetDesc"));
-    snippetImporterEl.settingEl.addClass("cm-theme-importer-setting");
+      .setName(t('modals.snippetEditor.importFromSnippet'))
+      .setDesc(t('modals.snippetEditor.importFromSnippetDesc'));
+    snippetImporterEl.settingEl.addClass('cm-theme-importer-setting');
 
     snippetImporterEl.addDropdown((dropdown) => {
       if (installedSnippets.length > 0) {
@@ -941,14 +888,14 @@ export class SnippetCssModal extends ColorMasterBaseModal {
           selectedSnippet = value;
         });
       } else {
-        dropdown.addOption("", t("modals.snippetEditor.noSnippets"));
+        dropdown.addOption('', t('modals.snippetEditor.noSnippets'));
         dropdown.setDisabled(true);
       }
     });
 
     snippetImporterEl.addButton((button) => {
       button
-        .setButtonText(t("buttons.import"))
+        .setButtonText(t('buttons.import'))
         .setCta()
         .setDisabled(installedSnippets.length === 0)
         .onClick(async () => {
@@ -959,40 +906,31 @@ export class SnippetCssModal extends ColorMasterBaseModal {
             this.cssTextarea.setValue(cssContent);
             this.nameInput.setValue(selectedSnippet);
             this.snippetName = selectedSnippet;
-            new Notice(t("notices.snippetLoaded", selectedSnippet));
+            new Notice(t('notices.snippetLoaded', selectedSnippet));
           } catch (error) {
-            new Notice(t("notices.snippetReadFailed", selectedSnippet));
-            console.error(
-              `Color Master: Failed to read snippet CSS at ${snippetPath}`,
-              error,
-            );
+            new Notice(t('notices.snippetReadFailed', selectedSnippet));
+            console.error(`Color Master: Failed to read snippet CSS at ${snippetPath}`, error);
           }
         });
     });
 
-    const nameLabelText = t("modals.snippetEditor.nameLabel");
+    const nameLabelText = t('modals.snippetEditor.nameLabel');
 
-    this.nameSetting = new Setting(contentEl)
-      .setName(nameLabelText)
-      .addText((text) => {
-        this.nameInput = text;
-        let placeholderText = t("modals.snippetEditor.namePlaceholder");
+    this.nameSetting = new Setting(contentEl).setName(nameLabelText).addText((text) => {
+      this.nameInput = text;
+      let placeholderText = t('modals.snippetEditor.namePlaceholder');
 
-        text
-          .setValue(
-            this.isEditing && this.existingSnippet
-              ? this.existingSnippet.name
-              : "",
-          )
-          .setPlaceholder(placeholderText)
-          .onChange((value) => {
-            this.snippetName = value.trim();
-          });
-      });
+      text
+        .setValue(this.isEditing && this.existingSnippet ? this.existingSnippet.name : '')
+        .setPlaceholder(placeholderText)
+        .onChange((value) => {
+          this.snippetName = value.trim();
+        });
+    });
 
     new Setting(contentEl)
-      .setName(t("snippets.globalName"))
-      .setDesc(t("snippets.globalDesc"))
+      .setName(t('snippets.globalName'))
+      .setDesc(t('snippets.globalDesc'))
       .addToggle((toggle) => {
         toggle.setValue(this.isGlobalSnippet).onChange((value) => {
           this.isGlobalSnippet = value;
@@ -1001,31 +939,26 @@ export class SnippetCssModal extends ColorMasterBaseModal {
 
     this.cssTextarea = new TextAreaComponent(contentEl);
     contentEl.createDiv({
-      text: t("modals.cssImport.note"),
-      cls: "cm-modal-warning-note",
+      text: t('modals.cssImport.note'),
+      cls: 'cm-modal-warning-note',
     });
 
     new Setting(contentEl)
-      .setName(t("modals.cssImport.importFromFile"))
-      .setDesc(t("modals.cssImport.importFromFileDesc"))
+      .setName(t('modals.cssImport.importFromFile'))
+      .setDesc(t('modals.cssImport.importFromFileDesc'))
       .addButton((button) => {
-        button.setButtonText(t("buttons.chooseFile")).onClick(() => {
+        button.setButtonText(t('buttons.chooseFile')).onClick(() => {
           this._handleFileImport();
         });
       });
 
-    this.cssTextarea.inputEl.classList.add(
-      "cm-search-input",
-      "cm-large-textarea",
-    );
+    this.cssTextarea.inputEl.classList.add('cm-search-input', 'cm-large-textarea');
     this.cssTextarea.inputEl.rows = 18;
-    this.cssTextarea.setPlaceholder(t("modals.snippetEditor.cssPlaceholder"));
+    this.cssTextarea.setPlaceholder(t('modals.snippetEditor.cssPlaceholder'));
 
-    const historyId =
-      this.isEditing && this.existingSnippet ? this.existingSnippet.id : null;
+    const historyId = this.isEditing && this.existingSnippet ? this.existingSnippet.id : null;
 
-    const initialCss =
-      this.isEditing && this.existingSnippet ? this.existingSnippet.css : "";
+    const initialCss = this.isEditing && this.existingSnippet ? this.existingSnippet.css : '';
 
     if (historyId) {
       const lastState = this.plugin.cssHistory[historyId]?.undoStack.last();
@@ -1051,15 +984,15 @@ export class SnippetCssModal extends ColorMasterBaseModal {
       }
     });
 
-    this.cssTextarea.inputEl.addEventListener("keydown", (e: KeyboardEvent) => {
+    this.cssTextarea.inputEl.addEventListener('keydown', (e: KeyboardEvent) => {
       if (historyId && e.ctrlKey) {
-        if (e.key.toLowerCase() === "z") {
+        if (e.key.toLowerCase() === 'z') {
           e.preventDefault();
           const prevState = this.plugin.undoCssHistory(historyId);
           if (prevState !== null) {
             this.cssTextarea.setValue(prevState);
           }
-        } else if (e.key.toLowerCase() === "y") {
+        } else if (e.key.toLowerCase() === 'y') {
           e.preventDefault();
           const nextState = this.plugin.redoCssHistory(historyId);
           if (nextState !== null) {
@@ -1069,37 +1002,36 @@ export class SnippetCssModal extends ColorMasterBaseModal {
       }
     });
     const buttonContainer = contentEl.createDiv({
-      cls: "modal-button-container",
+      cls: 'modal-button-container',
     });
 
     buttonContainer
-      .createEl("button", { text: t("buttons.cancel") })
-      .addEventListener("click", () => this.close());
+      .createEl('button', { text: t('buttons.cancel') })
+      .addEventListener('click', () => this.close());
 
     buttonContainer
-      .createEl("button", {
-        text: this.isEditing ? t("buttons.update") : t("buttons.create"),
-        cls: "mod-cta",
+      .createEl('button', {
+        text: this.isEditing ? t('buttons.update') : t('buttons.create'),
+        cls: 'mod-cta',
       })
-      .addEventListener("click", () => this.handleSave());
+      .addEventListener('click', () => this.handleSave());
     setTimeout(() => this.nameInput.inputEl.focus(), 0);
   }
 
   handleSave() {
     const cssText = this.cssTextarea.getValue().trim();
-    const name = (this.snippetName || "").trim();
+    const name = (this.snippetName || '').trim();
 
     if (!name) {
-      new Notice(t("notices.varNameEmpty"));
+      new Notice(t('notices.varNameEmpty'));
       return;
     }
     if (!cssText) {
-      new Notice(t("notices.cssContentEmpty"));
+      new Notice(t('notices.cssContentEmpty'));
       return;
     }
 
-    const activeProfile =
-      this.plugin.settings.profiles[this.plugin.settings.activeProfile];
+    const activeProfile = this.plugin.settings.profiles[this.plugin.settings.activeProfile];
     if (!activeProfile) return;
 
     if (!Array.isArray(this.plugin.settings.globalSnippets)) {
@@ -1113,12 +1045,11 @@ export class SnippetCssModal extends ColorMasterBaseModal {
     const isNameTaken = targetList.some(
       (s) =>
         s.name.toLowerCase() === name.toLowerCase() &&
-        (!this.isEditing ||
-          (this.existingSnippet && this.existingSnippet.id !== s.id)),
+        (!this.isEditing || (this.existingSnippet && this.existingSnippet.id !== s.id)),
     );
 
     if (isNameTaken) {
-      new Notice(t("notices.snippetNameExists", name));
+      new Notice(t('notices.snippetNameExists', name));
       return;
     }
 
@@ -1131,9 +1062,7 @@ export class SnippetCssModal extends ColorMasterBaseModal {
         ? this.plugin.settings.globalSnippets
         : activeProfile.snippets;
 
-      const snippetIndex = originalList.findIndex(
-        (s) => s.id === this.existingSnippet!.id,
-      );
+      const snippetIndex = originalList.findIndex((s) => s.id === this.existingSnippet!.id);
 
       if (snippetIndex > -1) {
         // First case If the clip type does not change (remains public or private)
@@ -1153,7 +1082,7 @@ export class SnippetCssModal extends ColorMasterBaseModal {
 
           targetList.push(snippetToMove);
         }
-        new Notice(t("notices.snippetUpdated", name));
+        new Notice(t('notices.snippetUpdated', name));
       }
     } else {
       targetList.push({
@@ -1163,7 +1092,7 @@ export class SnippetCssModal extends ColorMasterBaseModal {
         enabled: true,
         isGlobal: this.isGlobalSnippet,
       });
-      new Notice(t("notices.snippetCreated", name));
+      new Notice(t('notices.snippetCreated', name));
     }
 
     this.isSaving = true;
@@ -1175,15 +1104,14 @@ export class SnippetCssModal extends ColorMasterBaseModal {
         this.close();
       })
       .catch((err) => {
-        console.error("Failed to save settings:", err);
+        console.error('Failed to save settings:', err);
       });
   }
 
   onClose() {
     // If the save button is not pressed
     if (!this.isSaving) {
-      const historyId =
-        this.isEditing && this.existingSnippet ? this.existingSnippet.id : null;
+      const historyId = this.isEditing && this.existingSnippet ? this.existingSnippet.id : null;
       // If there is a temporary date delete it.
       if (historyId && this.plugin.cssHistory[historyId]) {
         delete this.plugin.cssHistory[historyId];
@@ -1196,7 +1124,7 @@ export class SnippetCssModal extends ColorMasterBaseModal {
 export class NoticeRulesModal extends ColorMasterBaseModal {
   plugin: ColorMaster;
   settingTab: ColorMasterSettingTab;
-  ruleType: "text" | "background";
+  ruleType: 'text' | 'background';
   localRules: NoticeRule[];
   newlyAddedRuleId: string | null = null;
   rulesContainer: HTMLElement;
@@ -1206,21 +1134,18 @@ export class NoticeRulesModal extends ColorMasterBaseModal {
     app: App,
     plugin: ColorMaster,
     settingTab: ColorMasterSettingTab,
-    ruleType: "text" | "background",
+    ruleType: 'text' | 'background',
   ) {
     super(app, plugin);
     this.settingTab = settingTab;
     this.ruleType = ruleType; // 'text' or 'background'
-    const activeProfile =
-      this.plugin.settings.profiles[this.plugin.settings.activeProfile];
-    this.localRules = JSON.parse(
-      JSON.stringify(activeProfile?.noticeRules?.[this.ruleType] || []),
-    );
+    const activeProfile = this.plugin.settings.profiles[this.plugin.settings.activeProfile];
+    this.localRules = JSON.parse(JSON.stringify(activeProfile?.noticeRules?.[this.ruleType] || []));
     if (this.localRules.length === 0) {
       this.localRules.push({
         id: `rule-${Date.now()}`,
-        keywords: "",
-        color: this.ruleType === "text" ? "#ffffff" : "#444444",
+        keywords: '',
+        color: this.ruleType === 'text' ? '#ffffff' : '#444444',
         isRegex: false,
         highlightOnly: false,
       });
@@ -1232,96 +1157,91 @@ export class NoticeRulesModal extends ColorMasterBaseModal {
 
     const { contentEl } = this;
     contentEl.empty();
-    this.modalEl.classList.add("color-master-modal", "cm-rules-modal");
+    this.modalEl.classList.add('color-master-modal', 'cm-rules-modal');
 
     const title =
-      this.ruleType === "text"
-        ? t("modals.noticeRules.titleText")
-        : t("modals.noticeRules.titleBg");
+      this.ruleType === 'text'
+        ? t('modals.noticeRules.titleText')
+        : t('modals.noticeRules.titleBg');
 
     const headerContainer = contentEl.createDiv({
-      cls: "cm-rules-modal-header",
+      cls: 'cm-rules-modal-header',
     });
     const iconEl = headerContainer.createDiv({
-      cls: "cm-rules-modal-header-icon",
+      cls: 'cm-rules-modal-header-icon',
     });
-    setIcon(iconEl, "bell");
-    headerContainer.createEl("h3", { text: title });
+    setIcon(iconEl, 'bell');
+    headerContainer.createEl('h3', { text: title });
     const descAndButtonContainer = contentEl.createDiv({
-      cls: "cm-rules-header",
+      cls: 'cm-rules-header',
     });
 
-    descAndButtonContainer.createEl("p", {
-      text: t("modals.noticeRules.desc"),
-      cls: "cm-rules-modal-desc",
+    descAndButtonContainer.createEl('p', {
+      text: t('modals.noticeRules.desc'),
+      cls: 'cm-rules-modal-desc',
     });
     const buttonSettingContainer = descAndButtonContainer.createDiv();
-    const settingEl = new Setting(buttonSettingContainer).addButton(
-      (button) => {
-        button
-          .setButtonText(t("modals.noticeRules.addNewRule"))
-          .setCta()
-          .onClick(() => {
-            const newRule: NoticeRule = {
-              id: `rule-${Date.now()}`,
-              keywords: "",
-              color: this.ruleType === "text" ? "#ffffff" : "#444444",
-              isRegex: false,
-              highlightOnly: false,
-            };
-            this.localRules.push(newRule);
+    const settingEl = new Setting(buttonSettingContainer).addButton((button) => {
+      button
+        .setButtonText(t('modals.noticeRules.addNewRule'))
+        .setCta()
+        .onClick(() => {
+          const newRule: NoticeRule = {
+            id: `rule-${Date.now()}`,
+            keywords: '',
+            color: this.ruleType === 'text' ? '#ffffff' : '#444444',
+            isRegex: false,
+            highlightOnly: false,
+          };
+          this.localRules.push(newRule);
 
-            this.newlyAddedRuleId = newRule.id;
+          this.newlyAddedRuleId = newRule.id;
 
-            this.displayRules();
-          });
-      },
-    );
+          this.displayRules();
+        });
+    });
 
-    settingEl.settingEl.classList.add("cm-rules-add-button-setting");
+    settingEl.settingEl.classList.add('cm-rules-add-button-setting');
 
-    this.rulesContainer = contentEl.createDiv("cm-rules-container");
+    this.rulesContainer = contentEl.createDiv('cm-rules-container');
     this.displayRules();
 
     const buttonContainer = contentEl.createDiv({
-      cls: "modal-button-container",
+      cls: 'modal-button-container',
     });
 
     buttonContainer
-      .createEl("button", { text: t("buttons.cancel") })
-      .addEventListener("click", () => this.close());
+      .createEl('button', { text: t('buttons.cancel') })
+      .addEventListener('click', () => this.close());
 
     buttonContainer
-      .createEl("button", { text: t("buttons.apply"), cls: "mod-cta" })
-      .addEventListener("click", () => {
+      .createEl('button', { text: t('buttons.apply'), cls: 'mod-cta' })
+      .addEventListener('click', () => {
         void (async () => {
           const allTagInputs =
-            this.rulesContainer.querySelectorAll<HTMLInputElement>(
-              ".cm-tag-input-field",
-            );
+            this.rulesContainer.querySelectorAll<HTMLInputElement>('.cm-tag-input-field');
 
           allTagInputs.forEach((inputEl, index) => {
-            const newKeyword = inputEl.value.trim().replace(/,/g, "");
+            const newKeyword = inputEl.value.trim().replace(/,/g, '');
             if (newKeyword) {
               const rule = this.localRules[index];
               if (rule) {
                 const keywords =
-                  typeof rule.keywords === "string" && rule.keywords
+                  typeof rule.keywords === 'string' && rule.keywords
                     ? rule.keywords
-                        .split(",")
+                        .split(',')
                         .map((k) => k.trim())
                         .filter(Boolean)
                     : [];
 
                 if (!keywords.includes(newKeyword)) {
-                  rule.keywords = [...keywords, newKeyword].join(",");
+                  rule.keywords = [...keywords, newKeyword].join(',');
                 }
               }
             }
           });
 
-          const activeProfile =
-            this.plugin.settings.profiles[this.plugin.settings.activeProfile];
+          const activeProfile = this.plugin.settings.profiles[this.plugin.settings.activeProfile];
 
           if (!activeProfile.noticeRules) {
             activeProfile.noticeRules = { text: [], background: [] };
@@ -1333,10 +1253,10 @@ export class NoticeRulesModal extends ColorMasterBaseModal {
           this.plugin.liveNoticeRules = null;
           this.plugin.liveNoticeRuleType = null;
 
-          new Notice(t("notices.settingsSaved"));
+          new Notice(t('notices.settingsSaved'));
           this.close();
         })().catch((err) => {
-          console.error("Failed to save notice rules:", err);
+          console.error('Failed to save notice rules:', err);
         });
       });
   }
@@ -1346,103 +1266,97 @@ export class NoticeRulesModal extends ColorMasterBaseModal {
     container.empty();
 
     this.localRules.forEach((rule, index) => {
-      const ruleEl = container.createDiv({ cls: "cm-rule-item" });
+      const ruleEl = container.createDiv({ cls: 'cm-rule-item' });
       ruleEl.dataset.ruleId = rule.id;
 
       if (this.newlyAddedRuleId && rule.id === this.newlyAddedRuleId) {
-        ruleEl.classList.add("newly-added");
+        ruleEl.classList.add('newly-added');
         this.newlyAddedRuleId = null;
       }
 
       const actionButtonsContainer = ruleEl.createDiv({
-        cls: "cm-rule-actions",
+        cls: 'cm-rule-actions',
       });
 
       const moveButtons = actionButtonsContainer.createDiv({
-        cls: "cm-rule-action-buttons",
+        cls: 'cm-rule-action-buttons',
       });
 
       const handleBtn = new ButtonComponent(moveButtons)
-        .setIcon("grip-vertical")
-        .setTooltip(t("tooltips.dragReorder"));
+        .setIcon('grip-vertical')
+        .setTooltip(t('tooltips.dragReorder'));
 
-      handleBtn.buttonEl.classList.add("cm-drag-handle");
-      handleBtn.buttonEl.addEventListener("mousedown", (e) => {
+      handleBtn.buttonEl.classList.add('cm-drag-handle');
+      handleBtn.buttonEl.addEventListener('mousedown', (e) => {
         e.stopPropagation();
       });
 
       actionButtonsContainer.createDiv({
-        cls: "cm-rule-order-number",
+        cls: 'cm-rule-order-number',
         text: `${index + 1}`,
       });
 
       const tagInputWrapper = ruleEl.createDiv({
-        cls: "cm-rule-input-wrapper",
+        cls: 'cm-rule-input-wrapper',
       });
       this._createTagInput(tagInputWrapper, rule);
 
-      const colorContainer = ruleEl.createDiv({ cls: "cm-color-container" });
+      const colorContainer = ruleEl.createDiv({ cls: 'cm-color-container' });
 
-      const colorInput = colorContainer.createEl("input", { type: "color" });
+      const colorInput = colorContainer.createEl('input', { type: 'color' });
       colorInput.value = rule.color;
-      if (rule.color && rule.color.toLowerCase() === "transparent") {
-        colorInput.classList.add("is-transparent");
+      if (rule.color && rule.color.toLowerCase() === 'transparent') {
+        colorInput.classList.add('is-transparent');
       }
-      colorInput.addEventListener("input", (evt) => {
+      colorInput.addEventListener('input', (evt) => {
         rule.color = (evt.target as HTMLInputElement).value;
         this.plugin.liveNoticeRules = this.localRules;
         this.plugin.liveNoticeRuleType = this.ruleType;
-        colorInput.classList.remove("is-transparent");
+        colorInput.classList.remove('is-transparent');
       });
 
       new ButtonComponent(colorContainer)
-        .setIcon("eraser")
-        .setClass("cm-rule-icon-button")
-        .setTooltip(t("tooltips.setTransparent"))
+        .setIcon('eraser')
+        .setClass('cm-rule-icon-button')
+        .setTooltip(t('tooltips.setTransparent'))
         .onClick(() => {
-          rule.color = "transparent";
-          colorInput.classList.add("is-transparent");
+          rule.color = 'transparent';
+          colorInput.classList.add('is-transparent');
         });
 
       const regexBtn = new ButtonComponent(ruleEl)
-        .setIcon("regex")
-        .setClass("cm-rule-icon-button")
-        .setTooltip(t("modals.noticeRules.useRegex"))
+        .setIcon('regex')
+        .setClass('cm-rule-icon-button')
+        .setTooltip(t('modals.noticeRules.useRegex'))
         .onClick(() => {
           rule.isRegex = !rule.isRegex;
-          regexBtn.buttonEl.classList.toggle("is-active", rule.isRegex);
+          regexBtn.buttonEl.classList.toggle('is-active', rule.isRegex);
         });
-      regexBtn.buttonEl.classList.toggle("is-active", rule.isRegex);
+      regexBtn.buttonEl.classList.toggle('is-active', rule.isRegex);
 
-      if (this.ruleType === "text") {
+      if (this.ruleType === 'text') {
         const highlightBtn = new ButtonComponent(ruleEl)
-          .setIcon("highlighter")
-          .setClass("cm-rule-icon-button")
-          .setTooltip(t("modals.noticeRules.highlightOnly"))
+          .setIcon('highlighter')
+          .setClass('cm-rule-icon-button')
+          .setTooltip(t('modals.noticeRules.highlightOnly'))
           .onClick(() => {
             (rule as unknown).highlightOnly = !(rule as unknown).highlightOnly;
-            highlightBtn.buttonEl.classList.toggle(
-              "is-active",
-              (rule as unknown).highlightOnly,
-            );
+            highlightBtn.buttonEl.classList.toggle('is-active', (rule as unknown).highlightOnly);
           });
-        highlightBtn.buttonEl.classList.toggle(
-          "is-active",
-          (rule as unknown).highlightOnly,
-        );
+        highlightBtn.buttonEl.classList.toggle('is-active', (rule as unknown).highlightOnly);
       }
 
       new ButtonComponent(ruleEl)
-        .setIcon("bell")
-        .setClass("cm-rule-icon-button")
-        .setTooltip(t("tooltips.testRule"))
+        .setIcon('bell')
+        .setClass('cm-rule-icon-button')
+        .setTooltip(t('tooltips.testRule'))
         .onClick(() => {
           this._handleTestRule(rule);
         });
 
       new ButtonComponent(ruleEl)
-        .setIcon("trash")
-        .setClass("cm-rule-icon-button")
+        .setIcon('trash')
+        .setClass('cm-rule-icon-button')
         .setWarning()
         .onClick(() => {
           this._handleDeleteRule(index);
@@ -1458,25 +1372,24 @@ export class NoticeRulesModal extends ColorMasterBaseModal {
       try {
         this.sortable.destroy();
       } catch (e) {
-        console.warn("Could not destroy sortable instance", e);
+        console.warn('Could not destroy sortable instance', e);
       }
       this.sortable = null;
     }
 
     if (!Sortable) {
-      console.warn("Color Master: SortableJS not found, drag & drop disabled.");
+      console.warn('Color Master: SortableJS not found, drag & drop disabled.');
       return;
     }
 
     this.sortable = new Sortable(this.rulesContainer, {
-      handle: ".cm-drag-handle",
+      handle: '.cm-drag-handle',
       animation: 160,
-      ghostClass: "cm-rule-ghost",
-      dataIdAttr: "data-rule-id",
+      ghostClass: 'cm-rule-ghost',
+      dataIdAttr: 'data-rule-id',
       onEnd: (evt: Sortable.SortableEvent) => {
         const { oldIndex, newIndex } = evt;
-        if (oldIndex === newIndex || oldIndex == null || newIndex == null)
-          return;
+        if (oldIndex === newIndex || oldIndex == null || newIndex == null) return;
 
         const [moved] = this.localRules.splice(oldIndex, 1);
         if (moved) {
@@ -1494,48 +1407,48 @@ export class NoticeRulesModal extends ColorMasterBaseModal {
   }
 
   _createTagInput(parentEl: HTMLElement, rule: NoticeRule) {
-    const container = parentEl.createDiv({ cls: "cm-tag-input-container" });
+    const container = parentEl.createDiv({ cls: 'cm-tag-input-container' });
 
     const renderTags = () => {
       container.empty();
       const keywords =
-        typeof rule.keywords === "string" && rule.keywords
+        typeof rule.keywords === 'string' && rule.keywords
           ? rule.keywords
-              .split(",")
+              .split(',')
               .map((k) => k.trim())
               .filter(Boolean)
           : [];
 
       keywords.forEach((keyword, index) => {
-        const tagEl = container.createDiv({ cls: "cm-tag-item" });
+        const tagEl = container.createDiv({ cls: 'cm-tag-item' });
         tagEl.dataset.keyword = keyword;
-        tagEl.createSpan({ cls: "cm-tag-text", text: keyword });
+        tagEl.createSpan({ cls: 'cm-tag-text', text: keyword });
         const removeEl = tagEl.createSpan({
-          cls: "cm-tag-remove",
-          text: "×",
+          cls: 'cm-tag-remove',
+          text: '×',
         });
-        removeEl.addEventListener("click", (e) => {
+        removeEl.addEventListener('click', (e) => {
           e.stopPropagation();
           keywords.splice(index, 1);
-          rule.keywords = keywords.join(",");
+          rule.keywords = keywords.join(',');
           renderTags();
         });
       });
 
-      const inputEl = container.createEl("input", {
-        type: "text",
-        cls: "cm-tag-input-field",
+      const inputEl = container.createEl('input', {
+        type: 'text',
+        cls: 'cm-tag-input-field',
       });
-      inputEl.placeholder = t("modals.noticeRules.keywordPlaceholder");
+      inputEl.placeholder = t('modals.noticeRules.keywordPlaceholder');
 
       const addKeywordFromInput = () => {
-        const newKeyword = inputEl.value.trim().replace(/,/g, "");
+        const newKeyword = inputEl.value.trim().replace(/,/g, '');
         if (!newKeyword) return;
 
         const keywords =
-          typeof rule.keywords === "string" && rule.keywords
+          typeof rule.keywords === 'string' && rule.keywords
             ? rule.keywords
-                .split(",")
+                .split(',')
                 .map((k) => k.trim())
                 .filter(Boolean)
             : [];
@@ -1544,44 +1457,42 @@ export class NoticeRulesModal extends ColorMasterBaseModal {
         const newKeywordLower = newKeyword.toLowerCase();
 
         if (!keywordsLower.includes(newKeywordLower)) {
-          rule.keywords = [...keywords, newKeyword].join(",");
+          rule.keywords = [...keywords, newKeyword].join(',');
           renderTags();
         } else {
           const existingTagEl = container.querySelector(
-            `.cm-tag-item[data-keyword="${
-              keywords[keywordsLower.indexOf(newKeywordLower)]
-            }"]`,
+            `.cm-tag-item[data-keyword="${keywords[keywordsLower.indexOf(newKeywordLower)]}"]`,
           );
           if (existingTagEl) {
-            existingTagEl.classList.add("cm-tag-duplicate-flash");
+            existingTagEl.classList.add('cm-tag-duplicate-flash');
             setTimeout(() => {
-              existingTagEl.classList.remove("cm-tag-duplicate-flash");
+              existingTagEl.classList.remove('cm-tag-duplicate-flash');
             }, 700);
           }
-          inputEl.value = "";
+          inputEl.value = '';
         }
       };
 
-      inputEl.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || e.key === " ") {
+      inputEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
           addKeywordFromInput();
-        } else if (e.key === "Backspace" && inputEl.value === "") {
+        } else if (e.key === 'Backspace' && inputEl.value === '') {
           if (keywords.length > 0) {
             keywords.pop();
-            rule.keywords = keywords.join(",");
+            rule.keywords = keywords.join(',');
             renderTags();
           }
         }
       });
 
-      inputEl.addEventListener("blur", addKeywordFromInput);
+      inputEl.addEventListener('blur', addKeywordFromInput);
 
       inputEl.focus();
     };
 
-    container.addEventListener("click", () => {
-      container.querySelector<HTMLInputElement>(".cm-tag-input-field")?.focus();
+    container.addEventListener('click', () => {
+      container.querySelector<HTMLInputElement>('.cm-tag-input-field')?.focus();
     });
 
     renderTags();
@@ -1590,15 +1501,15 @@ export class NoticeRulesModal extends ColorMasterBaseModal {
     const ruleEl = this.rulesContainer.children[index];
     if (!ruleEl) return;
 
-    ruleEl.classList.add("removing");
+    ruleEl.classList.add('removing');
 
     setTimeout(() => {
       if (this.localRules.length === 1) {
         this.localRules.splice(index, 1);
         const newRule: NoticeRule = {
           id: `rule-${Date.now()}`,
-          keywords: "",
-          color: this.ruleType === "text" ? "#ffffff" : "#444444",
+          keywords: '',
+          color: this.ruleType === 'text' ? '#ffffff' : '#444444',
           isRegex: false,
           highlightOnly: false,
         };
@@ -1611,18 +1522,18 @@ export class NoticeRulesModal extends ColorMasterBaseModal {
     }, 100);
   }
   _handleTestRule(rule: NoticeRule & { _lastTestIndex?: number }) {
-    const keywordsString = rule.keywords || "";
+    const keywordsString = rule.keywords || '';
     if (!keywordsString.trim()) {
-      new Notice(t("notices.noKeywordsToTest"));
+      new Notice(t('notices.noKeywordsToTest'));
       return;
     }
 
     const keywordsArray = keywordsString
-      .split(",")
+      .split(',')
       .map((k) => k.trim())
       .filter(Boolean);
     if (keywordsArray.length === 0) {
-      new Notice(t("notices.noKeywordsToTest"));
+      new Notice(t('notices.noKeywordsToTest'));
       return;
     }
     if (rule._lastTestIndex === undefined || rule._lastTestIndex === null) {
@@ -1635,18 +1546,18 @@ export class NoticeRulesModal extends ColorMasterBaseModal {
 
     const sequentialKeyword = keywordsArray[rule._lastTestIndex];
     const fragment = new DocumentFragment();
-    const text = t("notices.testSentence", sequentialKeyword).split(
-      new RegExp(`(${sequentialKeyword})`, "i"),
+    const text = t('notices.testSentence', sequentialKeyword).split(
+      new RegExp(`(${sequentialKeyword})`, 'i'),
     );
 
     fragment.append(text[0]);
 
     const keywordSpan = fragment.createSpan({
-      cls: "cm-test-keyword",
+      cls: 'cm-test-keyword',
       text: text[1],
     });
     fragment.append(keywordSpan);
-    fragment.append(text[2] || "");
+    fragment.append(text[2] || '');
     new Notice(fragment);
   }
 }
@@ -1663,12 +1574,12 @@ export class CustomVariableMetaModal extends ColorMasterBaseModal {
   }) => void;
 
   // Instance variables
-  varName: string = "";
-  varValue: string = "";
-  displayName: string = "";
-  description: string = "";
-  varType: CustomVarType = "color";
-  sizeUnit: string = "px";
+  varName: string = '';
+  varValue: string = '';
+  displayName: string = '';
+  description: string = '';
+  varType: CustomVarType = 'color';
+  sizeUnit: string = 'px';
   valueInputContainer: HTMLElement;
 
   constructor(
@@ -1692,36 +1603,33 @@ export class CustomVariableMetaModal extends ColorMasterBaseModal {
   renderValueInput(container: HTMLElement) {
     container.empty(); // Clean up the old field
     const valueSetting = new Setting(container)
-      .setName(t("modals.customVar.varValue"))
-      .setDesc(t("modals.customVar.varValueDesc"));
+      .setName(t('modals.customVar.varValue'))
+      .setDesc(t('modals.customVar.varValueDesc'));
 
     switch (this.varType) {
-      case "color": {
-        if (
-          this.varValue !== "" &&
-          !this.varValue.match(/^(#|rgb|hsl|transparent|var\(--)/i)
-        ) {
-          this.varValue = "";
+      case 'color': {
+        if (this.varValue !== '' && !this.varValue.match(/^(#|rgb|hsl|transparent|var\(--)/i)) {
+          this.varValue = '';
         }
 
-        const colorPicker = valueSetting.controlEl.createEl("input", {
-          type: "color",
+        const colorPicker = valueSetting.controlEl.createEl('input', {
+          type: 'color',
         });
-        const textInput = valueSetting.controlEl.createEl("input", {
-          type: "text",
-          cls: "color-master-text-input",
+        const textInput = valueSetting.controlEl.createEl('input', {
+          type: 'text',
+          cls: 'color-master-text-input',
         });
 
         colorPicker.value = this.varValue;
         textInput.value = this.varValue;
 
-        colorPicker.addEventListener("input", (e) => {
+        colorPicker.addEventListener('input', (e) => {
           const newColor = (e.target as HTMLInputElement).value;
           textInput.value = newColor;
           this.varValue = newColor;
         });
 
-        textInput.addEventListener("change", (e) => {
+        textInput.addEventListener('change', (e) => {
           const newColor = (e.target as HTMLInputElement).value;
           colorPicker.value = newColor;
           this.varValue = newColor;
@@ -1730,48 +1638,46 @@ export class CustomVariableMetaModal extends ColorMasterBaseModal {
         break;
       }
 
-      case "size": {
+      case 'size': {
         // If the current value is not a size, return it to the default
         if (!this.varValue.match(/^(-?\d+)(\.\d+)?(px|em|rem|%)$/)) {
-          this.varValue = "10px";
+          this.varValue = '10px';
         }
 
         // Extract the number and unit
         const sizeMatch = this.varValue.match(/(-?\d+)(\.\d+)?(\D+)/);
 
-        let num = sizeMatch
-          ? (sizeMatch[1] || "") + (sizeMatch[2] || "")
-          : "10";
+        let num = sizeMatch ? (sizeMatch[1] || '') + (sizeMatch[2] || '') : '10';
 
-        let unit = sizeMatch ? sizeMatch[3] || "" : "px";
-        if (!["px", "em", "rem", "%"].includes(unit)) unit = "px";
+        let unit = sizeMatch ? sizeMatch[3] || '' : 'px';
+        if (!['px', 'em', 'rem', '%'].includes(unit)) unit = 'px';
 
         this.sizeUnit = unit;
 
-        const sizeInput = valueSetting.controlEl.createEl("input", {
-          type: "number",
-          cls: "color-master-text-input",
+        const sizeInput = valueSetting.controlEl.createEl('input', {
+          type: 'number',
+          cls: 'color-master-text-input',
         });
-        sizeInput.setCssProps({ width: "80px" });
+        sizeInput.setCssProps({ width: '80px' });
         sizeInput.value = num;
 
         const unitDropdown = new DropdownComponent(valueSetting.controlEl);
 
         // eslint-disable-next-line obsidianmd/ui/sentence-case
-        unitDropdown.addOption("px", "px");
+        unitDropdown.addOption('px', 'px');
         // eslint-disable-next-line obsidianmd/ui/sentence-case
-        unitDropdown.addOption("em", "em");
+        unitDropdown.addOption('em', 'em');
         // eslint-disable-next-line obsidianmd/ui/sentence-case
-        unitDropdown.addOption("rem", "rem");
-        unitDropdown.addOption("%", "%");
+        unitDropdown.addOption('rem', 'rem');
+        unitDropdown.addOption('%', '%');
 
         unitDropdown.setValue(this.sizeUnit);
 
         const updateSizeValue = () => {
-          this.varValue = (sizeInput.value || "0") + this.sizeUnit;
+          this.varValue = (sizeInput.value || '0') + this.sizeUnit;
         };
 
-        sizeInput.addEventListener("change", updateSizeValue);
+        sizeInput.addEventListener('change', updateSizeValue);
 
         unitDropdown.onChange((newUnit) => {
           this.sizeUnit = newUnit;
@@ -1781,31 +1687,31 @@ export class CustomVariableMetaModal extends ColorMasterBaseModal {
         break;
       }
 
-      case "text": {
+      case 'text': {
         // Dump the value if the type is different
-        if (this.varType !== "text") this.varValue = "";
+        if (this.varType !== 'text') this.varValue = '';
 
         valueSetting.addTextArea((text) => {
           text
             .setValue(this.varValue)
-            .setPlaceholder(t("modals.customVar.textValuePlaceholder"))
+            .setPlaceholder(t('modals.customVar.textValuePlaceholder'))
             .onChange((value) => {
               this.varValue = value;
             });
 
-          text.inputEl.setCssProps({ width: "100%" });
-          text.inputEl.classList.add("cm-textarea-size");
+          text.inputEl.setCssProps({ width: '100%' });
+          text.inputEl.classList.add('cm-textarea-size');
         });
 
         break;
       }
 
-      case "number": {
+      case 'number': {
         // If the value is NaN, return it to 0
-        if (isNaN(parseFloat(this.varValue))) this.varValue = "0";
+        if (isNaN(parseFloat(this.varValue))) this.varValue = '0';
 
         valueSetting.addText((text) => {
-          text.inputEl.type = "number";
+          text.inputEl.type = 'number';
           text.setValue(this.varValue).onChange((value) => {
             this.varValue = value;
           });
@@ -1819,19 +1725,19 @@ export class CustomVariableMetaModal extends ColorMasterBaseModal {
   onOpen() {
     const { contentEl } = this;
     contentEl.empty();
-    this.modalEl.classList.add("color-master-modal");
+    this.modalEl.classList.add('color-master-modal');
 
     super.onOpen();
 
-    contentEl.createEl("h3", { text: t("modals.customVar.title") });
-    contentEl.createEl("p", { text: t("modals.customVar.desc") });
+    contentEl.createEl('h3', { text: t('modals.customVar.title') });
+    contentEl.createEl('p', { text: t('modals.customVar.desc') });
 
     new Setting(contentEl)
-      .setName(t("modals.customVar.displayName"))
-      .setDesc(t("modals.customVar.displayNameDesc"))
+      .setName(t('modals.customVar.displayName'))
+      .setDesc(t('modals.customVar.displayNameDesc'))
       .addText((text) =>
         text
-          .setPlaceholder(t("modals.customVar.displayNamePlaceholder"))
+          .setPlaceholder(t('modals.customVar.displayNamePlaceholder'))
           .setValue(this.displayName)
           .onChange((value) => {
             this.displayName = value;
@@ -1839,18 +1745,18 @@ export class CustomVariableMetaModal extends ColorMasterBaseModal {
       );
 
     new Setting(contentEl)
-      .setName(t("modals.customVar.varName"))
-      .setDesc(t("modals.customVar.varNameDesc"))
+      .setName(t('modals.customVar.varName'))
+      .setDesc(t('modals.customVar.varNameDesc'))
       .addText((text) =>
         text
-          .setPlaceholder(t("modals.customVar.varNamePlaceholder"))
+          .setPlaceholder(t('modals.customVar.varNamePlaceholder'))
           .setValue(this.varName)
           .onChange((value) => {
-            if (value.length > 0 && !value.startsWith("--")) {
-              if (value.startsWith("-")) {
-                this.varName = "-" + value;
+            if (value.length > 0 && !value.startsWith('--')) {
+              if (value.startsWith('-')) {
+                this.varName = '-' + value;
               } else {
-                this.varName = "--" + value;
+                this.varName = '--' + value;
               }
             } else {
               this.varName = value;
@@ -1859,46 +1765,46 @@ export class CustomVariableMetaModal extends ColorMasterBaseModal {
       );
 
     new Setting(contentEl)
-      .setName(t("modals.customVar.varType"))
-      .setDesc(t("modals.customVar.varTypeDesc"))
+      .setName(t('modals.customVar.varType'))
+      .setDesc(t('modals.customVar.varTypeDesc'))
       .addDropdown((dropdown) => {
         dropdown
-          .addOption("color", t("modals.customVar.types.color"))
-          .addOption("size", t("modals.customVar.types.size"))
-          .addOption("text", t("modals.customVar.types.text"))
-          .addOption("number", t("modals.customVar.types.number"))
+          .addOption('color', t('modals.customVar.types.color'))
+          .addOption('size', t('modals.customVar.types.size'))
+          .addOption('text', t('modals.customVar.types.text'))
+          .addOption('number', t('modals.customVar.types.number'))
           .setValue(this.varType)
           .onChange((value: CustomVarType) => {
             this.varType = value;
 
             switch (value) {
-              case "color":
-                this.varValue = "";
+              case 'color':
+                this.varValue = '';
                 break;
-              case "size":
-                this.varValue = "10px";
+              case 'size':
+                this.varValue = '10px';
                 break;
-              case "number":
-                this.varValue = "0";
+              case 'number':
+                this.varValue = '0';
                 break;
-              case "text":
-                this.varValue = "";
+              case 'text':
+                this.varValue = '';
                 break;
             }
             this.renderValueInput(this.valueInputContainer);
           });
       });
 
-    this.valueInputContainer = contentEl.createDiv("cm-value-input-container");
+    this.valueInputContainer = contentEl.createDiv('cm-value-input-container');
     this.renderValueInput(this.valueInputContainer);
 
     // Description
     new Setting(contentEl)
-      .setName(t("modals.customVar.description"))
-      .setDesc(t("modals.customVar.descriptionDesc"))
+      .setName(t('modals.customVar.description'))
+      .setDesc(t('modals.customVar.descriptionDesc'))
       .addTextArea((text) =>
         text
-          .setPlaceholder(t("modals.customVar.descriptionPlaceholder"))
+          .setPlaceholder(t('modals.customVar.descriptionPlaceholder'))
           .setValue(this.description)
           .onChange((value) => {
             this.description = value;
@@ -1907,34 +1813,31 @@ export class CustomVariableMetaModal extends ColorMasterBaseModal {
 
     // Buttons
     new Setting(contentEl)
-      .setClass("modal-button-container")
-      .addButton((button) =>
-        button.setButtonText(t("buttons.cancel")).onClick(() => this.close()),
-      )
+      .setClass('modal-button-container')
+      .addButton((button) => button.setButtonText(t('buttons.cancel')).onClick(() => this.close()))
       .addButton((button) =>
         button
-          .setButtonText(t("modals.customVar.addVarButton"))
+          .setButtonText(t('modals.customVar.addVarButton'))
           .setCta()
           .onClick(() => {
             const trimmedVarName = this.varName.trim();
 
-            if (!trimmedVarName.startsWith("--")) {
-              new Notice(t("notices.varNameFormat"));
+            if (!trimmedVarName.startsWith('--')) {
+              new Notice(t('notices.varNameFormat'));
               return;
             }
             if (!this.displayName.trim()) {
-              new Notice(t("notices.varNameEmpty"));
+              new Notice(t('notices.varNameEmpty'));
               return;
             }
 
             const allDefaultVars = Object.keys(flattenVars(DEFAULT_VARS));
-            const activeProfile =
-              this.plugin.settings.profiles[this.plugin.settings.activeProfile];
+            const activeProfile = this.plugin.settings.profiles[this.plugin.settings.activeProfile];
             const allProfileVars = Object.keys(activeProfile.vars || {});
             const allVarNames = new Set([...allDefaultVars, ...allProfileVars]);
 
             if (allVarNames.has(trimmedVarName)) {
-              new Notice(t("notices.varExists", trimmedVarName));
+              new Notice(t('notices.varExists', trimmedVarName));
               return;
             }
 
@@ -1964,26 +1867,24 @@ export class LanguageSettingsModal extends ColorMasterBaseModal {
 
   onOpen() {
     super.onOpen();
-    this.modalEl.classList.add("color-master-modal");
+    this.modalEl.classList.add('color-master-modal');
     const { contentEl } = this;
 
     contentEl.empty();
-    contentEl.createEl("h3", {
-      text: t("settings.languageSettingsModalTitle"),
+    contentEl.createEl('h3', {
+      text: t('settings.languageSettingsModalTitle'),
     });
 
     new Setting(contentEl)
-      .setName(t("settings.rtlLayoutName"))
-      .setDesc(t("settings.rtlLayoutDesc"))
+      .setName(t('settings.rtlLayoutName'))
+      .setDesc(t('settings.rtlLayoutDesc'))
       .addToggle((toggle) => {
-        toggle
-          .setValue(this.plugin.settings.useRtlLayout)
-          .onChange(async (value) => {
-            this.plugin.settings.useRtlLayout = value;
-            await this.plugin.saveSettings();
-            // Refresh the main settings tab to reflect the change
-            this.plugin.settingTabInstance?.display();
-          });
+        toggle.setValue(this.plugin.settings.useRtlLayout).onChange(async (value) => {
+          this.plugin.settings.useRtlLayout = value;
+          await this.plugin.saveSettings();
+          // Refresh the main settings tab to reflect the change
+          this.plugin.settingTabInstance?.display();
+        });
       });
   }
 
@@ -2002,39 +1903,37 @@ export class IconizeSettingsModal extends ColorMasterBaseModal {
 
   onOpen() {
     super.onOpen();
-    this.modalEl.classList.add("color-master-modal");
+    this.modalEl.classList.add('color-master-modal');
     const { contentEl } = this;
     contentEl.empty();
-    contentEl.createEl("h3", { text: t("options.iconizeModalTitle") });
+    contentEl.createEl('h3', { text: t('options.iconizeModalTitle') });
 
     new Setting(contentEl)
-      .setName(t("options.overrideIconizeName"))
-      .setDesc(t("options.overrideIconizeDesc"))
+      .setName(t('options.overrideIconizeName'))
+      .setDesc(t('options.overrideIconizeDesc'))
       .addToggle((toggle) => {
-        toggle
-          .setValue(this.plugin.settings.overrideIconizeColors)
-          .onChange(async (value) => {
-            if (value) {
-              const iconizeIDs = ["obsidian-icon-folder", "iconize"];
-              const pluginManager = (this.app as unknown).plugins;
-              const isIconizeInstalled = iconizeIDs.some(
-                (id: string) => !!pluginManager.getPlugin(id),
-              );
+        toggle.setValue(this.plugin.settings.overrideIconizeColors).onChange(async (value) => {
+          if (value) {
+            const iconizeIDs = ['obsidian-icon-folder', 'iconize'];
+            const pluginManager = (this.app as unknown).plugins;
+            const isIconizeInstalled = iconizeIDs.some(
+              (id: string) => !!pluginManager.getPlugin(id),
+            );
 
-              if (!isIconizeInstalled) {
-                new Notice(t("notices.iconizeNotFound"));
-                toggle.setValue(false);
-                return;
-              }
+            if (!isIconizeInstalled) {
+              new Notice(t('notices.iconizeNotFound'));
+              toggle.setValue(false);
+              return;
             }
-            this.plugin.settings.overrideIconizeColors = value;
-            await this.plugin.saveSettings();
-          });
+          }
+          this.plugin.settings.overrideIconizeColors = value;
+          await this.plugin.saveSettings();
+        });
       });
 
     new Setting(contentEl)
-      .setName(t("options.cleanupIntervalName"))
-      .setDesc(t("options.cleanupIntervalDesc"))
+      .setName(t('options.cleanupIntervalName'))
+      .setDesc(t('options.cleanupIntervalDesc'))
       .addSlider((slider) => {
         slider
           .setLimits(1, 10, 1)
@@ -2063,25 +1962,23 @@ export class BackgroundImageSettingsModal extends ColorMasterBaseModal {
 
   onOpen() {
     super.onOpen();
-    this.modalEl.classList.add("color-master-modal");
+    this.modalEl.classList.add('color-master-modal');
     const { contentEl } = this;
-    const activeProfile =
-      this.plugin.settings.profiles[this.plugin.settings.activeProfile];
+    const activeProfile = this.plugin.settings.profiles[this.plugin.settings.activeProfile];
 
     contentEl.empty();
-    contentEl.createEl("h3", {
-      text: t("options.backgroundModalSettingsTitle"),
+    contentEl.createEl('h3', {
+      text: t('options.backgroundModalSettingsTitle'),
     });
 
     // --- Enable/Disable Toggle ---
     new Setting(contentEl)
-      .setName(t("options.backgroundEnableName"))
-      .setDesc(t("options.backgroundEnableDesc"))
+      .setName(t('options.backgroundEnableName'))
+      .setDesc(t('options.backgroundEnableDesc'))
       .addToggle((toggle) => {
         const isCurrentlyEnabled = activeProfile?.backgroundEnabled !== false;
         toggle.setValue(isCurrentlyEnabled).onChange(async (value) => {
-          const profile =
-            this.plugin.settings.profiles[this.plugin.settings.activeProfile];
+          const profile = this.plugin.settings.profiles[this.plugin.settings.activeProfile];
           if (profile) {
             profile.backgroundEnabled = value;
             await this.plugin.saveSettings();
@@ -2090,40 +1987,36 @@ export class BackgroundImageSettingsModal extends ColorMasterBaseModal {
         });
       });
 
-    const settingTypeSetting = new Setting(contentEl).setName(
-      t("options.settingType"),
-    );
+    const settingTypeSetting = new Setting(contentEl).setName(t('options.settingType'));
 
     let imageButton: ButtonComponent;
     let videoButton: ButtonComponent;
 
-    const imageSettingsEl = contentEl.createDiv("cm-settings-group");
-    imageSettingsEl.setCssProps({ display: "none" });
+    const imageSettingsEl = contentEl.createDiv('cm-settings-group');
+    imageSettingsEl.setCssProps({ display: 'none' });
 
-    const videoSettingsEl = contentEl.createDiv("cm-settings-group");
-    videoSettingsEl.setCssProps({ display: "none" });
+    const videoSettingsEl = contentEl.createDiv('cm-settings-group');
+    videoSettingsEl.setCssProps({ display: 'none' });
 
     // --- Fill the Image Settings container ---
     new Setting(imageSettingsEl)
-      .setName(t("options.convertImagesName"))
-      .setDesc(t("options.convertImagesDesc"))
+      .setName(t('options.convertImagesName'))
+      .setDesc(t('options.convertImagesDesc'))
       .addToggle((toggle) => {
-        toggle
-          .setValue(activeProfile?.convertImagesToJpg || false)
-          .onChange(async (value) => {
-            activeProfile.convertImagesToJpg = value;
-            if (value && !activeProfile.jpgQuality) {
-              activeProfile.jpgQuality = 85;
-            }
-            await this.plugin.saveSettings();
-            this.onOpen();
-          });
+        toggle.setValue(activeProfile?.convertImagesToJpg || false).onChange(async (value) => {
+          activeProfile.convertImagesToJpg = value;
+          if (value && !activeProfile.jpgQuality) {
+            activeProfile.jpgQuality = 85;
+          }
+          await this.plugin.saveSettings();
+          this.onOpen();
+        });
       });
 
     if (activeProfile?.convertImagesToJpg === true) {
       new Setting(imageSettingsEl)
-        .setName(t("options.jpgQualityName"))
-        .setDesc(t("options.jpgQualityDesc"))
+        .setName(t('options.jpgQualityName'))
+        .setDesc(t('options.jpgQualityDesc'))
         .addSlider((slider) => {
           slider
             .setLimits(1, 100, 1)
@@ -2137,8 +2030,8 @@ export class BackgroundImageSettingsModal extends ColorMasterBaseModal {
 
     // --- Fill the video settings container (it is still hidden) ---
     new Setting(videoSettingsEl)
-      .setName(t("options.videoOpacityName"))
-      .setDesc(t("options.videoOpacityDesc"))
+      .setName(t('options.videoOpacityName'))
+      .setDesc(t('options.videoOpacityDesc'))
       .addSlider((slider) => {
         slider
           .setLimits(0.1, 1, 0.1)
@@ -2151,9 +2044,7 @@ export class BackgroundImageSettingsModal extends ColorMasterBaseModal {
 
         slider.sliderEl.oninput = (e) => {
           const value = parseFloat((e.target as HTMLInputElement).value);
-          const videoEl = document.querySelector<HTMLVideoElement>(
-            "#cm-background-video",
-          );
+          const videoEl = document.querySelector<HTMLVideoElement>('#cm-background-video');
           if (videoEl) {
             videoEl.setCssProps({ opacity: value.toString() });
           }
@@ -2161,69 +2052,60 @@ export class BackgroundImageSettingsModal extends ColorMasterBaseModal {
       });
 
     new Setting(videoSettingsEl)
-      .setName(t("options.videoMuteName"))
-      .setDesc(t("options.videoMuteDesc"))
+      .setName(t('options.videoMuteName'))
+      .setDesc(t('options.videoMuteDesc'))
       .addToggle((toggle) =>
-        toggle
-          .setValue(activeProfile.videoMuted !== false)
-          .onChange(async (value) => {
-            activeProfile.videoMuted = value;
-            await this.plugin.saveSettings();
+        toggle.setValue(activeProfile.videoMuted !== false).onChange(async (value) => {
+          activeProfile.videoMuted = value;
+          await this.plugin.saveSettings();
 
-            const videoEl = document.querySelector<HTMLVideoElement>(
-              "#cm-background-video",
-            );
-            if (videoEl) {
-              videoEl.muted = value;
-            }
-          }),
+          const videoEl = document.querySelector<HTMLVideoElement>('#cm-background-video');
+          if (videoEl) {
+            videoEl.muted = value;
+          }
+        }),
       );
 
     // --- Attaching buttons to containers ---
-    const setActiveButton = (active: "image" | "video") => {
-      if (active === "image") {
+    const setActiveButton = (active: 'image' | 'video') => {
+      if (active === 'image') {
         imageButton.setCta();
-        videoButton.buttonEl.classList.remove("mod-cta");
-        imageSettingsEl.setCssProps({ display: "block" });
-        videoSettingsEl.setCssProps({ display: "none" });
+        videoButton.buttonEl.classList.remove('mod-cta');
+        imageSettingsEl.setCssProps({ display: 'block' });
+        videoSettingsEl.setCssProps({ display: 'none' });
       } else {
-        imageButton.buttonEl.classList.remove("mod-cta");
+        imageButton.buttonEl.classList.remove('mod-cta');
         videoButton.setCta();
-        imageSettingsEl.setCssProps({ display: "none" });
-        videoSettingsEl.setCssProps({ display: "block" });
+        imageSettingsEl.setCssProps({ display: 'none' });
+        videoSettingsEl.setCssProps({ display: 'block' });
       }
     };
 
     settingTypeSetting.addButton((button) => {
       imageButton = button;
-      button
-        .setButtonText(t("options.settingTypeImage"))
-        .onClick(() => setActiveButton("image"));
+      button.setButtonText(t('options.settingTypeImage')).onClick(() => setActiveButton('image'));
     });
 
     settingTypeSetting.addButton((button) => {
       videoButton = button;
-      button
-        .setButtonText(t("options.settingTypeVideo"))
-        .onClick(() => setActiveButton("video"));
+      button.setButtonText(t('options.settingTypeVideo')).onClick(() => setActiveButton('video'));
     });
 
-    const currentType = activeProfile?.backgroundType || "image";
+    const currentType = activeProfile?.backgroundType || 'image';
     setActiveButton(currentType);
   }
 
   debouncedSaveSettings = debounce((value: number) => {
     void (async () => {
-      const profile =
-        this.plugin.settings.profiles[this.plugin.settings.activeProfile];
+      const profile = this.plugin.settings.profiles[this.plugin.settings.activeProfile];
 
       if (profile) {
         profile.jpgQuality = value;
         await this.plugin.saveSettings();
-        new Notice(t("notices.jpgQualitySet", value));
+        new Notice(t('notices.jpgQualitySet', value));
       }
     })().catch((err) => {
-      console.error("Failed to save JPG quality:", err);
+      console.error('Failed to save JPG quality:', err);
     });
   }, 0);
 
@@ -2252,14 +2134,14 @@ export class FileConflictModal extends ColorMasterBaseModal {
   plugin: ColorMaster;
   arrayBuffer: ArrayBuffer; // The image data to save
   fileName: string; // The conflicting filename
-  onResolve: (choice: "replace" | "keep") => void; // Callback with user's choice
+  onResolve: (choice: 'replace' | 'keep') => void; // Callback with user's choice
 
   constructor(
     app: App,
     plugin: ColorMaster,
     arrayBuffer: ArrayBuffer,
     fileName: string,
-    onResolve: (choice: "replace" | "keep") => void,
+    onResolve: (choice: 'replace' | 'keep') => void,
   ) {
     super(app, plugin);
     this.arrayBuffer = arrayBuffer;
@@ -2272,30 +2154,30 @@ export class FileConflictModal extends ColorMasterBaseModal {
     const { contentEl } = this;
     contentEl.empty();
 
-    contentEl.createEl("h3", { text: t("modals.fileConflict.title") });
-    contentEl.createEl("p", {
-      text: t("modals.fileConflict.desc", this.fileName),
+    contentEl.createEl('h3', { text: t('modals.fileConflict.title') });
+    contentEl.createEl('p', {
+      text: t('modals.fileConflict.desc', this.fileName),
     });
 
     const buttonContainer = contentEl.createDiv({
-      cls: "modal-button-container",
+      cls: 'modal-button-container',
     });
 
     // Replace Button
     new ButtonComponent(buttonContainer)
-      .setButtonText(t("modals.fileConflict.replaceButton"))
+      .setButtonText(t('modals.fileConflict.replaceButton'))
 
       .onClick(() => {
-        this.onResolve("replace");
+        this.onResolve('replace');
         this.close();
       });
 
     // Keep Both Button
     new ButtonComponent(buttonContainer)
-      .setButtonText(t("modals.fileConflict.keepButton"))
+      .setButtonText(t('modals.fileConflict.keepButton'))
       .setCta()
       .onClick(() => {
-        this.onResolve("keep");
+        this.onResolve('keep');
         this.close();
       });
   }
@@ -2310,99 +2192,92 @@ export class AddBackgroundModal extends ColorMasterBaseModal {
   plugin: ColorMaster;
   settingTab: ColorMasterSettingTab;
 
-  constructor(
-    app: App,
-    plugin: ColorMaster,
-    settingTab: ColorMasterSettingTab,
-  ) {
+  constructor(app: App, plugin: ColorMaster, settingTab: ColorMasterSettingTab) {
     super(app, plugin);
     this.settingTab = settingTab;
   }
 
   // Process pasted image files
   async handlePastedFile(file: File) {
-    new Notice(t("notices.pastedImage", file.name));
+    new Notice(t('notices.pastedImage', file.name));
     await this.processFileWithProgress(file);
   }
 
   // Process pasted URLs (http/https or data URLs)
   async handlePastedUrl(url: string) {
-    const pasteBox = this.contentEl.querySelector<HTMLElement>(".cm-paste-box");
+    const pasteBox = this.contentEl.querySelector<HTMLElement>('.cm-paste-box');
 
     // Handle data URLs directly
-    if (url.startsWith("data:image")) {
+    if (url.startsWith('data:image')) {
       try {
         if (pasteBox) {
-          pasteBox.textContent = t("modals.addBackground.processing") + "...";
+          pasteBox.textContent = t('modals.addBackground.processing') + '...';
         }
         const response = await requestUrl({ url });
         const arrayBuffer = response.arrayBuffer;
-        const contentType = response.headers["content-type"] || "image/png";
-        const fileName = `pasted-image-${Date.now()}.${
-          contentType.split("/")[1]
-        }`;
-        new Notice(t("notices.pastedBase64Image"));
+        const contentType = response.headers['content-type'] || 'image/png';
+        const fileName = `pasted-image-${Date.now()}.${contentType.split('/')[1]}`;
+        new Notice(t('notices.pastedBase64Image'));
 
-        await this.plugin.setBackgroundMedia(arrayBuffer, fileName, "prompt");
+        await this.plugin.setBackgroundMedia(arrayBuffer, fileName, 'prompt');
         this.close();
         return; // Exit after handling
       } catch (error) {
-        new Notice(t("notices.backgroundLoadError"));
-        console.error("Color Master: Error handling pasted data URL:", error);
+        new Notice(t('notices.backgroundLoadError'));
+        console.error('Color Master: Error handling pasted data URL:', error);
         this.close();
         return; // Exit on error
       }
     }
 
     // Handle regular URLs
-    if (url.startsWith("http://") || url.startsWith("https://")) {
-      new Notice(t("notices.downloadingFromUrl", url));
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      new Notice(t('notices.downloadingFromUrl', url));
       if (pasteBox) {
         // Show processing (no percentage)
-        pasteBox.textContent = t("modals.addBackground.processing") + "...";
+        pasteBox.textContent = t('modals.addBackground.processing') + '...';
       }
       await this.plugin.setBackgroundMediaFromUrl(url); // Use dedicated function
       this.close();
       return; // Exit after handling
     }
     // If neither type matched
-    new Notice(t("notices.pasteError"));
+    new Notice(t('notices.pasteError'));
   }
 
   // Read file as ArrayBuffer, update progress, and call setBackgroundImage
   async processFileWithProgress(file: File) {
     await Promise.resolve();
     const reader = new FileReader();
-    const pasteBox = this.contentEl.querySelector<HTMLElement>(".cm-paste-box");
+    const pasteBox = this.contentEl.querySelector<HTMLElement>('.cm-paste-box');
 
     // Update progress text in paste box
     reader.onprogress = (event) => {
       if (event.lengthComputable && pasteBox) {
         const percent = Math.round((event.loaded / event.total) * 100);
-        pasteBox.textContent =
-          t("modals.addBackground.processing") + `${percent}%`;
+        pasteBox.textContent = t('modals.addBackground.processing') + `${percent}%`;
       }
     };
 
     // On successful load, pass data to main plugin function
     reader.onload = async () => {
       if (pasteBox) {
-        pasteBox.textContent = t("modals.addBackground.processing") + " 100%";
+        pasteBox.textContent = t('modals.addBackground.processing') + ' 100%';
       }
       const arrayBuffer = reader.result as ArrayBuffer;
-      await this.plugin.setBackgroundMedia(arrayBuffer, file.name, "prompt");
+      await this.plugin.setBackgroundMedia(arrayBuffer, file.name, 'prompt');
       this.close();
     };
 
     // Handle read errors
     reader.onerror = () => {
-      new Notice(t("notices.backgroundLoadError"));
+      new Notice(t('notices.backgroundLoadError'));
       this.close();
     };
 
     // Start reading the file
     if (pasteBox) {
-      pasteBox.textContent = t("modals.addBackground.processing") + "0%";
+      pasteBox.textContent = t('modals.addBackground.processing') + '0%';
     }
     reader.readAsArrayBuffer(file);
   }
@@ -2412,21 +2287,21 @@ export class AddBackgroundModal extends ColorMasterBaseModal {
     const { contentEl } = this;
     contentEl.empty();
 
-    contentEl.createEl("h3", { text: t("modals.addBackground.title") });
+    contentEl.createEl('h3', { text: t('modals.addBackground.title') });
 
     // --- File Import Button ---
     new Setting(contentEl)
-      .setName(t("modals.addBackground.importFromFile"))
-      .setDesc(t("modals.addBackground.importFromFileDesc"))
+      .setName(t('modals.addBackground.importFromFile'))
+      .setDesc(t('modals.addBackground.importFromFileDesc'))
       .addButton((button) => {
         // Hidden input element to handle file selection
-        const input = document.createElement("input");
-        input.type = "file";
-        input.accept = "image/*, video/mp4, video/webm";
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*, video/mp4, video/webm';
 
         button
           .setCta()
-          .setButtonText(t("buttons.chooseFile"))
+          .setButtonText(t('buttons.chooseFile'))
           .onClick(() => {
             input.click();
           });
@@ -2439,16 +2314,16 @@ export class AddBackgroundModal extends ColorMasterBaseModal {
         };
       });
 
-    contentEl.createEl("hr");
+    contentEl.createEl('hr');
 
     // --- Paste Box (URL or Image via Paste/DragDrop) ---
     const pasteBox = contentEl.createDiv({
-      cls: "cm-paste-box",
-      text: t("modals.addBackground.pasteBoxPlaceholder"),
+      cls: 'cm-paste-box',
+      text: t('modals.addBackground.pasteBoxPlaceholder'),
     });
-    pasteBox.setAttribute("contenteditable", "true");
+    pasteBox.setAttribute('contenteditable', 'true');
 
-    pasteBox.addEventListener("paste", (event: ClipboardEvent) => {
+    pasteBox.addEventListener('paste', (event: ClipboardEvent) => {
       event.preventDefault();
 
       const clipboardData = event.clipboardData;
@@ -2457,54 +2332,54 @@ export class AddBackgroundModal extends ColorMasterBaseModal {
       // Check for pasted files first
       if (clipboardData.files && clipboardData.files.length > 0) {
         const file = clipboardData.files[0];
-        if (file.type.startsWith("image/") || file.type.startsWith("video/")) {
+        if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
           void this.handlePastedFile(file).catch((err) => {
-            console.error("Failed to handle pasted file:", err);
+            console.error('Failed to handle pasted file:', err);
           });
           return;
         }
       }
 
       // Check for pasted text (URLs)
-      const pastedText = clipboardData.getData("text/plain");
+      const pastedText = clipboardData.getData('text/plain');
       if (
         pastedText &&
-        (pastedText.startsWith("http://") ||
-          pastedText.startsWith("https://") ||
-          pastedText.startsWith("data:image"))
+        (pastedText.startsWith('http://') ||
+          pastedText.startsWith('https://') ||
+          pastedText.startsWith('data:image'))
       ) {
         void this.handlePastedUrl(pastedText).catch((err) => {
-          console.error("Failed to handle pasted URL:", err);
+          console.error('Failed to handle pasted URL:', err);
         });
         return;
       }
       // If neither worked
-      new Notice(t("notices.backgroundPasteError"));
+      new Notice(t('notices.backgroundPasteError'));
     });
 
     // --- Drag and Drop Listeners ---
-    pasteBox.addEventListener("dragover", (event: DragEvent) => {
+    pasteBox.addEventListener('dragover', (event: DragEvent) => {
       event.preventDefault(); // Required to allow drop
-      pasteBox.classList.add("is-over");
-      pasteBox.textContent = t("modals.addBackground.dropToAdd");
+      pasteBox.classList.add('is-over');
+      pasteBox.textContent = t('modals.addBackground.dropToAdd');
     });
 
-    pasteBox.addEventListener("dragleave", () => {
-      pasteBox.classList.remove("is-over");
-      pasteBox.textContent = t("modals.addBackground.pasteBoxPlaceholder");
+    pasteBox.addEventListener('dragleave', () => {
+      pasteBox.classList.remove('is-over');
+      pasteBox.textContent = t('modals.addBackground.pasteBoxPlaceholder');
     });
 
-    pasteBox.addEventListener("drop", (event: DragEvent) => {
+    pasteBox.addEventListener('drop', (event: DragEvent) => {
       event.preventDefault(); // Prevent default browser file handling
-      pasteBox.classList.remove("is-over");
-      pasteBox.textContent = t("modals.addBackground.pasteBoxPlaceholder");
+      pasteBox.classList.remove('is-over');
+      pasteBox.textContent = t('modals.addBackground.pasteBoxPlaceholder');
 
       if (!event.dataTransfer) return;
 
       // Check for dropped files first
       if (event.dataTransfer.files && event.dataTransfer.files.length > 0) {
         const file = event.dataTransfer.files[0];
-        if (file.type.startsWith("image/")) {
+        if (file.type.startsWith('image/')) {
           void this.handlePastedFile(file);
           return;
         }
@@ -2512,14 +2387,13 @@ export class AddBackgroundModal extends ColorMasterBaseModal {
 
       // Check for dropped URLs (less common, but possible)
       const url =
-        event.dataTransfer.getData("text/uri-list") ||
-        event.dataTransfer.getData("text/plain");
-      if (url && (url.startsWith("http") || url.startsWith("data:image"))) {
+        event.dataTransfer.getData('text/uri-list') || event.dataTransfer.getData('text/plain');
+      if (url && (url.startsWith('http') || url.startsWith('data:image'))) {
         void this.handlePastedUrl(url);
         return;
       }
       // If neither worked
-      new Notice(t("notices.backgroundPasteError"));
+      new Notice(t('notices.backgroundPasteError'));
     });
   }
 
@@ -2552,13 +2426,13 @@ export class ProfileImageBrowserModal extends ColorMasterBaseModal {
     const { contentEl } = this;
     contentEl.empty();
     this.videoPlayers = [];
-    contentEl.createEl("h3", { text: t("modals.backgroundBrowser.title") });
+    contentEl.createEl('h3', { text: t('modals.backgroundBrowser.title') });
 
-    this.galleryEl = contentEl.createDiv({ cls: "cm-image-gallery" });
+    this.galleryEl = contentEl.createDiv({ cls: 'cm-image-gallery' });
 
     // run async tasks safely
     void this._renderImages().catch((err) => {
-      console.error("Failed to render images:", err);
+      console.error('Failed to render images:', err);
     });
   }
 
@@ -2570,16 +2444,7 @@ export class ProfileImageBrowserModal extends ColorMasterBaseModal {
   async displayImages() {
     this.galleryEl.empty();
     const backgroundsPath = `${this.app.vault.configDir}/backgrounds`;
-    const mediaExtensions = [
-      ".png",
-      ".jpg",
-      ".jpeg",
-      ".gif",
-      ".webp",
-      ".svg",
-      ".mp4",
-      ".webm",
-    ];
+    const mediaExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg', '.mp4', '.webm'];
 
     let files: string[] = [];
     try {
@@ -2588,7 +2453,7 @@ export class ProfileImageBrowserModal extends ColorMasterBaseModal {
         files = list.files;
       }
     } catch (e) {
-      console.warn("Color Master: Error listing background folder.", e);
+      console.warn('Color Master: Error listing background folder.', e);
     }
 
     const mediaFiles = files.filter((path) =>
@@ -2597,161 +2462,151 @@ export class ProfileImageBrowserModal extends ColorMasterBaseModal {
 
     if (mediaFiles.length === 0) {
       this.galleryEl.createDiv({
-        cls: "cm-image-browser-empty",
-        text: t("modals.backgroundBrowser.noImages"),
+        cls: 'cm-image-browser-empty',
+        text: t('modals.backgroundBrowser.noImages'),
       });
       return;
     }
 
-    const activeProfile =
-      this.plugin.settings.profiles[this.plugin.settings.activeProfile];
+    const activeProfile = this.plugin.settings.profiles[this.plugin.settings.activeProfile];
     const activeMediaPath = activeProfile?.backgroundPath;
 
     // Optimization: Helper to parse filenames (defined once outside the loop)
     const splitName = (fullFileName: string) => {
-      const decoded = decodeURIComponent(fullFileName || "");
-      const lastDot = decoded.lastIndexOf(".");
+      const decoded = decodeURIComponent(fullFileName || '');
+      const lastDot = decoded.lastIndexOf('.');
       if (lastDot > 0 && lastDot < decoded.length - 1) {
         return {
           basename: decoded.substring(0, lastDot),
           ext: decoded.substring(lastDot),
         };
       }
-      return { basename: decoded, ext: "" };
+      return { basename: decoded, ext: '' };
     };
 
     // Optimization: Use DocumentFragment to minimize DOM reflows
     const fragment = document.createDocumentFragment();
 
     for (const mediaPath of mediaFiles) {
-      const cardEl = document.createElement("div");
-      cardEl.className = "cm-image-card";
-      if (mediaPath === activeMediaPath) cardEl.classList.add("is-active");
+      const cardEl = document.createElement('div');
+      cardEl.className = 'cm-image-card';
+      if (mediaPath === activeMediaPath) cardEl.classList.add('is-active');
 
       const mediaUrl = this.app.vault.adapter.getResourcePath(mediaPath);
-      const fileName = mediaPath.split("/").pop();
+      const fileName = mediaPath.split('/').pop();
       const isVideo =
-        mediaPath.toLowerCase().endsWith(".mp4") ||
-        mediaPath.toLowerCase().endsWith(".webm");
+        mediaPath.toLowerCase().endsWith('.mp4') || mediaPath.toLowerCase().endsWith('.webm');
 
       // --- Media Preview Section ---
       const previewContainer = cardEl.createDiv({
-        cls: "cm-media-preview-container",
+        cls: 'cm-media-preview-container',
       });
 
       if (isVideo) {
-        const videoEl = previewContainer.createEl("video", {
-          cls: "cm-image-card-preview",
+        const videoEl = previewContainer.createEl('video', {
+          cls: 'cm-image-card-preview',
           attr: {
             src: mediaUrl,
             muted: true,
             loop: true,
             playsinline: true,
-            "data-path": mediaPath,
+            'data-path': mediaPath,
           },
         });
 
         this.videoPlayers.push(videoEl);
 
         const playOverlay = previewContainer.createDiv({
-          cls: "cm-media-play-overlay",
+          cls: 'cm-media-play-overlay',
         });
-        setIcon(playOverlay, "play");
+        setIcon(playOverlay, 'play');
 
         const muteButton = previewContainer.createDiv({
-          cls: "cm-media-mute-toggle",
+          cls: 'cm-media-mute-toggle',
         });
 
         const updateMuteIcon = () => {
-          setIcon(muteButton, videoEl.muted ? "volume-x" : "volume-2");
-          muteButton.setCssProps({ opacity: "0" });
+          setIcon(muteButton, videoEl.muted ? 'volume-x' : 'volume-2');
+          muteButton.setCssProps({ opacity: '0' });
         };
         updateMuteIcon();
 
         // Mute Toggle Logic
-        muteButton.addEventListener("click", (e) => {
+        muteButton.addEventListener('click', (e) => {
           e.stopPropagation();
           videoEl.muted = !videoEl.muted;
           updateMuteIcon();
           muteButton.setCssProps({
-            opacity: videoEl.muted ? "0.8" : "1",
+            opacity: videoEl.muted ? '0.8' : '1',
           });
         });
 
         // Video Play/Pause & Exclusive Play Logic
-        previewContainer.addEventListener("click", () => {
+        previewContainer.addEventListener('click', () => {
           // Pause other playing videos
           for (const player of this.videoPlayers) {
             if (player !== videoEl && !player.paused) {
               player.pause();
-              const container = player.closest<HTMLElement>(
-                ".cm-media-preview-container",
-              );
+              const container = player.closest<HTMLElement>('.cm-media-preview-container');
               if (container) {
-                const playOverlay = container.querySelector<HTMLElement>(
-                  ".cm-media-play-overlay",
-                );
-                const muteToggle = container.querySelector<HTMLElement>(
-                  ".cm-media-mute-toggle",
-                );
+                const playOverlay = container.querySelector<HTMLElement>('.cm-media-play-overlay');
+                const muteToggle = container.querySelector<HTMLElement>('.cm-media-mute-toggle');
 
-                playOverlay?.setCssProps({ opacity: "1" });
-                muteToggle?.setCssProps({ opacity: "0" });
+                playOverlay?.setCssProps({ opacity: '1' });
+                muteToggle?.setCssProps({ opacity: '0' });
               }
             }
           }
 
           if (videoEl.paused) {
             void videoEl.play().catch((err) => {
-              console.error("Failed to play video:", err);
+              console.error('Failed to play video:', err);
             });
-            playOverlay.setCssProps({ opacity: "0" });
+            playOverlay.setCssProps({ opacity: '0' });
             muteButton.setCssProps({
-              opacity: videoEl.muted ? "0.8" : "1",
+              opacity: videoEl.muted ? '0.8' : '1',
             });
           } else {
-            muteButton.setCssProps({ opacity: "0" });
+            muteButton.setCssProps({ opacity: '0' });
             videoEl.pause();
-            playOverlay.setCssProps({ opacity: "1" });
+            playOverlay.setCssProps({ opacity: '1' });
           }
         });
       } else {
-        previewContainer.createEl("img", {
-          cls: "cm-image-card-preview",
-          attr: { src: mediaUrl, "data-path": mediaPath },
+        previewContainer.createEl('img', {
+          cls: 'cm-image-card-preview',
+          attr: { src: mediaUrl, 'data-path': mediaPath },
         });
       }
 
       // --- Rename Input Section ---
       const nameSettingEl = cardEl.createDiv({
-        cls: "setting-item cm-image-card-name-input",
+        cls: 'setting-item cm-image-card-name-input',
       });
       const nameControlEl = nameSettingEl.createDiv({
-        cls: "setting-item-control",
+        cls: 'setting-item-control',
       });
       const nameInputContainer = nameControlEl.createDiv({
-        cls: "cm-name-input-container",
+        cls: 'cm-name-input-container',
       });
 
-      const nameInput = nameInputContainer.createEl("input", {
-        type: "text",
-        cls: "cm-name-input-basename",
+      const nameInput = nameInputContainer.createEl('input', {
+        type: 'text',
+        cls: 'cm-name-input-basename',
       });
       const extensionSpan = nameInputContainer.createSpan({
-        cls: "cm-name-input-extension",
+        cls: 'cm-name-input-extension',
       });
 
       // State tracking for rename logic
       let currentImagePath = mediaPath;
-      let currentFileName = fileName || "";
+      let currentFileName = fileName || '';
       let { basename, ext } = splitName(currentFileName);
 
       nameInput.value = basename;
       extensionSpan.setText(ext);
 
-      nameInput.addEventListener("focus", (e) =>
-        (e.target as HTMLInputElement).select(),
-      );
+      nameInput.addEventListener('focus', (e) => (e.target as HTMLInputElement).select());
 
       const saveName = async () => {
         const newBasename = nameInput.value.trim();
@@ -2764,30 +2619,21 @@ export class ProfileImageBrowserModal extends ColorMasterBaseModal {
             newFullName,
           );
 
-          if (renameResult && typeof renameResult === "string") {
+          if (renameResult && typeof renameResult === 'string') {
             // Update local state upon success
             currentImagePath = renameResult;
-            currentFileName = renameResult.split("/").pop() || "";
+            currentFileName = renameResult.split('/').pop() || '';
             const updatedSplit = splitName(currentFileName);
             basename = updatedSplit.basename;
 
             // Partial UI update to avoid full reload
-            const imgEl = cardEl.querySelector<HTMLImageElement>(
-              ".cm-image-card-preview",
-            );
-            const selectBtn = cardEl.querySelector<HTMLButtonElement>(
-              ".cm-image-card-select-btn",
-            );
-            const deleteBtn = cardEl.querySelector<HTMLButtonElement>(
-              ".cm-image-card-delete-btn",
-            );
+            const imgEl = cardEl.querySelector<HTMLImageElement>('.cm-image-card-preview');
+            const selectBtn = cardEl.querySelector<HTMLButtonElement>('.cm-image-card-select-btn');
+            const deleteBtn = cardEl.querySelector<HTMLButtonElement>('.cm-image-card-delete-btn');
 
-            if (imgEl)
-              imgEl.src = this.app.vault.adapter.getResourcePath(renameResult);
-            if (selectBtn)
-              selectBtn.onclick = () => this.selectMedia(renameResult);
-            if (deleteBtn)
-              deleteBtn.onclick = () => this.deleteMedia(renameResult, cardEl);
+            if (imgEl) imgEl.src = this.app.vault.adapter.getResourcePath(renameResult);
+            if (selectBtn) selectBtn.onclick = () => this.selectMedia(renameResult);
+            if (deleteBtn) deleteBtn.onclick = () => this.deleteMedia(renameResult, cardEl);
           } else {
             nameInput.value = currentBase; // Revert on failure
           }
@@ -2796,32 +2642,32 @@ export class ProfileImageBrowserModal extends ColorMasterBaseModal {
         }
       };
 
-      nameInput.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") {
+      nameInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
           e.preventDefault();
           nameInput.blur(); // Triggers focusout
         }
       });
-      nameInput.addEventListener("focusout", () => {
+      nameInput.addEventListener('focusout', () => {
         void saveName().catch((err) => {
-          console.error("Failed to save snippet name:", err);
+          console.error('Failed to save snippet name:', err);
         });
       });
 
       // --- Actions (Select / Delete) ---
-      const controlsEl = cardEl.createDiv({ cls: "cm-image-card-controls" });
+      const controlsEl = cardEl.createDiv({ cls: 'cm-image-card-controls' });
 
       const selectButton = new ButtonComponent(controlsEl)
-        .setButtonText(t("buttons.select"))
+        .setButtonText(t('buttons.select'))
         .setCta()
         .onClick(() => this.selectMedia(currentImagePath));
-      selectButton.buttonEl.classList.add("cm-image-card-select-btn");
+      selectButton.buttonEl.classList.add('cm-image-card-select-btn');
 
       const deleteButton = new ButtonComponent(controlsEl)
-        .setIcon("trash")
-        .setClass("mod-warning")
+        .setIcon('trash')
+        .setClass('mod-warning')
         .onClick(() => this.deleteMedia(currentImagePath, cardEl));
-      deleteButton.buttonEl.classList.add("cm-image-card-delete-btn");
+      deleteButton.buttonEl.classList.add('cm-image-card-delete-btn');
 
       fragment.appendChild(cardEl);
     }
@@ -2832,9 +2678,9 @@ export class ProfileImageBrowserModal extends ColorMasterBaseModal {
 
   async selectMedia(path: string) {
     // Infer media type from extension to ensure correct rendering tag (img vs video)
-    const fileExt = path.split(".").pop()?.toLowerCase();
-    const mediaType: "image" | "video" =
-      fileExt === "mp4" || fileExt === "webm" ? "video" : "image";
+    const fileExt = path.split('.').pop()?.toLowerCase();
+    const mediaType: 'image' | 'video' =
+      fileExt === 'mp4' || fileExt === 'webm' ? 'video' : 'image';
 
     await this.plugin.selectBackgroundMedia(path, mediaType);
 
@@ -2852,45 +2698,45 @@ export class ProfileImageBrowserModal extends ColorMasterBaseModal {
 
     // Construct warning UI with list of affected profiles
     const messageFragment = new DocumentFragment();
-    messageFragment.append(t("modals.confirmation.deleteGlobalBgDesc"));
+    messageFragment.append(t('modals.confirmation.deleteGlobalBgDesc'));
 
     if (affectedProfiles.length > 0) {
-      const listEl = messageFragment.createEl("ul", {
-        cls: "cm-profile-list-modal",
+      const listEl = messageFragment.createEl('ul', {
+        cls: 'cm-profile-list-modal',
       });
       affectedProfiles.forEach((name) => {
-        listEl.createEl("li").createEl("strong", { text: name });
+        listEl.createEl('li').createEl('strong', { text: name });
       });
     }
 
     new ConfirmationModal(
       this.app,
       this.plugin,
-      t("modals.confirmation.deleteBackgroundTitle"),
+      t('modals.confirmation.deleteBackgroundTitle'),
       messageFragment,
       () => {
         void (async () => {
           // Perform deletion
           await this.plugin.removeBackgroundMediaByPath(path);
-          new Notice(t("notices.bgDeleted"));
+          new Notice(t('notices.bgDeleted'));
 
           // Update browser UI
           cardEl.remove();
 
           if (this.galleryEl.childElementCount === 0) {
             this.galleryEl.createDiv({
-              cls: "cm-image-browser-empty",
-              text: t("modals.backgroundBrowser.noImages"),
+              cls: 'cm-image-browser-empty',
+              text: t('modals.backgroundBrowser.noImages'),
             });
           }
 
           // Sync main settings tab
           this.settingTab.display();
         })().catch((err) => {
-          console.error("Failed to delete background:", err);
+          console.error('Failed to delete background:', err);
         });
       },
-      { buttonText: t("buttons.deleteAnyway"), buttonClass: "mod-warning" },
+      { buttonText: t('buttons.deleteAnyway'), buttonClass: 'mod-warning' },
     ).open();
   }
 
@@ -2938,15 +2784,15 @@ export class AdvancedResetModal extends ColorMasterBaseModal {
     const { contentEl } = this;
 
     contentEl.empty();
-    contentEl.createEl("h3", { text: t("modals.advancedReset.title") });
-    contentEl.createEl("p", { text: t("modals.advancedReset.desc") });
-    contentEl.addClass("cm-advanced-reset-options");
+    contentEl.createEl('h3', { text: t('modals.advancedReset.title') });
+    contentEl.createEl('p', { text: t('modals.advancedReset.desc') });
+    contentEl.addClass('cm-advanced-reset-options');
 
     // 1. Profiles & Snapshots
     new Setting(contentEl)
-      .setName(t("modals.advancedReset.profilesLabel"))
+      .setName(t('modals.advancedReset.profilesLabel'))
       .addExtraButton((btn) => {
-        btn.setIcon("info").setTooltip(t("modals.advancedReset.profilesDesc"));
+        btn.setIcon('info').setTooltip(t('modals.advancedReset.profilesDesc'));
       })
       .addToggle((toggle) => {
         toggle.setValue(this.resetOptions.deleteProfiles).onChange((value) => {
@@ -2958,9 +2804,9 @@ export class AdvancedResetModal extends ColorMasterBaseModal {
 
     // 2. Snippets
     new Setting(contentEl)
-      .setName(t("modals.advancedReset.snippetsLabel"))
+      .setName(t('modals.advancedReset.snippetsLabel'))
       .addExtraButton((btn) => {
-        btn.setIcon("info").setTooltip(t("modals.advancedReset.snippetsDesc"));
+        btn.setIcon('info').setTooltip(t('modals.advancedReset.snippetsDesc'));
       })
       .addToggle((toggle) => {
         toggle.setValue(this.resetOptions.deleteSnippets).onChange((value) => {
@@ -2972,9 +2818,9 @@ export class AdvancedResetModal extends ColorMasterBaseModal {
 
     // 3. Plugin Settings
     new Setting(contentEl)
-      .setName(t("modals.advancedReset.settingsLabel"))
+      .setName(t('modals.advancedReset.settingsLabel'))
       .addExtraButton((btn) => {
-        btn.setIcon("info").setTooltip(t("modals.advancedReset.settingsDesc"));
+        btn.setIcon('info').setTooltip(t('modals.advancedReset.settingsDesc'));
       })
       .addToggle((toggle) => {
         toggle.setValue(this.resetOptions.deleteSettings).onChange((value) => {
@@ -2986,56 +2832,50 @@ export class AdvancedResetModal extends ColorMasterBaseModal {
 
     // 4. Backgrounds Folder
     new Setting(contentEl)
-      .setName(t("modals.advancedReset.backgroundsLabel"))
+      .setName(t('modals.advancedReset.backgroundsLabel'))
       .addExtraButton((btn) => {
-        btn
-          .setIcon("info")
-          .setTooltip(t("modals.advancedReset.backgroundsDesc"));
+        btn.setIcon('info').setTooltip(t('modals.advancedReset.backgroundsDesc'));
       })
       .addToggle((toggle) => {
-        toggle
-          .setValue(this.resetOptions.deleteBackgrounds)
-          .onChange((value) => {
-            this.resetOptions.deleteBackgrounds = value;
-            this.validateButton();
-          });
+        toggle.setValue(this.resetOptions.deleteBackgrounds).onChange((value) => {
+          this.resetOptions.deleteBackgrounds = value;
+          this.validateButton();
+        });
         toggle.toggleEl.blur();
       });
 
     // 5. Custom Languages (Handles optional type safely)
     new Setting(contentEl)
-      .setName(t("modals.advancedReset.languagesLabel"))
+      .setName(t('modals.advancedReset.languagesLabel'))
       .addExtraButton((btn) => {
-        btn.setIcon("info").setTooltip(t("modals.advancedReset.languagesDesc"));
+        btn.setIcon('info').setTooltip(t('modals.advancedReset.languagesDesc'));
       })
       .addToggle((toggle) => {
-        toggle
-          .setValue(this.resetOptions.deleteLanguages ?? false)
-          .onChange((value) => {
-            this.resetOptions.deleteLanguages = value;
-            this.validateButton();
-          });
+        toggle.setValue(this.resetOptions.deleteLanguages ?? false).onChange((value) => {
+          this.resetOptions.deleteLanguages = value;
+          this.validateButton();
+        });
         toggle.toggleEl.blur();
       });
 
     // --- Action Buttons ---
     const buttonContainer = contentEl.createDiv({
-      cls: "modal-button-container",
+      cls: 'modal-button-container',
     });
 
     new ButtonComponent(buttonContainer)
-      .setButtonText(t("buttons.cancel"))
+      .setButtonText(t('buttons.cancel'))
       .onClick(() => this.close());
 
     this.deleteButton = new ButtonComponent(buttonContainer)
-      .setButtonText(t("buttons.delete"))
+      .setButtonText(t('buttons.delete'))
       .setWarning()
       .onClick(() => {
         if (Object.values(this.resetOptions).every((v) => v === false)) return;
 
         this.plugin.settings.advancedResetOptions = this.resetOptions;
         void this.plugin.resetPluginData(this.resetOptions).catch((err) => {
-          console.error("Failed to reset plugin data:", err);
+          console.error('Failed to reset plugin data:', err);
         });
 
         this.close();
@@ -3045,13 +2885,9 @@ export class AdvancedResetModal extends ColorMasterBaseModal {
   }
 
   validateButton() {
-    const hasSelection = Object.values(this.resetOptions).some(
-      (v) => v === true,
-    );
+    const hasSelection = Object.values(this.resetOptions).some((v) => v === true);
     this.deleteButton.setDisabled(!hasSelection);
-    this.deleteButton.setButtonText(
-      hasSelection ? t("buttons.delete") : t("buttons.selectOption"),
-    );
+    this.deleteButton.setButtonText(hasSelection ? t('buttons.delete') : t('buttons.selectOption'));
   }
 
   onClose() {
@@ -3064,15 +2900,11 @@ export class AdvancedResetModal extends ColorMasterBaseModal {
  */
 export class AddNewLanguageModal extends ColorMasterBaseModal {
   settingTab: ColorMasterSettingTab;
-  langName: string = "";
-  langCode: string = "";
+  langName: string = '';
+  langCode: string = '';
   isRtl: boolean = false;
 
-  constructor(
-    app: App,
-    plugin: ColorMaster,
-    settingTab: ColorMasterSettingTab,
-  ) {
+  constructor(app: App, plugin: ColorMaster, settingTab: ColorMasterSettingTab) {
     super(app, plugin);
     this.settingTab = settingTab;
   }
@@ -3082,44 +2914,40 @@ export class AddNewLanguageModal extends ColorMasterBaseModal {
     const { contentEl } = this;
     contentEl.empty();
 
-    contentEl.createEl("h3", { text: t("modals.addLang.title") });
-    contentEl.createEl("p", { text: t("modals.addLang.desc") });
+    contentEl.createEl('h3', { text: t('modals.addLang.title') });
+    contentEl.createEl('p', { text: t('modals.addLang.desc') });
 
     // 1. Language Name Input
     new Setting(contentEl)
-      .setName(t("modals.addLang.nameLabel"))
-      .setDesc(t("modals.addLang.nameDesc"))
+      .setName(t('modals.addLang.nameLabel'))
+      .setDesc(t('modals.addLang.nameDesc'))
       .addText((text) => {
-        text
-          .setPlaceholder(t("modals.addLang.namePlaceholder"))
-          .onChange((value) => {
-            this.langName = value.trim();
-          });
+        text.setPlaceholder(t('modals.addLang.namePlaceholder')).onChange((value) => {
+          this.langName = value.trim();
+        });
       });
 
     // 2. Language Code Input (Sanitized)
     new Setting(contentEl)
-      .setName(t("modals.addLang.codeLabel"))
-      .setDesc(t("modals.addLang.codeDesc"))
+      .setName(t('modals.addLang.codeLabel'))
+      .setDesc(t('modals.addLang.codeDesc'))
       .addText((text) => {
-        text
-          .setPlaceholder(t("modals.addLang.codePlaceholder"))
-          .onChange((value) => {
-            // Enforce lowercase alphanumeric format for safe keys
-            this.langCode = value
-              .trim()
-              .toLowerCase()
-              .replace(/[^a-z0-9_-]/g, "");
-            if (text.inputEl.value !== this.langCode) {
-              text.setValue(this.langCode);
-            }
-          });
+        text.setPlaceholder(t('modals.addLang.codePlaceholder')).onChange((value) => {
+          // Enforce lowercase alphanumeric format for safe keys
+          this.langCode = value
+            .trim()
+            .toLowerCase()
+            .replace(/[^a-z0-9_-]/g, '');
+          if (text.inputEl.value !== this.langCode) {
+            text.setValue(this.langCode);
+          }
+        });
       });
 
     // 3. RTL Toggle
     new Setting(contentEl)
-      .setName(t("modals.addLang.rtlLabel"))
-      .setDesc(t("modals.addLang.rtlDesc"))
+      .setName(t('modals.addLang.rtlLabel'))
+      .setDesc(t('modals.addLang.rtlDesc'))
       .addToggle((toggle) => {
         toggle.setValue(this.isRtl).onChange((value) => {
           this.isRtl = value;
@@ -3128,15 +2956,15 @@ export class AddNewLanguageModal extends ColorMasterBaseModal {
 
     // 4. Action Buttons
     const buttonContainer = contentEl.createDiv({
-      cls: "modal-button-container",
+      cls: 'modal-button-container',
     });
 
     new ButtonComponent(buttonContainer)
-      .setButtonText(t("buttons.cancel"))
+      .setButtonText(t('buttons.cancel'))
       .onClick(() => this.close());
 
     new ButtonComponent(buttonContainer)
-      .setButtonText(t("buttons.create"))
+      .setButtonText(t('buttons.create'))
       .setCta()
       .onClick(() => this.handleCreate());
   }
@@ -3144,18 +2972,18 @@ export class AddNewLanguageModal extends ColorMasterBaseModal {
   async handleCreate() {
     // --- Validation ---
     if (!this.langName) {
-      new Notice(t("notices.langNameEmpty"));
+      new Notice(t('notices.langNameEmpty'));
       return;
     }
     if (!this.langCode) {
-      new Notice(t("notices.langCodeEmpty"));
+      new Notice(t('notices.langCodeEmpty'));
       return;
     }
 
     // Prevent overriding core languages
-    const coreCodes = ["en", "ar", "fa", "fr"];
+    const coreCodes = ['en', 'ar', 'fa', 'fr'];
     if (coreCodes.includes(this.langCode)) {
-      new Notice(t("notices.langCodeCore", this.langCode));
+      new Notice(t('notices.langCodeCore', this.langCode));
       return;
     }
 
@@ -3165,7 +2993,7 @@ export class AddNewLanguageModal extends ColorMasterBaseModal {
 
     // Check for duplicate codes
     if (this.plugin.settings.customLanguages[this.langCode]) {
-      new Notice(t("notices.langCodeExists", this.langCode));
+      new Notice(t('notices.langCodeExists', this.langCode));
       return;
     }
 
@@ -3175,16 +3003,14 @@ export class AddNewLanguageModal extends ColorMasterBaseModal {
       (lang) => lang.languageName.toLowerCase() === this.langName.toLowerCase(),
     );
     if (nameExists) {
-      new Notice(t("notices.langNameExists", this.langName));
+      new Notice(t('notices.langNameExists', this.langName));
       return;
     }
 
     // Check for duplicate names (Core)
-    const coreLangNames = Object.values(CORE_LANGUAGES).map((name) =>
-      name.toLowerCase(),
-    );
+    const coreLangNames = Object.values(CORE_LANGUAGES).map((name) => name.toLowerCase());
     if (coreLangNames.includes(this.langName.toLowerCase())) {
-      new Notice(t("notices.langNameCore", this.langName));
+      new Notice(t('notices.langNameCore', this.langName));
       return;
     }
 
@@ -3200,17 +3026,12 @@ export class AddNewLanguageModal extends ColorMasterBaseModal {
 
     await this.plugin.saveSettings();
     loadLanguage(this.plugin.settings); // Refresh i18n engine
-    new Notice(t("notices.langCreated", this.langName));
+    new Notice(t('notices.langCreated', this.langName));
     this.settingTab.display(); // Refresh UI
     this.close();
 
     // Open translator immediately for convenience
-    new LanguageTranslatorModal(
-      this.app,
-      this.plugin,
-      this.settingTab,
-      this.langCode,
-    ).open();
+    new LanguageTranslatorModal(this.app, this.plugin, this.settingTab, this.langCode).open();
   }
 
   onClose() {
@@ -3232,27 +3053,20 @@ export class LanguageTranslatorModal extends ColorMasterBaseModal {
   listContainer: HTMLElement;
   isCoreLanguage: boolean;
   isRtl: boolean = false;
-  searchQuery: string = "";
+  searchQuery: string = '';
   caseSensitive: boolean = false;
   filterMissing: boolean = false;
   searchInput: HTMLInputElement;
   debouncedRender: () => void;
 
-  constructor(
-    app: App,
-    plugin: ColorMaster,
-    settingTab: ColorMasterSettingTab,
-    langCode: string,
-  ) {
+  constructor(app: App, plugin: ColorMaster, settingTab: ColorMasterSettingTab, langCode: string) {
     super(app, plugin);
     this.settingTab = settingTab;
     this.langCode = langCode;
     this.fallbackStrings = getFallbackStrings();
 
     // Pre-calculate nested structure once to avoid overhead during render loops
-    this.nestedFallback = unflattenStrings(
-      this.fallbackStrings as CustomTranslation,
-    );
+    this.nestedFallback = unflattenStrings(this.fallbackStrings as CustomTranslation);
 
     const customLangData = this.plugin.settings.customLanguages?.[langCode];
     const coreLangNameString = CORE_LANGUAGES[langCode as LocaleCode];
@@ -3266,26 +3080,22 @@ export class LanguageTranslatorModal extends ColorMasterBaseModal {
       const flatCoreLang = flattenStrings(CORE_LOCALES[langCode as LocaleCode]);
       const baseStrings: CustomTranslation = {};
       for (const key in flatCoreLang) {
-        if (typeof flatCoreLang[key] === "string")
-          baseStrings[key] = flatCoreLang[key];
+        if (typeof flatCoreLang[key] === 'string') baseStrings[key] = flatCoreLang[key];
       }
 
       // 2. If we have saved overrides, merge them on top of base strings
       if (customLangData && customLangData.translations) {
         this.translations = { ...baseStrings, ...customLangData.translations };
-        this.isRtl =
-          customLangData.isRtl ?? (langCode === "ar" || langCode === "fa");
+        this.isRtl = customLangData.isRtl ?? (langCode === 'ar' || langCode === 'fa');
       } else {
         // No overrides yet, just show full base strings
         this.translations = baseStrings;
-        this.isRtl = langCode === "ar" || langCode === "fa";
+        this.isRtl = langCode === 'ar' || langCode === 'fa';
       }
     } else if (customLangData) {
       // Purely custom language (not core) - load as is
       this.langName = customLangData.languageName;
-      this.translations = JSON.parse(
-        JSON.stringify(customLangData.translations || {}),
-      );
+      this.translations = JSON.parse(JSON.stringify(customLangData.translations || {}));
       this.isCoreLanguage = false;
       this.isRtl = customLangData.isRtl || false;
     } else {
@@ -3301,13 +3111,13 @@ export class LanguageTranslatorModal extends ColorMasterBaseModal {
     const { contentEl } = this;
     contentEl.empty();
     this.modalEl.classList.add(
-      "color-master-modal",
-      "cm-translator-modal",
-      "cm-translator-tree-modal",
+      'color-master-modal',
+      'cm-translator-modal',
+      'cm-translator-tree-modal',
     );
 
-    contentEl.createEl("h3", {
-      text: t("modals.translator.title", this.langName),
+    contentEl.createEl('h3', {
+      text: t('modals.translator.title', this.langName),
     });
 
     this.debouncedRender = debounce(() => {
@@ -3315,35 +3125,32 @@ export class LanguageTranslatorModal extends ColorMasterBaseModal {
     }, 250);
 
     this.renderControls(contentEl);
-    this.listContainer = contentEl.createDiv("cm-translator-list");
+    this.listContainer = contentEl.createDiv('cm-translator-list');
     this.renderTranslationTree();
 
     const mainControls = new Setting(contentEl)
       .addButton((button) => {
         button
-          .setButtonText(t("buttons.apply"))
+          .setButtonText(t('buttons.apply'))
           .setCta()
           .onClick(() => this.handleSave());
       })
       .addButton((button) => {
-        button.setButtonText(t("buttons.cancel")).onClick(() => this.close());
+        button.setButtonText(t('buttons.cancel')).onClick(() => this.close());
       });
-    mainControls.settingEl.classList.add(
-      "cm-translator-main-controls",
-      "modal-button-container",
-    );
+    mainControls.settingEl.classList.add('cm-translator-main-controls', 'modal-button-container');
   }
 
   renderControls(containerEl: HTMLElement) {
-    const controlsEl = containerEl.createDiv("cm-translator-controls");
+    const controlsEl = containerEl.createDiv('cm-translator-controls');
 
     // --- 1. Search Bar (Using Obsidian Component) ---
     const searchBarContainer = controlsEl.createDiv({
-      cls: "cm-search-bar-container",
+      cls: 'cm-search-bar-container',
     });
 
     const searchComponent = new SearchComponent(searchBarContainer)
-      .setPlaceholder(t("modals.translator.searchPlaceholder"))
+      .setPlaceholder(t('modals.translator.searchPlaceholder'))
       .setValue(this.searchQuery)
       .onChange((value) => {
         this.searchQuery = value;
@@ -3352,64 +3159,64 @@ export class LanguageTranslatorModal extends ColorMasterBaseModal {
 
     this.searchInput = searchComponent.inputEl;
 
-    searchBarContainer.addClass("cm-search-input-container");
+    searchBarContainer.addClass('cm-search-input-container');
 
     const searchActions = searchBarContainer.createDiv({
-      cls: "cm-search-actions",
+      cls: 'cm-search-actions',
     });
 
     // Case Sensitivity Toggle
-    const caseToggle = searchActions.createEl("button", {
-      cls: "cm-search-action-btn",
-      text: "Aa",
+    const caseToggle = searchActions.createEl('button', {
+      cls: 'cm-search-action-btn',
+      text: 'Aa',
     });
-    caseToggle.setAttr("aria-label", t("settings.ariaCase"));
-    caseToggle.classList.toggle("is-active", this.caseSensitive);
-    caseToggle.addEventListener("click", () => {
+    caseToggle.setAttr('aria-label', t('settings.ariaCase'));
+    caseToggle.classList.toggle('is-active', this.caseSensitive);
+    caseToggle.addEventListener('click', () => {
       this.caseSensitive = !this.caseSensitive;
-      caseToggle.classList.toggle("is-active", this.caseSensitive);
+      caseToggle.classList.toggle('is-active', this.caseSensitive);
       this.debouncedRender();
     });
 
     // Filter Missing Toggle
-    const missingToggle = searchActions.createEl("button", {
-      cls: "cm-search-action-btn",
+    const missingToggle = searchActions.createEl('button', {
+      cls: 'cm-search-action-btn',
     });
-    setIcon(missingToggle, "filter");
-    missingToggle.setAttr("aria-label", t("modals.translator.showMissing"));
-    missingToggle.classList.toggle("is-active", this.filterMissing);
-    missingToggle.addEventListener("click", () => {
+    setIcon(missingToggle, 'filter');
+    missingToggle.setAttr('aria-label', t('modals.translator.showMissing'));
+    missingToggle.classList.toggle('is-active', this.filterMissing);
+    missingToggle.addEventListener('click', () => {
       this.filterMissing = !this.filterMissing;
-      missingToggle.classList.toggle("is-active", this.filterMissing);
+      missingToggle.classList.toggle('is-active', this.filterMissing);
       this.debouncedRender();
     });
 
     // --- 2. IO Buttons (Import/Export) ---
-    const ioControls = controlsEl.createDiv("cm-translator-io-controls");
+    const ioControls = controlsEl.createDiv('cm-translator-io-controls');
 
     new Setting(ioControls)
       .addButton((btn) =>
         btn
-          .setIcon("copy")
-          .setTooltip(t("modals.translator.copyJson"))
+          .setIcon('copy')
+          .setTooltip(t('modals.translator.copyJson'))
           .onClick(() => this._copyJson()),
       )
       .addButton((btn) =>
         btn
-          .setIcon("paste")
-          .setTooltip(t("modals.translator.pasteJson"))
+          .setIcon('paste')
+          .setTooltip(t('modals.translator.pasteJson'))
           .onClick(() => this._pasteJson()),
       )
       .addButton((btn) =>
         btn
-          .setIcon("download")
-          .setTooltip(t("modals.translator.importFile"))
+          .setIcon('download')
+          .setTooltip(t('modals.translator.importFile'))
           .onClick(() => this._importLanguageFile()),
       )
       .addButton((btn) =>
         btn
-          .setIcon("upload")
-          .setTooltip(t("modals.translator.exportFile"))
+          .setIcon('upload')
+          .setTooltip(t('modals.translator.exportFile'))
           .onClick(() => this._exportLanguageFile()),
       );
   }
@@ -3419,22 +3226,20 @@ export class LanguageTranslatorModal extends ColorMasterBaseModal {
 
     // Use cached structure instead of recalculating
     const counter = { index: 1 };
-    const query = this.caseSensitive
-      ? this.searchQuery
-      : this.searchQuery.toLowerCase();
+    const query = this.caseSensitive ? this.searchQuery : this.searchQuery.toLowerCase();
 
     const totalRendered = this.renderGroup(
       this.listContainer,
       this.nestedFallback,
-      "",
+      '',
       counter,
       query,
     );
 
     if (totalRendered === 0 && (this.searchQuery || this.filterMissing)) {
-      this.listContainer.createEl("p", {
-        cls: "cm-translator-empty",
-        text: t("modals.translator.noMatches"),
+      this.listContainer.createEl('p', {
+        cls: 'cm-translator-empty',
+        text: t('modals.translator.noMatches'),
       });
     }
   }
@@ -3456,8 +3261,8 @@ export class LanguageTranslatorModal extends ColorMasterBaseModal {
     const keys = Object.keys(fallbackGroup).sort((a, b) => {
       const aVal = fallbackGroup[a];
       const bVal = fallbackGroup[b];
-      const aIsObj = typeof aVal === "object" && aVal !== null;
-      const bIsObj = typeof bVal === "object" && bVal !== null;
+      const aIsObj = typeof aVal === 'object' && aVal !== null;
+      const bIsObj = typeof bVal === 'object' && bVal !== null;
 
       if (aIsObj && !bIsObj) return -1;
       if (!aIsObj && bIsObj) return 1;
@@ -3472,41 +3277,36 @@ export class LanguageTranslatorModal extends ColorMasterBaseModal {
       // Prepare search terms once
       const keyStr = this.caseSensitive ? key : key.toLowerCase();
 
-      let displayFallback = "";
-      if (typeof fallbackValue === "string") {
+      let displayFallback = '';
+      if (typeof fallbackValue === 'string') {
         displayFallback = fallbackValue;
-      } else if (typeof fallbackValue === "function") {
-        displayFallback = t("modals.translator.dynamicValue");
+      } else if (typeof fallbackValue === 'function') {
+        displayFallback = t('modals.translator.dynamicValue');
       }
 
-      const fallbackStr = this.caseSensitive
-        ? displayFallback
-        : displayFallback.toLowerCase();
+      const fallbackStr = this.caseSensitive ? displayFallback : displayFallback.toLowerCase();
 
       const valStr =
-        typeof currentValue === "string"
+        typeof currentValue === 'string'
           ? this.caseSensitive
             ? currentValue
             : currentValue.toLowerCase()
-          : "";
+          : '';
 
       const isMatch =
-        !query ||
-        keyStr.includes(query) ||
-        fallbackStr.includes(query) ||
-        valStr.includes(query);
+        !query || keyStr.includes(query) || fallbackStr.includes(query) || valStr.includes(query);
 
       // Recursive Case: Group/Folder (Must be object and NOT null)
-      if (typeof fallbackValue === "object" && fallbackValue !== null) {
-        const details = container.createEl("details", {
-          cls: "cm-translator-group",
+      if (typeof fallbackValue === 'object' && fallbackValue !== null) {
+        const details = container.createEl('details', {
+          cls: 'cm-translator-group',
         });
-        const summary = details.createEl("summary", {
-          cls: "cm-translator-group-title",
+        const summary = details.createEl('summary', {
+          cls: 'cm-translator-group-title',
         });
         summary.createSpan({ text: key });
 
-        const groupContainer = details.createDiv("cm-translator-group-content");
+        const groupContainer = details.createDiv('cm-translator-group-content');
 
         const childrenCount = this.renderGroup(
           groupContainer,
@@ -3527,10 +3327,7 @@ export class LanguageTranslatorModal extends ColorMasterBaseModal {
         }
       }
       // Base Case: Translation Item (String OR Function)
-      else if (
-        typeof fallbackValue === "string" ||
-        typeof fallbackValue === "function"
-      ) {
+      else if (typeof fallbackValue === 'string' || typeof fallbackValue === 'function') {
         const isMissing = !currentValue;
         const matchesFilter = !this.filterMissing || isMissing;
 
@@ -3538,39 +3335,35 @@ export class LanguageTranslatorModal extends ColorMasterBaseModal {
           itemsRenderedInThisGroup++;
 
           const itemEl = container.createDiv({
-            cls: "cm-translator-item setting-item",
+            cls: 'cm-translator-item setting-item',
           });
           itemEl.createSpan({
-            cls: "cm-translator-index",
+            cls: 'cm-translator-index',
             text: `${counter.index++}.`,
           });
 
-          const infoEl = itemEl.createDiv("setting-item-info");
-          const nameEl = infoEl.createDiv(
-            "setting-item-name cm-translator-key",
-          );
+          const infoEl = itemEl.createDiv('setting-item-info');
+          const nameEl = infoEl.createDiv('setting-item-name cm-translator-key');
 
           const keySpan = nameEl.createSpan();
           this.highlightMatch(keySpan, key, query);
 
           const descEl = infoEl.createDiv({
-            cls: "setting-item-description",
+            cls: 'setting-item-description',
           });
 
           const isLongText = displayFallback.length > 100;
           const isDesc =
-            newPath.endsWith(".desc") ||
-            newPath.endsWith("Desc") ||
-            newPath.includes("langInfo");
+            newPath.endsWith('.desc') || newPath.endsWith('Desc') || newPath.includes('langInfo');
 
           if (isDesc && isLongText) {
-            const truncatedText = displayFallback.substring(0, 100) + "...";
+            const truncatedText = displayFallback.substring(0, 100) + '...';
 
             this.highlightMatch(descEl, truncatedText, query);
 
-            const toggleBtn = infoEl.createEl("a", {
-              cls: "cm-translator-toggle",
-              text: t("modals.translator.showMore"),
+            const toggleBtn = infoEl.createEl('a', {
+              cls: 'cm-translator-toggle',
+              text: t('modals.translator.showMore'),
             });
 
             let isExpanded = false;
@@ -3581,16 +3374,14 @@ export class LanguageTranslatorModal extends ColorMasterBaseModal {
               this.highlightMatch(descEl, textToShow, query);
 
               toggleBtn.setText(
-                isExpanded
-                  ? t("modals.translator.showLess")
-                  : t("modals.translator.showMore"),
+                isExpanded ? t('modals.translator.showLess') : t('modals.translator.showMore'),
               );
             };
           } else {
             this.highlightMatch(descEl, displayFallback, query);
           }
 
-          const controlEl = itemEl.createDiv("setting-item-control");
+          const controlEl = itemEl.createDiv('setting-item-control');
 
           // Use TextArea for long strings
           const isMultiLine = this.isLongString(displayFallback);
@@ -3599,7 +3390,7 @@ export class LanguageTranslatorModal extends ColorMasterBaseModal {
             : new TextComponent(controlEl);
 
           component
-            .setValue(currentValue || "")
+            .setValue(currentValue || '')
             .setPlaceholder(displayFallback)
             .onChange((value) => {
               if (value) {
@@ -3623,8 +3414,8 @@ export class LanguageTranslatorModal extends ColorMasterBaseModal {
     }
 
     try {
-      const flags = this.caseSensitive ? "g" : "gi";
-      const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const flags = this.caseSensitive ? 'g' : 'gi';
+      const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       const regex = new RegExp(escapedQuery, flags);
 
       let lastIndex = 0;
@@ -3634,7 +3425,7 @@ export class LanguageTranslatorModal extends ColorMasterBaseModal {
         if (match.index > lastIndex) {
           element.appendText(text.substring(lastIndex, match.index));
         }
-        element.createSpan({ cls: "cm-search-match", text: match[0] });
+        element.createSpan({ cls: 'cm-search-match', text: match[0] });
 
         lastIndex = regex.lastIndex;
       }
@@ -3648,7 +3439,7 @@ export class LanguageTranslatorModal extends ColorMasterBaseModal {
   }
 
   isLongString(str: string): boolean {
-    return str.length > 50 || str.includes("\n");
+    return str.length > 50 || str.includes('\n');
   }
 
   async handleSave() {
@@ -3661,10 +3452,7 @@ export class LanguageTranslatorModal extends ColorMasterBaseModal {
     // If it's a Core Language, save ONLY the differences (Deltas)
     if (this.isCoreLanguage) {
       const flatCoreLang = flattenStrings(
-        CORE_LOCALES[this.langCode as LocaleCode] as unknown as Record<
-          string,
-          unknown
-        >,
+        CORE_LOCALES[this.langCode as LocaleCode] as unknown as Record<string, unknown>,
       );
       const diffs: CustomTranslation = {};
 
@@ -3696,7 +3484,7 @@ export class LanguageTranslatorModal extends ColorMasterBaseModal {
       loadLanguage(this.plugin.settings);
     }
 
-    new Notice(t("notices.langSaved", this.langName));
+    new Notice(t('notices.langSaved', this.langName));
     this.settingTab.display();
     this.close();
   }
@@ -3704,21 +3492,21 @@ export class LanguageTranslatorModal extends ColorMasterBaseModal {
   _exportLanguageFile() {
     const nestedData = unflattenStrings(this.translations);
     const data = JSON.stringify(nestedData, null, 2);
-    const blob = new Blob([data], { type: "application/json" });
+    const blob = new Blob([data], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
+    const a = document.createElement('a');
     a.href = url;
     a.download = `${this.langCode}.json`;
     a.click();
     URL.revokeObjectURL(url);
     a.remove();
-    new Notice(t("notices.langExported", this.langCode));
+    new Notice(t('notices.langExported', this.langCode));
   }
 
   _importLanguageFile() {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = ".json";
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
 
     input.onchange = () => {
       void (async () => {
@@ -3728,23 +3516,21 @@ export class LanguageTranslatorModal extends ColorMasterBaseModal {
         try {
           const content = await file.text();
           const nestedJson = JSON.parse(content);
-          const importedTranslations = flattenStrings(
-            nestedJson,
-          ) as CustomTranslation;
+          const importedTranslations = flattenStrings(nestedJson) as CustomTranslation;
 
           this.translations = {
             ...this.translations,
             ...importedTranslations,
           };
 
-          new Notice(t("notices.langImported", file.name));
+          new Notice(t('notices.langImported', file.name));
           this.renderTranslationTree();
         } catch (e) {
-          new Notice(t("notices.invalidJson"));
-          console.error("Failed to import language file:", e);
+          new Notice(t('notices.invalidJson'));
+          console.error('Failed to import language file:', e);
         }
       })().catch((err) => {
-        console.error("Unhandled file import error:", err);
+        console.error('Unhandled file import error:', err);
       });
     };
 
@@ -3756,10 +3542,10 @@ export class LanguageTranslatorModal extends ColorMasterBaseModal {
     const jsonText = JSON.stringify(nestedData, null, 2);
 
     void navigator.clipboard.writeText(jsonText).catch((err) => {
-      console.error("Failed to copy JSON to clipboard:", err);
+      console.error('Failed to copy JSON to clipboard:', err);
     });
 
-    new Notice(t("notices.langCopiedJson"));
+    new Notice(t('notices.langCopiedJson'));
   }
 
   _pasteJson(): void {
@@ -3782,14 +3568,14 @@ export class LanguageTranslatorModal extends ColorMasterBaseModal {
           }
         }
 
-        new Notice(t("notices.langPastedJson", updateCount));
+        new Notice(t('notices.langPastedJson', updateCount));
         this.renderTranslationTree();
       } catch (e) {
-        new Notice(t("notices.invalidJson"));
-        console.error("Failed to paste JSON from clipboard:", e);
+        new Notice(t('notices.invalidJson'));
+        console.error('Failed to paste JSON from clipboard:', e);
       }
     })().catch((err) => {
-      console.error("Unhandled paste JSON error:", err);
+      console.error('Unhandled paste JSON error:', err);
     });
   }
 

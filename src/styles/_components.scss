@@ -94,20 +94,13 @@
     background: none;
 
     &::before {
-      content: "";
+      content: '';
       position: absolute;
       top: 0;
       left: 0;
       width: 400%;
       height: 100%;
-      background: linear-gradient(
-        115deg,
-        #33ff00,
-        #ffcc00,
-        #8000ff,
-        #00b7ff,
-        #00ff66
-      );
+      background: linear-gradient(115deg, #33ff00, #ffcc00, #8000ff, #00b7ff, #00ff66);
       background-size: 25% 100%;
       animation: cm-border-animation 2s linear infinite;
     }
@@ -129,20 +122,13 @@
   width: 100%;
 
   &::before {
-    content: "";
+    content: '';
     position: absolute;
     top: 0;
     left: 0;
     width: 400%;
     height: 100%;
-    background: linear-gradient(
-      115deg,
-      #33ff00,
-      #ffcc00,
-      #8000ff,
-      #00b7ff,
-      #00ff66
-    );
+    background: linear-gradient(115deg, #33ff00, #ffcc00, #8000ff, #00b7ff, #00ff66);
     background-size: 25% 100%;
     animation: cm-border-animation 1.5s linear infinite;
     animation-play-state: running;
@@ -411,7 +397,7 @@
   }
 }
 
-.color-master-settings-tab[dir="ltr"] .cm-flyout-menu-buttons {
+.color-master-settings-tab[dir='ltr'] .cm-flyout-menu-buttons {
   transform: translateX(15px);
   &.is-open {
     opacity: 1;
@@ -420,7 +406,7 @@
   }
 }
 
-.color-master-settings-tab[dir="rtl"] .cm-flyout-menu-buttons {
+.color-master-settings-tab[dir='rtl'] .cm-flyout-menu-buttons {
   transform: translateX(-15px);
   &.is-open {
     opacity: 1;
