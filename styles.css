@@ -354,25 +354,23 @@ body.cm-settings-background-active .color-master-settings-tab {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: rgba(var(--mono-rgb, 255, 255, 255), 0.08);
+  background-color: var(--background-modifier-hover);
   border-radius: 50%;
-  border: 1px solid var(--cm-card-border);
-  transition: all 0.25s ease;
+  border: 1px solid var(--background-modifier-border);
+  transition: all 0.2s ease;
 }
 .cm-action-button svg {
+  color: var(--interactive-accent);
   width: 20px;
   height: 20px;
-  opacity: 0.85;
+  opacity: 1;
 }
 .cm-action-button:hover {
   background-color: var(--interactive-accent);
   border-color: var(--interactive-accent);
-  transform: translateY(-3px);
-  box-shadow: 0 6px 12px rgba(var(--accent-rgb, 120, 120, 255), 0.4);
 }
 .cm-action-button:hover svg {
   color: var(--text-on-accent);
-  opacity: 1;
 }
 
 /* --- CSS Snippets List --- */
