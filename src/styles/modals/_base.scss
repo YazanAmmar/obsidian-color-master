@@ -1,0 +1,96 @@
+/* Modal base */
+.color-master-modal {
+  /* --- Generic Modal Components --- */
+
+  .modal-content h3 {
+    border-bottom: 1px solid var(--background-modifier-border);
+    padding-bottom: 10px;
+    margin-bottom: 8px;
+  }
+
+  .setting-item:first-of-type {
+    border-top: none;
+  }
+
+  .modal-content > hr {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  .modal-button-container {
+    justify-content: flex-end;
+    margin-top: 12px !important;
+    padding-bottom: 0 !important;
+  }
+
+  /* --- Setting Items inside Modals --- */
+  .setting-item {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    margin-bottom: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    min-width: 0 !important;
+
+    &:first-of-type {
+      border-top: none;
+    }
+
+    .setting-item-description {
+      white-space: normal !important;
+    }
+
+    /* Focus glow for toggles */
+    .checkbox-container {
+      outline: none !important;
+      box-shadow: none !important;
+
+      &:focus,
+      &:focus-visible {
+        outline: none !important;
+        box-shadow: none !important;
+        border-color: var(--background-modifier-border) !important;
+      }
+    }
+  }
+
+  /* --- Specific Modal Utilities --- */
+
+  .cm-modal-warning-note {
+    font-size: var(--font-ui-smaller);
+    color: var(--interactive-warning);
+    margin-bottom: 10px;
+    margin-top: 4px;
+    text-align: center;
+  }
+
+  .cm-wide-text-input,
+  .cm-full-width-control,
+  .cm-import-textarea,
+  .cm-large-textarea {
+    width: 100%;
+  }
+
+  .cm-textarea-size {
+    height: 30px;
+    width: 166px !important;
+  }
+
+  .cm-import-textarea {
+    margin-bottom: 15px;
+  }
+
+  .cm-theme-importer-setting.setting-item {
+    border-top: none;
+    padding-top: 0;
+    margin-top: 12px;
+    margin-bottom: 20px;
+  }
+
+  .cm-settings-group {
+    border-top: 1px solid var(--background-modifier-border);
+    margin-top: 0;
+    padding-top: 10px;
+  }
+}

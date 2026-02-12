@@ -1,7 +1,4 @@
-/* ==========================================================================
-   Base Styles
-   Variables, LTR/RTL layouts, animations, and core editor overrides.
-   ========================================================================== */
+/* Variables */
 :root {
   /* Snippet List UI Variables */
   --cm-snippet-row-min-height: 40px;
@@ -11,7 +8,7 @@
   --cm-snippet-handle-vertical-nudge: 2px;
 }
 
-/* --- Animations --- */
+/* Duplicate tag warning */
 @keyframes cm-flash-red {
   0% {
     background-color: var(--interactive-error);
@@ -20,6 +17,7 @@
     background-color: var(--interactive-accent);
   }
 }
+/* Duplicate tag shaking */
 @keyframes cm-shake {
   10%, 90% {
     transform: translateX(-1px);
@@ -34,46 +32,13 @@
     transform: translateX(3px);
   }
 }
-@keyframes cm-glowing-border {
-  0% {
-    border-image-source: linear-gradient(to right, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3);
-  }
-  14% {
-    border-image-source: linear-gradient(to right, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000);
-  }
-  28% {
-    border-image-source: linear-gradient(to right, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000, #ff7f00);
-  }
-  42% {
-    border-image-source: linear-gradient(to right, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000, #ff7f00, #ffff00);
-  }
-  56% {
-    border-image-source: linear-gradient(to right, #0000ff, #4b0082, #9400d3, #ff0000, #ff7f00, #ffff00, #00ff00);
-  }
-  70% {
-    border-image-source: linear-gradient(to right, #4b0082, #9400d3, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff);
-  }
-  84% {
-    border-image-source: linear-gradient(to right, #9400d3, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082);
-  }
-  100% {
-    border-image-source: linear-gradient(to right, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3);
-  }
-}
+/* Codepen Button */
 @keyframes cm-border-animation {
   to {
     transform: translateX(-25%);
   }
 }
-@keyframes cm-progress {
-  from {
-    width: 0;
-  }
-  to {
-    width: var(--skill-percentage);
-    opacity: 1;
-  }
-}
+/* Adding new items */
 @keyframes fadeInScale {
   from {
     opacity: 0;
@@ -84,6 +49,7 @@
     transform: scale(1);
   }
 }
+/* Removing items */
 @keyframes fadeOutSlide {
   from {
     opacity: 1;
@@ -94,12 +60,13 @@
     transform: translateX(20px);
   }
 }
+/* Background Picker Paste Area */
 @keyframes cm-marching-ants {
   to {
     background-position: 10px 0, 100% 10px, -10px 100%, 0 -10px;
   }
 }
-/* --- Layout Directionality (LTR/RTL) --- */
+/* Directionality (LTR/RTL) */
 .is-ltr {
   direction: ltr !important;
 }
@@ -136,6 +103,7 @@ body.color-master-rtl .notice {
   text-align: right;
 }
 
+/* Editor & Markdown Overrides */
 /* --- Global Backgrounds --- */
 #cm-background-video {
   position: fixed;
@@ -243,7 +211,7 @@ body.cm-settings-background-active .color-master-settings-tab {
   background-color: var(--blockquote-bg) !important;
 }
 
-/* --- Utilities --- */
+/* Utilities */
 /* Search Highlight (Unified with Editor Highlight) */
 .cm-search-match {
   background-color: var(--text-highlight-bg);
@@ -266,10 +234,6 @@ body.cm-settings-background-active .color-master-settings-tab {
   box-sizing: border-box !important;
 }
 
-/* ==========================================================================
-   Component Styles
-   Reusable UI elements: Cards, Snippet Lists, Badges, Menus.
-   ========================================================================== */
 /* --- Like Plugin Card --- */
 .cm-like-card {
   --cm-card-bg: rgba(var(--mono-rgb, 255, 255, 255), 0.04);
@@ -373,7 +337,57 @@ body.cm-settings-background-active .color-master-settings-tab {
   color: var(--text-on-accent);
 }
 
-/* --- CSS Snippets List --- */
+/* Buttons */
+.codepen-button {
+  display: block;
+  cursor: pointer;
+  color: white;
+  position: relative;
+  text-decoration: none;
+  font-weight: 600;
+  border-radius: 6px;
+  overflow: hidden;
+  padding: 2px;
+  isolation: isolate;
+  width: 100%;
+}
+.codepen-button::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 400%;
+  height: 100%;
+  background: linear-gradient(115deg, #33ff00, #ffcc00, #8000ff, #00b7ff, #00ff66);
+  background-size: 25% 100%;
+  animation: cm-border-animation 1.5s linear infinite;
+  animation-play-state: running;
+}
+.codepen-button span {
+  position: relative;
+  display: block;
+  text-align: center;
+  padding: 8px 12px;
+  font-size: 13px;
+  background: var(--background-secondary);
+  border-radius: 4px;
+  height: 100%;
+}
+.codepen-button {
+  /* Light Mode Fallback */
+}
+.theme-light .codepen-button span {
+  color: #000000;
+  background: #f0f2f5;
+}
+
+.cm-promo-container {
+  border-top: 1px solid var(--background-modifier-border);
+  text-align: center;
+  width: 100%;
+}
+
+/* Snippets list */
 .cm-snippets-header {
   display: flex;
   justify-content: space-between;
@@ -395,6 +409,7 @@ body.cm-settings-background-active .color-master-settings-tab {
   border: 1px solid var(--interactive-accent);
   color: var(--interactive-accent);
   transition: all 0.2s ease-in-out;
+  cursor: pointer;
 }
 .cm-snippets-header .cm-snippets-add-button.setting-item button:hover {
   background-color: var(--interactive-accent);
@@ -410,11 +425,11 @@ body.cm-settings-background-active .color-master-settings-tab {
   background-color: transparent !important;
 }
 .cm-snippet-lock-btn:hover {
-  color: var(--text-normal);
+  color: var(--text-on-accent);
   background-color: var(--background-modifier-hover) !important;
 }
 .cm-snippet-lock-btn.is-locked {
-  color: var(--text-normal);
+  color: var(--interactive-accent);
   opacity: 1;
 }
 
@@ -469,6 +484,7 @@ body.cm-settings-background-active .color-master-settings-tab {
   height: 28px;
   width: 28px;
   transition: all 0.2s ease-in-out;
+  cursor: pointer;
 }
 .cm-snippet-item.setting-item .setting-item-control button .svg-icon {
   width: 18px;
@@ -543,7 +559,7 @@ body.cm-settings-background-active .color-master-settings-tab {
   background-color: var(--background-secondary) !important;
 }
 
-/* --- Badges --- */
+/* Badges */
 .cm-snippet-global-badge {
   display: inline-block;
   font-size: 9px;
@@ -569,7 +585,7 @@ body.cm-settings-background-active .color-master-settings-tab {
   background-color: var(--background-modifier-hover);
 }
 
-/* --- Language Menu (Flyout) --- */
+/* Menus */
 .cm-flyout-menu-container {
   display: flex;
   align-items: center;
@@ -607,10 +623,7 @@ body.cm-settings-background-active .color-master-settings-tab {
   pointer-events: auto;
 }
 
-/* ==========================================================================
-   Modal Styles
-   Styles for all plugin modals (Settings, Translator, Rules, etc.)
-   ========================================================================== */
+/* Modal base */
 .color-master-modal {
   /* --- Generic Modal Components --- */
 }
@@ -621,7 +634,6 @@ body.cm-settings-background-active .color-master-settings-tab {
 }
 .color-master-modal .setting-item:first-of-type {
   border-top: none;
-  padding-top: 4px !important;
 }
 .color-master-modal .modal-content > hr {
   margin-top: 0;
@@ -691,10 +703,14 @@ body.cm-settings-background-active .color-master-settings-tab {
   margin-top: 12px;
   margin-bottom: 20px;
 }
-.color-master-modal {
-  /* --- Background Picker & Gallery --- */
+.color-master-modal .cm-settings-group {
+  border-top: 1px solid var(--background-modifier-border);
+  margin-top: 0;
+  padding-top: 10px;
 }
-.color-master-modal .cm-paste-box {
+
+/* Background picker */
+.cm-paste-box {
   border: none;
   border-radius: var(--radius-m);
   padding: 30px;
@@ -711,17 +727,18 @@ body.cm-settings-background-active .color-master-settings-tab {
   background-size: 10px 2px, 2px 10px;
   background-position: 0 0, 100% 0, 0 100%, 0 0;
 }
-.color-master-modal .cm-paste-box:hover, .color-master-modal .cm-paste-box:focus, .color-master-modal .cm-paste-box.is-over {
+.cm-paste-box:hover, .cm-paste-box:focus, .cm-paste-box.is-over {
   color: var(--text-normal);
   background-color: var(--background-modifier-hover);
   outline: none;
   /* Active Border Pattern */
   background-image: linear-gradient(to right, var(--interactive-accent) 50%, transparent 50%), linear-gradient(to bottom, var(--interactive-accent) 50%, transparent 50%), linear-gradient(to right, var(--interactive-accent) 50%, transparent 50%), linear-gradient(to bottom, var(--interactive-accent) 50%, transparent 50%);
 }
-.color-master-modal .cm-paste-box:focus, .color-master-modal .cm-paste-box.is-over {
+.cm-paste-box:focus, .cm-paste-box.is-over {
   animation: cm-marching-ants 0.2s linear infinite;
 }
-.color-master-modal .cm-image-gallery {
+
+.cm-image-gallery {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   gap: 15px;
@@ -732,7 +749,9 @@ body.cm-settings-background-active .color-master-settings-tab {
   border: 1px solid var(--background-modifier-border);
   border-radius: var(--radius-m);
 }
-.color-master-modal .cm-image-card {
+
+/* Image browser cards */
+.cm-image-card {
   display: flex;
   flex-direction: column;
   border: 1px solid var(--background-modifier-border);
@@ -740,16 +759,16 @@ body.cm-settings-background-active .color-master-settings-tab {
   overflow: hidden;
   background: var(--background-secondary);
 }
-.color-master-modal .cm-image-card.is-active {
+.cm-image-card.is-active {
   border: 2px solid var(--interactive-accent);
   box-shadow: 0 0 10px var(--interactive-accent);
   transform: scale(1.02);
   transition: all 0.2s ease-in-out;
 }
-.color-master-modal .cm-image-card {
+.cm-image-card {
   /* Formatting the button container inside the card */
 }
-.color-master-modal .cm-image-card .cm-image-card-controls {
+.cm-image-card .cm-image-card-controls {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -757,12 +776,12 @@ body.cm-settings-background-active .color-master-settings-tab {
   background-color: var(--background-secondary);
   border-top: 1px solid var(--background-modifier-border);
 }
-.color-master-modal .cm-image-card .cm-image-card-controls .cm-image-card-select-btn {
+.cm-image-card .cm-image-card-controls .cm-image-card-select-btn {
   flex-grow: 1;
   justify-content: center;
   margin: 0;
 }
-.color-master-modal .cm-image-card .cm-image-card-controls .cm-image-card-delete-btn {
+.cm-image-card .cm-image-card-controls .cm-image-card-delete-btn {
   flex-shrink: 0;
   width: 30px;
   padding: 0 !important;
@@ -771,7 +790,33 @@ body.cm-settings-background-active .color-master-settings-tab {
   justify-content: center;
   margin: 0;
 }
-.color-master-modal .cm-media-preview-container {
+
+/* Image browser extras */
+.cm-image-browser-empty {
+  text-align: center;
+  padding: 30px;
+  color: var(--text-muted);
+  grid-column: 1/-1;
+  font-style: italic;
+}
+
+.cm-profile-list-modal {
+  margin-top: 10px;
+  margin-bottom: 5px;
+}
+.cm-profile-list-modal strong {
+  color: var(--text-accent);
+  font-weight: 600;
+}
+
+.cm-settings-group {
+  border-top: 1px solid var(--background-modifier-border);
+  margin-top: 0;
+  padding-top: 10px;
+}
+
+/* Media preview */
+.cm-media-preview-container {
   position: relative;
   width: 100%;
   height: 80px;
@@ -779,14 +824,14 @@ body.cm-settings-background-active .color-master-settings-tab {
   border-bottom: 1px solid var(--background-modifier-border);
   cursor: pointer;
 }
-.color-master-modal .cm-media-preview-container .cm-image-card-preview {
+.cm-media-preview-container .cm-image-card-preview {
   width: 100%;
   height: 100%;
   object-fit: cover;
   padding: 3px;
   box-sizing: border-box;
 }
-.color-master-modal .cm-media-preview-container .cm-media-play-overlay {
+.cm-media-preview-container .cm-media-play-overlay {
   position: absolute;
   inset: 0;
   display: flex;
@@ -797,11 +842,11 @@ body.cm-settings-background-active .color-master-settings-tab {
   transition: opacity 0.2s ease;
   pointer-events: none;
 }
-.color-master-modal .cm-media-preview-container .cm-media-play-overlay svg {
+.cm-media-preview-container .cm-media-play-overlay svg {
   width: 32px;
   height: 32px;
 }
-.color-master-modal .cm-media-preview-container .cm-media-mute-toggle {
+.cm-media-preview-container .cm-media-mute-toggle {
   position: absolute;
   top: 4px;
   right: 4px;
@@ -818,14 +863,16 @@ body.cm-settings-background-active .color-master-settings-tab {
   opacity: 0.8;
   transition: opacity 0.2s ease;
 }
-.color-master-modal .cm-media-preview-container .cm-media-mute-toggle svg {
+.cm-media-preview-container .cm-media-mute-toggle svg {
   width: 16px;
   height: 16px;
 }
-.color-master-modal .cm-media-preview-container:hover .cm-media-mute-toggle {
+.cm-media-preview-container:hover .cm-media-mute-toggle {
   opacity: 1;
 }
-.color-master-modal .cm-image-card-name-input.setting-item {
+
+/* Name input */
+.cm-image-card-name-input.setting-item {
   border: none !important;
   border-top: 1px solid var(--background-modifier-border) !important;
   background-color: var(--background-secondary);
@@ -833,11 +880,12 @@ body.cm-settings-background-active .color-master-settings-tab {
   min-height: 32px !important;
   justify-content: center;
 }
-.color-master-modal .cm-image-card-name-input.setting-item .setting-item-control {
+.cm-image-card-name-input.setting-item .setting-item-control {
   width: 100%;
   justify-content: center;
 }
-.color-master-modal .cm-name-input-container {
+
+.cm-name-input-container {
   display: flex;
   align-items: baseline;
   justify-content: center;
@@ -847,16 +895,17 @@ body.cm-settings-background-active .color-master-settings-tab {
   transition: background-color 0.2s ease;
   max-width: 100%;
 }
-.color-master-modal .cm-name-input-container:hover, .color-master-modal .cm-name-input-container:has(.cm-name-input-basename:focus) {
+.cm-name-input-container:hover, .cm-name-input-container:has(.cm-name-input-basename:focus) {
   background-color: var(--background-primary) !important;
 }
-.color-master-modal .cm-name-input-container:hover .cm-name-input-basename, .color-master-modal .cm-name-input-container:has(.cm-name-input-basename:focus) .cm-name-input-basename {
+.cm-name-input-container:hover .cm-name-input-basename, .cm-name-input-container:has(.cm-name-input-basename:focus) .cm-name-input-basename {
   color: var(--text-normal);
 }
-.color-master-modal .cm-name-input-container:hover .cm-name-input-extension, .color-master-modal .cm-name-input-container:has(.cm-name-input-basename:focus) .cm-name-input-extension {
+.cm-name-input-container:hover .cm-name-input-extension, .cm-name-input-container:has(.cm-name-input-basename:focus) .cm-name-input-extension {
   color: var(--text-muted);
 }
-.color-master-modal .cm-name-input-basename {
+
+.cm-name-input-basename {
   border: none !important;
   outline: none !important;
   box-shadow: none !important;
@@ -872,7 +921,8 @@ body.cm-settings-background-active .color-master-settings-tab {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.color-master-modal .cm-name-input-basename {
+
+.cm-name-input-basename {
   border: none;
   outline: none;
   box-shadow: none;
@@ -887,7 +937,8 @@ body.cm-settings-background-active .color-master-settings-tab {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.color-master-modal .cm-name-input-extension {
+
+.cm-name-input-extension {
   font-size: var(--font-ui-smaller);
   color: var(--text-faint);
   padding: 4px 12px 4px 2px;
@@ -895,28 +946,8 @@ body.cm-settings-background-active .color-master-settings-tab {
   white-space: nowrap;
   flex-shrink: 0;
 }
-.color-master-modal .cm-image-browser-empty {
-  text-align: center;
-  padding: 30px;
-  color: var(--text-muted);
-  grid-column: 1/-1;
-  font-style: italic;
-}
-.color-master-modal .cm-profile-list-modal {
-  margin-top: 10px;
-  margin-bottom: 5px;
-}
-.color-master-modal .cm-profile-list-modal strong {
-  color: var(--text-accent);
-  font-weight: 600;
-}
-.color-master-modal .cm-settings-group {
-  border-top: 1px solid var(--background-modifier-border);
-  margin-top: 0;
-  padding-top: 10px;
-}
 
-/* --- Notice Rules Modal --- */
+/* Notice rules modal (outer layout) */
 .cm-rules-modal .cm-rules-modal-header {
   display: flex;
   align-items: center;
@@ -964,7 +995,9 @@ body.cm-settings-background-active .color-master-settings-tab {
   border-top: 1px solid var(--background-modifier-border);
   padding-top: 16px;
 }
-.cm-rules-modal .cm-rule-item {
+
+/* Rules list and items */
+.cm-rule-item {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -972,13 +1005,13 @@ body.cm-settings-background-active .color-master-settings-tab {
   border-radius: 6px;
   background-color: var(--background-secondary);
 }
-.cm-rules-modal .cm-rule-item.newly-added {
+.cm-rule-item.newly-added {
   animation: fadeInScale 0.35s ease-out;
 }
-.cm-rules-modal .cm-rule-item.removing {
+.cm-rule-item.removing {
   animation: fadeOutSlide 0.12s ease-in forwards;
 }
-.cm-rules-modal .cm-rule-item .cm-rule-actions {
+.cm-rule-item .cm-rule-actions {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -987,42 +1020,41 @@ body.cm-settings-background-active .color-master-settings-tab {
   border-right: 1px solid var(--background-modifier-border);
   align-self: stretch;
 }
-.cm-rules-modal .cm-rule-item .cm-rule-order-number {
+.cm-rule-item .cm-rule-order-number {
   font-size: 16px;
   font-weight: 500;
   color: var(--text-muted);
   font-family: monospace;
 }
-.cm-rules-modal .cm-rule-item .cm-rule-input-wrapper {
+.cm-rule-item .cm-rule-input-wrapper {
   flex-grow: 1;
   display: flex;
   align-items: center;
 }
-.cm-rules-modal .cm-rule-item .cm-color-container {
+.cm-rule-item .cm-color-container {
   display: flex;
   align-items: center;
   gap: 4px;
 }
-.cm-rules-modal .cm-rule-item .cm-color-container .setting-item-control button {
+.cm-rule-item .cm-color-container .setting-item-control button {
   height: 24px;
   width: 24px;
 }
-.cm-rules-modal .cm-rule-item {
+.cm-rule-item {
   /* Transparent swatch fix */
 }
-.cm-rules-modal .cm-rule-item input[type=color].is-transparent {
+.cm-rule-item input[type=color].is-transparent {
   background-color: transparent;
 }
-.cm-rules-modal .cm-rule-item input[type=color].is-transparent::-webkit-color-swatch {
+.cm-rule-item input[type=color].is-transparent::-webkit-color-swatch {
   background-image: linear-gradient(45deg, #808080 25%, transparent 25%), linear-gradient(-45deg, #808080 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #808080 75%), linear-gradient(-45deg, transparent 75%, #808080 75%);
   background-size: 8px 8px;
   background-position: 0 0, 0 4px, 4px -4px, -4px 0px;
   border: 1px solid var(--text-faint);
 }
-.cm-rules-modal {
-  /* Tag Inputs */
-}
-.cm-rules-modal .cm-tag-input-container {
+
+/* Tag Inputs */
+.cm-tag-input-container {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -1035,11 +1067,12 @@ body.cm-settings-background-active .color-master-settings-tab {
   min-height: 36px;
   width: 100%;
 }
-.cm-rules-modal .cm-tag-input-container:focus-within {
+.cm-tag-input-container:focus-within {
   border-color: var(--interactive-accent);
   box-shadow: 0 0 0 1px var(--background-modifier-border-focus);
 }
-.cm-rules-modal .cm-tag-item {
+
+.cm-tag-item {
   display: flex;
   align-items: center;
   background-color: var(--interactive-accent);
@@ -1050,10 +1083,11 @@ body.cm-settings-background-active .color-master-settings-tab {
   font-weight: 500;
   white-space: nowrap;
 }
-.cm-rules-modal .cm-tag-item.cm-tag-duplicate-flash {
+.cm-tag-item.cm-tag-duplicate-flash {
   animation: cm-flash-red 1s ease-out, cm-shake 0.5s ease-in-out;
 }
-.cm-rules-modal .cm-tag-remove {
+
+.cm-tag-remove {
   margin-left: 6px;
   cursor: pointer;
   width: 16px;
@@ -1066,10 +1100,11 @@ body.cm-settings-background-active .color-master-settings-tab {
   line-height: 1;
   transition: background-color 0.2s ease;
 }
-.cm-rules-modal .cm-tag-remove:hover {
+.cm-tag-remove:hover {
   background-color: rgba(0, 0, 0, 0.2);
 }
-.cm-rules-modal .cm-tag-input-field {
+
+.cm-tag-input-field {
   flex-grow: 1;
   border: none;
   outline: none;
@@ -1078,10 +1113,11 @@ body.cm-settings-background-active .color-master-settings-tab {
   min-width: 120px;
   color: var(--text-normal);
 }
-.cm-rules-modal .cm-tag-input-field:focus {
+.cm-tag-input-field:focus {
   box-shadow: none;
 }
-.cm-rules-modal .cm-rule-icon-button {
+
+.cm-rule-icon-button {
   background: none !important;
   border: none !important;
   box-shadow: none !important;
@@ -1091,18 +1127,19 @@ body.cm-settings-background-active .color-master-settings-tab {
   border-radius: 4px;
   transition: background-color 0.2s ease, color 0.2s ease;
 }
-.cm-rules-modal .cm-rule-icon-button:hover:not(.mod-warning) {
+.cm-rule-icon-button:hover:not(.mod-warning) {
   background-color: var(--background-modifier-hover) !important;
   color: var(--text-normal);
 }
-.cm-rules-modal .cm-rule-icon-button.mod-warning {
+.cm-rule-icon-button.mod-warning {
   color: var(--text-muted);
 }
-.cm-rules-modal .cm-rule-icon-button.mod-warning:hover {
+.cm-rule-icon-button.mod-warning:hover {
   background-color: var(--interactive-error) !important;
   color: var(--text-on-accent) !important;
 }
-.cm-rules-modal .cm-drag-handle {
+
+.cm-drag-handle {
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
@@ -1110,12 +1147,17 @@ body.cm-settings-background-active .color-master-settings-tab {
   opacity: 0.6;
   cursor: grab;
 }
-.cm-rules-modal .cm-drag-handle:hover {
+.cm-drag-handle:hover {
   opacity: 1;
 }
 
-/* --- Advanced Reset Modal --- */
+/* Advanced reset modal */
 .cm-advanced-reset-options .setting-item {
+  align-items: center;
+  row-gap: var(--size-4-3);
+  border-radius: var(--setting-items-radius);
+  padding: var(--size-4-4);
+  border: var(--setting-items-border-width) solid var(--setting-items-border-color);
   border-top: none !important;
   padding-top: 4px !important;
   padding-bottom: 4px !important;
@@ -1145,7 +1187,7 @@ body.cm-settings-background-active .color-master-settings-tab {
   order: 2;
 }
 
-/* --- Translator Tree Modal --- */
+/* Translator common controls and list */
 .cm-translator-tree-modal .modal-content {
   width: 100%;
   max-width: 90vw;
@@ -1161,7 +1203,7 @@ body.cm-settings-background-active .color-master-settings-tab {
   align-items: center;
   margin-bottom: 10px;
   border-bottom: 1px solid var(--background-modifier-border);
-  padding-bottom: 15px;
+  padding-bottom: 10px;
   /* Search & Filter */
 }
 .cm-translator-tree-modal .cm-translator-controls .cm-search-bar-container {
@@ -1285,65 +1327,7 @@ body.cm-settings-background-active .color-master-settings-tab {
   word-break: break-all;
   margin-bottom: 4px;
 }
-.cm-translator-tree-modal .cm-translator-item .setting-item-description {
-  font-style: italic;
-  color: var(--text-muted);
-  font-size: var(--font-ui-smaller);
-  white-space: normal;
-}
-.cm-translator-tree-modal .cm-translator-item .setting-item-control {
-  flex: 1 1 50%;
-  padding-left: 10px;
-}
-.cm-translator-tree-modal .cm-translator-item .setting-item-control input[type=text],
-.cm-translator-tree-modal .cm-translator-item .setting-item-control textarea {
-  width: 100%;
-}
-.cm-translator-tree-modal .cm-translator-empty {
-  text-align: center;
-  color: var(--text-muted);
-  padding: 20px;
-}
-.cm-translator-tree-modal .cm-translator-main-controls {
-  border-top: 1px solid var(--background-modifier-border);
-  padding-top: 15px;
-  margin-top: 10px;
-}
 
-/* Language Info Modal */
-.cm-info-modal {
-  max-width: 650px;
-}
-.cm-info-modal .modal-content {
-  max-height: unset;
-  padding: 0;
-}
-.cm-info-modal .cm-info-content {
-  border-bottom: 1px solid var(--background-modifier-border);
-  padding: 0 var(--size-4-4) var(--size-4-4) var(--size-4-4);
-  margin-bottom: var(--size-4-4);
-  max-height: unset;
-  overflow-y: visible;
-}
-.cm-info-modal .cm-info-content p {
-  margin-bottom: var(--size-4-2);
-}
-.cm-info-modal .cm-info-content ul,
-.cm-info-modal .cm-info-content ol {
-  margin-inline-start: var(--size-4-6);
-  margin-bottom: var(--size-4-2);
-}
-.cm-info-modal .cm-info-content li {
-  margin-bottom: var(--size-4-1);
-}
-.cm-info-modal .cm-info-content code {
-  background-color: var(--background-modifier-hover);
-  color: var(--text-normal);
-  padding: 2px 4px;
-  border-radius: var(--radius-s);
-}
-
-/* Translator Modal - Flex layout for scrollable list */
 .cm-translator-modal .modal-content {
   display: flex;
   flex-direction: column;
@@ -1375,256 +1359,33 @@ body.cm-settings-background-active .color-master-settings-tab {
   color: var(--text-accent-hover);
 }
 
-/* Notice Rules List */
-.cm-rules-modal .cm-rule-item .cm-rule-icon-button {
-  margin-left: 4px;
-}
-.cm-rules-modal .cm-rule-item .cm-rule-icon-button.is-active {
-  color: var(--text-accent);
-  background-color: var(--background-modifier-hover);
-  box-shadow: 0 0 0 1px var(--background-modifier-border-focus);
-}
-
-/* ==========================================================================
-   Settings Tab Styles
-   Main configuration interface styling (.color-master-settings-tab).
-   ========================================================================== */
-.color-master-settings-tab {
-  /* --- LTR/RTL Localization Overrides --- */
-}
-.color-master-settings-tab[dir=ltr] {
-  direction: ltr !important;
-}
-.color-master-settings-tab[dir=ltr] .setting-item {
-  flex-direction: row !important;
-}
-.color-master-settings-tab[dir=ltr] h2,
-.color-master-settings-tab[dir=ltr] h3,
-.color-master-settings-tab[dir=ltr] .setting-item-name,
-.color-master-settings-tab[dir=ltr] .setting-item-description {
-  text-align: left !important;
-}
-.color-master-settings-tab[dir=ltr] .setting-item-info {
-  margin-right: 10px !important;
-  margin-left: 0 !important;
-}
-.color-master-settings-tab[dir=ltr] .cm-search-container,
-.color-master-settings-tab[dir=ltr] .cm-profile-actions,
-.color-master-settings-tab[dir=ltr] .cm-snippets-header {
-  flex-direction: row !important;
-}
-.color-master-settings-tab[dir=ltr] .cm-search-input-icon {
-  left: 10px !important;
-  right: auto !important;
-}
-.color-master-settings-tab[dir=ltr] .cm-search-input-container .cm-search-input {
-  background-color: transparent;
-  padding: 8px 12px 8px 38px !important;
-}
-.color-master-settings-tab[dir=ltr] .cm-accessibility-checker {
-  margin-left: 10px !important;
-  margin-right: 0 !important;
-}
-.color-master-settings-tab[dir=ltr] .cm-setting-icon {
-  margin-right: 5px;
-  margin-left: 0;
-}
-.color-master-settings-tab[dir=rtl] .cm-search-input-icon {
-  left: auto;
-  right: 10px;
-}
-.color-master-settings-tab[dir=rtl] .cm-search-input-container .cm-search-input {
-  padding-left: 12px !important;
-  padding-right: 36px !important;
-}
-.color-master-settings-tab[dir=rtl] .cm-accessibility-checker {
-  margin-left: 0;
-  margin-right: 10px;
-}
-.color-master-settings-tab[dir=rtl] .cm-setting-icon {
-  margin-right: 0;
-  margin-left: 5px;
-}
-.color-master-settings-tab {
-  /* --- Search Bar & Filters --- */
-}
-.color-master-settings-tab .cm-search-bar-container {
+/* Accessibility checker */
+.color-master-settings-tab .cm-accessibility-checker {
   display: flex;
   align-items: center;
-  gap: 8px;
-  width: 100%;
-  margin-bottom: 20px;
-}
-.color-master-settings-tab {
-  /* Search Input Wrapper */
-}
-.color-master-settings-tab .cm-search-input-container {
-  flex-grow: 1;
-  position: relative;
-}
-.color-master-settings-tab .cm-search-input-container .cm-search-input-icon {
-  display: none;
-}
-.color-master-settings-tab .cm-search-input-container .search-input-container {
-  width: 100%;
-}
-.color-master-settings-tab .cm-search-input-container .search-input-container input {
-  width: 100%;
-  background-color: transparent !important;
-  border: 1px solid var(--background-modifier-border);
-}
-.color-master-settings-tab .cm-search-input-container .search-input-container input:focus {
-  box-shadow: none !important;
-  border-color: var(--interactive-accent);
-}
-.color-master-settings-tab {
-  /* Action Buttons Container (Regex, Case, Filter) */
-}
-.color-master-settings-tab .cm-search-actions {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-.color-master-settings-tab {
-  /* Individual Toggle Buttons */
-}
-.color-master-settings-tab .cm-search-action-btn {
-  background-color: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  color: var(--text-muted) !important;
-  opacity: 0.8;
-  cursor: pointer;
-  padding: 5px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-s);
-  transition: all 0.1s ease-in-out;
-}
-.color-master-settings-tab .cm-search-action-btn:hover {
-  background-color: var(--background-modifier-hover) !important;
-  color: var(--text-normal) !important;
-  opacity: 1;
-}
-.color-master-settings-tab .cm-search-action-btn.is-active {
-  background-color: var(--interactive-accent) !important;
-  color: var(--text-on-accent) !important;
-  opacity: 1;
-}
-.color-master-settings-tab .cm-search-action-btn.is-active:hover {
-  background-color: var(--interactive-accent-hover) !important;
-}
-.color-master-settings-tab {
-  /* Filter Dropdown Container */
-}
-.color-master-settings-tab .cm-search-filter-options {
-  display: flex;
-  align-items: center;
-  padding: 0 !important;
-  border-radius: 6px !important;
-  background-color: transparent !important;
-  margin-left: 4px;
-  border: none !important;
-}
-.color-master-settings-tab .cm-search-filter-options.is-hidden {
-  display: none;
-}
-.color-master-settings-tab .cm-search-filter-options select.cm-search-small {
-  background-color: transparent !important;
-  border: 1px solid var(--background-modifier-border) !important;
-  padding-right: 25px !important;
-}
-.color-master-settings-tab .cm-search-filter-options select.cm-search-small:hover {
-  background-color: var(--background-modifier-hover) !important;
-}
-.color-master-settings-tab {
-  /* Result Counter */
-}
-.color-master-settings-tab .cm-search-info {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--text-muted);
-  background-color: var(--background-secondary);
   padding: 4px 8px;
   border-radius: 5px;
+  font-size: 11px;
+  font-weight: 500;
   border: 1px solid var(--background-modifier-border);
-  margin-left: 6px;
-  white-space: nowrap;
-  line-height: 1;
 }
-.color-master-settings-tab {
-  /* --- Profile Manager --- */
+.color-master-settings-tab .cm-accessibility-checker.cm-accessibility-pass {
+  background-color: rgba(40, 167, 69, 0.1254901961);
+  color: #28a745;
+  border-color: rgba(40, 167, 69, 0.5019607843);
 }
-.color-master-settings-tab .cm-profile-actions {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  margin: 10px 0 14px;
+.color-master-settings-tab .cm-accessibility-checker.cm-accessibility-warn {
+  background-color: rgba(255, 193, 7, 0.1254901961);
+  color: #b58900;
+  border-color: rgba(255, 193, 7, 0.5019607843);
 }
-.color-master-settings-tab .cm-profile-actions .cm-profile-action-spacer {
-  flex: 1;
+.color-master-settings-tab .cm-accessibility-checker.cm-accessibility-fail {
+  background-color: rgba(220, 53, 69, 0.1254901961);
+  color: #dc3545;
+  border-color: rgba(220, 53, 69, 0.5019607843);
 }
-.color-master-settings-tab {
-  /* Management Buttons (Export, Copy, Import) */
-}
-.color-master-settings-tab .cm-profile-action-btn {
-  background-color: transparent;
-  border: 1px solid var(--background-modifier-border);
-  box-shadow: none;
-  transition: all 0.2s ease-in-out;
-  cursor: pointer;
-}
-.color-master-settings-tab .cm-profile-action-btn:active {
-  transform: translateY(1px);
-}
-.color-master-settings-tab .cm-profile-action-btn:hover {
-  background-color: var(--background-modifier-hover);
-  border-color: var(--background-modifier-border-hover);
-}
-.color-master-settings-tab .cm-profile-action-btn {
-  /* Primary Action (Blue) */
-}
-.color-master-settings-tab .cm-profile-action-btn.mod-cta {
-  border-color: var(--interactive-accent);
-  color: var(--interactive-accent);
-}
-.color-master-settings-tab .cm-profile-action-btn.mod-cta:hover {
-  background-color: var(--interactive-accent);
-  color: var(--text-on-accent);
-}
-.color-master-settings-tab .cm-profile-action-btn.cm-paste-css-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-}
-.color-master-settings-tab .cm-profile-manager-controls {
-  /* Condense control buttons */
-}
-.color-master-settings-tab .cm-profile-manager-controls .setting-item-control button {
-  margin-left: -2px;
-  margin-right: -2px;
-}
-.color-master-settings-tab {
-  /* Theme Warning Icon */
-}
-.color-master-settings-tab .cm-theme-warning-icon {
-  display: inline-block;
-  margin-left: 8px;
-  color: var(--interactive-warning);
-  cursor: help;
-  vertical-align: middle;
-}
-.color-master-settings-tab .cm-theme-warning-icon svg {
-  width: 16px;
-  height: 16px;
-  position: relative;
-  top: -1px;
-}
-.color-master-settings-tab {
-  /* --- Advanced Settings Section --- */
-}
+
+/* Advanced settings and cards */
 .color-master-settings-tab .cm-advanced-settings-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1640,7 +1401,6 @@ body.cm-settings-background-active .color-master-settings-tab {
   border-radius: var(--input-border-radius);
   padding: 15px;
   display: flex;
-  flex-direction: column;
   align-items: flex-start;
 }
 .color-master-settings-tab .setting-item.cm-card-with-header-control .setting-item-name {
@@ -1713,9 +1473,8 @@ body.cm-settings-background-active .color-master-settings-tab {
   background-color: var(--background-modifier-hover) !important;
   color: var(--text-normal) !important;
 }
-.color-master-settings-tab {
-  /* --- Color Picker Rows --- */
-}
+
+/* Color picker rows and swatches */
 .color-master-settings-tab .color-master-text-input {
   width: 100px;
   vertical-align: middle;
@@ -1764,148 +1523,37 @@ body.cm-settings-background-active .color-master-settings-tab {
   background-size: 10px 10px;
   background-position: 0 0, 0 5px, 5px -5px, -5px 0px;
 }
+
+/* Inputs and controls styles */
 .color-master-settings-tab {
-  /* Main Row Wrapper */
+  /* Search Action Button */
 }
-.color-master-settings-tab .cm-var-row.cm-hidden {
-  display: none !important;
-}
-.color-master-settings-tab .cm-var-row .cm-var-name {
-  font-weight: 600;
-}
-.color-master-settings-tab .cm-var-row .cm-not-installed-badge {
-  display: inline-block;
-  font-size: 9px;
-  font-weight: 600;
-  color: var(--interactive-warning);
-  padding: 1px 6px;
-  border-radius: 10px;
-  border: 1px solid var(--background-modifier-border);
-  background: var(--background-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  position: relative;
-  top: -1px;
-  margin-left: 8px;
-  cursor: help;
-}
-.color-master-settings-tab .cm-category-container.cm-hidden {
-  display: none !important;
-}
-.color-master-settings-tab {
-  /* Accessibility Contrast Checker */
-}
-.color-master-settings-tab .cm-accessibility-checker {
+.color-master-settings-tab .cm-search-action-btn {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: var(--text-muted) !important;
+  opacity: 0.8;
+  cursor: pointer;
+  padding: 5px;
   display: flex;
   align-items: center;
-  padding: 4px 8px;
-  border-radius: 5px;
-  font-size: 11px;
-  font-weight: 500;
-  border: 1px solid var(--background-modifier-border);
+  justify-content: center;
+  border-radius: var(--radius-s);
+  transition: all 0.1s ease-in-out;
 }
-.color-master-settings-tab .cm-accessibility-checker.cm-accessibility-pass {
-  background-color: rgba(40, 167, 69, 0.1254901961);
-  color: #28a745;
-  border-color: rgba(40, 167, 69, 0.5019607843);
-}
-.color-master-settings-tab .cm-accessibility-checker.cm-accessibility-warn {
-  background-color: rgba(255, 193, 7, 0.1254901961);
-  color: #b58900;
-  border-color: rgba(255, 193, 7, 0.5019607843);
-}
-.color-master-settings-tab .cm-accessibility-checker.cm-accessibility-fail {
-  background-color: rgba(220, 53, 69, 0.1254901961);
-  color: #dc3545;
-  border-color: rgba(220, 53, 69, 0.5019607843);
-}
-.color-master-settings-tab {
-  /* --- General & Utility Styles --- */
-  /* Hide static sections during search */
-}
-.color-master-settings-tab .cm-static-sections.cm-hidden {
-  display: none !important;
-}
-.color-master-settings-tab {
-  /* Dividers */
-}
-.color-master-settings-tab > hr {
-  border: none;
-  height: 1px;
-  background-color: var(--background-modifier-border);
-  margin: -1px 0px;
-}
-.color-master-settings-tab .cm-static-sections > hr {
-  margin-top: 3px;
-  margin-bottom: 30px;
-}
-.color-master-settings-tab .cm-section-heading {
-  margin-top: 24px;
-}
-.color-master-settings-tab .cm-setting-icon {
-  display: inline-block;
-  position: relative;
-  top: 4px;
-  opacity: 0.7;
-}
-.color-master-settings-tab .cm-add-variable-setting.setting-item {
-  border-bottom: 1px solid var(--background-modifier-border);
-}
-.color-master-settings-tab {
-  /* Unified Button/Select Styles (Transparent) */
-}
-.color-master-settings-tab .cm-profile-action-btn,
-.color-master-settings-tab .cm-add-variable-setting button,
-.color-master-settings-tab .setting-item-control select,
-.color-master-settings-tab .cm-search-small {
-  background-color: transparent;
-  border: 1px solid var(--background-modifier-border);
-  box-shadow: none;
-  transition: all 0.2s ease-in-out;
-  cursor: pointer;
-}
-.color-master-settings-tab .cm-profile-action-btn:hover,
-.color-master-settings-tab .cm-add-variable-setting button:hover,
-.color-master-settings-tab .setting-item-control select:hover,
-.color-master-settings-tab .cm-search-small:hover {
-  background-color: var(--background-modifier-hover);
-  border-color: var(--background-modifier-border-hover);
-}
-.color-master-settings-tab {
-  /* Select Elements */
-}
-.color-master-settings-tab .setting-item-control select,
-.color-master-settings-tab .cm-search-small {
-  font-size: 12px;
-  border-radius: 6px;
+.color-master-settings-tab .cm-search-action-btn:hover {
+  background-color: var(--background-modifier-hover) !important;
   color: var(--text-normal) !important;
-  -webkit-appearance: none !important;
-  appearance: none !important;
-  background-repeat: no-repeat !important;
-  padding-top: 4px !important;
-  padding-bottom: 4px !important;
-  padding-left: 7px !important;
-  padding-right: 25px !important;
-  background-position: right 7px center !important;
+  opacity: 1;
 }
-.color-master-settings-tab .setting-item-control select.is-active,
-.color-master-settings-tab .cm-search-small.is-active {
-  background-color: var(--interactive-accent);
-  color: var(--text-on-accent);
+.color-master-settings-tab .cm-search-action-btn.is-active {
+  background-color: var(--interactive-accent) !important;
+  color: var(--text-on-accent) !important;
+  opacity: 1;
 }
-.color-master-settings-tab .setting-item-control select.is-active:hover,
-.color-master-settings-tab .cm-search-small.is-active:hover {
+.color-master-settings-tab .cm-search-action-btn.is-active:hover {
   background-color: var(--interactive-accent-hover) !important;
-}
-.color-master-settings-tab[dir=rtl] .setting-item-control select,
-.color-master-settings-tab[dir=rtl] .cm-search-small {
-  padding-right: 7px !important;
-  padding-left: 25px !important;
-  background-position: left 7px center !important;
-}
-.color-master-settings-tab .cm-search-filter-options select.cm-search-small {
-  background-position: right 8px center !important;
-  padding-right: 30px !important;
 }
 .color-master-settings-tab {
   /* Range Slider Styling */
@@ -1950,10 +1598,59 @@ body.cm-settings-background-active .color-master-settings-tab {
 .color-master-settings-tab input[type=range]::-moz-range-thumb:hover {
   background-color: var(--text-normal);
 }
-.color-master-settings-tab {
-  /* Generic Control Buttons */
+
+/* Shared Button Styles */
+.cm-profile-action-btn,
+.cm-add-variable-setting button {
+  background-color: transparent;
+  border: 1px solid var(--background-modifier-border);
+  box-shadow: none;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
 }
-.color-master-settings-tab .setting-item-control .cm-control-button {
+.cm-profile-action-btn:hover,
+.cm-add-variable-setting button:hover {
+  background-color: var(--background-modifier-hover);
+  border-color: var(--background-modifier-border-hover);
+}
+
+/* Select Dropdown & Search Small Input Styling */
+.setting-item-control select,
+.cm-search-small {
+  background-color: transparent;
+  border: 1px solid var(--background-modifier-border);
+  box-shadow: none;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+  font-size: 12px;
+  border-radius: 6px;
+  color: var(--text-normal) !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  background-repeat: no-repeat !important;
+  padding-top: 4px !important;
+  padding-bottom: 4px !important;
+  padding-left: 7px !important;
+  padding-right: 25px !important;
+  background-position: right 7px center !important;
+}
+.setting-item-control select:hover,
+.cm-search-small:hover {
+  background-color: var(--background-modifier-hover);
+  border-color: var(--background-modifier-border-hover);
+}
+.setting-item-control select.is-active,
+.cm-search-small.is-active {
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+.setting-item-control select.is-active:hover,
+.cm-search-small.is-active:hover {
+  background-color: var(--interactive-accent-hover) !important;
+}
+
+/* Generic Control Buttons */
+.setting-item-control .cm-control-button {
   background-color: transparent !important;
   border: none !important;
   box-shadow: none !important;
@@ -1961,27 +1658,283 @@ body.cm-settings-background-active .color-master-settings-tab {
   transition: all 0.2s ease-in-out;
   cursor: pointer;
 }
-.color-master-settings-tab .setting-item-control .cm-control-button:hover {
+.setting-item-control .cm-control-button:hover {
   background-color: var(--background-modifier-hover) !important;
   color: var(--text-normal);
   border-color: var(--background-modifier-border-hover) !important;
 }
-.color-master-settings-tab .setting-item-control .cm-control-button[disabled], .color-master-settings-tab .setting-item-control .cm-control-button.is-disabled {
+.setting-item-control .cm-control-button[disabled], .setting-item-control .cm-control-button.is-disabled {
   cursor: not-allowed;
 }
-.color-master-settings-tab {
-  /* Focus State for Checkboxes */
-}
-.color-master-settings-tab .setting-item .checkbox-container {
+
+/* Focus State for Checkboxes */
+.setting-item .checkbox-container {
   outline: none !important;
   box-shadow: none !important;
 }
-.color-master-settings-tab .setting-item .checkbox-container:focus, .color-master-settings-tab .setting-item .checkbox-container:focus-visible {
+.setting-item .checkbox-container:focus, .setting-item .checkbox-container:focus-visible {
   outline: none !important;
   box-shadow: none !important;
   border-color: var(--background-modifier-border) !important;
 }
 
+/* Settings layout and general styles (from _settings.scss) */
+.color-master-settings-tab {
+  /* --- LTR/RTL Localization Overrides --- */
+}
+.color-master-settings-tab[dir=ltr] {
+  direction: ltr !important;
+}
+.color-master-settings-tab[dir=ltr] .setting-item {
+  flex-direction: row !important;
+}
+.color-master-settings-tab[dir=ltr] h2,
+.color-master-settings-tab[dir=ltr] h3,
+.color-master-settings-tab[dir=ltr] .setting-item-name,
+.color-master-settings-tab[dir=ltr] .setting-item-description {
+  text-align: left !important;
+}
+.color-master-settings-tab[dir=ltr] .setting-item-info {
+  margin-right: 10px !important;
+  margin-left: 0 !important;
+}
+.color-master-settings-tab[dir=ltr] .cm-search-container,
+.color-master-settings-tab[dir=ltr] .cm-profile-actions,
+.color-master-settings-tab[dir=ltr] .cm-snippets-header {
+  flex-direction: row !important;
+}
+.color-master-settings-tab[dir=ltr] .cm-search-input-icon {
+  left: 10px !important;
+  right: auto !important;
+}
+.color-master-settings-tab[dir=ltr] .cm-search-input-container .cm-search-input {
+  background-color: transparent;
+  padding: 8px 12px 8px 38px !important;
+}
+.color-master-settings-tab[dir=ltr] .cm-accessibility-checker {
+  margin-left: 10px !important;
+  margin-right: 0 !important;
+}
+.color-master-settings-tab[dir=ltr] .cm-setting-icon {
+  margin-right: 5px;
+  margin-left: 0;
+}
+.color-master-settings-tab[dir=rtl] .cm-search-input-icon {
+  left: auto;
+  right: 10px;
+}
+.color-master-settings-tab[dir=rtl] .cm-search-input-container .cm-search-input {
+  padding-left: 12px !important;
+  padding-right: 36px !important;
+}
+.color-master-settings-tab[dir=rtl] .cm-accessibility-checker {
+  margin-left: 0;
+  margin-right: 10px;
+}
+.color-master-settings-tab[dir=rtl] .cm-setting-icon {
+  margin-right: 0;
+  margin-left: 5px;
+}
+
+/* Profile manager and related controls */
+.color-master-settings-tab .cm-profile-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 10px 0 14px;
+}
+.color-master-settings-tab .cm-profile-actions .cm-profile-action-spacer {
+  flex: 1;
+}
+.color-master-settings-tab {
+  /* Management Buttons (Export, Copy, Import) */
+}
+.color-master-settings-tab .cm-profile-action-btn {
+  background-color: transparent;
+  border: 1px solid var(--background-modifier-border);
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+.color-master-settings-tab .cm-profile-action-btn:active {
+  transform: translateY(1px);
+}
+.color-master-settings-tab .cm-profile-action-btn:hover {
+  background-color: var(--background-modifier-hover);
+  border-color: var(--background-modifier-border-hover);
+}
+.color-master-settings-tab .cm-profile-action-btn {
+  /* Primary Action (Blue) */
+}
+.color-master-settings-tab .cm-profile-action-btn.mod-cta {
+  border-color: var(--interactive-accent);
+  color: var(--interactive-accent);
+}
+.color-master-settings-tab .cm-profile-action-btn.mod-cta:hover {
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+.color-master-settings-tab .cm-profile-action-btn.cm-paste-css-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.color-master-settings-tab .cm-profile-manager-controls {
+  /* Condense control buttons */
+}
+.color-master-settings-tab .cm-profile-manager-controls .setting-item-control button {
+  margin-left: -2px;
+  margin-right: -2px;
+}
+.color-master-settings-tab {
+  /* Theme Warning Icon */
+}
+.color-master-settings-tab .cm-theme-warning-icon {
+  display: inline-block;
+  margin-left: 8px;
+  color: var(--interactive-warning);
+  cursor: help;
+  vertical-align: middle;
+}
+.color-master-settings-tab .cm-theme-warning-icon svg {
+  width: 16px;
+  height: 16px;
+  position: relative;
+  top: -1px;
+}
+
+/* Search bar and related controls */
+.color-master-settings-tab .cm-search-bar-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin-bottom: 20px;
+}
+.color-master-settings-tab .cm-search-input-container {
+  flex-grow: 1;
+  position: relative;
+}
+.color-master-settings-tab .cm-search-input-container .cm-search-input-icon {
+  display: none;
+}
+.color-master-settings-tab .cm-search-input-container .search-input-container {
+  width: 100%;
+}
+.color-master-settings-tab .cm-search-input-container .search-input-container input {
+  width: 100%;
+  background-color: transparent !important;
+  border: 1px solid var(--background-modifier-border);
+}
+.color-master-settings-tab .cm-search-input-container .search-input-container input:focus {
+  box-shadow: none !important;
+  border-color: var(--interactive-accent);
+}
+.color-master-settings-tab .cm-search-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.color-master-settings-tab .cm-search-filter-options {
+  display: flex;
+  align-items: center;
+  padding: 0 !important;
+  border-radius: 6px !important;
+  background-color: transparent !important;
+  margin-left: 4px;
+  border: none !important;
+}
+.color-master-settings-tab .cm-search-filter-options.is-hidden {
+  display: none;
+}
+.color-master-settings-tab .cm-search-filter-options select.cm-search-small {
+  background-color: transparent !important;
+  border: 1px solid var(--background-modifier-border) !important;
+  padding-right: 25px !important;
+}
+.color-master-settings-tab .cm-search-filter-options select.cm-search-small:hover {
+  background-color: var(--background-modifier-hover) !important;
+}
+.color-master-settings-tab {
+  /* Result Counter */
+}
+.color-master-settings-tab .cm-search-info {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  background-color: var(--background-secondary);
+  padding: 4px 8px;
+  border-radius: 5px;
+  border: 1px solid var(--background-modifier-border);
+  margin-left: 6px;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+/* States (placeholder for small UI states) */
+/* Settings utilities and misc shared styles */
+/* Main Row Wrapper and common elements */
+.cm-var-row.cm-hidden {
+  display: none !important;
+}
+.cm-var-row .cm-var-name {
+  font-weight: 600;
+}
+.cm-var-row .cm-not-installed-badge {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--interactive-warning);
+  padding: 1px 6px;
+  border-radius: 10px;
+  border: 1px solid var(--background-modifier-border);
+  background: var(--background-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: relative;
+  top: -1px;
+  margin-left: 8px;
+  cursor: help;
+}
+
+.cm-category-container.cm-hidden {
+  display: none !important;
+}
+
+/* Hide static sections during search */
+.cm-static-sections.cm-hidden {
+  display: none !important;
+}
+
+/* Dividers */
+.color-master-settings-tab > hr {
+  border: none;
+  height: 1px;
+  background-color: var(--background-modifier-border);
+  margin: -1px 0px;
+}
+
+.cm-static-sections > hr {
+  margin-top: 3px;
+  margin-bottom: 30px;
+}
+
+.cm-section-heading {
+  margin-top: 24px;
+}
+
+.cm-setting-icon {
+  display: inline-block;
+  position: relative;
+  top: 4px;
+  opacity: 0.7;
+}
+
+.cm-add-variable-setting.setting-item {
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+/* Pristine / Modified States */
 .cm-var-row {
   /* Default State: Dimmed */
 }

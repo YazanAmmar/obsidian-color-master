@@ -1,0 +1,56 @@
+/* Notice rules modal (outer layout) */
+.cm-rules-modal {
+  .cm-rules-modal-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    border-bottom: 1px solid var(--background-modifier-border);
+    padding-bottom: 10px;
+
+    h3 {
+      border: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .cm-rules-modal-header-icon {
+      position: relative;
+      top: 3px;
+      svg {
+        width: 22px;
+        height: 22px;
+        color: var(--text-accent);
+      }
+    }
+  }
+
+  .cm-rules-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 15px;
+
+    p.cm-rules-modal-desc {
+      margin: -5px 0 0 0;
+      flex-grow: 1;
+      font-size: var(--font-ui-smaller);
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+  }
+
+  .cm-rules-add-button-setting {
+    padding: 0;
+    border-top: none;
+  }
+
+  .cm-rules-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 16px;
+    border-top: 1px solid var(--background-modifier-border);
+    padding-top: 16px;
+  }
+}

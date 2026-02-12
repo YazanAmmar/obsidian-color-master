@@ -1,0 +1,92 @@
+/* Advanced settings and cards */
+.color-master-settings-tab {
+  .cm-advanced-settings-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-top: 15px;
+    margin-bottom: 20px;
+  }
+
+  /* Card Style for Settings */
+  .setting-item.cm-card-with-header-control {
+    border: 1px solid var(--background-modifier-border);
+    border-radius: var(--input-border-radius);
+    padding: 15px;
+    display: flex;
+    align-items: flex-start;
+
+    .setting-item-name {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      margin-bottom: 8px;
+    }
+
+    .setting-item-description {
+      margin: 0;
+      flex-grow: 1;
+      line-height: 1.5;
+      color: var(--text-muted);
+    }
+
+    > .setting-item-control {
+      display: none;
+    }
+  }
+
+  /* Add Variable Button */
+  .cm-add-variable-button {
+    background-color: transparent !important;
+    border: 1px solid var(--interactive-accent) !important;
+    color: var(--interactive-accent) !important;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+
+    &:hover {
+      background-color: var(--interactive-accent) !important;
+      color: var(--text-on-accent) !important;
+    }
+  }
+
+  /* Reset Plugin Button */
+  .cm-reset-plugin-icon-button {
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: var(--text-muted) !important;
+    padding: 4px !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-s);
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+
+    &:hover {
+      background-color: var(--interactive-error) !important;
+      color: var(--text-on-accent) !important;
+    }
+  }
+
+  /* Generic Icon Control Button */
+  .cm-control-icon-button {
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: var(--text-muted) !important;
+    padding: 4px !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-s);
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+
+    &:hover {
+      background-color: var(--background-modifier-hover) !important;
+      color: var(--text-normal) !important;
+    }
+  }
+}

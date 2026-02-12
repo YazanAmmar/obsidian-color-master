@@ -1,0 +1,112 @@
+/* Editor & Markdown Overrides */
+
+/* --- Global Backgrounds --- */
+#cm-background-video {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  z-index: -1;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+body.cm-workspace-background-active {
+  background-image: var(--cm-background-image);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+
+  /* Ensure workspace transparency to reveal background */
+  .workspace-split.mod-root,
+  .workspace-leaf,
+  .workspace-leaf-content,
+  .view-header,
+  .workspace-tab-header-container {
+    background-color: transparent !important;
+  }
+
+  /* Add backdrop blur for legibility in modals */
+  .modal-container .modal {
+    background-color: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(5px);
+  }
+}
+
+/* Scoped background for settings tab */
+body.cm-settings-background-active .color-master-settings-tab {
+  background-image: var(--cm-background-image);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+/* --- Editor & Markdown Overrides --- */
+
+/* Tag Styling */
+.tag {
+  color: var(--tag-color) !important;
+  background-color: var(--tag-bg) !important;
+  padding: 2px 8px;
+  border-radius: 12px;
+  text-decoration: none;
+
+  &:hover {
+    color: var(--tag-color-hover) !important;
+  }
+}
+
+/* Live Preview Tags */
+.cm-s-obsidian span.cm-hashtag {
+  background-color: var(--tag-bg) !important;
+  color: var(--tag-color) !important;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  border-radius: 0;
+  padding-left: 0;
+  padding-right: 0;
+
+  &-begin {
+    background-color: var(--tag-bg) !important;
+    color: var(--tag-color) !important;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-inline-start: 8px;
+    border-start-start-radius: 12px;
+    border-end-start-radius: 12px;
+  }
+
+  &-end {
+    background-color: var(--tag-bg) !important;
+    color: var(--tag-color) !important;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-inline-end: 8px;
+    border-start-end-radius: 12px;
+    border-end-end-radius: 12px;
+  }
+}
+
+/* Inline Code */
+.cm-s-obsidian span.cm-inline-code,
+.markdown-preview-view code:not(pre code) {
+  color: var(--code-normal) !important;
+  background-color: var(--code-background) !important;
+}
+
+/* Highlights */
+.markdown-source-view.mod-cm6 .cm-highlight,
+.markdown-preview-view mark,
+.markdown-preview-view .highlight {
+  background-color: var(--text-highlight-bg) !important;
+}
+
+/* Blockquotes */
+.markdown-preview-view blockquote,
+.cm-s-obsidian span.cm-quote {
+  background-color: var(--blockquote-bg) !important;
+}

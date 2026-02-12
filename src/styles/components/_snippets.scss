@@ -1,0 +1,191 @@
+/* Snippets list */
+.cm-snippets-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  margin-bottom: 16px;
+
+  h3 {
+    margin: 0;
+    white-space: nowrap;
+  }
+
+  .cm-snippets-add-button.setting-item {
+    border: none;
+    padding: 0;
+    margin: 0;
+
+    button {
+      background-color: transparent;
+      border: 1px solid var(--interactive-accent);
+      color: var(--interactive-accent);
+      transition: all 0.2s ease-in-out;
+      cursor: pointer;
+
+      &:hover {
+        background-color: var(--interactive-accent);
+        color: var(--text-on-accent);
+      }
+    }
+  }
+}
+
+// --- Lock Button Styling ---
+.cm-snippet-lock-btn {
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: all 0.2s ease-in-out;
+  border: none !important;
+  box-shadow: none !important;
+  background-color: transparent !important;
+
+  &:hover {
+    color: var(--text-on-accent);
+    background-color: var(--background-modifier-hover) !important;
+  }
+
+  // --- Locked State ---
+  &.is-locked {
+    color: var(--interactive-accent);
+    opacity: 1;
+  }
+}
+
+.cm-snippets-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.cm-snippets-empty-state {
+  color: var(--text-muted);
+  font-style: italic;
+  padding: 10px;
+  text-align: center;
+}
+
+.cm-snippet-item.setting-item {
+  align-items: center !important;
+  min-height: 40px;
+  padding: 4px 10px !important;
+  transition: transform 0.16s ease;
+  gap: 4px !important;
+
+  .setting-item-info {
+    flex: 1;
+    min-width: 0;
+    margin-right: 10px;
+  }
+
+  .setting-item-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .setting-item-control {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    .checkbox-container {
+      transform: scale(0.85);
+    }
+
+    button {
+      background-color: transparent;
+      border: none;
+      box-shadow: none;
+      color: var(--text-muted);
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 28px;
+      width: 28px;
+      transition: all 0.2s ease-in-out;
+      cursor: pointer;
+
+      .svg-icon {
+        width: 18px;
+        height: 18px;
+        transition: all 0.2s ease-in-out;
+      }
+
+      &:hover {
+        background-color: var(--background-modifier-hover);
+        color: var(--text-normal);
+      }
+
+      &.is-success {
+        color: #00ff08;
+        .svg-icon {
+          transform: scale(1.2);
+        }
+      }
+    }
+  }
+
+  /* Drag Handle & Divider */
+  .cm-snippet-drag-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-right: 4px;
+  }
+
+  .cm-snippet-divider {
+    color: var(--background-modifier-border);
+    font-size: 16px;
+    opacity: 0.8;
+  }
+
+  .cm-snippet-order-number {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-muted);
+    width: auto;
+    padding-left: 6px;
+    text-align: center;
+  }
+
+  .cm-snippet-drag-handle {
+    cursor: grab;
+    color: var(--text-faint);
+    opacity: 0.7;
+    position: relative;
+    top: var(--cm-snippet-handle-vertical-nudge);
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+
+    &:hover {
+      opacity: 1;
+      color: var(--text-normal);
+    }
+
+    &.is-locked {
+      cursor: not-allowed;
+      opacity: 0.4;
+
+      &:hover {
+        opacity: 0.4;
+        color: var(--text-faint);
+      }
+    }
+  }
+
+  /* Drag States */
+  &.cm-snippet-ghost {
+    opacity: 0.75;
+    transform: scale(0.99);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+    transition: transform 0.12s ease;
+  }
+  &.cm-snippet-dragged {
+    background-color: var(--background-secondary) !important;
+  }
+}

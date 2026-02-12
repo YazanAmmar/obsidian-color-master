@@ -1,0 +1,28 @@
+/* Accessibility checker */
+.color-master-settings-tab {
+  .cm-accessibility-checker {
+    display: flex;
+    align-items: center;
+    padding: 4px 8px;
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: 500;
+    border: 1px solid var(--background-modifier-border);
+
+    &.cm-accessibility-pass {
+      background-color: #28a74520;
+      color: #28a745;
+      border-color: #28a74580;
+    }
+    &.cm-accessibility-warn {
+      background-color: #ffc10720;
+      color: #b58900;
+      border-color: #ffc10780;
+    }
+    &.cm-accessibility-fail {
+      background-color: #dc354520;
+      color: #dc3545;
+      border-color: #dc354580;
+    }
+  }
+}

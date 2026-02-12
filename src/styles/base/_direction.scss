@@ -1,0 +1,43 @@
+/* Directionality (LTR/RTL) */
+.is-ltr {
+  direction: ltr !important;
+
+  h2,
+  h3,
+  .setting-item-name,
+  .setting-item-description {
+    text-align: left !important;
+  }
+
+  .setting-item,
+  .modal-content .setting-item {
+    flex-direction: row !important;
+  }
+
+  .color-master-text-input {
+    margin-left: 8px;
+  }
+}
+
+.is-rtl {
+  direction: rtl;
+
+  .color-master-text-input {
+    margin-right: 8px;
+  }
+
+  .setting-item-name,
+  .setting-item-description,
+  h2,
+  h3 {
+    text-align: right;
+  }
+}
+
+/* Global RTL override for notices */
+body.color-master-rtl {
+  .notice {
+    direction: rtl;
+    text-align: right;
+  }
+}

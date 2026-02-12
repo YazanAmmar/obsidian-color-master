@@ -1,0 +1,23 @@
+/* Image browser extras */
+.cm-image-browser-empty {
+  text-align: center;
+  padding: 30px;
+  color: var(--text-muted);
+  grid-column: 1 / -1;
+  font-style: italic;
+}
+
+.cm-profile-list-modal {
+  margin-top: 10px;
+  margin-bottom: 5px;
+  strong {
+    color: var(--text-accent);
+    font-weight: 600;
+  }
+}
+
+.cm-settings-group {
+  border-top: 1px solid var(--background-modifier-border);
+  margin-top: 0;
+  padding-top: 10px;
+}

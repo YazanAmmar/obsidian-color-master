@@ -1,0 +1,41 @@
+/* Advanced reset modal */
+.cm-advanced-reset-options {
+  .setting-item {
+    align-items: center;
+    row-gap: var(--size-4-3);
+    border-radius: var(--setting-items-radius);
+    padding: var(--size-4-4);
+    border: var(--setting-items-border-width) solid var(--setting-items-border-color);
+
+    border-top: none !important;
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+  }
+
+  .setting-item-control {
+    order: 2;
+    justify-content: flex-end;
+    .clickable-icon {
+      color: var(--text-faint);
+      cursor: help;
+      &:hover {
+        color: var(--text-muted);
+      }
+    }
+  }
+
+  .setting-item-info {
+    order: 1;
+  }
+
+  /* RTL Override */
+  [dir='rtl'] & {
+    .setting-item-control {
+      order: 1;
+      justify-content: flex-start;
+    }
+    .setting-item-info {
+      order: 2;
+    }
+  }
+}

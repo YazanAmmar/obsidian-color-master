@@ -1,0 +1,50 @@
+/* Buttons */
+.codepen-button {
+  display: block;
+  cursor: pointer;
+  color: white;
+  position: relative;
+  text-decoration: none;
+  font-weight: 600;
+  border-radius: 6px;
+  overflow: hidden;
+  padding: 2px;
+  isolation: isolate;
+  width: 100%;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 400%;
+    height: 100%;
+    background: linear-gradient(115deg, #33ff00, #ffcc00, #8000ff, #00b7ff, #00ff66);
+    background-size: 25% 100%;
+    animation: cm-border-animation 1.5s linear infinite;
+    animation-play-state: running;
+  }
+
+  span {
+    position: relative;
+    display: block;
+    text-align: center;
+    padding: 8px 12px;
+    font-size: 13px;
+    background: var(--background-secondary);
+    border-radius: 4px;
+    height: 100%;
+  }
+
+  /* Light Mode Fallback */
+  .theme-light & span {
+    color: #000000;
+    background: #f0f2f5;
+  }
+}
+
+.cm-promo-container {
+  border-top: 1px solid var(--background-modifier-border);
+  text-align: center;
+  width: 100%;
+}

@@ -1,0 +1,191 @@
+/* Translator common controls and list */
+.cm-translator-tree-modal {
+  .modal-content {
+    width: 100%;
+    max-width: 90vw;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .cm-translator-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    border-bottom: 1px solid var(--background-modifier-border);
+    padding-bottom: 10px;
+
+    /* Search & Filter */
+    .cm-search-bar-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-grow: 1;
+      min-width: 250px;
+    }
+
+    .cm-search-input-container {
+      flex-grow: 1;
+      position: relative;
+
+      .search-input-container {
+        width: 100%;
+        input {
+          width: 100%;
+        }
+      }
+    }
+
+    .cm-search-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .cm-search-action-btn {
+      background-color: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      color: var(--text-muted) !important;
+      opacity: 0.8;
+      cursor: pointer;
+      padding: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-s);
+      transition: all 0.1s ease-in-out;
+      min-height: 20px;
+
+      &:hover {
+        background-color: var(--background-modifier-hover) !important;
+        color: var(--text-normal) !important;
+        opacity: 1;
+      }
+      &.is-active {
+        background-color: var(--interactive-accent) !important;
+        color: var(--text-on-accent) !important;
+        opacity: 1;
+        &:hover {
+          background-color: var(--interactive-accent-hover) !important;
+        }
+      }
+    }
+
+    /* I/O Buttons Container */
+    .cm-translator-io-controls {
+      display: flex;
+      gap: 4px;
+      margin-top: 4px;
+
+      .setting-item {
+        border-top: none;
+        padding: 0;
+        margin: 0;
+        flex-grow: 0;
+        flex-shrink: 0;
+      }
+    }
+  }
+
+  /* Tree List */
+  .cm-translator-list {
+    overflow-y: auto;
+    flex: 1;
+    padding-right: 10px;
+  }
+
+  .cm-translator-group {
+    border-left: 2px solid var(--background-modifier-border);
+    margin-left: 10px;
+    padding-left: 10px;
+    margin-bottom: 5px;
+
+    .cm-translator-group-title {
+      font-weight: 600;
+      font-size: 1.1em;
+      color: var(--text-accent);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 4px;
+      transition: background-color 0.2s ease;
+      &:hover {
+        background-color: var(--background-modifier-hover);
+      }
+    }
+    .cm-translator-group-content {
+      padding-left: 10px;
+    }
+  }
+
+  .cm-translator-item {
+    border-top: none;
+    border-bottom: 1px solid var(--background-modifier-border-hover);
+    padding: 10px 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+
+    .cm-translator-index {
+      font-size: var(--font-ui-smaller);
+      color: var(--text-faint);
+      width: 28px;
+      text-align: right;
+      flex-shrink: 0;
+      padding-top: 6px;
+    }
+
+    .setting-item-info {
+      flex-grow: 1;
+    }
+
+    .setting-item-name.cm-translator-key {
+      font-weight: 600;
+      font-family: var(--font-monospace);
+      font-size: 0.9em;
+      word-break: break-all;
+      margin-bottom: 4px;
+    }
+  }
+}
+
+.cm-translator-modal {
+  .modal-content {
+    display: flex;
+    flex-direction: column;
+    height: 65vh;
+    max-height: 65vh;
+  }
+
+  .cm-translator-list {
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  .cm-translator-controls,
+  .cm-translator-main-controls {
+    flex: 0 0 auto;
+  }
+
+  .cm-translator-main-controls {
+    padding: 0;
+    border: none;
+    margin-top: var(--size-4-2);
+  }
+}
+
+.cm-translator-toggle {
+  font-size: var(--font-ui-small);
+  color: var(--text-accent);
+  cursor: pointer;
+  margin-top: 4px;
+  display: inline-block;
+
+  &:hover {
+    color: var(--text-accent-hover);
+  }
+}

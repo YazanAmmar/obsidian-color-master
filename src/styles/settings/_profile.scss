@@ -1,0 +1,72 @@
+/* Profile manager and related controls */
+.color-master-settings-tab {
+  .cm-profile-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin: 10px 0 14px;
+
+    .cm-profile-action-spacer {
+      flex: 1;
+    }
+  }
+
+  /* Management Buttons (Export, Copy, Import) */
+  .cm-profile-action-btn {
+    background-color: transparent;
+    border: 1px solid var(--background-modifier-border);
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+
+    &:active {
+      transform: translateY(1px);
+    }
+
+    &:hover {
+      background-color: var(--background-modifier-hover);
+      border-color: var(--background-modifier-border-hover);
+    }
+
+    /* Primary Action (Blue) */
+    &.mod-cta {
+      border-color: var(--interactive-accent);
+      color: var(--interactive-accent);
+
+      &:hover {
+        background-color: var(--interactive-accent);
+        color: var(--text-on-accent);
+      }
+    }
+
+    &.cm-paste-css-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+  }
+
+  .cm-profile-manager-controls {
+    /* Condense control buttons */
+    .setting-item-control button {
+      margin-left: -2px;
+      margin-right: -2px;
+    }
+  }
+
+  /* Theme Warning Icon */
+  .cm-theme-warning-icon {
+    display: inline-block;
+    margin-left: 8px;
+    color: var(--interactive-warning);
+    cursor: help;
+    vertical-align: middle;
+
+    svg {
+      width: 16px;
+      height: 16px;
+      position: relative;
+      top: -1px;
+    }
+  }
+}

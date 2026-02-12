@@ -1,0 +1,84 @@
+/* Name input */
+.cm-image-card-name-input.setting-item {
+  border: none !important;
+
+  border-top: 1px solid var(--background-modifier-border) !important;
+
+  background-color: var(--background-secondary);
+  padding: 4px 8px !important;
+  min-height: 32px !important;
+  justify-content: center;
+
+  .setting-item-control {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+.cm-name-input-container {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  padding: 2px 6px;
+  margin: 0 auto;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+  max-width: 100%;
+
+  &:hover,
+  &:has(.cm-name-input-basename:focus) {
+    background-color: var(--background-primary) !important;
+
+    .cm-name-input-basename {
+      color: var(--text-normal);
+    }
+    .cm-name-input-extension {
+      color: var(--text-muted);
+    }
+  }
+}
+
+.cm-name-input-basename {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background-color: transparent !important;
+
+  text-align: right;
+  font-size: var(--font-ui-smaller);
+  color: var(--text-muted);
+
+  padding: 2px 0;
+  flex-grow: 0;
+  min-width: 20px;
+  max-width: 140px;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cm-name-input-basename {
+  border: none;
+  outline: none;
+  box-shadow: none;
+  background-color: transparent;
+  text-align: right;
+  font-size: var(--font-ui-smaller);
+  color: var(--text-muted);
+  padding: 4px 0 4px 12px;
+  flex-grow: 1;
+  min-width: 30px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cm-name-input-extension {
+  font-size: var(--font-ui-smaller);
+  color: var(--text-faint);
+  padding: 4px 12px 4px 2px;
+  user-select: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+}

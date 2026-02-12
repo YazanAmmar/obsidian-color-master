@@ -1,0 +1,27 @@
+/* Badges */
+.cm-snippet-global-badge {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--text-accent);
+  padding: 1px 6px;
+  border-radius: 10px;
+  border: 1px solid var(--interactive-accent-hover);
+  background: rgba(14, 165, 233, 0.1);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: relative;
+  top: 1px;
+}
+
+/* --- UI Elements --- */
+.cm-segmented-control button {
+  &.is-active {
+    background-color: var(--interactive-accent);
+    color: var(--text-on-accent);
+    font-weight: 600;
+  }
+  &:hover:not(.is-active) {
+    background-color: var(--background-modifier-hover);
+  }
+}

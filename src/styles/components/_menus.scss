@@ -1,0 +1,38 @@
+/* Menus */
+.cm-flyout-menu-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  .cm-flyout-menu-buttons {
+    display: flex;
+    align-items: center;
+    background-color: transparent;
+    border: none;
+    padding: 0;
+    gap: 4px;
+    border-radius: var(--radius-m);
+    border: 1px solid var(--background-modifier-border);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+.color-master-settings-tab[dir='ltr'] .cm-flyout-menu-buttons {
+  transform: translateX(15px);
+  &.is-open {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
+  }
+}
+
+.color-master-settings-tab[dir='rtl'] .cm-flyout-menu-buttons {
+  transform: translateX(-15px);
+  &.is-open {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
+  }
+}

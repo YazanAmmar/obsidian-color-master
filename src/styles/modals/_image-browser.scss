@@ -1,0 +1,42 @@
+/* Image browser cards */
+.cm-image-card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-s);
+  overflow: hidden;
+  background: var(--background-secondary);
+
+  &.is-active {
+    border: 2px solid var(--interactive-accent);
+    box-shadow: 0 0 10px var(--interactive-accent);
+    transform: scale(1.02);
+    transition: all 0.2s ease-in-out;
+  }
+
+  /* Formatting the button container inside the card */
+  .cm-image-card-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px;
+    background-color: var(--background-secondary);
+    border-top: 1px solid var(--background-modifier-border);
+
+    .cm-image-card-select-btn {
+      flex-grow: 1;
+      justify-content: center;
+      margin: 0;
+    }
+
+    .cm-image-card-delete-btn {
+      flex-shrink: 0;
+      width: 30px;
+      padding: 0 !important;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0;
+    }
+  }
+}
