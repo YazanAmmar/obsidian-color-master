@@ -22,19 +22,8 @@
     }
 
     .cm-search-container,
-    .cm-profile-actions,
     .cm-snippets-header {
       flex-direction: row !important;
-    }
-
-    .cm-search-input-icon {
-      left: 10px !important;
-      right: auto !important;
-    }
-
-    .cm-search-input-container .cm-search-input {
-      background-color: transparent;
-      padding: 8px 12px 8px 38px !important;
     }
 
     .cm-accessibility-checker {
@@ -49,16 +38,6 @@
   }
 
   &[dir='rtl'] {
-    .cm-search-input-icon {
-      left: auto;
-      right: 10px;
-    }
-
-    .cm-search-input-container .cm-search-input {
-      padding-left: 12px !important;
-      padding-right: 36px !important;
-    }
-
     .cm-accessibility-checker {
       margin-left: 0;
       margin-right: 10px;

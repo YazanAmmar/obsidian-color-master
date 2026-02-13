@@ -16,11 +16,16 @@ export function drawProfileManager(containerEl: HTMLElement, settingTab: ColorMa
     text: t('profileManager.heading'),
     cls: 'cm-section-heading',
   });
+
+  const profileShell = containerEl.createDiv({
+    cls: 'cm-profile-manager-shell',
+  });
+
   const activeProfileName = plugin.settings.activeProfile;
   const activeProfile = plugin.settings.profiles[activeProfileName];
   const isCssProfile = activeProfile?.isCssProfile;
 
-  const profileSetting = new Setting(containerEl)
+  const profileSetting = new Setting(profileShell)
     .setName(t('profileManager.activeProfile'))
     .setDesc(t('profileManager.activeProfileDesc'))
     .setClass('cm-profile-manager-controls')
@@ -40,6 +45,7 @@ export function drawProfileManager(containerEl: HTMLElement, settingTab: ColorMa
         await plugin.saveSettings();
         settingTab.display();
       });
+      dropdown.selectEl.classList.add('cm-profile-picker');
     })
 
     .addButton((button) => {
@@ -49,7 +55,7 @@ export function drawProfileManager(containerEl: HTMLElement, settingTab: ColorMa
         return;
       }
 
-      button.buttonEl.classList.add('cm-control-button');
+      button.buttonEl.classList.add('cm-control-button', 'cm-profile-icon-action');
 
       // Helper function to update the button's appearance
       const updateButtonAppearance = (themeType: 'auto' | 'dark' | 'light') => {
@@ -113,7 +119,7 @@ export function drawProfileManager(containerEl: HTMLElement, settingTab: ColorMa
       } else {
         button.buttonEl.hide();
       }
-      button.buttonEl.classList.add('cm-control-button');
+      button.buttonEl.classList.add('cm-control-button', 'cm-profile-icon-action');
     })
 
     .addButton((button) => {
@@ -130,7 +136,7 @@ export function drawProfileManager(containerEl: HTMLElement, settingTab: ColorMa
           plugin.pendingVarUpdates = {};
           settingTab.display();
         });
-      button.buttonEl.classList.add('cm-control-button');
+      button.buttonEl.classList.add('cm-control-button', 'cm-profile-icon-action');
     })
     .addButton((button) => {
       settingTab.resetPinBtn = button;
@@ -157,7 +163,7 @@ export function drawProfileManager(containerEl: HTMLElement, settingTab: ColorMa
             { buttonText: t('buttons.reset'), buttonClass: 'mod-cta' },
           ).open();
         });
-      button.buttonEl.classList.add('cm-control-button');
+      button.buttonEl.classList.add('cm-control-button', 'cm-profile-icon-action');
     })
     .addButton((button) => {
       button.setButtonText(t('buttons.new')).onClick(() => {
@@ -197,7 +203,7 @@ export function drawProfileManager(containerEl: HTMLElement, settingTab: ColorMa
           });
         }).open();
       });
-      button.buttonEl.classList.add('cm-control-button');
+      button.buttonEl.classList.add('cm-profile-text-action', 'cm-profile-text-action-new');
     })
     .addButton((button) => {
       button.setButtonText(t('buttons.delete')).onClick(() => {
@@ -222,7 +228,7 @@ export function drawProfileManager(containerEl: HTMLElement, settingTab: ColorMa
           },
         ).open();
       });
-      button.buttonEl.classList.add('cm-control-button');
+      button.buttonEl.classList.add('cm-profile-text-action', 'cm-profile-text-action-delete');
     });
 
   const currentTheme = (plugin.app as AppWithCustomCss).customCss.theme;
@@ -237,5 +243,6 @@ export function drawProfileManager(containerEl: HTMLElement, settingTab: ColorMa
   }
 
   profileSetting.settingEl.classList.add('cm-active-profile-controls');
+  profileSetting.settingEl.classList.add('cm-profile-manager-main');
   settingTab._updatePinButtons();
 }

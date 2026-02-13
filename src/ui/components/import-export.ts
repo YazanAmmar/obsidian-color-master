@@ -3,17 +3,25 @@ import { PasteCssModal, ProfileJsonImportModal } from '../modals';
 import type { ColorMasterSettingTab } from '../settingsTab';
 
 export function drawImportExport(containerEl: HTMLElement, settingTab: ColorMasterSettingTab) {
-  const actionsEl = containerEl.createDiv('cm-profile-actions');
+  const profileShell = containerEl.querySelector<HTMLElement>('.cm-profile-manager-shell');
+  const actionsHost = profileShell || containerEl;
+  const actionsEl = actionsHost.createDiv('cm-profile-actions');
+  const outputGroup = actionsEl.createDiv(
+    'cm-profile-actions-group cm-profile-actions-group-export',
+  );
+  const inputGroup = actionsEl.createDiv(
+    'cm-profile-actions-group cm-profile-actions-group-import',
+  );
 
   // Output Actions (Export / Copy)
-  actionsEl
+  outputGroup
     .createEl('button', {
       text: t('buttons.exportFile'),
       cls: 'cm-profile-action-btn',
     })
     .addEventListener('click', () => settingTab._exportProfileToFile());
 
-  actionsEl
+  outputGroup
     .createEl('button', {
       text: t('buttons.copyJson'),
       cls: 'cm-profile-action-btn',
@@ -24,11 +32,8 @@ export function drawImportExport(containerEl: HTMLElement, settingTab: ColorMast
       });
     });
 
-  // Spacer to push input actions to the right
-  actionsEl.createDiv({ cls: 'cm-profile-action-spacer' });
-
   // Input Actions (Import CSS / JSON)
-  const pasteCssBtn = actionsEl.createEl('button', {
+  const pasteCssBtn = inputGroup.createEl('button', {
     text: t('buttons.importCss'),
     cls: 'cm-profile-action-btn cm-paste-css-btn',
   });
@@ -37,7 +42,7 @@ export function drawImportExport(containerEl: HTMLElement, settingTab: ColorMast
     new PasteCssModal(settingTab.app, settingTab.plugin, settingTab, null).open();
   });
 
-  actionsEl
+  inputGroup
     .createEl('button', {
       text: t('buttons.importJson'),
       cls: 'cm-profile-action-btn mod-cta',

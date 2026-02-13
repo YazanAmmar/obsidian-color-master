@@ -1,33 +1,143 @@
 /* Profile manager and related controls */
 .color-master-settings-tab {
-  .cm-profile-actions {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    margin: 10px 0 14px;
+  .cm-profile-manager-shell {
+    margin: 8px 0 18px;
+    padding: 12px;
+    border-radius: var(--radius-l);
+    border: 1px solid var(--background-modifier-border);
+    background-color: var(--background-primary-alt);
+  }
 
-    .cm-profile-action-spacer {
-      flex: 1;
+  .cm-profile-manager-main.setting-item {
+    margin: 0;
+    padding: 12px;
+    border-radius: var(--radius-m);
+    border: 1px solid var(--background-modifier-border);
+    background-color: var(--background-primary);
+    gap: 12px;
+
+    .setting-item-info {
+      flex: 1 1 220px;
+      min-width: 180px;
+      margin-right: 0 !important;
+    }
+
+    .setting-item-name {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: var(--font-ui-medium);
+      font-weight: 650;
+      line-height: 1.2;
+    }
+
+    .setting-item-description {
+      margin-top: 2px;
+      color: var(--text-muted);
+      line-height: 1.3;
+    }
+
+    .setting-item-control {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 6px;
+      margin-left: auto;
     }
   }
 
-  /* Management Buttons (Export, Copy, Import) */
-  .cm-profile-action-btn {
-    background-color: transparent;
-    border: 1px solid var(--background-modifier-border);
-    transition: all 0.2s ease-in-out;
-    cursor: pointer;
+  .cm-profile-picker {
+    min-width: 170px;
+    max-width: 220px;
+    height: 32px;
+  }
 
-    &:active {
-      transform: translateY(1px);
+  .cm-profile-icon-action {
+    width: 30px;
+    min-width: 30px;
+    height: 30px;
+    padding: 0 !important;
+    border: 1px solid transparent !important;
+    border-radius: var(--radius-s);
+    color: var(--text-muted);
+    transition: all 0.2s ease-in-out;
+
+    &:hover {
+      border-color: var(--background-modifier-border-hover) !important;
+      color: var(--text-normal);
+      transform: translateY(-1px);
     }
+  }
+
+  .cm-profile-text-action {
+    height: 30px;
+    padding: 0 10px;
+    border-radius: var(--radius-s);
+    border: 1px solid var(--background-modifier-border);
+    background-color: transparent;
+    color: var(--text-normal);
+    font-size: var(--font-ui-small);
+    transition: all 0.2s ease-in-out;
 
     &:hover {
       background-color: var(--background-modifier-hover);
       border-color: var(--background-modifier-border-hover);
+      transform: translateY(-1px);
+    }
+  }
+
+  .cm-profile-text-action-delete {
+    color: var(--text-muted);
+
+    &:hover {
+      color: var(--text-error);
+      border-color: var(--text-error);
+      background-color: rgba(220, 53, 69, 0.1);
+    }
+  }
+
+  .cm-profile-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 10px;
+    align-items: center;
+    margin: 12px 0 2px;
+    padding-top: 12px;
+    border-top: 1px solid var(--background-modifier-border);
+  }
+
+  .cm-profile-actions-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .cm-profile-actions-group-import {
+    justify-content: flex-end;
+  }
+
+  .cm-profile-action-btn {
+    min-height: 32px;
+    padding: 0 12px;
+    border-radius: var(--radius-s);
+    border: 1px solid var(--background-modifier-border);
+    background-color: transparent;
+    color: var(--text-normal);
+    box-shadow: none;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+
+    &:hover {
+      background-color: var(--background-modifier-hover);
+      border-color: var(--background-modifier-border-hover);
+      transform: translateY(-1px);
     }
 
-    /* Primary Action (Blue) */
+    &:active {
+      transform: translateY(0);
+    }
+
     &.mod-cta {
       border-color: var(--interactive-accent);
       color: var(--interactive-accent);
@@ -37,21 +147,12 @@
         color: var(--text-on-accent);
       }
     }
-
-    &.cm-paste-css-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-    }
   }
 
-  .cm-profile-manager-controls {
-    /* Condense control buttons */
-    .setting-item-control button {
-      margin-left: -2px;
-      margin-right: -2px;
-    }
+  .cm-profile-action-btn.cm-paste-css-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 
   /* Theme Warning Icon */
@@ -67,6 +168,47 @@
       height: 16px;
       position: relative;
       top: -1px;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .cm-profile-manager-main.setting-item {
+      flex-direction: column !important;
+      align-items: stretch;
+
+      .setting-item-control {
+        justify-content: flex-start;
+        margin-left: 0;
+      }
+    }
+
+    .cm-profile-picker {
+      min-width: 190px;
+      max-width: 100%;
+      flex: 1 1 240px;
+    }
+
+    .cm-profile-actions {
+      grid-template-columns: 1fr;
+    }
+
+    .cm-profile-actions-group-import {
+      justify-content: flex-start;
+    }
+  }
+
+  &[dir='rtl'] {
+    .cm-profile-manager-main.setting-item {
+      .setting-item-control {
+        margin-left: 0;
+        margin-right: auto;
+        justify-content: flex-start;
+      }
+    }
+
+    .cm-theme-warning-icon {
+      margin-left: 0;
+      margin-right: 8px;
     }
   }
 }
