@@ -126,9 +126,7 @@ Designed for both:
 
 Here is the corrected high-level structure of the `src` folder:
 
-Markdown
-
-```
+```Markdown
 src/
 ├── main.ts                       # Core plugin entry — loads/unloads the plugin, handles notice processing, and wires all systems together
 ├── constants.ts                  # Built-in defaults, variable maps, themes, and static configuration
@@ -339,14 +337,19 @@ If you want to customize the plugin or contribute to its development, you can ea
 3. **Build the Plugin:** To compile the TypeScript code and package the plugin for Obsidian:
 
    - **Standard Build:** Use `npm run build` to compile the core files (`main.js`, `styles.css`, `manifest.json`) into the project root.
+
      ```Bash
      npm run build
      ```
+
    - **Lint the Code:** Run the ESLint script to check for code style issues.
+
      ```Bash
      npm run lint
      ```
+
    - **Development Build (Advanced):** Use `npm run dev` to **compile AND automatically copy** the resulting files to a local Obsidian vault.
+
      ```Bash
      npm run dev
      ```

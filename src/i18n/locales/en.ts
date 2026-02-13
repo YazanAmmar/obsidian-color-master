@@ -36,6 +36,8 @@ export default {
       "When enabled, the plugin's interface is flipped to properly support languages written from right to left.",
     searchPlaceholder: 'Search variables (name or value)...',
     regexPlaceholder: 'Enter Regex and press Enter...',
+    noResultsFound: 'No matching results found',
+    noResultsHint: 'Try another keyword, or clear search and filters.',
     allSections: 'All Sections',
     clear: 'Clear',
     ariaCase: 'Case-sensitive search',

@@ -54,6 +54,8 @@ export interface LocaleStrings {
     rtlLayoutDesc: string;
     searchPlaceholder: string;
     regexPlaceholder: string;
+    noResultsFound: string;
+    noResultsHint: string;
     allSections: string;
     clear: string;
     ariaCase: string;

@@ -47,6 +47,8 @@ export class ColorMasterSettingTab extends PluginSettingTab {
   resetPinBtn: ButtonComponent | null = null;
   pinBtn: ButtonComponent | null = null;
   snippetSortable: Sortable | null;
+  likeCardEl: HTMLElement | null = null;
+  noSearchResultsEl: HTMLElement | null = null;
 
   constructor(app: App, plugin: ColorMaster) {
     super(app, plugin);
@@ -275,6 +277,7 @@ export class ColorMasterSettingTab extends PluginSettingTab {
   _applySearchFilter() {
     const s = this._searchState;
     const activeProfile = this.plugin.settings.profiles[this.plugin.settings.activeProfile];
+    const isSearching = s.query.trim().length > 0 || s.section !== '';
     const rows = Array.from(
       this.containerEl.querySelectorAll<HTMLElement>('.cm-var-row, .cm-searchable-row'),
     );
@@ -361,6 +364,16 @@ export class ColorMasterSettingTab extends PluginSettingTab {
         heading.classList.add('cm-hidden');
       }
     });
+
+    const hasVisibleSearchResults = rows.some((row) => !row.classList.contains('cm-hidden'));
+    const showNoResults = isSearching && !hasVisibleSearchResults;
+
+    if (this.noSearchResultsEl) {
+      this.noSearchResultsEl.classList.toggle('is-hidden', !showNoResults);
+    }
+    if (this.likeCardEl) {
+      this.likeCardEl.classList.toggle('is-hidden', showNoResults);
+    }
   }
 
   _highlightRowMatches(row: HTMLElement, state: typeof this._searchState) {
@@ -755,7 +768,25 @@ export class ColorMasterSettingTab extends PluginSettingTab {
     this.initSearchUI(containerEl);
     drawColorPickers(this.containerEl, this, themeDefaults);
     containerEl.createEl('hr');
-    drawLikePluginCard(containerEl, this);
+
+    const noResultsBadge = containerEl.createDiv({
+      cls: 'cm-search-empty-badge is-hidden',
+    });
+    const noResultsIcon = noResultsBadge.createDiv({
+      cls: 'cm-search-empty-icon',
+    });
+    setIcon(noResultsIcon, 'search-x');
+    noResultsBadge.createDiv({
+      cls: 'cm-search-empty-title',
+      text: t('settings.noResultsFound'),
+    });
+    noResultsBadge.createDiv({
+      cls: 'cm-search-empty-subtitle',
+      text: t('settings.noResultsHint'),
+    });
+    this.noSearchResultsEl = noResultsBadge;
+
+    this.likeCardEl = drawLikePluginCard(containerEl, this);
 
     //---Implement automatic search and scrolling---
 

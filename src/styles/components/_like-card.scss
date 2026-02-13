@@ -25,6 +25,10 @@
   &:hover {
     border-color: var(--interactive-accent);
   }
+
+  &.is-hidden {
+    display: none !important;
+  }
 }
 
 /* Header */

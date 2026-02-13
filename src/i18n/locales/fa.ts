@@ -1,4 +1,4 @@
-export default {
+﻿export default {
   plugin: {
     name: 'استاد رنگ - v1.2.0',
     ribbonTooltip: 'تنظیمات استاد رنگ',
@@ -36,6 +36,8 @@ export default {
       'هنگامی که فعال باشد، رابط کاربری افزونه برای پشتیبانی صحیح از زبان‌های راست به چپ برعکس می‌شود.',
     searchPlaceholder: 'جستجوی متغیرها (نام یا مقدار)...',
     regexPlaceholder: 'عبارت منظم را وارد کنید و Enter را بزنید...',
+    noResultsFound: 'نتیجه‌ای مطابق پیدا نشد',
+    noResultsHint: 'یک کلمهٔ کلیدی دیگر امتحان کنید یا جستجو و فیلترها را پاک کنید.',
     allSections: 'همه بخش‌ها',
     clear: 'پاک کردن',
     ariaCase: 'جستجوی حساس به حروف بزرگ و کوچک',

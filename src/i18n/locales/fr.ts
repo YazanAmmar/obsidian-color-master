@@ -1,4 +1,4 @@
-export default {
+﻿export default {
   plugin: {
     name: 'Maître des Couleurs - v1.2.0',
     ribbonTooltip: 'Paramètres de Color Master',
@@ -36,6 +36,8 @@ export default {
       "Lorsque cette option est activée, l'interface du plugin est inversée pour prendre en charge correctement les langues écrites de droite à gauche.",
     searchPlaceholder: 'Rechercher des variables (nom ou valeur)...',
     regexPlaceholder: 'Entrez Regex et appuyez sur Entrée...',
+    noResultsFound: 'Aucun résultat correspondant trouvé',
+    noResultsHint: 'Essayez un autre mot-clé ou effacez la recherche et les filtres.',
     allSections: 'Toutes les sections',
     clear: 'Effacer',
     ariaCase: 'Recherche sensible à la casse',

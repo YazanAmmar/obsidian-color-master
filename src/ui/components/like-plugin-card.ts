@@ -49,7 +49,10 @@ function calcPluginIntegrations(): number {
   return 0;
 }
 
-export function drawLikePluginCard(containerEl: HTMLElement, settingTab: ColorMasterSettingTab) {
+export function drawLikePluginCard(
+  containerEl: HTMLElement,
+  settingTab: ColorMasterSettingTab,
+): HTMLElement {
   const likeCardEl = containerEl.createDiv('cm-like-card');
 
   const headerSection = likeCardEl.createDiv('cm-like-card-header');
@@ -107,4 +110,6 @@ export function drawLikePluginCard(containerEl: HTMLElement, settingTab: ColorMa
   createActionButton('bug', t('likeCard.reportIssueButton'), ISSUE_URL);
   createActionButton('git-pull-request-arrow', t('likeCard.syncVaultButton'), SYNC_WIKI_URL);
   createActionButton('send', t('likeCard.telegramButton'), TELEGRAM_URL);
+
+  return likeCardEl;
 }
