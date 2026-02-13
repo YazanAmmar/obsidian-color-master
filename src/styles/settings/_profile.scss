@@ -4,7 +4,6 @@
     margin: 8px 0 18px;
     padding: 12px;
     border-radius: var(--radius-l);
-    border: 1px solid var(--background-modifier-border);
     background-color: var(--background-primary-alt);
   }
 
@@ -79,6 +78,7 @@
     color: var(--text-normal);
     font-size: var(--font-ui-small);
     transition: all 0.2s ease-in-out;
+    cursor: pointer;
 
     &:hover {
       background-color: var(--background-modifier-hover);
