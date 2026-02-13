@@ -1,4 +1,4 @@
-import { Notice, Setting } from 'obsidian';
+import { Notice, Setting, SettingGroup } from 'obsidian';
 import { DEFAULT_VARS, TEXT_TO_BG_MAP } from '../../constants';
 import { t } from '../../i18n/strings';
 import {
@@ -18,6 +18,47 @@ export function drawColorPickers(
   const plugin = settingTab.plugin;
   const activeProfile = plugin.settings.profiles[plugin.settings.activeProfile];
   const activeProfileVars = activeProfile.vars;
+  const canUseSettingGroup = typeof SettingGroup === 'function';
+
+  const createCategorySection = (parentEl: HTMLElement, headingText: string, category: string) => {
+    const categoryContainer = parentEl.createDiv({
+      cls: 'cm-category-container',
+    });
+    categoryContainer.dataset.category = category;
+
+    if (canUseSettingGroup) {
+      const group = new SettingGroup(categoryContainer);
+      group.setHeading(headingText);
+      group.addClass('cm-native-setting-group');
+
+      return {
+        createSetting: () => {
+          let createdSetting: Setting | null = null;
+          group.addSetting((setting) => {
+            createdSetting = setting;
+          });
+
+          if (!createdSetting) {
+            console.warn('Color Master: Failed to create grouped setting. Falling back.');
+            return new Setting(categoryContainer);
+          }
+
+          return createdSetting;
+        },
+      };
+    }
+
+    categoryContainer.classList.add('cm-fallback-setting-group');
+    categoryContainer.createEl('h3', { text: headingText, cls: 'cm-setting-group-heading' });
+
+    const sectionBody = categoryContainer.createDiv({
+      cls: 'cm-setting-group-body',
+    });
+
+    return {
+      createSetting: () => new Setting(sectionBody),
+    };
+  };
 
   for (const [category, vars] of Object.entries(DEFAULT_VARS)) {
     let categoryKey: string;
@@ -36,20 +77,15 @@ export function drawColorPickers(
     }
 
     const headingText = t(`categories.${categoryKey}`) || category;
-    const categoryContainerClasses = ['cm-category-container'];
-
-    const categoryContainer = containerEl.createDiv({
-      cls: categoryContainerClasses.join(' '),
-    });
-    categoryContainer.dataset.category = category;
-    categoryContainer.createEl('h3', { text: headingText });
+    const categorySection = createCategorySection(containerEl, headingText, category);
 
     for (const [varName, originalDefaultValue] of Object.entries(vars)) {
       const defaultValue = themeDefaults[varName] || '';
 
       const description = t(`colors.descriptions.${varName}`) || '';
 
-      const setting = new Setting(containerEl)
+      const setting = categorySection
+        .createSetting()
         .setName(t(`colors.names.${varName}`) || varName)
         .setDesc(description);
 
@@ -251,15 +287,7 @@ export function drawColorPickers(
   }
 
   if (Object.keys(customVars).length > 0) {
-    const customVarsContainer = containerEl.createDiv({
-      cls: 'cm-category-container',
-    });
-    customVarsContainer.dataset.category = 'Custom';
-
-    customVarsContainer.createEl('h3', {
-      text: t('categories.custom'),
-      cls: 'cm-section-heading',
-    });
+    const customSection = createCategorySection(containerEl, t('categories.custom'), 'Custom');
 
     const activeProfile = plugin.settings.profiles[plugin.settings.activeProfile];
 
@@ -272,7 +300,7 @@ export function drawColorPickers(
 
       const isModified = varValue !== '';
 
-      const setting = new Setting(customVarsContainer).setName(displayName).setDesc(displayDesc);
+      const setting = customSection.createSetting().setName(displayName).setDesc(displayDesc);
 
       setting.settingEl.classList.add('cm-var-row', isModified ? 'is-modified' : 'is-pristine');
 

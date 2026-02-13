@@ -32,6 +32,38 @@
   display: none !important;
 }
 
+.color-master-settings-tab {
+  .cm-top-settings-group {
+    margin-bottom: 12px;
+  }
+
+  .cm-category-container {
+    margin-bottom: 16px;
+  }
+
+  .cm-fallback-setting-group {
+    .cm-setting-group-heading {
+      margin: 0 0 8px;
+    }
+
+    .cm-setting-group-body {
+      border: 1px solid var(--background-modifier-border);
+      border-radius: var(--radius-l);
+      background-color: var(--background-primary-alt);
+      overflow: hidden;
+    }
+
+    .cm-setting-group-body > .setting-item {
+      margin: 0;
+      border-top: 1px solid var(--background-modifier-border);
+    }
+
+    .cm-setting-group-body > .setting-item:first-child {
+      border-top: none;
+    }
+  }
+}
+
 /* Hide static sections during search */
 .cm-static-sections.cm-hidden {
   display: none !important;

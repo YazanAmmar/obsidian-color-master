@@ -5,6 +5,7 @@ import {
   Notice,
   PluginSettingTab,
   Setting,
+  SettingGroup,
   setIcon,
   SearchComponent,
 } from 'obsidian';
@@ -532,7 +533,38 @@ export class ColorMasterSettingTab extends PluginSettingTab {
 
     this.containerEl.setAttribute('dir', isRTL ? 'rtl' : 'ltr');
 
-    new Setting(containerEl)
+    const topSettingsContainer = containerEl.createDiv({
+      cls: 'cm-top-settings-group',
+    });
+
+    let createTopSetting: () => Setting;
+
+    if (typeof SettingGroup === 'function') {
+      const topGroup = new SettingGroup(topSettingsContainer);
+      topGroup.addClass('cm-native-setting-group');
+
+      createTopSetting = () => {
+        let createdSetting: Setting | null = null;
+        topGroup.addSetting((setting) => {
+          createdSetting = setting;
+        });
+
+        if (!createdSetting) {
+          console.warn('Color Master: Failed to create top setting group item. Falling back.');
+          return new Setting(topSettingsContainer);
+        }
+
+        return createdSetting;
+      };
+    } else {
+      topSettingsContainer.classList.add('cm-fallback-setting-group');
+      const topSettingsBody = topSettingsContainer.createDiv({
+        cls: 'cm-setting-group-body',
+      });
+      createTopSetting = () => new Setting(topSettingsBody);
+    }
+
+    createTopSetting()
       .setName(t('settings.enablePlugin'))
       .setDesc(t('settings.enablePluginDesc'))
       .addToggle((toggle) => {
@@ -551,7 +583,7 @@ export class ColorMasterSettingTab extends PluginSettingTab {
         });
       });
 
-    const languageSetting = new Setting(containerEl)
+    const languageSetting = createTopSetting()
       .setName(t('settings.language'))
       .setDesc(t('settings.languageDesc'));
 

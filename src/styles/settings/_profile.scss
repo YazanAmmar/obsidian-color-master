@@ -12,7 +12,7 @@
     padding: 12px;
     border-radius: var(--radius-m);
     border: 1px solid var(--background-modifier-border);
-    background-color: var(--background-primary);
+    background-color: var(--background-primary-alt);
     gap: 12px;
 
     .setting-item-info {
@@ -26,7 +26,6 @@
       align-items: center;
       gap: 6px;
       font-size: var(--font-ui-medium);
-      font-weight: 650;
       line-height: 1.2;
     }
 
