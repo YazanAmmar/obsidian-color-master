@@ -1,6 +1,7 @@
 import js from "@eslint/js";
 import tseslint from "typescript-eslint";
 import obsidianmd from "eslint-plugin-obsidianmd";
+import eslintComments from "eslint-plugin-eslint-comments";
 import globals from "globals";
 
 export default tseslint.config(
@@ -19,10 +20,13 @@ export default tseslint.config(
   },
 
   js.configs.recommended,
-  ...obsidianmd.configs.recommended,
+  ...obsidianmd.configs.recommendedWithLocalesEn,
 
   {
     files: ["src/**/*.ts", "src/**/*.tsx"],
+    plugins: {
+      "eslint-comments": eslintComments,
+    },
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: "module",
@@ -41,9 +45,14 @@ export default tseslint.config(
       "@typescript-eslint/no-floating-promises": "error",
       "@typescript-eslint/no-misused-promises": "error",
       "obsidianmd/hardcoded-config-path": "error",
-      "obsidianmd/ui/sentence-case": "warn",
       "obsidianmd/no-forbidden-elements": "error",
       "@typescript-eslint/await-thenable": "error",
+      "eslint-comments/require-description": "error",
+      "eslint-comments/no-restricted-disable": [
+        "error",
+        "obsidianmd/no-forbidden-elements",
+        "obsidianmd/ui/sentence-case",
+      ],
 
       "@typescript-eslint/no-unsafe-function-type": "error",
       "obsidianmd/settings-tab/no-manual-html-headings": "error",
@@ -60,8 +69,8 @@ export default tseslint.config(
       "@typescript-eslint/no-unsafe-argument": "off",
 
       "@typescript-eslint/no-unused-vars": [
-        "error",
-        { argsIgnorePattern: "^_", varsIgnorePattern: "^T$" },
+        "warn",
+        { argsIgnorePattern: "^_" },
       ],
       "no-restricted-globals": [
         "error",
