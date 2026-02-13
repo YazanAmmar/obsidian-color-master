@@ -131,9 +131,6 @@ export function drawProfileManager(containerEl: HTMLElement, settingTab: ColorMa
           await plugin.pinProfileSnapshot(plugin.settings.activeProfile);
           new Notice(t('notices.profilePinned'));
           settingTab._updatePinButtons();
-
-          plugin.settings.profiles[plugin.settings.activeProfile].vars = {};
-          plugin.pendingVarUpdates = {};
           settingTab.display();
         });
       button.buttonEl.classList.add('cm-control-button', 'cm-profile-icon-action');

@@ -89,25 +89,20 @@ export const t = (key: string, ...args: (string | number)[]): string => {
 
 // Recursively flattens nested objects into dot-notation keys
 export function flattenStrings(
-  obj: Record<string, unknown>,
+  obj: object,
   parentKey = '',
   result: Record<string, string | LocaleFunc> = {},
 ): Record<string, string | LocaleFunc> {
-  for (const key in obj) {
-    if (Object.prototype.hasOwnProperty.call(obj, key)) {
-      const newKey = parentKey ? `${parentKey}.${key}` : key;
-      const value = obj[key];
+  for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
+    const newKey = parentKey ? `${parentKey}.${key}` : key;
 
-      if (
-        typeof value === 'object' &&
-        value !== null &&
-        !Array.isArray(value) &&
-        typeof value !== 'function'
-      ) {
-        flattenStrings(value, newKey, result);
-      } else if (!Array.isArray(value)) {
-        result[newKey] = value;
-      }
+    if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+      flattenStrings(value, newKey, result);
+      continue;
+    }
+
+    if (typeof value === 'string' || typeof value === 'function') {
+      result[newKey] = value as string | LocaleFunc;
     }
   }
   return result;

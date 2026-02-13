@@ -9,7 +9,7 @@ import { ButtonComponent, moment, Notice, Plugin, requestUrl } from 'obsidian';
 import { registerCommands } from './commands';
 import { DEFAULT_SETTINGS, DEFAULT_VARS, BUILT_IN_PROFILES_VARS } from './constants';
 import { initializeT, t } from './i18n/strings';
-import { PluginSettings } from './types';
+import { NoticeRule, PluginSettings, Profile, Snippet } from './types';
 import { ColorMasterSettingTab } from './ui/settingsTab';
 import {
   flattenVars,
@@ -20,6 +20,46 @@ import {
 } from './utils';
 import { FileConflictModal } from './ui/modals';
 
+type StylableElement = Element & {
+  setCssProps: (props: Record<string, string | null>) => void;
+};
+
+type AppWithSettingsManager = {
+  setting: {
+    open: () => void;
+    openTabById: (id: string) => void;
+  };
+};
+
+type AppWithCommands = {
+  commands: {
+    executeCommandById: (commandId: string) => void;
+  };
+};
+
+type VaultWithConfigGetter = {
+  getConfig: (key: string) => string;
+};
+
+type ReloadableView = {
+  reload?: () => void;
+};
+
+type LegacyPinnedSnapshot = {
+  vars?: Record<string, string>;
+  customCss?: string;
+  snippets?: Snippet[];
+  noticeRules?: {
+    text: NoticeRule[];
+    background: NoticeRule[];
+  };
+};
+
+type LegacySnippetData = {
+  css?: string;
+  enabled?: boolean;
+};
+
 export default class ColorMaster extends Plugin {
   settings: PluginSettings;
   iconizeWatcherInterval: number | null = null;
@@ -28,7 +68,7 @@ export default class ColorMaster extends Plugin {
   runtimeStyleSheets: Record<string, CSSStyleSheet> = {};
   runtimeStyleSheetSupportWarned = false;
   settingTabInstance: ColorMasterSettingTab | null = null;
-  liveNoticeRules: unknown[] | null = null;
+  liveNoticeRules: NoticeRule[] | null = null;
   liveNoticeRuleType: 'text' | 'background' | null = null;
   iconizeObserver: MutationObserver;
   noticeObserver: MutationObserver;
@@ -569,16 +609,20 @@ export default class ColorMaster extends Plugin {
       return;
     }
 
-    const snapshotData = {
-      vars: JSON.parse(JSON.stringify(profile.vars || {})),
-      customCss: profile.customCss || '',
-      snippets: JSON.parse(JSON.stringify(profile.snippets || {})),
-      noticeRules: JSON.parse(JSON.stringify(profile.noticeRules || { text: [], background: [] })),
-    };
+    const snapshotProfile: Profile = JSON.parse(
+      JSON.stringify({
+        ...profile,
+        vars: profile.vars || {},
+        themeType: profile.themeType || 'auto',
+        snippets: Array.isArray(profile.snippets) ? profile.snippets : [],
+        customCss: profile.customCss || '',
+        noticeRules: profile.noticeRules || { text: [], background: [] },
+      }),
+    );
 
     this.settings.pinnedSnapshots[profileName] = {
       pinnedAt: new Date().toISOString(),
-      ...snapshotData,
+      profile: snapshotProfile,
     };
     return this.saveSettings();
   }
@@ -586,7 +630,7 @@ export default class ColorMaster extends Plugin {
   async resetProfileToPinned(profileName: string): Promise<void> {
     if (!profileName) profileName = this.settings.activeProfile;
     const snap = this.settings.pinnedSnapshots?.[profileName];
-    if (!snap || !snap.vars) {
+    if (!snap) {
       new Notice(t('notices.noPinnedSnapshot'));
       return;
     }
@@ -597,15 +641,35 @@ export default class ColorMaster extends Plugin {
       return;
     }
 
-    activeProfile.vars = JSON.parse(JSON.stringify(snap.vars));
-    activeProfile.customCss = snap.customCss || '';
-    activeProfile.snippets = snap.snippets ? JSON.parse(JSON.stringify(snap.snippets)) : {};
-    activeProfile.noticeRules = snap.noticeRules
-      ? JSON.parse(JSON.stringify(snap.noticeRules))
-      : { text: [], background: [] };
+    const legacySnap = snap as LegacyPinnedSnapshot;
+    const pinnedProfile: Profile | null = snap.profile
+      ? JSON.parse(JSON.stringify(snap.profile))
+      : legacySnap.vars
+        ? {
+            vars: JSON.parse(JSON.stringify(legacySnap.vars)),
+            themeType: activeProfile.themeType || 'auto',
+            snippets: Array.isArray(legacySnap.snippets)
+              ? JSON.parse(JSON.stringify(legacySnap.snippets))
+              : [],
+            customCss: legacySnap.customCss || '',
+            noticeRules: legacySnap.noticeRules
+              ? JSON.parse(JSON.stringify(legacySnap.noticeRules))
+              : { text: [], background: [] },
+          }
+        : null;
 
-    Object.keys(snap.vars).forEach((k) => {
-      this.pendingVarUpdates[k] = snap.vars[k];
+    if (!pinnedProfile || !pinnedProfile.vars) {
+      new Notice(t('notices.noPinnedSnapshot'));
+      return;
+    }
+
+    activeProfile.vars = pinnedProfile.vars;
+    activeProfile.customCss = pinnedProfile.customCss || '';
+    activeProfile.snippets = Array.isArray(pinnedProfile.snippets) ? pinnedProfile.snippets : [];
+    activeProfile.noticeRules = pinnedProfile.noticeRules || { text: [], background: [] };
+
+    Object.keys(pinnedProfile.vars).forEach((k) => {
+      this.pendingVarUpdates[k] = pinnedProfile.vars[k];
     });
 
     await this.saveSettings();
@@ -657,8 +721,9 @@ export default class ColorMaster extends Plugin {
     // Add a ribbon icon to the left gutter
     this.addRibbonIcon('paint-bucket', t('plugin.ribbonTooltip'), (_evt: MouseEvent) => {
       // Open the settings tab when the icon is clicked
-      (this.app as unknown).setting.open();
-      (this.app as unknown).setting.openTabById(this.manifest.id);
+      const appWithSettings = this.app as typeof this.app & AppWithSettingsManager;
+      appWithSettings.setting.open();
+      appWithSettings.setting.openTabById(this.manifest.id);
     });
 
     // Store a reference to the settings tab and add it
@@ -792,8 +857,8 @@ export default class ColorMaster extends Plugin {
       const svg = iconNode.querySelector('svg');
       if (!svg) return;
 
-      [svg, ...svg.querySelectorAll('*')].forEach((el: unknown) => {
-        if (typeof el.hasAttribute !== 'function') return;
+      ([svg, ...svg.querySelectorAll('*')] as StylableElement[]).forEach((el) => {
+        if (typeof el.setCssProps !== 'function') return;
 
         if (!iconizeColor) {
           // remove inline overrides to let theme/defaults show
@@ -891,7 +956,8 @@ export default class ColorMaster extends Plugin {
       document.body.classList.remove('theme-dark');
       document.body.classList.add('theme-light');
     } else {
-      const currentConfig = (this.app.vault as unknown).getConfig('theme');
+      const vaultWithConfig = this.app.vault as typeof this.app.vault & VaultWithConfigGetter;
+      const currentConfig = vaultWithConfig.getConfig('theme');
       const isSystemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
       if (currentConfig === 'obsidian' || (currentConfig === 'system' && isSystemDark)) {
@@ -926,8 +992,9 @@ export default class ColorMaster extends Plugin {
       this.app.workspace.trigger('css-change');
       const graphLeaves = this.app.workspace.getLeavesOfType('graph');
       graphLeaves.forEach((leaf) => {
-        if (leaf.view && (leaf.view as unknown).reload) {
-          (leaf.view as unknown).reload();
+        const view = leaf.view as ReloadableView | null;
+        if (view?.reload) {
+          view.reload();
         }
       });
     }, 300);
@@ -960,8 +1027,8 @@ export default class ColorMaster extends Plugin {
       const svg = iconNode.querySelector('svg');
       if (!svg) return;
 
-      [svg, ...svg.querySelectorAll('*')].forEach((el: unknown) => {
-        if (typeof el.hasAttribute !== 'function') return;
+      ([svg, ...svg.querySelectorAll('*')] as StylableElement[]).forEach((el) => {
+        if (typeof el.setCssProps !== 'function') return;
 
         el.setCssProps({
           fill: null,
@@ -992,7 +1059,7 @@ export default class ColorMaster extends Plugin {
           profile.noticeRules = JSON.parse(JSON.stringify(this.settings.noticeRules));
         }
       }
-      delete (this.settings as unknown).noticeRules;
+      delete this.settings.noticeRules;
       migrationNeeded = true;
     }
 
@@ -1038,14 +1105,13 @@ export default class ColorMaster extends Plugin {
         typeof profile.snippets === 'object'
       ) {
         snippetsMigrationNeeded = true;
-        const snippetsArray = Object.entries(profile.snippets).map(
-          ([name, data]: [string, unknown]) => ({
-            id: `snippet-${Date.now()}-${Math.random()}`,
-            name: name,
-            css: data.css || '',
-            enabled: data.enabled !== false,
-          }),
-        );
+        const legacySnippets = profile.snippets as unknown as Record<string, LegacySnippetData>;
+        const snippetsArray = Object.entries(legacySnippets).map(([name, data]) => ({
+          id: `snippet-${Date.now()}-${Math.random()}`,
+          name: name,
+          css: data.css || '',
+          enabled: data.enabled !== false,
+        }));
         profile.snippets = snippetsArray;
       }
     }
@@ -1182,7 +1248,8 @@ export default class ColorMaster extends Plugin {
       .setButtonText(t('buttons.reload'))
       .setCta()
       .onClick(() => {
-        (this.app as unknown).commands.executeCommandById('app:reload');
+        const appWithCommands = this.app as typeof this.app & AppWithCommands;
+        appWithCommands.commands.executeCommandById('app:reload');
       });
   }
 
@@ -1208,7 +1275,7 @@ export default class ColorMaster extends Plugin {
       const liveRuleType = this.liveNoticeRuleType;
 
       // --- 1. Background Rules (Base Style) ---
-      const bgRules =
+      const bgRules: NoticeRule[] =
         liveRuleType === 'background' && liveRules
           ? liveRules
           : activeProfile?.noticeRules?.background || [];
@@ -1254,12 +1321,12 @@ export default class ColorMaster extends Plugin {
       }
 
       // --- 2. Text Rules (Split: Base Color vs. DOM Highlights) ---
-      const textRules =
+      const textRules: NoticeRule[] =
         liveRuleType === 'text' && liveRules ? liveRules : activeProfile?.noticeRules?.text || [];
 
       let finalTextColor = activeProfile.vars['--cm-notice-text-default'];
-      const highlightRules: unknown[] = [];
-      const fullColorRules: unknown[] = [];
+      const highlightRules: NoticeRule[] = [];
+      const fullColorRules: NoticeRule[] = [];
 
       // Pre-sort rules to avoid multiple iterations later
       for (const rule of textRules) {
