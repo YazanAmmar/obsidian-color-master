@@ -1,4 +1,4 @@
-import { ButtonComponent, Notice, Setting, ToggleComponent, setIcon } from 'obsidian';
+import { ButtonComponent, Notice, ToggleComponent, setIcon } from 'obsidian';
 import { t } from '../../i18n/strings';
 import type { Snippet } from '../../types';
 import { ConfirmationModal, SnippetCssModal } from '../modals';
@@ -7,6 +7,14 @@ import Sortable from 'sortablejs';
 
 function initSnippetDrag(containerEl: HTMLElement, settingTab: ColorMasterSettingTab) {
   const plugin = settingTab.plugin;
+
+  const refreshVisualOrder = () => {
+    const orderEls = containerEl.querySelectorAll<HTMLElement>('.cm-snippet-order-number');
+    orderEls.forEach((el, index) => {
+      el.setText(`${index + 1}`);
+    });
+  };
+
   if (settingTab.snippetSortable) {
     settingTab.snippetSortable.destroy();
   }
@@ -61,7 +69,7 @@ function initSnippetDrag(containerEl: HTMLElement, settingTab: ColorMasterSettin
         }
 
         await plugin.saveSettings();
-        settingTab.display();
+        refreshVisualOrder();
       })().catch((err) => {
         console.error('Failed to reorder snippets:', err);
       });
@@ -72,7 +80,11 @@ function initSnippetDrag(containerEl: HTMLElement, settingTab: ColorMasterSettin
 export function drawCssSnippetsUI(containerEl: HTMLElement, settingTab: ColorMasterSettingTab) {
   const plugin = settingTab.plugin;
 
-  const headerContainer = containerEl.createDiv({
+  const snippetsSection = containerEl.createDiv({
+    cls: 'cm-snippets-section cm-fallback-setting-group',
+  });
+
+  const headerContainer = snippetsSection.createDiv({
     cls: 'cm-snippets-header',
   });
 
@@ -80,35 +92,45 @@ export function drawCssSnippetsUI(containerEl: HTMLElement, settingTab: ColorMas
 
   headerContainer.createEl('h3', { text: t('snippets.heading') });
 
-  const controlsContainer = new Setting(headerContainer).setClass('cm-snippets-add-button');
-
-  // --- Lock Button ---
-  controlsContainer.addExtraButton((btn) => {
-    btn
-      .setIcon(isLocked ? 'lock' : 'lock-open')
-      .setTooltip(isLocked ? t('tooltips.unlockSnippets') : t('tooltips.lockSnippets'))
-      .onClick(async () => {
-        plugin.settings.snippetsLocked = !isLocked;
-        await plugin.saveSettings();
-
-        settingTab.display();
-
-        new Notice(isLocked ? t('notices.snippetsUnlocked') : t('notices.snippetsLocked'));
-      });
-
-    btn.extraSettingsEl.classList.add('cm-snippet-lock-btn');
-    if (isLocked) {
-      btn.extraSettingsEl.classList.add('is-locked');
-    }
+  const controlsContainer = headerContainer.createDiv({
+    cls: 'cm-snippets-header-controls',
   });
 
-  controlsContainer.addButton((button) => {
-    button
-      .setButtonText(t('snippets.createButton'))
-      .setCta()
-      .onClick(() => {
-        new SnippetCssModal(settingTab.app, plugin, settingTab, null).open();
-      });
+  // --- Lock Button ---
+  new ButtonComponent(controlsContainer)
+    .setIcon(isLocked ? 'lock' : 'lock-open')
+    .setTooltip(isLocked ? t('tooltips.unlockSnippets') : t('tooltips.lockSnippets'))
+    .onClick(async () => {
+      plugin.settings.snippetsLocked = !isLocked;
+      await plugin.saveSettings();
+
+      settingTab.display();
+
+      new Notice(isLocked ? t('notices.snippetsUnlocked') : t('notices.snippetsLocked'));
+    });
+
+  const lockButton = controlsContainer.lastElementChild as HTMLButtonElement | null;
+  if (lockButton) {
+    lockButton.classList.add('cm-snippet-lock-btn');
+    if (isLocked) {
+      lockButton.classList.add('is-locked');
+    }
+  }
+
+  new ButtonComponent(controlsContainer)
+    .setButtonText(t('snippets.createButton'))
+    .setCta()
+    .onClick(() => {
+      new SnippetCssModal(settingTab.app, plugin, settingTab, null).open();
+    });
+
+  const createButton = controlsContainer.lastElementChild as HTMLButtonElement | null;
+  if (createButton) {
+    createButton.classList.add('cm-snippets-create-btn');
+  }
+
+  const snippetsGroupBody = snippetsSection.createDiv({
+    cls: 'cm-setting-group-body cm-snippets-group-body',
   });
 
   const activeProfile = plugin.settings.profiles[plugin.settings.activeProfile];
@@ -117,7 +139,7 @@ export function drawCssSnippetsUI(containerEl: HTMLElement, settingTab: ColorMas
   const globalSnippets = plugin.settings.globalSnippets || [];
   const profileSnippets = Array.isArray(activeProfile.snippets) ? activeProfile.snippets : [];
 
-  const snippetsContainer = containerEl.createDiv({
+  const snippetsContainer = snippetsGroupBody.createDiv({
     cls: 'cm-snippets-list-container',
   });
 

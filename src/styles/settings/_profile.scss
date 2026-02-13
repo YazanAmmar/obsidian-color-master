@@ -11,7 +11,6 @@
     margin: 0;
     padding: 12px;
     border-radius: var(--radius-m);
-    border: 1px solid var(--background-modifier-border);
     background-color: var(--background-primary-alt);
     gap: 12px;
 
@@ -46,9 +45,8 @@
   }
 
   .cm-profile-picker {
-    min-width: 170px;
+    min-width: 110px;
     max-width: 220px;
-    height: 32px;
   }
 
   .cm-profile-icon-action {
@@ -71,13 +69,12 @@
   .cm-profile-text-action {
     height: 30px;
     padding: 0 10px;
-    border-radius: var(--radius-s);
-    border: 1px solid var(--background-modifier-border);
     background-color: transparent;
     color: var(--text-normal);
     font-size: var(--font-ui-small);
     transition: all 0.2s ease-in-out;
     cursor: pointer;
+    box-shadow: none !important;
 
     &:hover {
       background-color: var(--background-modifier-hover);

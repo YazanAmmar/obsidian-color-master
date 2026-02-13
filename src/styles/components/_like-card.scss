@@ -6,6 +6,7 @@
 
   backdrop-filter: blur(8px);
   background-color: var(--background-primary-alt);
+  border: 1px solid transparent !important;
   border-radius: var(--radius-m);
   padding: 22px;
   margin-top: 28px;
