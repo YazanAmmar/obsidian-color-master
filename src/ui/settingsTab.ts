@@ -531,8 +531,6 @@ export class ColorMasterSettingTab extends PluginSettingTab {
 
     this.containerEl.setAttribute('dir', isRTL ? 'rtl' : 'ltr');
 
-    new Setting(containerEl).setName(t('plugin.name')).setHeading();
-
     new Setting(containerEl)
       .setName(t('settings.enablePlugin'))
       .setDesc(t('settings.enablePluginDesc'))

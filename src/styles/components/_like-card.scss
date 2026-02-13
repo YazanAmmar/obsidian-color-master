@@ -3,12 +3,10 @@
 .cm-like-card {
   --cm-card-bg: rgba(var(--mono-rgb, 255, 255, 255), 0.04);
   --cm-card-border: rgba(var(--mono-rgb, 255, 255, 255), 0.12);
-  --cm-card-shadow: rgba(0, 0, 0, 0.22);
 
   backdrop-filter: blur(8px);
-  background-color: var(--cm-card-bg);
-  border: 1px solid var(--cm-card-border);
-  border-radius: 14px;
+  background-color: var(--background-primary-alt);
+  border-radius: var(--radius-m);
   padding: 22px;
   margin-top: 28px;
 

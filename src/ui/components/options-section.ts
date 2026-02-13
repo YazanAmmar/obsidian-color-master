@@ -15,7 +15,6 @@ export function drawOptionsSection(containerEl: HTMLElement, settingTab: ColorMa
   const activeProfile = plugin.settings.profiles[plugin.settings.activeProfile];
 
   containerEl.createEl('h3', { text: t('options.heading') });
-  containerEl.createEl('hr');
   const advancedSettingsGrid = containerEl.createDiv('cm-advanced-settings-grid');
 
   // --- Live Update FPS ---
