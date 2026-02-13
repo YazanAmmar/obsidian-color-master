@@ -108,13 +108,15 @@ export class CustomVariableMetaModal extends ColorMasterBaseModal {
 
         const unitDropdown = new DropdownComponent(valueSetting.controlEl);
 
-        // eslint-disable-next-line obsidianmd/ui/sentence-case
-        unitDropdown.addOption('px', 'px');
-        // eslint-disable-next-line obsidianmd/ui/sentence-case
-        unitDropdown.addOption('em', 'em');
-        // eslint-disable-next-line obsidianmd/ui/sentence-case
-        unitDropdown.addOption('rem', 'rem');
-        unitDropdown.addOption('%', '%');
+        const unitOptions: Array<[string, string]> = [
+          ['px', 'px'],
+          ['em', 'em'],
+          ['rem', 'rem'],
+          ['%', '%'],
+        ];
+        unitOptions.forEach(([value, label]) => {
+          unitDropdown.addOption(value, label);
+        });
 
         unitDropdown.setValue(this.sizeUnit);
 

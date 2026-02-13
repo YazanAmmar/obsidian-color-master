@@ -271,6 +271,21 @@ export class PasteCssModal extends ColorMasterBaseModal {
       return;
     }
 
+    if (typeof CSSStyleSheet === 'undefined' || !Array.isArray(document.adoptedStyleSheets)) {
+      console.error(
+        'Color Master: CSS import requires constructable stylesheet support in this runtime.',
+      );
+      return;
+    }
+
+    const tempStyleSheet = new CSSStyleSheet();
+    try {
+      tempStyleSheet.replaceSync(cssText);
+    } catch (e) {
+      console.error('Color Master: Failed to parse CSS for import.', e);
+      return;
+    }
+
     const saveBtn = this.contentEl.querySelector<HTMLButtonElement>('.mod-cta');
     if (saveBtn) {
       saveBtn.textContent = t('modals.addBackground.processing') + '...';
@@ -296,12 +311,8 @@ export class PasteCssModal extends ColorMasterBaseModal {
     void document.body.offsetHeight;
     await new Promise((resolve) => setTimeout(resolve, 0));
 
-    // STEP: Inject the new CSS into head for computation
-    // eslint-disable-next-line obsidianmd/no-forbidden-elements
-    const tempStyleEl = document.createElement('style');
-    tempStyleEl.id = 'cm-temp-import-style';
-    tempStyleEl.textContent = cssText;
-    document.head.appendChild(tempStyleEl);
+    // STEP: Adopt the temporary stylesheet for computed variable capture
+    document.adoptedStyleSheets = [...document.adoptedStyleSheets, tempStyleSheet];
 
     // Sync with browser paint cycle
     await new Promise((resolve) => requestAnimationFrame(resolve));
@@ -311,7 +322,9 @@ export class PasteCssModal extends ColorMasterBaseModal {
     const capturedVars = await this.plugin.captureCurrentComputedVars();
 
     // CLEANUP: Revert environment to original state
-    tempStyleEl.remove();
+    document.adoptedStyleSheets = document.adoptedStyleSheets.filter(
+      (sheet) => sheet !== tempStyleSheet,
+    );
     if (originalObsidianTheme) {
       customCss.setTheme(originalObsidianTheme);
     }

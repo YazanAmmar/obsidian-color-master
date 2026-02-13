@@ -20,13 +20,13 @@ import {
 } from './utils';
 import { FileConflictModal } from './ui/modals';
 
-let T: ColorMaster;
-
 export default class ColorMaster extends Plugin {
   settings: PluginSettings;
   iconizeWatcherInterval: number | null = null;
   colorUpdateInterval: number | null = null;
   pendingVarUpdates: Record<string, string> = {};
+  runtimeStyleSheets: Record<string, CSSStyleSheet> = {};
+  runtimeStyleSheetSupportWarned = false;
   settingTabInstance: ColorMasterSettingTab | null = null;
   liveNoticeRules: unknown[] | null = null;
   liveNoticeRuleType: 'text' | 'background' | null = null;
@@ -83,6 +83,58 @@ export default class ColorMaster extends Plugin {
   restartColorUpdateLoop() {
     this.stopColorUpdateLoop();
     this.startColorUpdateLoop();
+  }
+
+  private supportsRuntimeStyleSheets(): boolean {
+    return typeof CSSStyleSheet !== 'undefined' && Array.isArray(document.adoptedStyleSheets);
+  }
+
+  private getOrCreateRuntimeStyleSheet(styleId: string): CSSStyleSheet | null {
+    if (!this.supportsRuntimeStyleSheets()) {
+      if (!this.runtimeStyleSheetSupportWarned) {
+        this.runtimeStyleSheetSupportWarned = true;
+        console.warn(
+          'Color Master: Constructable stylesheets are not supported in this environment.',
+        );
+      }
+      return null;
+    }
+
+    let styleSheet = this.runtimeStyleSheets[styleId];
+    if (!styleSheet) {
+      styleSheet = new CSSStyleSheet();
+      this.runtimeStyleSheets[styleId] = styleSheet;
+    }
+
+    if (!document.adoptedStyleSheets.includes(styleSheet)) {
+      document.adoptedStyleSheets = [...document.adoptedStyleSheets, styleSheet];
+    }
+
+    return styleSheet;
+  }
+
+  private setRuntimeStyle(styleId: string, cssText: string): void {
+    const styleSheet = this.getOrCreateRuntimeStyleSheet(styleId);
+    if (!styleSheet) return;
+
+    try {
+      styleSheet.replaceSync(cssText);
+    } catch (e) {
+      console.error(`Color Master: Failed to apply runtime stylesheet "${styleId}"`, e);
+    }
+  }
+
+  private clearRuntimeStyle(styleId: string): void {
+    const styleSheet = this.runtimeStyleSheets[styleId];
+    if (!styleSheet) return;
+
+    delete this.runtimeStyleSheets[styleId];
+
+    if (document.adoptedStyleSheets.includes(styleSheet)) {
+      document.adoptedStyleSheets = document.adoptedStyleSheets.filter(
+        (sheet) => sheet !== styleSheet,
+      );
+    }
   }
 
   // Removes background image CSS variable and body classes.
@@ -431,11 +483,7 @@ export default class ColorMaster extends Plugin {
         return;
       }
 
-      // eslint-disable-next-line obsidianmd/no-forbidden-elements
-      const el = document.createElement('style');
-      el.id = `cm-custom-css-for-profile`;
-      el.textContent = profile.customCss;
-      document.head.appendChild(el);
+      this.setRuntimeStyle('cm-custom-css-for-profile', profile.customCss);
     } catch (e) {
       console.warn('applyCustomCssForProfile failed', e);
     }
@@ -443,6 +491,7 @@ export default class ColorMaster extends Plugin {
 
   removeInjectedCustomCss() {
     try {
+      this.clearRuntimeStyle('cm-custom-css-for-profile');
       const oldStyle = document.getElementById('cm-custom-css-for-profile');
       if (oldStyle) oldStyle.remove();
     } catch (e) {
@@ -469,15 +518,12 @@ export default class ColorMaster extends Plugin {
       .join('\n\n');
 
     if (enabledCss) {
-      // eslint-disable-next-line obsidianmd/no-forbidden-elements
-      const el = document.createElement('style');
-      el.id = 'cm-css-snippets';
-      el.textContent = enabledCss;
-      document.head.appendChild(el);
+      this.setRuntimeStyle('cm-css-snippets', enabledCss);
     }
   }
 
   removeCssSnippets() {
+    this.clearRuntimeStyle('cm-css-snippets');
     const el = document.getElementById('cm-css-snippets');
     if (el) el.remove();
   }
@@ -585,8 +631,6 @@ export default class ColorMaster extends Plugin {
   }
 
   async onload() {
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    T = this;
     await this.loadSettings();
     initializeT(this);
     await this._ensureBackgroundsFolderExists();
@@ -608,8 +652,6 @@ export default class ColorMaster extends Plugin {
       await this.saveSettings();
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    T = this;
     registerCommands(this);
 
     // Add a ribbon icon to the left gutter
@@ -833,11 +875,7 @@ export default class ColorMaster extends Plugin {
       .join('\n            ')}
     }`;
 
-      // eslint-disable-next-line obsidianmd/no-forbidden-elements
-      const styleEl = document.createElement('style');
-      styleEl.id = 'cm-profile-variables';
-      styleEl.textContent = cssString;
-      document.head.appendChild(styleEl);
+      this.setRuntimeStyle('cm-profile-variables', cssString);
     }
 
     this.forceIconizeColors();
@@ -896,6 +934,9 @@ export default class ColorMaster extends Plugin {
   }
 
   clearStyles() {
+    this.clearRuntimeStyle('cm-profile-variables');
+    this.clearRuntimeStyle('cm-dynamic-notice-styles');
+
     const profileStyleEl = document.getElementById('cm-profile-variables');
     if (profileStyleEl) {
       profileStyleEl.remove();
@@ -1381,21 +1422,13 @@ export default class ColorMaster extends Plugin {
 
   updateNoticeStyles() {
     const styleId = 'cm-dynamic-notice-styles';
-    let styleEl = document.getElementById(styleId) as HTMLStyleElement | null;
 
     const notices = document.querySelectorAll<HTMLElement>(
       '[data-cm-notice-bg], [data-cm-notice-text]',
     );
     if (notices.length === 0) {
-      if (styleEl) styleEl.remove();
+      this.clearRuntimeStyle(styleId);
       return;
-    }
-
-    if (!styleEl) {
-      // eslint-disable-next-line obsidianmd/no-forbidden-elements
-      styleEl = document.createElement('style');
-      styleEl.id = styleId;
-      document.head.appendChild(styleEl);
     }
 
     const cssRules: string[] = [];
@@ -1417,7 +1450,7 @@ export default class ColorMaster extends Plugin {
       cssRules.push(rule);
     });
 
-    styleEl.textContent = cssRules.join('\n');
+    this.setRuntimeStyle(styleId, cssRules.join('\n'));
   }
 
   /**
