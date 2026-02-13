@@ -1,11 +1,21 @@
 /* Search bar and related controls */
 .color-master-settings-tab {
+  .cm-search-shell {
+    width: 100%;
+    margin-bottom: 20px;
+    padding: 10px 12px;
+    border-radius: var(--radius-m);
+    border: 1px solid var(--background-modifier-border);
+    background-color: var(--background-primary-alt);
+    box-sizing: border-box;
+  }
+
   .cm-search-bar-container {
     display: flex;
     align-items: center;
     gap: 8px;
     width: 100%;
-    margin-bottom: 20px;
+    margin-bottom: 0;
   }
 
   .cm-search-input-container {
@@ -16,15 +26,6 @@
     }
     .search-input-container {
       width: 100%;
-      input {
-        width: 100%;
-        background-color: transparent !important;
-        border: 1px solid var(--background-modifier-border);
-        &:focus {
-          box-shadow: none !important;
-          border-color: var(--interactive-accent);
-        }
-      }
     }
   }
 
@@ -70,5 +71,32 @@
     margin-left: 6px;
     white-space: nowrap;
     line-height: 1;
+  }
+
+  &[dir='rtl'] {
+    .cm-search-filter-options {
+      margin-left: 0;
+      margin-right: 4px;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .cm-search-shell {
+      padding: 10px;
+    }
+
+    .cm-search-bar-container {
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .cm-search-input-container {
+      min-width: 100%;
+    }
+
+    .cm-search-actions {
+      width: 100%;
+      justify-content: flex-end;
+    }
   }
 }

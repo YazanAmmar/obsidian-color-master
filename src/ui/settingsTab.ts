@@ -122,7 +122,12 @@ export class ColorMasterSettingTab extends PluginSettingTab {
       section: this.plugin.settings.lastSearchSection || '',
     };
 
-    const searchBarContainer = containerEl.createDiv({
+    const searchShell = containerEl.createDiv({
+      cls: 'cm-search-shell',
+    });
+    this.searchContainer = searchShell;
+
+    const searchBarContainer = searchShell.createDiv({
       cls: 'cm-search-bar-container',
     });
 
@@ -269,10 +274,6 @@ export class ColorMasterSettingTab extends PluginSettingTab {
   _applySearchFilter() {
     const s = this._searchState;
     const activeProfile = this.plugin.settings.profiles[this.plugin.settings.activeProfile];
-    if (this.staticContentContainer) {
-      const isSearching = s.query.trim().length > 0 || s.section !== '';
-      this.staticContentContainer.toggleClass('cm-hidden', isSearching);
-    }
     const rows = Array.from(
       this.containerEl.querySelectorAll<HTMLElement>('.cm-var-row, .cm-searchable-row'),
     );
@@ -710,7 +711,6 @@ export class ColorMasterSettingTab extends PluginSettingTab {
       });
     });
 
-    this.initSearchUI(containerEl);
     this.staticContentContainer = containerEl.createDiv({
       cls: 'cm-static-sections',
     });
@@ -719,6 +719,8 @@ export class ColorMasterSettingTab extends PluginSettingTab {
     drawOptionsSection(this.staticContentContainer, this);
     this.staticContentContainer.createEl('hr');
     drawCssSnippetsUI(this.staticContentContainer, this);
+    containerEl.createEl('hr', { cls: 'cm-search-divider' });
+    this.initSearchUI(containerEl);
     drawColorPickers(this.containerEl, this, themeDefaults);
     containerEl.createEl('hr');
     drawLikePluginCard(containerEl, this);
