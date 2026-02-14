@@ -1,8 +1,8 @@
 import { t } from '../../i18n/strings';
 import { PasteCssModal, ProfileJsonImportModal } from '../modals';
-import type { ColorMasterSettingTab } from '../settingsTab';
+import type { ThemeEngineSettingTab } from '../settingsTab';
 
-export function drawImportExport(containerEl: HTMLElement, settingTab: ColorMasterSettingTab) {
+export function drawImportExport(containerEl: HTMLElement, settingTab: ThemeEngineSettingTab) {
   const profileShell = containerEl.querySelector<HTMLElement>('.cm-profile-manager-shell');
   const actionsHost = profileShell || containerEl;
   const actionsEl = actionsHost.createDiv('cm-profile-actions');

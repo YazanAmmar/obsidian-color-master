@@ -1,7 +1,7 @@
 ﻿export default {
   plugin: {
-    name: 'Maître des Couleurs - v1.2.0',
-    ribbonTooltip: 'Paramètres de Color Master',
+    name: 'Maître des Couleurs - v2.2.0',
+    ribbonTooltip: 'Paramètres de Theme Engine',
   },
   buttons: {
     new: 'Nouveau',
@@ -177,7 +177,7 @@
         'Êtes-vous sûr de vouloir supprimer cet extrait ? Cette action est irréversible.',
       resetPluginTitle: 'Êtes-vous sûr ?',
       resetPluginDesc:
-        "Cela supprimera définitivement toutes vos données Color Master (profils, extraits, paramètres et arrière-plans). C'est irréversible.",
+        "Cela supprimera définitivement toutes vos données Theme Engine (profils, extraits, paramètres et arrière-plans). C'est irréversible.",
       deleteGlobalBgTitle: "Confirmer la suppression de l'arrière-plan",
       deleteGlobalBgDesc:
         "Voulez-vous vraiment supprimer définitivement cet arrière-plan ? Les profils suivants l'utilisent et seront réinitialisés :",
@@ -335,7 +335,7 @@
     exportSuccess: 'Profil exporté avec succès !',
     jsonCopied: 'JSON du profil copié dans le presse-papiers avec succès !',
     resetSuccess:
-      'Les données de Color Master ont été supprimées. Veuillez recharger Obsidian pour appliquer les changements.',
+      'Les données de Theme Engine ont été supprimées. Veuillez recharger Obsidian pour appliquer les changements.',
     fpsUpdated: (value: number) => `FPS de la mise à jour en direct défini sur : ${value}`,
     invalidProfileObject: 'Le JSON ne semble pas être un objet de profil valide.',
     profileCreated: (name: string) => `Le profil "${name}" a été créé avec succès !`,

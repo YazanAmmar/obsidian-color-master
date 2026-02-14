@@ -37,7 +37,7 @@ body.cm-workspace-background-active {
 }
 
 /* Scoped background for settings tab */
-body.cm-settings-background-active .color-master-settings-tab {
+body.cm-settings-background-active .theme-engine-settings-tab {
   background-image: var(--cm-background-image);
   background-size: cover;
   background-position: center;

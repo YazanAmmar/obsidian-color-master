@@ -119,7 +119,7 @@ export async function maybeConvertToJpg(
     return { arrayBuffer, fileName };
   }
 
-  console.debug(`Color Master: Converting ${fileName} to JPG...`);
+  console.debug(`Theme Engine: Converting ${fileName} to JPG...`);
 
   return new Promise((resolve, reject) => {
     const blob = new Blob([arrayBuffer]);
@@ -159,7 +159,7 @@ export async function maybeConvertToJpg(
               const newFileName = fileName.substring(0, fileName.lastIndexOf('.')) + '.jpg';
 
               console.debug(
-                `Color Master: Conversion complete. New size: ${newArrayBuffer.byteLength} bytes`,
+                `Theme Engine: Conversion complete. New size: ${newArrayBuffer.byteLength} bytes`,
               );
 
               resolve({ arrayBuffer: newArrayBuffer, fileName: newFileName });

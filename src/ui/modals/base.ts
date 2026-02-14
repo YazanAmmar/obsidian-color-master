@@ -1,17 +1,17 @@
 import { App, Modal } from 'obsidian';
-import type ColorMaster from '../../main';
+import type ThemeEngine from '../../main';
 
 /**
- * A new Base Modal that all Color Master modals should extend from.
+ * A new Base Modal that all Theme Engine modals should extend from.
  * It automatically handles applying the correct RTL/LTR direction.
  */
-export class ColorMasterBaseModal extends Modal {
-  plugin: ColorMaster;
+export class ThemeEngineBaseModal extends Modal {
+  plugin: ThemeEngine;
 
-  constructor(app: App, plugin: ColorMaster) {
+  constructor(app: App, plugin: ThemeEngine) {
     super(app);
     this.plugin = plugin;
-    this.modalEl.classList.add('color-master-modal');
+    this.modalEl.classList.add('theme-engine-modal', 'color-master-modal');
   }
 
   /**

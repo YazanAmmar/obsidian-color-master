@@ -2,10 +2,10 @@ import { ButtonComponent, Notice, ToggleComponent, setIcon } from 'obsidian';
 import { t } from '../../i18n/strings';
 import type { Snippet } from '../../types';
 import { ConfirmationModal, SnippetCssModal } from '../modals';
-import type { ColorMasterSettingTab } from '../settingsTab';
+import type { ThemeEngineSettingTab } from '../settingsTab';
 import Sortable from 'sortablejs';
 
-function initSnippetDrag(containerEl: HTMLElement, settingTab: ColorMasterSettingTab) {
+function initSnippetDrag(containerEl: HTMLElement, settingTab: ThemeEngineSettingTab) {
   const plugin = settingTab.plugin;
 
   const refreshVisualOrder = () => {
@@ -20,7 +20,7 @@ function initSnippetDrag(containerEl: HTMLElement, settingTab: ColorMasterSettin
   }
 
   if (!Sortable) {
-    console.warn('Color Master: SortableJS library not found.');
+    console.warn('Theme Engine: SortableJS library not found.');
     return;
   }
 
@@ -77,7 +77,7 @@ function initSnippetDrag(containerEl: HTMLElement, settingTab: ColorMasterSettin
   });
 }
 
-export function drawCssSnippetsUI(containerEl: HTMLElement, settingTab: ColorMasterSettingTab) {
+export function drawCssSnippetsUI(containerEl: HTMLElement, settingTab: ThemeEngineSettingTab) {
   const plugin = settingTab.plugin;
 
   const snippetsSection = containerEl.createDiv({

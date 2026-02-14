@@ -1,7 +1,7 @@
 import { App, Notice, Setting } from 'obsidian';
 import { t } from '../../../i18n/strings';
-import type ColorMaster from '../../../main';
-import { ColorMasterBaseModal } from '../base';
+import type ThemeEngine from '../../../main';
+import { ThemeEngineBaseModal } from '../base';
 
 interface AppWithPlugins extends App {
   plugins: {
@@ -9,16 +9,16 @@ interface AppWithPlugins extends App {
   };
 }
 
-export class IconizeSettingsModal extends ColorMasterBaseModal {
-  plugin: ColorMaster;
+export class IconizeSettingsModal extends ThemeEngineBaseModal {
+  plugin: ThemeEngine;
 
-  constructor(app: App, plugin: ColorMaster) {
+  constructor(app: App, plugin: ThemeEngine) {
     super(app, plugin);
   }
 
   onOpen() {
     super.onOpen();
-    this.modalEl.classList.add('color-master-modal');
+    this.modalEl.classList.add('theme-engine-modal');
     const { contentEl } = this;
     contentEl.empty();
     contentEl.createEl('h3', { text: t('options.iconizeModalTitle') });

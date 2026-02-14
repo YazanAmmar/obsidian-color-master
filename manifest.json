@@ -1,9 +1,9 @@
 {
-  "id": "color-master",
-  "name": "Color Master",
-  "version": "1.2.0",
+  "id": "obsidian-theme-engine",
+  "name": "Theme Engine",
+  "version": "2.2.0",
   "minAppVersion": "1.5.0",
-  "description": "Fully customize and control the app's appearance. Create and share color profiles, use advanced CSS snippets, and override any theme with a powerful, live UI.",
+  "description": "A powerful theme engine for Obsidian. Build dynamic profiles, override themes, and customize your workspace in real time.",
   "author": "Yazan Ammar",
   "authorUrl": "https://github.com/YazanAmmar",
   "isDesktopOnly": false

@@ -1,6 +1,6 @@
 import { Notice, App } from 'obsidian';
 import { t } from '../i18n/strings';
-import type ColorMaster from '../main';
+import type ThemeEngine from '../main';
 
 interface AppWithSetting extends App {
   setting: {
@@ -9,14 +9,22 @@ interface AppWithSetting extends App {
   };
 }
 
+export const PLUGIN_COMMAND_SUFFIXES = [
+  'toggle',
+  'profile-next',
+  'profile-prev',
+  'open-settings',
+  'toggle-theme',
+] as const;
+
 /**
- * Registers all commands for the Color Master plugin.
- * @param plugin - The instance of the Color Master plugin.
+ * Registers all commands for the Theme Engine plugin.
+ * @param plugin - The instance of the Theme Engine plugin.
  */
-export function registerCommands(plugin: ColorMaster) {
+export function registerCommands(plugin: ThemeEngine) {
   // Toggle plugin on/off
   plugin.addCommand({
-    id: 'toggle',
+    id: PLUGIN_COMMAND_SUFFIXES[0],
     name: t('commands.enableDisable'),
     callback: async () => {
       plugin.settings.pluginEnabled = !plugin.settings.pluginEnabled;
@@ -29,7 +37,7 @@ export function registerCommands(plugin: ColorMaster) {
 
   // Select next profile
   plugin.addCommand({
-    id: 'profile-next',
+    id: PLUGIN_COMMAND_SUFFIXES[1],
     name: t('commands.cycleNext'),
     callback: async () => {
       const names = Object.keys(plugin.settings.profiles || {});
@@ -47,7 +55,7 @@ export function registerCommands(plugin: ColorMaster) {
 
   // Select previous profile
   plugin.addCommand({
-    id: 'profile-prev',
+    id: PLUGIN_COMMAND_SUFFIXES[2],
     name: t('commands.cyclePrevious'),
     callback: async () => {
       const names = Object.keys(plugin.settings.profiles || {});
@@ -67,7 +75,7 @@ export function registerCommands(plugin: ColorMaster) {
 
   // Open plugin settings
   plugin.addCommand({
-    id: 'open-settings',
+    id: PLUGIN_COMMAND_SUFFIXES[3],
     name: t('commands.openSettings'),
     callback: () => {
       const app = plugin.app as AppWithSetting;
@@ -78,7 +86,7 @@ export function registerCommands(plugin: ColorMaster) {
 
   // Toggle active profile theme
   plugin.addCommand({
-    id: 'toggle-theme',
+    id: PLUGIN_COMMAND_SUFFIXES[4],
     name: t('commands.toggleTheme'),
     callback: async () => {
       const activeProfileName = plugin.settings.activeProfile;

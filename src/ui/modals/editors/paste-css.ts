@@ -1,10 +1,10 @@
 import { App, Notice, Setting, TextComponent } from 'obsidian';
 import { DEFAULT_PROFILE } from '../../../constants';
 import { t } from '../../../i18n/strings';
-import type ColorMaster from '../../../main';
+import type ThemeEngine from '../../../main';
 import { debounce } from '../../../utils';
-import type { ColorMasterSettingTab } from '../../settingsTab';
-import { ColorMasterBaseModal } from '../base';
+import type { ThemeEngineSettingTab } from '../../settingsTab';
+import { ThemeEngineBaseModal } from '../base';
 
 /**
  * Accessor interface for Obsidian's internal CSS/Theme management.
@@ -17,9 +17,9 @@ interface AppWithCustomCss extends App {
   };
 }
 
-export class PasteCssModal extends ColorMasterBaseModal {
-  plugin: ColorMaster;
-  settingTab: ColorMasterSettingTab;
+export class PasteCssModal extends ThemeEngineBaseModal {
+  plugin: ThemeEngine;
+  settingTab: ThemeEngineSettingTab;
   existingProfileData: {
     name: string;
     css: string;
@@ -35,8 +35,8 @@ export class PasteCssModal extends ColorMasterBaseModal {
 
   constructor(
     app: App,
-    plugin: ColorMaster,
-    settingTab: ColorMasterSettingTab,
+    plugin: ThemeEngine,
+    settingTab: ThemeEngineSettingTab,
     existingProfileData: {
       name: string;
       css: string;
@@ -125,7 +125,7 @@ export class PasteCssModal extends ColorMasterBaseModal {
             new Notice(t('notices.themeCssLoaded', selectedTheme));
           } catch (error) {
             new Notice(t('notices.themeReadFailed', selectedTheme));
-            console.error(`Color Master: Failed to read theme CSS at ${themePath}`, error);
+            console.error(`Theme Engine: Failed to read theme CSS at ${themePath}`, error);
           }
         });
     });
@@ -273,7 +273,7 @@ export class PasteCssModal extends ColorMasterBaseModal {
 
     if (typeof CSSStyleSheet === 'undefined' || !Array.isArray(document.adoptedStyleSheets)) {
       console.error(
-        'Color Master: CSS import requires constructable stylesheet support in this runtime.',
+        'Theme Engine: CSS import requires constructable stylesheet support in this runtime.',
       );
       return;
     }
@@ -282,7 +282,7 @@ export class PasteCssModal extends ColorMasterBaseModal {
     try {
       tempStyleSheet.replaceSync(cssText);
     } catch (e) {
-      console.error('Color Master: Failed to parse CSS for import.', e);
+      console.error('Theme Engine: Failed to parse CSS for import.', e);
       return;
     }
 

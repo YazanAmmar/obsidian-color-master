@@ -1,7 +1,7 @@
 export default {
   plugin: {
-    name: 'Color master - v1.2.0',
-    ribbonTooltip: 'Color master settings',
+    name: 'Theme engine - v2.2.0',
+    ribbonTooltip: 'Theme engine settings',
   },
   buttons: {
     new: 'New',
@@ -25,7 +25,7 @@ export default {
     restore: 'Restore',
   },
   settings: {
-    enablePlugin: 'Enable color master',
+    enablePlugin: 'Enable theme engine',
     enablePluginDesc:
       'Turn this off to temporarily disable all custom colors and revert to your active Obsidian theme.',
     language: 'Language',
@@ -69,7 +69,7 @@ export default {
     iconizeModalTitle: 'Iconize integration settings',
     overrideIconizeName: 'Override iconize plugin colors',
     overrideIconizeDesc:
-      'Let color master control all icon colors from the iconize plugin. For best results, disable the color settings within iconize itself.',
+      'Let theme engine control all icon colors from the iconize plugin. For best results, disable the color settings within iconize itself.',
     cleanupIntervalName: 'Cleanup interval',
     cleanupIntervalDesc:
       'Sets how often (in seconds) the plugin checks for uninstalled iconize plugin to clean up its icons.',
@@ -174,7 +174,7 @@ export default {
         'Are you sure you want to delete this snippet? This action cannot be undone.',
       resetPluginTitle: 'Are you sure?',
       resetPluginDesc:
-        'This will permanently delete all your color master data (profiles, snippets, settings, and backgrounds). This is irreversible.',
+        'This will permanently delete all your theme engine data (profiles, snippets, settings, and backgrounds). This is irreversible.',
       deleteGlobalBgTitle: 'Confirm background deletion',
       deleteGlobalBgDesc:
         'Are you sure you want to permanently delete this background? The following profiles are using it and will be reset:',
@@ -295,8 +295,8 @@ export default {
     },
   },
   notices: {
-    pluginEnabled: 'Color master enabled',
-    pluginDisabled: 'Color master disabled',
+    pluginEnabled: 'Theme engine enabled',
+    pluginDisabled: 'Theme engine disabled',
     profilePinned: 'Profile colors pinned successfully!',
     profileReset: 'Profile has been reset to the pinned snapshot.',
     noPinnedSnapshot: 'No pinned snapshot found for this profile.',
@@ -328,7 +328,7 @@ export default {
     exportSuccess: 'Profile exported successfully!',
     jsonCopied: 'Profile JSON copied to clipboard.',
     resetSuccess:
-      'Color master data has been deleted. Please reload Obsidian to apply the changes.',
+      'Theme engine data has been deleted. Please reload Obsidian to apply the changes.',
     fpsUpdated: (value: number) => `Live Update FPS set to: ${value}`,
     invalidProfileObject: 'JSON does not appear to be a valid profile object.',
     profileCreated: (name: string) => `Profile "${name}" created successfully!`,
@@ -424,7 +424,7 @@ export default {
   },
   likeCard: {
     tagline: 'Theme your Obsidian — edit, save & share color profiles',
-    description: 'Color master for Obsidian — control themes & color schemes',
+    description: 'Theme engine for Obsidian — control themes & color schemes',
     profilesAndSnippets: 'Profiles & snippets',
     customizableColors: 'Customizable colors',
     daysOfUse: 'Days of use',

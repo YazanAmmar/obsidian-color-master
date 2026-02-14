@@ -62,6 +62,14 @@ export interface PinnedSnapshot {
   profile: Profile;
 }
 export interface PluginSettings {
+  idMigration?: {
+    from: string;
+    to: string;
+    at: string;
+    sourcePath: string;
+    hotkeysMigrated?: boolean;
+    communityPluginsMigrated?: boolean;
+  };
   advancedResetOptions?: {
     deleteProfiles: boolean;
     deleteSnippets: boolean;

@@ -1,16 +1,16 @@
 /*
- * Color Master - Obsidian Plugin
- * Version: 1.2.0
+ * Theme Engine - Obsidian Plugin
+ * Version: 2.2.0
  * Author: Yazan Ammar (GitHub : https://github.com/YazanAmmar )
  * Description: Provides a comprehensive UI to control all Obsidian CSS color variables directly,
  * removing the need for Force Mode and expanding customization options.
  */
 import { ButtonComponent, moment, Notice, Plugin, requestUrl } from 'obsidian';
-import { registerCommands } from './commands';
+import { PLUGIN_COMMAND_SUFFIXES, registerCommands } from './commands';
 import { DEFAULT_SETTINGS, DEFAULT_VARS, BUILT_IN_PROFILES_VARS } from './constants';
 import { initializeT, t } from './i18n/strings';
 import { NoticeRule, PluginSettings, Profile, Snippet } from './types';
-import { ColorMasterSettingTab } from './ui/settingsTab';
+import { ThemeEngineSettingTab } from './ui/settingsTab';
 import {
   flattenVars,
   findNextAvailablePath,
@@ -60,14 +60,22 @@ type LegacySnippetData = {
   enabled?: boolean;
 };
 
-export default class ColorMaster extends Plugin {
+const LEGACY_PLUGIN_IDS = ['theme-engine', 'color-master', 'obsidian-color-master'] as const;
+const LEGACY_COMMAND_PLUGIN_IDS = [
+  'theme-engine',
+  'color-master',
+  'obsidian-color-master',
+] as const;
+const CURRENT_PLUGIN_ID = 'obsidian-theme-engine';
+
+export default class ThemeEngine extends Plugin {
   settings: PluginSettings;
   iconizeWatcherInterval: number | null = null;
   colorUpdateInterval: number | null = null;
   pendingVarUpdates: Record<string, string> = {};
   runtimeStyleSheets: Record<string, CSSStyleSheet> = {};
   runtimeStyleSheetSupportWarned = false;
-  settingTabInstance: ColorMasterSettingTab | null = null;
+  settingTabInstance: ThemeEngineSettingTab | null = null;
   liveNoticeRules: NoticeRule[] | null = null;
   liveNoticeRuleType: 'text' | 'background' | null = null;
   iconizeObserver: MutationObserver;
@@ -125,6 +133,235 @@ export default class ColorMaster extends Plugin {
     this.startColorUpdateLoop();
   }
 
+  private isObjectRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' && value !== null && !Array.isArray(value);
+  }
+
+  private normalizeHotkeyArray(value: unknown): Array<{ modifiers: string[]; key: string }> {
+    const normalized: Array<{ modifiers: string[]; key: string }> = [];
+    const seen = new Set<string>();
+
+    if (!Array.isArray(value)) {
+      return normalized;
+    }
+
+    for (const item of value) {
+      if (!this.isObjectRecord(item)) continue;
+
+      const keyRaw = item.key;
+      if (typeof keyRaw !== 'string' || keyRaw.trim() === '') continue;
+
+      const modifiersRaw = item.modifiers;
+      const modifiers = Array.isArray(modifiersRaw)
+        ? modifiersRaw.filter((modifier): modifier is string => typeof modifier === 'string')
+        : [];
+
+      const entry = { modifiers, key: keyRaw };
+      const signature = JSON.stringify(entry);
+
+      if (seen.has(signature)) continue;
+      seen.add(signature);
+      normalized.push(entry);
+    }
+
+    return normalized;
+  }
+
+  private mergeHotkeyArrays(
+    currentValue: unknown,
+    legacyValue: unknown,
+  ): Array<{ modifiers: string[]; key: string }> {
+    const merged = [
+      ...this.normalizeHotkeyArray(currentValue),
+      ...this.normalizeHotkeyArray(legacyValue),
+    ];
+    const deduped: Array<{ modifiers: string[]; key: string }> = [];
+    const seen = new Set<string>();
+
+    for (const entry of merged) {
+      const signature = JSON.stringify(entry);
+      if (seen.has(signature)) continue;
+      seen.add(signature);
+      deduped.push(entry);
+    }
+
+    return deduped;
+  }
+
+  private async writeJsonWithBackup(
+    path: string,
+    backupPath: string,
+    data: unknown,
+  ): Promise<void> {
+    const adapter = this.app.vault.adapter;
+
+    if (!(await adapter.exists(backupPath)) && (await adapter.exists(path))) {
+      const currentRaw = await adapter.read(path);
+      await adapter.write(backupPath, currentRaw);
+    }
+
+    await adapter.write(path, JSON.stringify(data, null, 2));
+  }
+
+  private async migrateLegacyPluginDataIfNeeded(): Promise<{
+    migrated: boolean;
+    sourcePath?: string;
+  }> {
+    let currentData: unknown = null;
+
+    try {
+      currentData = await this.loadData();
+    } catch (error) {
+      console.warn('Theme Engine: Failed to read current plugin data before migration.', error);
+    }
+
+    if (this.isObjectRecord(currentData) && Object.keys(currentData).length > 0) {
+      return { migrated: false };
+    }
+
+    const adapter = this.app.vault.adapter;
+    const pluginsDir = `${this.app.vault.configDir}/plugins`;
+
+    for (const legacyPluginId of LEGACY_PLUGIN_IDS) {
+      const sourcePath = `${pluginsDir}/${legacyPluginId}/data.json`;
+
+      try {
+        if (!(await adapter.exists(sourcePath))) continue;
+
+        const raw = await adapter.read(sourcePath);
+        const parsed = JSON.parse(raw) as unknown;
+        if (!this.isObjectRecord(parsed)) {
+          console.warn(
+            `Theme Engine: Legacy data at "${sourcePath}" is not an object. Skipping migration source.`,
+          );
+          continue;
+        }
+
+        const migratedSettings: Record<string, unknown> = { ...parsed };
+        migratedSettings.idMigration = {
+          from: legacyPluginId,
+          to: CURRENT_PLUGIN_ID,
+          at: new Date().toISOString(),
+          sourcePath,
+        };
+
+        await this.saveData(migratedSettings);
+        console.debug(`Theme Engine: Migrated settings data from "${sourcePath}".`);
+        return { migrated: true, sourcePath };
+      } catch (error) {
+        console.warn(`Theme Engine: Failed to migrate data from "${sourcePath}".`, error);
+      }
+    }
+
+    return { migrated: false };
+  }
+
+  private async migrateLegacyHotkeysIfNeeded(): Promise<boolean> {
+    const adapter = this.app.vault.adapter;
+    const configDir = this.app.vault.configDir;
+    const hotkeysPath = `${configDir}/hotkeys.json`;
+    const backupPath = `${configDir}/hotkeys.${CURRENT_PLUGIN_ID}-id-migration.bak.json`;
+
+    try {
+      if (!(await adapter.exists(hotkeysPath))) return false;
+
+      const raw = await adapter.read(hotkeysPath);
+      const parsed = JSON.parse(raw) as unknown;
+      if (!this.isObjectRecord(parsed)) return false;
+
+      const hotkeyMap = parsed;
+      let changed = false;
+
+      for (const suffix of PLUGIN_COMMAND_SUFFIXES) {
+        const newCommandId = `${CURRENT_PLUGIN_ID}:${suffix}`;
+        const currentValue = hotkeyMap[newCommandId];
+        const normalizedCurrent = this.normalizeHotkeyArray(currentValue);
+        let merged = normalizedCurrent;
+
+        for (const legacyCommandPluginId of LEGACY_COMMAND_PLUGIN_IDS) {
+          const oldCommandId = `${legacyCommandPluginId}:${suffix}`;
+          const legacyValue = hotkeyMap[oldCommandId];
+
+          if (typeof legacyValue === 'undefined') continue;
+
+          merged = this.mergeHotkeyArrays(merged, legacyValue);
+          delete hotkeyMap[oldCommandId];
+          changed = true;
+        }
+
+        if (JSON.stringify(normalizedCurrent) !== JSON.stringify(merged)) {
+          hotkeyMap[newCommandId] = merged;
+          changed = true;
+        }
+      }
+
+      if (!changed) return false;
+
+      await this.writeJsonWithBackup(hotkeysPath, backupPath, hotkeyMap);
+      console.debug(
+        `Theme Engine: Migrated hotkeys from legacy namespaces to "${CURRENT_PLUGIN_ID}:*".`,
+      );
+      return true;
+    } catch (error) {
+      console.warn('Theme Engine: Failed to migrate hotkeys.', error);
+      return false;
+    }
+  }
+
+  private async migrateCommunityPluginListIfNeeded(): Promise<boolean> {
+    const adapter = this.app.vault.adapter;
+    const configDir = this.app.vault.configDir;
+    const listPath = `${configDir}/community-plugins.json`;
+    const backupPath = `${configDir}/community-plugins.${CURRENT_PLUGIN_ID}-id-migration.bak.json`;
+
+    try {
+      if (!(await adapter.exists(listPath))) return false;
+
+      const raw = await adapter.read(listPath);
+      const parsed = JSON.parse(raw) as unknown;
+      if (!Array.isArray(parsed)) return false;
+
+      const entries = parsed.filter((entry): entry is string => typeof entry === 'string');
+      let changed = entries.length !== parsed.length;
+      const updatedEntries: string[] = [];
+      let hasCurrentId = false;
+
+      for (const entry of entries) {
+        if (entry === CURRENT_PLUGIN_ID) {
+          if (!hasCurrentId) {
+            updatedEntries.push(entry);
+            hasCurrentId = true;
+          } else {
+            changed = true;
+          }
+          continue;
+        }
+
+        if (LEGACY_PLUGIN_IDS.some((legacyId) => legacyId === entry)) {
+          if (!hasCurrentId) {
+            updatedEntries.push(CURRENT_PLUGIN_ID);
+            hasCurrentId = true;
+          }
+          changed = true;
+          continue;
+        }
+
+        updatedEntries.push(entry);
+      }
+
+      if (!changed) return false;
+
+      await this.writeJsonWithBackup(listPath, backupPath, updatedEntries);
+      console.debug(
+        `Theme Engine: Migrated community plugin list entry from legacy IDs to "${CURRENT_PLUGIN_ID}".`,
+      );
+      return true;
+    } catch (error) {
+      console.warn('Theme Engine: Failed to migrate community plugin list.', error);
+      return false;
+    }
+  }
+
   private supportsRuntimeStyleSheets(): boolean {
     return typeof CSSStyleSheet !== 'undefined' && Array.isArray(document.adoptedStyleSheets);
   }
@@ -134,7 +371,7 @@ export default class ColorMaster extends Plugin {
       if (!this.runtimeStyleSheetSupportWarned) {
         this.runtimeStyleSheetSupportWarned = true;
         console.warn(
-          'Color Master: Constructable stylesheets are not supported in this environment.',
+          'Theme Engine: Constructable stylesheets are not supported in this environment.',
         );
       }
       return null;
@@ -160,7 +397,7 @@ export default class ColorMaster extends Plugin {
     try {
       styleSheet.replaceSync(cssText);
     } catch (e) {
-      console.error(`Color Master: Failed to apply runtime stylesheet "${styleId}"`, e);
+      console.error(`Theme Engine: Failed to apply runtime stylesheet "${styleId}"`, e);
     }
   }
 
@@ -343,10 +580,10 @@ export default class ColorMaster extends Plugin {
       if (!(await this.app.vault.adapter.exists(backgroundsPath))) {
         // Create the folder if it's missing
         await this.app.vault.adapter.mkdir(backgroundsPath);
-        console.debug(`Color Master: Created global backgrounds folder at ${backgroundsPath}`);
+        console.debug(`Theme Engine: Created global backgrounds folder at ${backgroundsPath}`);
       }
     } catch (error) {
-      console.error('Color Master: Failed to create backgrounds folder on startup.', error);
+      console.error('Theme Engine: Failed to create backgrounds folder on startup.', error);
     }
   }
 
@@ -403,7 +640,7 @@ export default class ColorMaster extends Plugin {
         await this.app.vault.adapter.remove(pathToDelete);
       }
     } catch (error) {
-      console.warn(`Color Master: Could not delete background file '${pathToDelete}'.`, error);
+      console.warn(`Theme Engine: Could not delete background file '${pathToDelete}'.`, error);
     }
 
     if (settingsChanged) {
@@ -509,7 +746,7 @@ export default class ColorMaster extends Plugin {
       }
     } catch (error) {
       new Notice(t('notices.backgroundLoadError'));
-      console.error('Color Master: Error setting background media:', error);
+      console.error('Theme Engine: Error setting background media:', error);
     }
   }
 
@@ -596,7 +833,7 @@ export default class ColorMaster extends Plugin {
       // Force graph view to repaint by dispatching a resize event
       window.dispatchEvent(new Event('resize'));
     } catch (e) {
-      console.error('Color Master: applyPendingNow failed', e);
+      console.error('Theme Engine: applyPendingNow failed', e);
     }
   }
 
@@ -695,8 +932,43 @@ export default class ColorMaster extends Plugin {
   }
 
   async onload() {
+    const dataMigration = await this.migrateLegacyPluginDataIfNeeded();
+    const hotkeysMigrated = await this.migrateLegacyHotkeysIfNeeded();
+    const communityPluginsMigrated = await this.migrateCommunityPluginListIfNeeded();
+
     await this.loadSettings();
+
+    const migrationHappened = dataMigration.migrated || hotkeysMigrated || communityPluginsMigrated;
+
+    if (migrationHappened) {
+      const sourcePath =
+        dataMigration.sourcePath ||
+        this.settings.idMigration?.sourcePath ||
+        `${this.app.vault.configDir}/plugins/${LEGACY_PLUGIN_IDS[0]}/data.json`;
+
+      this.settings.idMigration = {
+        from: this.settings.idMigration?.from || LEGACY_PLUGIN_IDS[0],
+        to: CURRENT_PLUGIN_ID,
+        at: new Date().toISOString(),
+        sourcePath,
+        hotkeysMigrated,
+        communityPluginsMigrated,
+      };
+
+      await this.saveData(this.settings);
+    }
+
     initializeT(this);
+
+    if (migrationHappened) {
+      const migratedParts: string[] = [];
+      if (dataMigration.migrated) migratedParts.push('settings data');
+      if (hotkeysMigrated) migratedParts.push('hotkeys');
+      if (communityPluginsMigrated) migratedParts.push('enabled plugin list');
+
+      new Notice(`Theme Engine migration completed: ${migratedParts.join(', ')}.`);
+    }
+
     await this._ensureBackgroundsFolderExists();
     this.liveNoticeRules = null;
     this.liveNoticeRuleType = null;
@@ -727,7 +999,7 @@ export default class ColorMaster extends Plugin {
     });
 
     // Store a reference to the settings tab and add it
-    this.settingTabInstance = new ColorMasterSettingTab(this.app, this);
+    this.settingTabInstance = new ThemeEngineSettingTab(this.app, this);
     this.addSettingTab(this.settingTabInstance);
 
     this.app.workspace.onLayoutReady(() => {
@@ -775,7 +1047,7 @@ export default class ColorMaster extends Plugin {
       this.settings.lastSearchQuery = '';
       this.settings.lastScrollPosition = 0;
       this.saveData(this.settings).catch((err) => {
-        console.error('Color Master: Failed to save settings on unload.', err);
+        console.error('Theme Engine: Failed to save settings on unload.', err);
       });
     }
 
@@ -783,7 +1055,7 @@ export default class ColorMaster extends Plugin {
     this.removeInjectedCustomCss();
     this.stopColorUpdateLoop();
     this._clearBackgroundMedia();
-    console.debug('Color Master unloaded.');
+    console.debug('Theme Engine unloaded.');
   }
 
   public enableObservers(): void {
@@ -796,9 +1068,9 @@ export default class ColorMaster extends Plugin {
         childList: true,
         subtree: true,
       });
-      console.debug('Color Master Observers: Enabled');
+      console.debug('Theme Engine Observers: Enabled');
     } catch (e) {
-      console.error('Color Master: Failed to enable observers', e);
+      console.error('Theme Engine: Failed to enable observers', e);
     }
   }
 
@@ -806,9 +1078,9 @@ export default class ColorMaster extends Plugin {
     try {
       this.iconizeObserver.disconnect();
       this.noticeObserver.disconnect();
-      console.debug('Color Master Observers: Disabled');
+      console.debug('Theme Engine Observers: Disabled');
     } catch (e) {
-      console.error('Color Master: Failed to disable observers', e);
+      console.error('Theme Engine: Failed to disable observers', e);
     }
   }
 
@@ -819,7 +1091,7 @@ export default class ColorMaster extends Plugin {
     }
 
     console.debug(
-      `Color Master: Found ${graphLeaves.length} graph(s). Applying Plan C (programmatic rebuild).`,
+      `Theme Engine: Found ${graphLeaves.length} graph(s). Applying Plan C (programmatic rebuild).`,
     );
 
     for (const leaf of graphLeaves) {
@@ -840,7 +1112,7 @@ export default class ColorMaster extends Plugin {
       const cssVal = getComputedStyle(document.body).getPropertyValue('--iconize-icon-color');
       if (cssVal) computedIconizeColor = cssVal.trim();
     } catch (e) {
-      console.warn('Color Master: failed to read computed --iconize-icon-color', e);
+      console.warn('Theme Engine: failed to read computed --iconize-icon-color', e);
       computedIconizeColor = null;
     }
 
@@ -895,7 +1167,7 @@ export default class ColorMaster extends Plugin {
     // If not installed, check if the override setting is still on.
     let settingsChanged = false;
     if (this.settings.overrideIconizeColors === true) {
-      console.debug('Color Master: Iconize plugin not found. Disabling override setting.');
+      console.debug('Theme Engine: Iconize plugin not found. Disabling override setting.');
       this.settings.overrideIconizeColors = false;
       settingsChanged = true;
     }
@@ -905,7 +1177,7 @@ export default class ColorMaster extends Plugin {
 
     if (orphanedIcons.length > 0) {
       console.debug(
-        `Color Master: Found ${orphanedIcons.length} orphaned Iconize elements. Cleaning up...`,
+        `Theme Engine: Found ${orphanedIcons.length} orphaned Iconize elements. Cleaning up...`,
       );
       orphanedIcons.forEach((icon) => icon.remove());
     }
@@ -927,7 +1199,7 @@ export default class ColorMaster extends Plugin {
 
     const profile = this.settings.profiles[this.settings.activeProfile];
     if (!profile) {
-      console.error('Color Master: Active profile not found!');
+      console.error('Theme Engine: Active profile not found!');
       return;
     }
 
@@ -980,9 +1252,9 @@ export default class ColorMaster extends Plugin {
     const isRTL = (isCoreRtlLang || isCustomRtlLang) && isRtlEnabled;
 
     if (isRTL) {
-      document.body.classList.add('color-master-rtl');
+      document.body.classList.add('theme-engine-rtl');
     } else {
-      document.body.classList.remove('color-master-rtl');
+      document.body.classList.remove('theme-engine-rtl');
     }
     await this.applyBackgroundMedia();
     this.app.workspace.trigger('css-change');
@@ -1037,13 +1309,13 @@ export default class ColorMaster extends Plugin {
       });
     });
 
-    const styleId = 'color-master-overrides';
+    const styleId = 'theme-engine-overrides';
     const overrideStyleEl = document.getElementById(styleId);
     if (overrideStyleEl) {
       overrideStyleEl.remove();
     }
     this.app.workspace.trigger('css-change');
-    document.body.classList.remove('color-master-rtl');
+    document.body.classList.remove('theme-engine-rtl');
     this._clearBackgroundMedia();
   }
 
@@ -1052,7 +1324,7 @@ export default class ColorMaster extends Plugin {
 
     let migrationNeeded = false;
     if (this.settings.noticeRules && Object.keys(this.settings.profiles || {}).length > 0) {
-      console.debug('Color Master: Detected old global notice rules. Starting migration...');
+      console.debug('Theme Engine: Detected old global notice rules. Starting migration...');
       for (const profileName in this.settings.profiles) {
         const profile = this.settings.profiles[profileName];
         if (!profile.noticeRules) {
@@ -1073,7 +1345,7 @@ export default class ColorMaster extends Plugin {
 
     if (migrationNeeded) {
       console.debug(
-        'Color Master: Notice rules migration complete. Saving new settings structure.',
+        'Theme Engine: Notice rules migration complete. Saving new settings structure.',
       );
       await this.saveData(this.settings);
     }
@@ -1118,7 +1390,7 @@ export default class ColorMaster extends Plugin {
 
     if (snippetsMigrationNeeded) {
       console.debug(
-        'Color Master: The clipping data structure is being migrated to the new format (array).',
+        'Theme Engine: The clipping data structure is being migrated to the new format (array).',
       );
       await this.saveData(this.settings);
     }
@@ -1138,7 +1410,7 @@ export default class ColorMaster extends Plugin {
       }
     }
     if (profileMigrationNeeded) {
-      console.debug('Color Master: Setting default backgroundEnabled status for profiles.');
+      console.debug('Theme Engine: Setting default backgroundEnabled status for profiles.');
       await this.saveData(this.settings); // Save changes if migration happened
     }
   }
@@ -1211,14 +1483,14 @@ export default class ColorMaster extends Plugin {
     this.settings = newSettings;
     await this.saveData(this.settings);
 
-    console.debug('Color Master: Selective data reset complete.', options);
+    console.debug('Theme Engine: Selective data reset complete.', options);
 
     // Handle File System operations (Backgrounds)
     if (options.deleteBackgrounds) {
       const backgroundsPath = `${this.app.vault.configDir}/backgrounds`;
       try {
         if (await this.app.vault.adapter.exists(backgroundsPath)) {
-          console.debug('Color Master: Deleting backgrounds folder...');
+          console.debug('Theme Engine: Deleting backgrounds folder...');
           await this.app.vault.adapter.rmdir(backgroundsPath, true);
         }
 
@@ -1234,7 +1506,7 @@ export default class ColorMaster extends Plugin {
           await this.saveData(this.settings);
         }
       } catch (folderError) {
-        console.error(`Color Master: Error deleting backgrounds: ${folderError.message}`);
+        console.error(`Theme Engine: Error deleting backgrounds: ${folderError.message}`);
         new Notice(t('notices.deleteBackgroundsError', folderError.message));
       }
     }
@@ -1415,7 +1687,7 @@ export default class ColorMaster extends Plugin {
                   });
                 }
               } catch (e) {
-                console.warn('Color Master: Invalid Regex in notice rule', e);
+                console.warn('Theme Engine: Invalid Regex in notice rule', e);
               }
             } else {
               const keywords = rule.keywords
@@ -1483,7 +1755,7 @@ export default class ColorMaster extends Plugin {
 
       this.updateNoticeStyles();
     } catch (e) {
-      console.warn('Color Master: processNotice failed', e);
+      console.warn('Theme Engine: processNotice failed', e);
     }
   }
 
@@ -1598,7 +1870,7 @@ export default class ColorMaster extends Plugin {
       await this.setBackgroundMedia(arrayBuffer, fileName, 'prompt');
     } catch (error) {
       new Notice(t('notices.backgroundUrlLoadError'));
-      console.error('Color Master: Error fetching image from URL:', error);
+      console.error('Theme Engine: Error fetching image from URL:', error);
     }
   }
 
@@ -1637,7 +1909,7 @@ export default class ColorMaster extends Plugin {
 
     if (oldExt && !newFullName.toLowerCase().endsWith(oldExt.toLowerCase())) {
       console.warn(
-        `Color Master: Rename blocked. Attempted to change extension from "${oldExt}" in "${newFullName}".`,
+        `Theme Engine: Rename blocked. Attempted to change extension from "${oldExt}" in "${newFullName}".`,
       );
       new Notice(t('notices.invalidFilename') + ' (Extension mismatch)');
       return false;
@@ -1673,7 +1945,7 @@ export default class ColorMaster extends Plugin {
       return newPath;
     } catch (error) {
       new Notice(t('notices.renameError'));
-      console.error('Color Master: Error renaming background image:', error);
+      console.error('Theme Engine: Error renaming background image:', error);
       return false;
     }
   }
@@ -1683,7 +1955,7 @@ export default class ColorMaster extends Plugin {
    * Essential for determining base theme defaults.
    */
   async captureCurrentComputedVars(): Promise<Record<string, string>> {
-    console.debug('Color Master: Capturing current computed styles...');
+    console.debug('Theme Engine: Capturing current computed styles...');
 
     // 1. Flush plugin overrides and await repaint to expose base theme
     this.clearStyles();
@@ -1718,7 +1990,7 @@ export default class ColorMaster extends Plugin {
       }
     }
 
-    console.debug(`Color Master: Captured ${Object.keys(capturedVars).length} variables.`);
+    console.debug(`Theme Engine: Captured ${Object.keys(capturedVars).length} variables.`);
 
     // 2. Restore plugin state
     void this.applyStyles();
@@ -1738,7 +2010,7 @@ export default class ColorMaster extends Plugin {
       return this.cachedThemeDefaults;
     }
 
-    console.debug('Color Master: Cache miss or theme change. Refreshing defaults...');
+    console.debug('Theme Engine: Cache miss or theme change. Refreshing defaults...');
 
     const newDefaults = await this.captureCurrentComputedVars();
 

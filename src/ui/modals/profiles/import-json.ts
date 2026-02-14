@@ -1,19 +1,19 @@
 import { App, Notice, Setting, TextComponent } from 'obsidian';
 import { t } from '../../../i18n/strings';
-import type ColorMaster from '../../../main';
+import type ThemeEngine from '../../../main';
 import type { Profile, Snippet } from '../../../types';
 import { debounce } from '../../../utils';
-import type { ColorMasterSettingTab } from '../../settingsTab';
-import { ColorMasterBaseModal } from '../base';
+import type { ThemeEngineSettingTab } from '../../settingsTab';
+import { ThemeEngineBaseModal } from '../base';
 
-export class ProfileJsonImportModal extends ColorMasterBaseModal {
-  plugin: ColorMaster;
-  settingTab: ColorMasterSettingTab;
+export class ProfileJsonImportModal extends ThemeEngineBaseModal {
+  plugin: ThemeEngine;
+  settingTab: ThemeEngineSettingTab;
   textarea: HTMLTextAreaElement;
   nameInput: TextComponent;
   profileName: string = '';
 
-  constructor(app: App, plugin: ColorMaster, settingTabInstance: ColorMasterSettingTab) {
+  constructor(app: App, plugin: ThemeEngine, settingTabInstance: ThemeEngineSettingTab) {
     super(app, plugin);
     this.settingTab = settingTabInstance;
   }

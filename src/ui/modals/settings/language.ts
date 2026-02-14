@@ -1,24 +1,24 @@
 import { App, ButtonComponent, Notice, Setting } from 'obsidian';
 import { loadLanguage, t } from '../../../i18n/strings';
 import { CORE_LANGUAGES } from '../../../i18n/types';
-import type ColorMaster from '../../../main';
-import type { ColorMasterSettingTab } from '../../settingsTab';
-import { ColorMasterBaseModal } from '../base';
+import type ThemeEngine from '../../../main';
+import type { ThemeEngineSettingTab } from '../../settingsTab';
+import { ThemeEngineBaseModal } from '../base';
 import { LanguageTranslatorModal } from './translator';
 
 /**
  * Modal for toggling global layout direction (RTL/LTR).
  */
-export class LanguageSettingsModal extends ColorMasterBaseModal {
-  plugin: ColorMaster;
+export class LanguageSettingsModal extends ThemeEngineBaseModal {
+  plugin: ThemeEngine;
 
-  constructor(app: App, plugin: ColorMaster) {
+  constructor(app: App, plugin: ThemeEngine) {
     super(app, plugin);
   }
 
   onOpen() {
     super.onOpen();
-    this.modalEl.classList.add('color-master-modal');
+    this.modalEl.classList.add('theme-engine-modal');
     const { contentEl } = this;
 
     contentEl.empty();
@@ -47,13 +47,13 @@ export class LanguageSettingsModal extends ColorMasterBaseModal {
 /**
  * Modal for creating a new custom language definition.
  */
-export class AddNewLanguageModal extends ColorMasterBaseModal {
-  settingTab: ColorMasterSettingTab;
+export class AddNewLanguageModal extends ThemeEngineBaseModal {
+  settingTab: ThemeEngineSettingTab;
   langName: string = '';
   langCode: string = '';
   isRtl: boolean = false;
 
-  constructor(app: App, plugin: ColorMaster, settingTab: ColorMasterSettingTab) {
+  constructor(app: App, plugin: ThemeEngine, settingTab: ThemeEngineSettingTab) {
     super(app, plugin);
     this.settingTab = settingTab;
   }

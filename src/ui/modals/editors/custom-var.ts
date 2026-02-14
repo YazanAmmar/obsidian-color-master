@@ -1,15 +1,15 @@
 import { App, DropdownComponent, Notice, Setting } from 'obsidian';
 import { DEFAULT_VARS } from '../../../constants';
 import { t } from '../../../i18n/strings';
-import type ColorMaster from '../../../main';
+import type ThemeEngine from '../../../main';
 import type { CustomVarType } from '../../../types';
 import { flattenVars } from '../../../utils';
-import type { ColorMasterSettingTab } from '../../settingsTab';
-import { ColorMasterBaseModal } from '../base';
+import type { ThemeEngineSettingTab } from '../../settingsTab';
+import { ThemeEngineBaseModal } from '../base';
 
-export class CustomVariableMetaModal extends ColorMasterBaseModal {
-  plugin: ColorMaster;
-  settingTab: ColorMasterSettingTab;
+export class CustomVariableMetaModal extends ThemeEngineBaseModal {
+  plugin: ThemeEngine;
+  settingTab: ThemeEngineSettingTab;
   onSubmit: (details: {
     varName: string;
     varValue: string;
@@ -29,8 +29,8 @@ export class CustomVariableMetaModal extends ColorMasterBaseModal {
 
   constructor(
     app: App,
-    plugin: ColorMaster,
-    settingTab: ColorMasterSettingTab,
+    plugin: ThemeEngine,
+    settingTab: ThemeEngineSettingTab,
     onSubmit: (details: {
       varName: string;
       varValue: string;
@@ -62,7 +62,7 @@ export class CustomVariableMetaModal extends ColorMasterBaseModal {
         });
         const textInput = valueSetting.controlEl.createEl('input', {
           type: 'text',
-          cls: 'color-master-text-input',
+          cls: 'theme-engine-text-input',
         });
 
         colorPicker.value = this.varValue;
@@ -101,7 +101,7 @@ export class CustomVariableMetaModal extends ColorMasterBaseModal {
 
         const sizeInput = valueSetting.controlEl.createEl('input', {
           type: 'number',
-          cls: 'color-master-text-input',
+          cls: 'theme-engine-text-input',
         });
         sizeInput.setCssProps({ width: '80px' });
         sizeInput.value = num;
@@ -172,7 +172,7 @@ export class CustomVariableMetaModal extends ColorMasterBaseModal {
   onOpen() {
     const { contentEl } = this;
     contentEl.empty();
-    this.modalEl.classList.add('color-master-modal');
+    this.modalEl.classList.add('theme-engine-modal');
 
     super.onOpen();
 

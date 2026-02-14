@@ -1,10 +1,10 @@
 import { App } from 'obsidian';
 import { t } from '../../../i18n/strings';
-import type ColorMaster from '../../../main';
-import { ColorMasterBaseModal } from '../base';
+import type ThemeEngine from '../../../main';
+import { ThemeEngineBaseModal } from '../base';
 
-export class ConfirmationModal extends ColorMasterBaseModal {
-  plugin: ColorMaster;
+export class ConfirmationModal extends ThemeEngineBaseModal {
+  plugin: ThemeEngine;
   title: string;
   message: string | DocumentFragment;
   onConfirm: () => void;
@@ -13,7 +13,7 @@ export class ConfirmationModal extends ColorMasterBaseModal {
 
   constructor(
     app: App,
-    plugin: ColorMaster,
+    plugin: ThemeEngine,
     title: string,
     message: string | DocumentFragment,
     onConfirm: () => void,

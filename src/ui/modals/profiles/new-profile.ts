@@ -1,15 +1,15 @@
 import { App, Notice, Setting } from 'obsidian';
 import { t } from '../../../i18n/strings';
-import type ColorMaster from '../../../main';
-import { ColorMasterBaseModal } from '../base';
+import type ThemeEngine from '../../../main';
+import { ThemeEngineBaseModal } from '../base';
 
-export class NewProfileModal extends ColorMasterBaseModal {
+export class NewProfileModal extends ThemeEngineBaseModal {
   onSubmit: (result: { name: string; themeType: 'auto' | 'dark' | 'light' }) => void;
-  plugin: ColorMaster;
+  plugin: ThemeEngine;
 
   constructor(
     app: App,
-    plugin: ColorMaster,
+    plugin: ThemeEngine,
     onSubmit: (result: { name: string; themeType: 'auto' | 'dark' | 'light' }) => void,
   ) {
     super(app, plugin);

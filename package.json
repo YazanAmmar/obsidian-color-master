@@ -1,7 +1,7 @@
 {
-  "name": "obsidian-color-master",
-  "version": "1.2.0",
-  "description": "Full control of Obsidian's appearance. Create and share color profiles, use advanced CSS snippets, and override any theme with a powerful, live UI.",
+  "name": "obsidian-theme-engine",
+  "version": "2.2.0",
+  "description": "A powerful theme engine for Obsidian. Build dynamic profiles, override themes, and customize your workspace in real time.",
   "main": "main.js",
   "scripts": {
     "build:js": "esbuild src/main.ts --bundle --platform=browser --format=cjs --outfile=main.js --minify --external:obsidian",
@@ -9,7 +9,7 @@
     "format": "prettier --write \"src/**/*.{ts,scss}\"",
     "lint": "eslint \"src/**/*.{ts,tsx}\"",
     "build": "npm run format && npm run build:js && npm run build:css",
-    "dev": "npm run build && cpy main.js styles.css manifest.json \"C:\\Users\\user\\Documents\\Obsidian\\My Notes\\.obsidian\\plugins\\obsidian-color-master\""
+    "dev": "npm run build && cpy main.js styles.css manifest.json \"C:\\Users\\user\\Documents\\Obsidian\\My Notes\\.obsidian\\plugins\\obsidian-theme-engine\""
   },
   "keywords": [],
   "author": "Yazan Ammar",

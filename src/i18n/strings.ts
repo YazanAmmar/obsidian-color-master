@@ -1,4 +1,4 @@
-import type ColorMaster from '../main';
+import type ThemeEngine from '../main';
 import type { PluginSettings } from '../types';
 import type { LocaleStrings } from './types';
 import { DEFAULT_LOCALE, LocaleCode } from './types';
@@ -8,7 +8,7 @@ import enStrings from './locales/en';
 import faStrings from './locales/fa';
 import frStrings from './locales/fr';
 
-let T: ColorMaster;
+let T: ThemeEngine;
 
 // Built-in languages
 export const CORE_LOCALES: Record<LocaleCode, LocaleStrings> = {
@@ -23,7 +23,7 @@ let FALLBACK_STRINGS: Record<string, string | LocaleFunc> = {};
 let ACTIVE_STRINGS: Record<string, string | LocaleFunc> = {};
 
 // Called once on plugin load
-export function initializeT(plugin: ColorMaster) {
+export function initializeT(plugin: ThemeEngine) {
   T = plugin;
   // Always load English as the safety net
   FALLBACK_STRINGS = flattenStrings(CORE_LOCALES[DEFAULT_LOCALE]);
@@ -36,14 +36,14 @@ export function loadLanguage(settings: PluginSettings) {
   const customLang = settings.customLanguages?.[langCode];
 
   if (CORE_LOCALES[langCode]) {
-    console.debug(`Color Master: Loading core language "${langCode}"`);
+    console.debug(`Theme Engine: Loading core language "${langCode}"`);
 
     // Load the base strings first from the code
     const baseStrings = flattenStrings(CORE_LOCALES[langCode]);
 
     if (customLang && customLang.translations) {
       console.debug(
-        `Color Master: Applying ${
+        `Theme Engine: Applying ${
           Object.keys(customLang.translations).length
         } overrides for "${langCode}"`,
       );
@@ -52,10 +52,10 @@ export function loadLanguage(settings: PluginSettings) {
       ACTIVE_STRINGS = baseStrings;
     }
   } else if (customLang) {
-    console.debug(`Color Master: Loading custom language "${langCode}"`);
+    console.debug(`Theme Engine: Loading custom language "${langCode}"`);
     ACTIVE_STRINGS = customLang.translations;
   } else {
-    console.debug(`Color Master: Language "${langCode}" not found, using default.`);
+    console.debug(`Theme Engine: Language "${langCode}" not found, using default.`);
     ACTIVE_STRINGS = FALLBACK_STRINGS;
   }
 }
@@ -63,7 +63,7 @@ export function loadLanguage(settings: PluginSettings) {
 // Main translation helper
 export const t = (key: string, ...args: (string | number)[]): string => {
   if (!T) {
-    console.error("ColorMaster: 'T' is not initialized yet.");
+    console.error("ThemeEngine: 'T' is not initialized yet.");
     return key;
   }
 
@@ -75,7 +75,7 @@ export const t = (key: string, ...args: (string | number)[]): string => {
   }
 
   if (string === undefined) {
-    console.warn(`ColorMaster: Missing translation for key: ${key}`);
+    console.warn(`ThemeEngine: Missing translation for key: ${key}`);
     return key;
   }
 

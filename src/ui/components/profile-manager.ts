@@ -1,7 +1,7 @@
 import { App, Notice, setIcon, Setting } from 'obsidian';
 import { t } from '../../i18n/strings';
 import { ConfirmationModal, NewProfileModal, PasteCssModal } from '../modals';
-import type { ColorMasterSettingTab } from '../settingsTab';
+import type { ThemeEngineSettingTab } from '../settingsTab';
 
 interface AppWithCustomCss extends App {
   customCss: {
@@ -9,7 +9,7 @@ interface AppWithCustomCss extends App {
   };
 }
 
-export function drawProfileManager(containerEl: HTMLElement, settingTab: ColorMasterSettingTab) {
+export function drawProfileManager(containerEl: HTMLElement, settingTab: ThemeEngineSettingTab) {
   const plugin = settingTab.plugin;
 
   containerEl.createEl('h3', {

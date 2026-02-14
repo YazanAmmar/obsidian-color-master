@@ -11,7 +11,7 @@ import {
 } from 'obsidian';
 import { DEFAULT_VARS, TEXT_TO_BG_MAP } from '../constants';
 import { t } from '../i18n/strings';
-import type ColorMaster from '../main';
+import type ThemeEngine from '../main';
 import { flattenVars, getAccessibilityRating, getContrastRatio, debounce } from '../utils';
 import { drawColorPickers } from './components/color-pickers';
 import { drawImportExport } from './components/import-export';
@@ -30,8 +30,8 @@ import {
   LanguageInfoModal,
 } from './modals';
 
-export class ColorMasterSettingTab extends PluginSettingTab {
-  plugin: ColorMaster;
+export class ThemeEngineSettingTab extends PluginSettingTab {
+  plugin: ThemeEngine;
   searchContainer: HTMLElement;
   searchInput: HTMLInputElement;
   caseToggle: HTMLButtonElement;
@@ -50,7 +50,7 @@ export class ColorMasterSettingTab extends PluginSettingTab {
   likeCardEl: HTMLElement | null = null;
   noSearchResultsEl: HTMLElement | null = null;
 
-  constructor(app: App, plugin: ColorMaster) {
+  constructor(app: App, plugin: ThemeEngine) {
     super(app, plugin);
     this.plugin = plugin;
     this.snippetSortable = null;
@@ -78,7 +78,7 @@ export class ColorMasterSettingTab extends PluginSettingTab {
       try {
         colorPicker.value = rgbHex;
       } catch {
-        console.warn(`Color Master: Invalid HEX for color picker: ${rgbHex}`);
+        console.warn(`Theme Engine: Invalid HEX for color picker: ${rgbHex}`);
         colorPicker.value = '#ffffff';
       }
     } else {
@@ -530,9 +530,9 @@ export class ColorMasterSettingTab extends PluginSettingTab {
     const themeDefaults = await this.plugin.getThemeDefaults();
 
     const { containerEl } = this;
-    containerEl.classList.add('color-master-settings-tab');
+    containerEl.classList.add('theme-engine-settings-tab');
     containerEl.empty();
-    containerEl.classList.add('color-master-hidden');
+    containerEl.classList.add('theme-engine-hidden');
 
     const langCode = this.plugin.settings.language;
     const customLang = this.plugin.settings.customLanguages?.[langCode];
@@ -563,7 +563,7 @@ export class ColorMasterSettingTab extends PluginSettingTab {
         });
 
         if (!createdSetting) {
-          console.warn('Color Master: Failed to create top setting group item. Falling back.');
+          console.warn('Theme Engine: Failed to create top setting group item. Falling back.');
           return new Setting(topSettingsContainer);
         }
 
@@ -811,7 +811,7 @@ export class ColorMasterSettingTab extends PluginSettingTab {
     const scrollContainer = this.containerEl.closest<HTMLElement>('.vertical-tab-content');
 
     if (!scrollContainer) {
-      console.warn('Color Master: Could not find scroll container.');
+      console.warn('Theme Engine: Could not find scroll container.');
     } else {
       const debouncedScrollSave = debounce(() => {
         this.plugin.settings.lastScrollPosition = scrollContainer.scrollTop;
@@ -830,6 +830,6 @@ export class ColorMasterSettingTab extends PluginSettingTab {
       }
     }
 
-    containerEl.classList.remove('color-master-hidden');
+    containerEl.classList.remove('theme-engine-hidden');
   }
 }

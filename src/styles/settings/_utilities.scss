@@ -32,7 +32,7 @@
   display: none !important;
 }
 
-.color-master-settings-tab {
+.theme-engine-settings-tab {
   .cm-top-settings-group {
     margin-bottom: 12px;
   }
@@ -69,14 +69,14 @@
 }
 
 /* Dividers */
-.color-master-settings-tab > hr {
+.theme-engine-settings-tab > hr {
   border: none;
   height: 1px;
   background-color: var(--background-modifier-border);
   margin: -1px 0px;
 }
 
-.color-master-settings-tab > hr.cm-search-divider {
+.theme-engine-settings-tab > hr.cm-search-divider {
   margin-top: 8px;
   margin-bottom: 12px;
 }
@@ -123,6 +123,6 @@
   }
 }
 
-.color-master-hidden {
+.theme-engine-hidden {
   visibility: hidden;
 }

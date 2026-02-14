@@ -1,24 +1,24 @@
 import { App, ButtonComponent, Notice, requestUrl, Setting } from 'obsidian';
 import { t } from '../../../i18n/strings';
-import type ColorMaster from '../../../main';
+import type ThemeEngine from '../../../main';
 import { debounce } from '../../../utils';
-import type { ColorMasterSettingTab } from '../../settingsTab';
-import { ColorMasterBaseModal } from '../base';
+import type { ThemeEngineSettingTab } from '../../settingsTab';
+import { ThemeEngineBaseModal } from '../base';
 
 /**
  * Modal for managing global background settings.
  * Handles switching between image/video modes and configuring processing options like JPG conversion.
  */
-export class BackgroundImageSettingsModal extends ColorMasterBaseModal {
-  plugin: ColorMaster;
+export class BackgroundImageSettingsModal extends ThemeEngineBaseModal {
+  plugin: ThemeEngine;
 
-  constructor(app: App, plugin: ColorMaster) {
+  constructor(app: App, plugin: ThemeEngine) {
     super(app, plugin);
   }
 
   onOpen() {
     super.onOpen();
-    this.modalEl.classList.add('color-master-modal');
+    this.modalEl.classList.add('theme-engine-modal');
     const { contentEl } = this;
     const activeProfile = this.plugin.settings.profiles[this.plugin.settings.activeProfile];
 
@@ -192,11 +192,11 @@ export class BackgroundImageSettingsModal extends ColorMasterBaseModal {
  * Modal for importing background media via local files, clipboard paste, or drag-and-drop.
  * Handles diverse inputs including Base64 data URLs and remote HTTP links.
  */
-export class AddBackgroundModal extends ColorMasterBaseModal {
-  plugin: ColorMaster;
-  settingTab: ColorMasterSettingTab;
+export class AddBackgroundModal extends ThemeEngineBaseModal {
+  plugin: ThemeEngine;
+  settingTab: ThemeEngineSettingTab;
 
-  constructor(app: App, plugin: ColorMaster, settingTab: ColorMasterSettingTab) {
+  constructor(app: App, plugin: ThemeEngine, settingTab: ThemeEngineSettingTab) {
     super(app, plugin);
     this.settingTab = settingTab;
   }
@@ -229,7 +229,7 @@ export class AddBackgroundModal extends ColorMasterBaseModal {
         return;
       } catch (error) {
         new Notice(t('notices.backgroundLoadError'));
-        console.error('Color Master: Error handling pasted data URL:', error);
+        console.error('Theme Engine: Error handling pasted data URL:', error);
         this.close();
         return;
       }

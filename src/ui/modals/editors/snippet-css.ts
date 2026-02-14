@@ -1,10 +1,10 @@
 import { App, Notice, Setting, TextComponent, TextAreaComponent } from 'obsidian';
 import { t } from '../../../i18n/strings';
-import type ColorMaster from '../../../main';
+import type ThemeEngine from '../../../main';
 import type { Snippet } from '../../../types';
 import { debounce } from '../../../utils';
-import type { ColorMasterSettingTab } from '../../settingsTab';
-import { ColorMasterBaseModal } from '../base';
+import type { ThemeEngineSettingTab } from '../../settingsTab';
+import { ThemeEngineBaseModal } from '../base';
 
 interface AppWithCustomCss extends App {
   customCss: {
@@ -12,9 +12,9 @@ interface AppWithCustomCss extends App {
   };
 }
 
-export class SnippetCssModal extends ColorMasterBaseModal {
-  plugin: ColorMaster;
-  settingTab: ColorMasterSettingTab;
+export class SnippetCssModal extends ThemeEngineBaseModal {
+  plugin: ThemeEngine;
+  settingTab: ThemeEngineSettingTab;
   existingSnippet: Snippet | null;
   isEditing: boolean;
   modalTitleEl: HTMLHeadingElement;
@@ -35,8 +35,8 @@ export class SnippetCssModal extends ColorMasterBaseModal {
 
   constructor(
     app: App,
-    plugin: ColorMaster,
-    settingTab: ColorMasterSettingTab,
+    plugin: ThemeEngine,
+    settingTab: ThemeEngineSettingTab,
     existingSnippet: Snippet | null = null,
   ) {
     super(app, plugin);
@@ -118,7 +118,7 @@ export class SnippetCssModal extends ColorMasterBaseModal {
             new Notice(t('notices.snippetLoaded', selectedSnippet));
           } catch (error) {
             new Notice(t('notices.snippetReadFailed', selectedSnippet));
-            console.error(`Color Master: Failed to read snippet CSS at ${snippetPath}`, error);
+            console.error(`Theme Engine: Failed to read snippet CSS at ${snippetPath}`, error);
           }
         });
     });

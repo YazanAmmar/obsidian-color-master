@@ -1,14 +1,14 @@
 import { App, ButtonComponent, Notice, setIcon, Setting } from 'obsidian';
 import Sortable from 'sortablejs';
 import { t } from '../../../i18n/strings';
-import type ColorMaster from '../../../main';
+import type ThemeEngine from '../../../main';
 import type { NoticeRule } from '../../../types';
-import type { ColorMasterSettingTab } from '../../settingsTab';
-import { ColorMasterBaseModal } from '../base';
+import type { ThemeEngineSettingTab } from '../../settingsTab';
+import { ThemeEngineBaseModal } from '../base';
 
-export class NoticeRulesModal extends ColorMasterBaseModal {
-  plugin: ColorMaster;
-  settingTab: ColorMasterSettingTab;
+export class NoticeRulesModal extends ThemeEngineBaseModal {
+  plugin: ThemeEngine;
+  settingTab: ThemeEngineSettingTab;
   ruleType: 'text' | 'background';
   localRules: NoticeRule[];
   newlyAddedRuleId: string | null = null;
@@ -17,8 +17,8 @@ export class NoticeRulesModal extends ColorMasterBaseModal {
 
   constructor(
     app: App,
-    plugin: ColorMaster,
-    settingTab: ColorMasterSettingTab,
+    plugin: ThemeEngine,
+    settingTab: ThemeEngineSettingTab,
     ruleType: 'text' | 'background',
   ) {
     super(app, plugin);
@@ -42,7 +42,7 @@ export class NoticeRulesModal extends ColorMasterBaseModal {
 
     const { contentEl } = this;
     contentEl.empty();
-    this.modalEl.classList.add('color-master-modal', 'cm-rules-modal');
+    this.modalEl.classList.add('theme-engine-modal', 'cm-rules-modal');
 
     const title =
       this.ruleType === 'text'
@@ -265,7 +265,7 @@ export class NoticeRulesModal extends ColorMasterBaseModal {
     }
 
     if (!Sortable) {
-      console.warn('Color Master: SortableJS not found, drag & drop disabled.');
+      console.warn('Theme Engine: SortableJS not found, drag & drop disabled.');
       return;
     }
 

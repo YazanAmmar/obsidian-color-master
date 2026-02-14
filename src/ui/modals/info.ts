@@ -1,13 +1,13 @@
 import { App, ButtonComponent, Component, MarkdownRenderer } from 'obsidian';
 import { t } from '../../i18n/strings';
-import type ColorMaster from '../../main';
-import { ColorMasterBaseModal } from './base';
+import type ThemeEngine from '../../main';
+import { ThemeEngineBaseModal } from './base';
 
 /**
  * A simple modal for showing informational text, rendered as markdown.
  */
-export class LanguageInfoModal extends ColorMasterBaseModal {
-  constructor(app: App, plugin: ColorMaster) {
+export class LanguageInfoModal extends ThemeEngineBaseModal {
+  constructor(app: App, plugin: ThemeEngine) {
     super(app, plugin);
   }
 
@@ -15,7 +15,7 @@ export class LanguageInfoModal extends ColorMasterBaseModal {
     super.onOpen();
     const { contentEl } = this;
     contentEl.empty();
-    this.modalEl.classList.add('color-master-modal', 'cm-info-modal');
+    this.modalEl.classList.add('theme-engine-modal', 'cm-info-modal');
 
     contentEl.createEl('h3', { text: t('modals.langInfo.title') });
 

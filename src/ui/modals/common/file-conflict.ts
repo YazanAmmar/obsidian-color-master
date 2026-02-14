@@ -1,20 +1,20 @@
 import { App, ButtonComponent } from 'obsidian';
 import { t } from '../../../i18n/strings';
-import type ColorMaster from '../../../main';
-import { ColorMasterBaseModal } from '../base';
+import type ThemeEngine from '../../../main';
+import { ThemeEngineBaseModal } from '../base';
 
 /**
  * Modal shown when adding a background image that already exists
  */
-export class FileConflictModal extends ColorMasterBaseModal {
-  plugin: ColorMaster;
+export class FileConflictModal extends ThemeEngineBaseModal {
+  plugin: ThemeEngine;
   arrayBuffer: ArrayBuffer;
   fileName: string;
   onResolve: (choice: 'replace' | 'keep') => void;
 
   constructor(
     app: App,
-    plugin: ColorMaster,
+    plugin: ThemeEngine,
     arrayBuffer: ArrayBuffer,
     fileName: string,
     onResolve: (choice: 'replace' | 'keep') => void,

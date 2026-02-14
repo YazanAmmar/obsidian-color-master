@@ -1,24 +1,24 @@
-# Obsidian Color Master
+# Obsidian Theme Engine
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![GitHub all releases](https://img.shields.io/github/downloads/YazanAmmar/obsidian-color-master/total?style=flat&color=brightgreen)](https://github.com/YazanAmmar/obsidian-color-master/releases)
-[![Release](https://img.shields.io/github/v/release/YazanAmmar/obsidian-color-master?label=version)](https://github.com/YazanAmmar/obsidian-color-master/releases)
-[![Supported Languages: 4 Built-in + Custom](https://img.shields.io/badge/languages-4%2B-blue.svg)](https://github.com/YazanAmmar/obsidian-color-master/blob/main/src/i18n/strings.ts)
-[![GitHub Stars](https://img.shields.io/github/stars/YazanAmmar/obsidian-color-master.svg?style=flat&color=yellow)](https://github.com/YazanAmmar/obsidian-color-master/stargazers)
-[![GitHub Issues](https://img.shields.io/github/issues/YazanAmmar/obsidian-color-master.svg?style=flat&color=red)](https://github.com/YazanAmmar/obsidian-color-master/issues)
+[![GitHub all releases](https://img.shields.io/github/downloads/YazanAmmar/obsidian-theme-engine/total?style=flat&color=brightgreen)](https://github.com/YazanAmmar/obsidian-theme-engine/releases)
+[![Release](https://img.shields.io/github/v/release/YazanAmmar/obsidian-theme-engine?label=version)](https://github.com/YazanAmmar/obsidian-theme-engine/releases)
+[![Supported Languages: 4 Built-in + Custom](https://img.shields.io/badge/languages-4%2B-blue.svg)](https://github.com/YazanAmmar/obsidian-theme-engine/blob/main/src/i18n/strings.ts)
+[![GitHub Stars](https://img.shields.io/github/stars/YazanAmmar/obsidian-theme-engine.svg?style=flat&color=yellow)](https://github.com/YazanAmmar/obsidian-theme-engine/stargazers)
+[![GitHub Issues](https://img.shields.io/github/issues/YazanAmmar/obsidian-theme-engine.svg?style=flat&color=red)](https://github.com/YazanAmmar/obsidian-theme-engine/issues)
 
 **A full theme-engine for Obsidian. Colors, backgrounds, snippets, profiles — all in one place.**
 
-Color Master exposes every core Obsidian CSS variable (and your own custom ones) through a polished UI. Manage profiles, snippets, and even video backgrounds—no CSS knowledge required, but perfect for power users.
+Theme Engine exposes every core Obsidian CSS variable (and your own custom ones) through a polished UI. Manage profiles, snippets, and even video backgrounds—no CSS knowledge required, but perfect for power users.
 
 <p align="center">
-  <img width="500" alt="Color Master Logo" src="assets/color-master.png" />
+  <img width="500" alt="Theme Engine Logo" src="assets/theme-engine.png" />
 </p>
 
 ## Table of Contents
 
 - [Overview](#overview)
-- [Why Color Master?](#why-color-master)
+- [Why Theme Engine?](#why-theme-engine)
 - [Features](#features)
 - [Project Structure](#project-structure)
 - [Supported Languages](#supported-languages)
@@ -45,7 +45,7 @@ Color Master exposes every core Obsidian CSS variable (and your own custom ones)
 
 ## Overview
 
-Color Master is an Obsidian plugin that allows you to edit and manage _all_ of Obsidian’s core CSS color variables using an interactive UI. Create theme **profiles** (bundles of colors, snippets, notice rules, and settings), switch between them instantly, export/share them as JSON, or even import CSS from your installed themes to create new, editable profiles.
+Theme Engine is an Obsidian plugin that allows you to edit and manage _all_ of Obsidian’s core CSS color variables using an interactive UI. Create theme **profiles** (bundles of colors, snippets, notice rules, and settings), switch between them instantly, export/share them as JSON, or even import CSS from your installed themes to create new, editable profiles.
 
 Designed for both:
 
@@ -54,9 +54,9 @@ Designed for both:
 
 ---
 
-## Why Color Master?
+## Why Theme Engine?
 
-- **Dynamic Theme Engine**: Color Master acts as a **smart layer** on top of your existing theme. It dynamically captures your active theme's colors, allowing you to override only what you need.
+- **Dynamic Theme Engine**: Theme Engine acts as a **smart layer** on top of your existing theme. It dynamically captures your active theme's colors, allowing you to override only what you need.
 - **Centralize Control:** Unify theme tweaks into **Profiles** (collections of variables + snippets + backgrounds).
 - **No More CSS Sprawl:** Keep small CSS hacks tied to specific profiles instead of managing dozens of separate `.css` files.
 - **Shareable Themes:** Create shareable theme packages (profiles export to a single `.json` file).
@@ -109,9 +109,9 @@ Designed for both:
   - **Management Tools:** Import, Export, Copy, and Paste translations as JSON.
   - **Smart Fallback Engine:** Gracefully falls back to English for any missing keys.
 - **Quick Theme Toggle**: Instantly cycle the active profile's theme setting between "Force Light," "Force Dark," and "Auto" with a new icon in the profile manager.
-- **Ribbon Icon**: Access the Color Master settings with a single click from the Obsidian ribbon.
+- **Ribbon Icon**: Access the Theme Engine settings with a single click from the Obsidian ribbon.
 - **Selective Data Reset**: The "Reset Plugin" feature is now granular. You can choose to delete only specific categories of data (Profiles, Snippets, Backgrounds, Settings, or Languages).
-- **Theme Interference Warning**: A small ⚠️ icon appears if you have a community theme enabled, warning you that it might override your Color Master settings.
+- **Theme Interference Warning**: A small ⚠️ icon appears if you have a community theme enabled, warning you that it might override your Theme Engine settings.
 - **Add Custom CSS Variables**:
   - Add any CSS variable (e.g., from another plugin) to the UI.
   - Define its type (color, size, text, number) for the correct UI controls.
@@ -170,7 +170,7 @@ src/
 
 ## Supported Languages
 
-Color Master has a powerful, extensible translation system. It includes full support for 4 built-in languages and allows you to add your own **Custom Languages** via the settings menu.
+Theme Engine has a powerful, extensible translation system. It includes full support for 4 built-in languages and allows you to add your own **Custom Languages** via the settings menu.
 
 **Built-in Languages:**
 
@@ -307,10 +307,10 @@ The plugin provides a UI to edit **all 62** core CSS variables. Here is a quick 
 
 ## Installation (End User)
 
-1. Download the latest release from the [GitHub Releases page](https://github.com/YazanAmmar/obsidian-color-master/releases).
+1. Download the latest release from the [GitHub Releases page](https://github.com/YazanAmmar/obsidian-theme-engine/releases).
 2. Extract the plugin folder into your vault's plugins folder: `<YourVault>/.obsidian/plugins/`.
 3. In Obsidian, go to `Settings` -> `Community plugins`.
-4. Enable the "Color Master" plugin.
+4. Enable the "Theme Engine" plugin.
 5. Open the plugin settings to start customizing!
 
 ---
@@ -322,8 +322,8 @@ If you want to customize the plugin or contribute to its development, you can ea
 1. **Clone the Repository:**
 
    ```Bash
-   git clone https://github.com/YazanAmmar/obsidian-color-master.git
-   cd obsidian-color-master
+   git clone https://github.com/YazanAmmar/obsidian-theme-engine.git
+   cd obsidian-theme-engine
    ```
 
 2. **Install Dependencies:**
@@ -335,7 +335,6 @@ If you want to customize the plugin or contribute to its development, you can ea
    ```
 
 3. **Build the Plugin:** To compile the TypeScript code and package the plugin for Obsidian:
-
    - **Standard Build:** Use `npm run build` to compile the core files (`main.js`, `styles.css`, `manifest.json`) into the project root.
 
      ```Bash
@@ -358,14 +357,14 @@ If you want to customize the plugin or contribute to its development, you can ea
 >
 > The `npm run dev` command is currently configured with a personal path:
 >
-> `C:\Users\user\Documents\Obsidian\My Notes\.obsidian\plugins\obsidian-color-master`
+> `C:\Users\user\Documents\Obsidian\My Notes\.obsidian\plugins\obsidian-theme-engine`
 >
 > You must edit the `dev` script inside the `package.json` file to point to your local vault's plugin folder before running this command.
 
 4. **Load into Obsidian:** The compiled files (`main.js`, `styles.css`, `manifest.json`) will be in the project's root. Copy these files into your vault's plugin folder:
 
    ```Bash
-   <YourVault>/.obsidian/plugins/color-master/
+   <YourVault>/.obsidian/plugins/obsidian-theme-engine/
    ```
 
 ---
@@ -421,7 +420,7 @@ You can assign hotkeys to these commands in `Settings` -> `Hotkeys`:
 1. **Enable & Disable**: Toggle the entire plugin on or off.
 2. **Cycle to next profile**: Instantly switch to the next profile in your list.
 3. **Cycle to previous profile**: Switch to the previous profile.
-4. **Open settings tab**: Open the Color Master settings panel.
+4. **Open settings tab**: Open the Theme Engine settings panel.
 5. **Cycle active profile theme**: Cycle the active profile's theme (Light/Dark/Auto).
 
 ---
@@ -429,7 +428,7 @@ You can assign hotkeys to these commands in `Settings` -> `Hotkeys`:
 ## Performance & Tips
 
 - If you notice lag while dragging a color picker, reduce the **Live Update FPS** slider in the `Advanced Settings` section. A value of 0 disables live preview completely, applying color only when you release the mouse.
-- The **Theme Interference Warning** ⚠️ is important. If you have a community theme (e.g., "Minimal") enabled _and_ a Color Master profile active, they might fight over colors. For best results, set your Obsidian theme to "Default" and let Color Master handle all the colors.
+- The **Theme Interference Warning** ⚠️ is important. If you have a community theme (e.g., "Minimal") enabled _and_ a Theme Engine profile active, they might fight over colors. For best results, set your Obsidian theme to "Default" and let Theme Engine handle all the colors.
 - **For Optimal Performance:** We recommend enabling the **Convert images to JPG** option in the Background Settings. This automatically compresses uploaded images, resulting in smaller file sizes and better loading performance without noticeable loss of visual quality.
 - **If you encounter stability or performance issues:** First, export your current profiles and backgrounds. Then, use the **Reset Plugin Settings** option in Advanced Settings to restore the plugin to its factory state. This often solves underlying data conflicts.
 
@@ -437,9 +436,9 @@ You can assign hotkeys to these commands in `Settings` -> `Hotkeys`:
 
 ## Changelog (Summary)
 
-For full details, see [`CHANGELOG.md`](https://github.com/YazanAmmar/obsidian-color-master/blob/main/CHANGELOG.md).
+For full details, see [`CHANGELOG.md`](https://github.com/YazanAmmar/obsidian-theme-engine/blob/main/CHANGELOG.md).
 
-- **v1.2.0** - The **Theme Engine Update**. Re-wrote the core to dynamically capture your active theme's colors. UI now shows "Pristine" (dimmed) vs. "Modified" (bright) states. Added a complete **Custom Language** and translation editor system. Implemented granular data reset and SCSS/ESLint.
+- **v2.2.0** - The **Theme Engine Update**. Re-wrote the core to dynamically capture your active theme's colors. UI now shows "Pristine" (dimmed) vs. "Modified" (bright) states. Added a complete **Custom Language** and translation editor system. Implemented granular data reset and SCSS/ESLint.
 - **v1.1.1** - Added **Per-Profile Video Background** support, enhanced settings display performance by **restoring scroll position**, and refactored the translation structure.
 - **v1.1.0** - Added **Per-Profile Custom Backgrounds** (Image & Video), background browser, and media management tools.
 - **v1.0.9** - Added **Import from Installed Themes/Snippets**, Quick Theme Toggle, Reset Plugin button, and Theme Interference Warning.
@@ -449,7 +448,7 @@ For full details, see [`CHANGELOG.md`](https://github.com/YazanAmmar/obsidian-co
 
 ## Roadmap
 
-Here are the future plans for Color Master. Feel free to contribute or suggest features!
+Here are the future plans for Theme Engine. Feel free to contribute or suggest features!
 
 - [ ] **Community Profile Marketplace**: An easy way to browse, share, and import profiles from other users.
 - [ ] **More Plugin Integrations**: Add dedicated color variables for other popular plugins (e.g., Kanban, Calendar).
@@ -480,7 +479,7 @@ Please follow the existing code style, and ensure your contributions are **innov
 
 > [!TIP]
 >
-> Are you a developer of another plugin? If you'd like your plugin to be natively supported by Color Master (e.g., controlling a specific color variable of your UI), feel free to open a Pull Request. Supporting integration is a great way to gain more visibility for your work!
+> Are you a developer of another plugin? If you'd like your plugin to be natively supported by Theme Engine (e.g., controlling a specific color variable of your UI), feel free to open a Pull Request. Supporting integration is a great way to gain more visibility for your work!
 
 ---
 
@@ -488,26 +487,26 @@ Please follow the existing code style, and ensure your contributions are **innov
 
 ### Q: ⚠️ Why are my colors not changing after I activate a profile?
 
-A: This is the most common issue. You likely have a **Community Theme** (like Minimal, Atom, etc.) enabled simultaneously. This external theme imposes its own color rules and interferes with the variables set by **Color Master**.
+A: This is the most common issue. You likely have a **Community Theme** (like Minimal, Atom, etc.) enabled simultaneously. This external theme imposes its own color rules and interferes with the variables set by **Theme Engine**.
 
 **The Best Solution:**
 
 1. Go to Obsidian's **Settings** -> **Appearance** -> **Themes**.
 2. Select the **Default** theme for Obsidian.
-3. The ⚠️ warning icon in Color Master settings will disappear, and your profile's colors will apply correctly.
+3. The ⚠️ warning icon in Theme Engine settings will disappear, and your profile's colors will apply correctly.
 
 **Advanced Solution (To customize an external theme):**
 
 1. Set Obsidian's theme to **Default**.
-2. Open **Color Master** settings and click **Import / Paste (.css)**.
+2. Open **Theme Engine** settings and click **Import / Paste (.css)**.
 3. Select the **"Import from installed theme"** option and choose the theme you want to modify (e.g., Minimal).
-4. This creates a **new CSS Profile** within Color Master containing the external theme's code, allowing you to customize its colors safely without conflicts.
+4. This creates a **new CSS Profile** within Theme Engine containing the external theme's code, allowing you to customize its colors safely without conflicts.
 
 ---
 
 ### Q: I added an image or video background, but the UI (like sidebars) is still dark. Why isn't it transparent?
 
-A: **Color Master** uses **Smart Transparency** to handle this.
+A: **Theme Engine** uses **Smart Transparency** to handle this.
 
 - When you activate a background, the plugin automatically sets key CSS variables (like `--background-primary` and `--sidebar-background`) to `transparent`.
 - This makes the UI layers see-through, allowing your image or video to be visible.
@@ -545,12 +544,12 @@ A: Yes, absolutely. The plugin fully supports **Arabic** (العَرَبيَّة
 
 ## License
 
-MIT — see [LICENSE](https://github.com/YazanAmmar/obsidian-color-master/blob/main/LICENSE).
+MIT — see [LICENSE](https://github.com/YazanAmmar/obsidian-theme-engine/blob/main/LICENSE).
 
 ---
 
 ## Contact / Links
 
-- **GitHub Repo**: [https://github.com/YazanAmmar/obsidian-color-master](https://github.com/YazanAmmar/obsidian-color-master)
-- **Issues & Features**: [GitHub Issues Page](https://github.com/YazanAmmar/obsidian-color-master/issues)
-- **Telegram Channel**: [https://t.me/ObsidianColorMaster](https://t.me/ThemeEngine)
+- **GitHub Repo**: [https://github.com/YazanAmmar/obsidian-theme-engine](https://github.com/YazanAmmar/obsidian-theme-engine)
+- **Issues & Features**: [GitHub Issues Page](https://github.com/YazanAmmar/obsidian-theme-engine/issues)
+- **Telegram Channel**: [https://t.me/ObsidianThemeEngine](https://t.me/ThemeEngine)

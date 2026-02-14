@@ -1,6 +1,6 @@
 import { Setting, Notice, setIcon } from 'obsidian';
 import { t } from '../../i18n/strings';
-import type { ColorMasterSettingTab } from '../settingsTab';
+import type { ThemeEngineSettingTab } from '../settingsTab';
 import {
   CustomVariableMetaModal,
   ConfirmationModal,
@@ -10,7 +10,7 @@ import {
   AdvancedResetModal,
 } from '../modals';
 
-export function drawOptionsSection(containerEl: HTMLElement, settingTab: ColorMasterSettingTab) {
+export function drawOptionsSection(containerEl: HTMLElement, settingTab: ThemeEngineSettingTab) {
   const plugin = settingTab.plugin;
   const activeProfile = plugin.settings.profiles[plugin.settings.activeProfile];
 

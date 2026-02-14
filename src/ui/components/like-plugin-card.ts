@@ -2,18 +2,18 @@ import { setIcon } from 'obsidian';
 import { DEFAULT_VARS } from '../../constants';
 import { t } from '../../i18n/strings';
 import { flattenVars } from '../../utils';
-import type { ColorMasterSettingTab } from '../settingsTab';
+import type { ThemeEngineSettingTab } from '../settingsTab';
 
-const GITHUB_REPO_URL = 'https://github.com/YazanAmmar/obsidian-color-master';
-const ISSUE_URL = 'https://github.com/YazanAmmar/obsidian-color-master/issues';
+const GITHUB_REPO_URL = 'https://github.com/YazanAmmar/obsidian-theme-engine';
+const ISSUE_URL = 'https://github.com/YazanAmmar/obsidian-theme-engine/issues';
 const SYNC_WIKI_URL = 'https://github.com/YazanAmmar/SyncEveryThing';
 const TELEGRAM_URL = 'https://t.me/ThemeEngine';
 
-function calcProfilesCount(settingTab: ColorMasterSettingTab): number {
+function calcProfilesCount(settingTab: ThemeEngineSettingTab): number {
   return Object.keys(settingTab.plugin.settings.profiles || {}).length;
 }
 
-function calcSnippetsCount(settingTab: ColorMasterSettingTab): number {
+function calcSnippetsCount(settingTab: ThemeEngineSettingTab): number {
   const settings = settingTab.plugin.settings;
   const profiles = settings.profiles || {};
 
@@ -28,7 +28,7 @@ function calcSnippetsCount(settingTab: ColorMasterSettingTab): number {
   return totalSnippets;
 }
 
-function calcVarsCount(settingTab: ColorMasterSettingTab): number {
+function calcVarsCount(settingTab: ThemeEngineSettingTab): number {
   const allVars = new Set(Object.keys(flattenVars(DEFAULT_VARS)));
   const activeProfile =
     settingTab.plugin.settings.profiles[settingTab.plugin.settings.activeProfile];
@@ -44,14 +44,14 @@ function calcPluginIntegrations(): number {
       return Object.keys(DEFAULT_VARS['Plugin Integrations']).length;
     }
   } catch (e) {
-    console.error('Color Master: Failed to calculate plugin integrations.', e);
+    console.error('Theme Engine: Failed to calculate plugin integrations.', e);
   }
   return 0;
 }
 
 export function drawLikePluginCard(
   containerEl: HTMLElement,
-  settingTab: ColorMasterSettingTab,
+  settingTab: ThemeEngineSettingTab,
 ): HTMLElement {
   const likeCardEl = containerEl.createDiv('cm-like-card');
 

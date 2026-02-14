@@ -15,18 +15,18 @@ import {
   t,
 } from '../../../i18n/strings';
 import { CORE_LANGUAGES, type LocaleCode, type LocalizedValue } from '../../../i18n/types';
-import type ColorMaster from '../../../main';
+import type ThemeEngine from '../../../main';
 import type { CustomTranslation } from '../../../types';
 import { debounce, unflattenStrings } from '../../../utils';
-import type { ColorMasterSettingTab } from '../../settingsTab';
-import { ColorMasterBaseModal } from '../base';
+import type { ThemeEngineSettingTab } from '../../settingsTab';
+import { ThemeEngineBaseModal } from '../base';
 
 /**
  * Advanced Language Translator supporting recursive tree-view rendering and delta-saving.
  * Designed to handle nested i18n structures efficiently.
  */
-export class LanguageTranslatorModal extends ColorMasterBaseModal {
-  settingTab: ColorMasterSettingTab;
+export class LanguageTranslatorModal extends ThemeEngineBaseModal {
+  settingTab: ThemeEngineSettingTab;
   langCode: string;
   langName: string;
   translations: CustomTranslation;
@@ -41,7 +41,7 @@ export class LanguageTranslatorModal extends ColorMasterBaseModal {
   searchInput: HTMLInputElement;
   debouncedRender: () => void;
 
-  constructor(app: App, plugin: ColorMaster, settingTab: ColorMasterSettingTab, langCode: string) {
+  constructor(app: App, plugin: ThemeEngine, settingTab: ThemeEngineSettingTab, langCode: string) {
     super(app, plugin);
     this.settingTab = settingTab;
     this.langCode = langCode;
@@ -93,7 +93,7 @@ export class LanguageTranslatorModal extends ColorMasterBaseModal {
     const { contentEl } = this;
     contentEl.empty();
     this.modalEl.classList.add(
-      'color-master-modal',
+      'theme-engine-modal',
       'cm-translator-modal',
       'cm-translator-tree-modal',
     );

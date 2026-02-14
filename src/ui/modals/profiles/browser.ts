@@ -1,25 +1,25 @@
 import { App, ButtonComponent, Notice, setIcon } from 'obsidian';
 import { t } from '../../../i18n/strings';
-import type ColorMaster from '../../../main';
-import type { ColorMasterSettingTab } from '../../settingsTab';
-import { ColorMasterBaseModal } from '../base';
+import type ThemeEngine from '../../../main';
+import type { ThemeEngineSettingTab } from '../../settingsTab';
+import { ThemeEngineBaseModal } from '../base';
 import { ConfirmationModal } from '../common/confirmation';
 
 /**
  * Media browser for background management.
  * Supports: Image/Video previews, exclusive playback, in-place renaming, and dependency-aware deletion.
  */
-export class ProfileImageBrowserModal extends ColorMasterBaseModal {
-  plugin: ColorMaster;
-  settingTab: ColorMasterSettingTab;
+export class ProfileImageBrowserModal extends ThemeEngineBaseModal {
+  plugin: ThemeEngine;
+  settingTab: ThemeEngineSettingTab;
   closeCallback: () => void;
   galleryEl: HTMLElement;
   private videoPlayers: HTMLVideoElement[] = [];
 
   constructor(
     app: App,
-    plugin: ColorMaster,
-    settingTab: ColorMasterSettingTab,
+    plugin: ThemeEngine,
+    settingTab: ThemeEngineSettingTab,
     closeCallback: () => void,
   ) {
     super(app, plugin);
@@ -61,7 +61,7 @@ export class ProfileImageBrowserModal extends ColorMasterBaseModal {
         files = list.files;
       }
     } catch (e) {
-      console.warn('Color Master: Error listing background folder.', e);
+      console.warn('Theme Engine: Error listing background folder.', e);
     }
 
     const mediaFiles = files.filter((path) =>

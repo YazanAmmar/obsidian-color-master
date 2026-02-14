@@ -1,7 +1,7 @@
 export default {
   plugin: {
-    name: 'متحكم الألوان - v1.2.0',
-    ribbonTooltip: 'إعدادات Color Master',
+    name: 'متحكم الألوان - v2.2.0',
+    ribbonTooltip: 'إعدادات Theme Engine',
   },
   buttons: {
     new: 'جديد',
@@ -68,7 +68,7 @@ export default {
     iconizeModalTitle: 'إعدادات تكامل Iconize',
     overrideIconizeName: 'تجاوز ألوان إضافة Iconize',
     overrideIconizeDesc:
-      'اسمح لـ Color Master بالتحكم في كل ألوان أيقونات Iconize. لأفضل النتائج، قم بتعطيل إعدادات الألوان في إضافة Iconize نفسها.',
+      'اسمح لـ Theme Engine بالتحكم في كل ألوان أيقونات Iconize. لأفضل النتائج، قم بتعطيل إعدادات الألوان في إضافة Iconize نفسها.',
     cleanupIntervalName: 'فترة التنظيف',
     cleanupIntervalDesc:
       'تحدد عدد المرات (بالثواني) التي تتحقق فيها الإضافة من إلغاء تثبيت إضافة Iconize لتنظيف أيقوناتها.',
@@ -171,7 +171,7 @@ export default {
         'هل أنت متأكد من رغبتك في حذف هذه القصاصة؟ لا يمكن التراجع عن هذا الإجراء.',
       resetPluginTitle: 'هل أنت متأكد؟',
       resetPluginDesc:
-        'سيتم حذف جميع بيانات Color Master بشكل دائم (الملفات الشخصية، القصاصات، الإعدادات، والخلفيات). هذا الإجراء لا يمكن التراجع عنه.',
+        'سيتم حذف جميع بيانات Theme Engine بشكل دائم (الملفات الشخصية، القصاصات، الإعدادات، والخلفيات). هذا الإجراء لا يمكن التراجع عنه.',
       deleteGlobalBgTitle: 'تأكيد حذف الخلفية',
       deleteGlobalBgDesc:
         'هل أنت متأكد من رغبتك في حذف هذه الخلفية بشكل دائم؟ البروفايلات التالية تستخدمها حالياً وسيتم إزالتها منها:',
@@ -324,7 +324,7 @@ export default {
     fileLoaded: (fileName: string) => `تم تحميل الملف "${fileName}" في منطقة النص.`,
     exportSuccess: 'تم تصدير الملف الشخصي بنجاح!',
     jsonCopied: 'تم نسخ JSON للملف الشخصي إلى الحافظة بنجاح!',
-    resetSuccess: 'تم حذف بيانات Color Master. يرجى إعادة تحميل Obsidian لتطبيق التغييرات.',
+    resetSuccess: 'تم حذف بيانات Theme Engine. يرجى إعادة تحميل Obsidian لتطبيق التغييرات.',
     fpsUpdated: (value: number) => `تم تعيين معدل التحديث المباشر إلى: ${value}`,
     invalidProfileObject: 'لا يبدو أن ملف JSON هو كائن ملف شخصي صالح.',
     profileCreated: (name: string) => `تم إنشاء الملف الشخصي "${name}" بنجاح!`,
@@ -418,7 +418,7 @@ export default {
   },
   likeCard: {
     tagline: 'خصّص ثيم Obsidian الخاص بك — عدّل، احفظ وشارك ملفات الألوان',
-    description: 'Color Master لـ Obsidian — تحكّم بالثيمات وأنظمة الألوان',
+    description: 'Theme Engine لـ Obsidian — تحكّم بالثيمات وأنظمة الألوان',
     profilesAndSnippets: 'الملفات ومقتطفات CSS',
     customizableColors: 'ألوان قابلة للتخصيص',
     daysOfUse: 'أيام الاستخدام',

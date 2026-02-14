@@ -19,7 +19,7 @@
   }
 }
 
-.color-master-settings-tab[dir='ltr'] .cm-flyout-menu-buttons {
+.theme-engine-settings-tab[dir='ltr'] .cm-flyout-menu-buttons {
   transform: translateX(15px);
   &.is-open {
     opacity: 1;
@@ -28,7 +28,7 @@
   }
 }
 
-.color-master-settings-tab[dir='rtl'] .cm-flyout-menu-buttons {
+.theme-engine-settings-tab[dir='rtl'] .cm-flyout-menu-buttons {
   transform: translateX(-15px);
   &.is-open {
     opacity: 1;

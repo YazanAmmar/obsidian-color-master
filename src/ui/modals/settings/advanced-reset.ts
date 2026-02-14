@@ -1,14 +1,14 @@
 import { App, ButtonComponent, Setting } from 'obsidian';
 import { t } from '../../../i18n/strings';
-import type ColorMaster from '../../../main';
-import { ColorMasterBaseModal } from '../base';
+import type ThemeEngine from '../../../main';
+import { ThemeEngineBaseModal } from '../base';
 
 /**
  * Modal for granular data reset operations.
  * Allows users to select specific data categories to wipe or preserve.
  */
-export class AdvancedResetModal extends ColorMasterBaseModal {
-  plugin: ColorMaster;
+export class AdvancedResetModal extends ThemeEngineBaseModal {
+  plugin: ThemeEngine;
 
   private defaultResetOptions = {
     deleteProfiles: false,
@@ -30,7 +30,7 @@ export class AdvancedResetModal extends ColorMasterBaseModal {
 
   deleteButton: ButtonComponent;
 
-  constructor(app: App, plugin: ColorMaster) {
+  constructor(app: App, plugin: ThemeEngine) {
     super(app, plugin);
   }
 

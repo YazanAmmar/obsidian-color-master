@@ -8,11 +8,11 @@ import {
   isIconizeEnabled,
 } from '../../utils';
 import { IconizeSettingsModal, NoticeRulesModal } from '../modals';
-import type { ColorMasterSettingTab } from '../settingsTab';
+import type { ThemeEngineSettingTab } from '../settingsTab';
 
 export function drawColorPickers(
   containerEl: HTMLElement,
-  settingTab: ColorMasterSettingTab,
+  settingTab: ThemeEngineSettingTab,
   themeDefaults: Record<string, string>,
 ) {
   const plugin = settingTab.plugin;
@@ -39,7 +39,7 @@ export function drawColorPickers(
           });
 
           if (!createdSetting) {
-            console.warn('Color Master: Failed to create grouped setting. Falling back.');
+            console.warn('Theme Engine: Failed to create grouped setting. Falling back.');
             return new Setting(categoryContainer);
           }
 
@@ -150,7 +150,7 @@ export function drawColorPickers(
       });
       const textInput = setting.controlEl.createEl('input', {
         type: 'text',
-        cls: 'color-master-text-input',
+        cls: 'theme-engine-text-input',
       });
 
       const isModified = Object.prototype.hasOwnProperty.call(activeProfileVars, varName);
@@ -341,7 +341,7 @@ export function drawColorPickers(
           });
           const textInput = setting.controlEl.createEl('input', {
             type: 'text',
-            cls: 'color-master-text-input',
+            cls: 'theme-engine-text-input',
           });
 
           textInput.value = varValue;
@@ -393,7 +393,7 @@ export function drawColorPickers(
 
           const sizeInput = setting.controlEl.createEl('input', {
             type: 'number',
-            cls: 'color-master-text-input',
+            cls: 'theme-engine-text-input',
           });
           sizeInput.value = numValue;
           sizeInput.setCssProps({ width: '80px' });
@@ -448,7 +448,7 @@ export function drawColorPickers(
         case 'number': {
           const numInput = setting.controlEl.createEl('input', {
             type: 'number',
-            cls: 'color-master-text-input',
+            cls: 'theme-engine-text-input',
           });
           numInput.value = varValue;
           numInput.setCssProps({ width: '100px' });
