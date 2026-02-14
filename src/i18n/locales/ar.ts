@@ -1,6 +1,6 @@
 export default {
   plugin: {
-    name: 'متحكم الألوان - v2.2.0',
+    name: 'متحكم الألوان - v2.0.0',
     ribbonTooltip: 'إعدادات Theme Engine',
   },
   buttons: {

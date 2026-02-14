@@ -1,6 +1,6 @@
 # Changelog
 
-## [v2.2.0](https://github.com/YazanAmmar/obsidian-theme-engine/releases/tag/2.2.0) - 2026-02-14 (The Theme Engine Rebrand)
+## [v2.0.0](https://github.com/YazanAmmar/obsidian-theme-engine/releases/tag/2.0.0) - 2026-02-14 (The Theme Engine Rebrand)
 
 This release completes the structural transition from **Color Master** to **Theme Engine** and prepares the project for long-term maintainability.
 
@@ -203,7 +203,7 @@ This version introduces powerful new features like **Global CSS Snippets** and a
 
 ## [v1.0.7](https://github.com/YazanAmmar/obsidian-theme-engine/releases/tag/1.0.7) - 2025-09-19 (TypeScript)
 
-### Major Milestone: The TypeScript Rewrite!
+### Major Milestone: The TypeScript Rewrite
 
 The entire Theme Engine codebase has been successfully migrated from JavaScript to **TypeScript**! This is a massive step forward for the project's health, stability, and future development.
 
@@ -407,4 +407,3 @@ This update focuses on two core principles: **intelligence and elegance**. We're
 - Import/export profiles as `.json` files.
 - Bilingual UI (English & Arabic) with RTL support.
 - Includes 5 beautiful default themes: Default, OLED Matrix, Solarized Nebula, Cyberpunk Sunset, and Citrus Zest.
-

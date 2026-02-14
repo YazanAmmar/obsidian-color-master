@@ -124,46 +124,45 @@ Designed for both:
 
 ## Project Structure
 
-Here is the corrected high-level structure of the `src` folder:
+The codebase is organized by concern: plugin core, UI, modal system, i18n, and SCSS layers.
 
-```Markdown
+```text
 src/
-├── main.ts                       # Core plugin entry — loads/unloads the plugin, handles notice processing, and wires all systems together
-├── constants.ts                  # Built-in defaults, variable maps, themes, and static configuration
-├── types.ts                      # Global TypeScript types (profiles, snippets, background data, notices, etc.)
-├── utils.ts                      # Helper functions: color math, DOM helpers, flatten/unflatten, type conversions
-│
-├── commands/
-│   └── index.ts                  # Registers all plugin commands (toggle, next profile, open settings…)
-│
-├── i18n/
-│   ├── locales/
-│   │   ├── ar.ts                 # Arabic translation (RTL)
-│   │   ├── en.ts                 # English translation
-│   │   ├── fa.ts                 # Persian translation (RTL)
-│   │   ├── fr.ts                 # French translation
-│   │   └── *.ts                  # (Your custom languages go here)
-│   ├── strings.ts                # New i18n engine: fallback logic, flattening, custom-language merging
-│   └── types.ts                  # Strong typing for translation keys, locale objects, and flattening logic
-│
-├── styles/
-│   ├── _base.scss         # Core foundation: :root variables, ALL @keyframes, LTR/RTL logic, and global element overrides (tags, code, backgrounds).
-│   ├── _components.scss   # Reusable UI blocks: Like Card, Snippet List, flyout menus, and custom buttons.
-│   ├── _modals.scss       # Styling for ALL modal windows and dialogs (e.g., translator, rules, backgrounds).
-│   ├── _settings.scss     # Styling scoped *only* to the main settings tab (layout, pickers, profile manager).
-│   └── main.scss          # Root SCSS file — imports all partials in the correct order to compile styles.css.
-│
-└── ui/
-    ├── settingsTab.ts            # Renders the full settings interface (profiles, backgrounds, snippets, i18n)
-    ├── modals.ts                 # All modal classes: background modal, variable modal, translation editor, etc.
-    │
-    └── components/
-        ├── color-pickers.ts      # The redesigned Theme Engine UI (dim/bright states, undo, text previews)
-        ├── profile-manager.ts    # Switching, creating, deleting profiles — includes theme toggle & pin system
-        ├── snippets-ui.ts        # Full snippet editor: reorder, lock, edit, create, delete (with drag & drop)
-        ├── import-export.ts      # Handles profile import, export, clipboard copy, validation, safe overwrites
-        ├── options-section.ts    # Advanced options: FPS slider, RTL, reset tools, background settings
-        └── like-plugin-card.ts   # Sidebar-style card with link to author's plugins / support section
+|- main.ts                  # Plugin entrypoint and lifecycle orchestration
+|- constants.ts             # Built-in defaults, maps, and static config
+|- types.ts                 # Shared TypeScript domain types
+|- utils.ts                 # Cross-cutting utility helpers
+|
+|- commands/
+|  `- index.ts              # Command registration and command handlers
+|
+|- i18n/
+|  |- strings.ts            # Translation engine + fallback behavior
+|  |- types.ts              # i18n-specific typings
+|  `- locales/              # Built-in locales + custom locale files
+|     |- en.ts
+|     |- ar.ts
+|     |- fr.ts
+|     `- fa.ts
+|
+|- styles/
+|  |- main.scss             # Root SCSS entry (compiled to styles.css)
+|  |- base/                 # Core tokens, animation, layout direction, editor styles
+|  |- components/           # Shared component-level styles
+|  |- modals/               # Styles scoped to modal experiences
+|  `- settings/             # Settings tab layout, controls, search, accessibility
+|
+`- ui/
+   |- settingsTab.ts        # Main settings screen composition
+   |- components/           # Reusable settings UI sections/widgets
+   `- modals/               # Modal architecture split by feature domain
+      |- index.ts           # Central modal exports
+      |- base.ts            # Shared modal base class/infrastructure
+      |- info.ts            # Informational modal(s)
+      |- common/            # Generic dialogs (confirmation, file conflict)
+      |- editors/           # Content editors (CSS, notice rules, custom vars)
+      |- profiles/          # Profile creation/import/browser modals
+      `- settings/          # Settings-related modals (language, translator, etc.)
 ```
 
 ---
@@ -438,7 +437,7 @@ You can assign hotkeys to these commands in `Settings` -> `Hotkeys`:
 
 For full details, see [`CHANGELOG.md`](https://github.com/YazanAmmar/obsidian-theme-engine/blob/main/CHANGELOG.md).
 
-- **v2.2.0** - The **Theme Engine Update**. Re-wrote the core to dynamically capture your active theme's colors. UI now shows "Pristine" (dimmed) vs. "Modified" (bright) states. Added a complete **Custom Language** and translation editor system. Implemented granular data reset and SCSS/ESLint.
+- **v2.0.0** - The **Theme Engine Update**. Re-wrote the core to dynamically capture your active theme's colors. UI now shows "Pristine" (dimmed) vs. "Modified" (bright) states. Added a complete **Custom Language** and translation editor system. Implemented granular data reset and SCSS/ESLint.
 - **v1.1.1** - Added **Per-Profile Video Background** support, enhanced settings display performance by **restoring scroll position**, and refactored the translation structure.
 - **v1.1.0** - Added **Per-Profile Custom Backgrounds** (Image & Video), background browser, and media management tools.
 - **v1.0.9** - Added **Import from Installed Themes/Snippets**, Quick Theme Toggle, Reset Plugin button, and Theme Interference Warning.

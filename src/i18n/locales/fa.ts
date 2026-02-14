@@ -1,6 +1,6 @@
 ﻿export default {
   plugin: {
-    name: 'استاد رنگ - v2.2.0',
+    name: 'استاد رنگ - v2.0.0',
     ribbonTooltip: 'تنظیمات استاد رنگ',
   },
   buttons: {
