@@ -357,7 +357,7 @@ If you want to customize the plugin or contribute to its development, you can ea
 >
 > The `npm run dev` command is currently configured with a personal path:
 >
-> `C:\Users\user\Documents\Obsidian\My Notes\.obsidian\plugins\obsidian-theme-engine`
+> `C:\Users\user\Documents\Obsidian\My Notes\\.obsidian\\plugins\\obsidian-theme-engine`
 >
 > You must edit the `dev` script inside the `package.json` file to point to your local vault's plugin folder before running this command.
 

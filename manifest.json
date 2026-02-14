@@ -1,9 +1,9 @@
 {
-  "id": "obsidian-theme-engine",
+  "id": "theme-engine",
   "name": "Theme Engine",
   "version": "2.2.0",
   "minAppVersion": "1.5.0",
-  "description": "A powerful theme engine for Obsidian. Build dynamic profiles, override themes, and customize your workspace in real time.",
+  "description": "Take full control of your workspace with dynamic theme profiles, live overrides, and a powerful customization engine built for complete visual freedom.",
   "author": "Yazan Ammar",
   "authorUrl": "https://github.com/YazanAmmar",
   "isDesktopOnly": false

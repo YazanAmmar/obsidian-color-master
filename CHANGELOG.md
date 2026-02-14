@@ -6,8 +6,8 @@ This release completes the structural transition from **Color Master** to **Them
 
 ### Theme Engine Rebrand & Migration
 
-- **Plugin Identity Updated:** Manifest ID is now `obsidian-theme-engine` with the new public name **Theme Engine**.
-- **Backward-Compatible Migration:** Added first-run migration for users coming from legacy IDs (`theme-engine`, `color-master`, `obsidian-color-master`).
+- **Plugin Identity Updated:** Manifest ID is now `theme-engine` with the new public name **Theme Engine**.
+- **Backward-Compatible Migration:** Added first-run migration for users coming from legacy IDs (`obsidian-theme-engine`, `color-master`, `obsidian-color-master`).
 - **Data Continuity:** Existing `data.json`, command hotkeys namespace, and enabled-plugin entries are migrated safely to the new identity.
 - **Non-Destructive Migration Design:** No manual steps required.
 - **Compatibility Safeguards:** Legacy identifiers are intentionally kept only where required for migration and compatibility paths.
@@ -407,3 +407,4 @@ This update focuses on two core principles: **intelligence and elegance**. We're
 - Import/export profiles as `.json` files.
 - Bilingual UI (English & Arabic) with RTL support.
 - Includes 5 beautiful default themes: Default, OLED Matrix, Solarized Nebula, Cyberpunk Sunset, and Citrus Zest.
+

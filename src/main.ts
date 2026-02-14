@@ -60,13 +60,17 @@ type LegacySnippetData = {
   enabled?: boolean;
 };
 
-const LEGACY_PLUGIN_IDS = ['theme-engine', 'color-master', 'obsidian-color-master'] as const;
-const LEGACY_COMMAND_PLUGIN_IDS = [
-  'theme-engine',
+const LEGACY_PLUGIN_IDS = [
+  'obsidian-theme-engine',
   'color-master',
   'obsidian-color-master',
 ] as const;
-const CURRENT_PLUGIN_ID = 'obsidian-theme-engine';
+const LEGACY_COMMAND_PLUGIN_IDS = [
+  'obsidian-theme-engine',
+  'color-master',
+  'obsidian-color-master',
+] as const;
+const CURRENT_PLUGIN_ID = 'theme-engine';
 
 export default class ThemeEngine extends Plugin {
   settings: PluginSettings;
