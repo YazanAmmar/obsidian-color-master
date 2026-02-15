@@ -1,409 +1,399 @@
 # Changelog
 
-## [v2.0.0](https://github.com/YazanAmmar/obsidian-theme-engine/releases/tag/2.0.0) - 2026-02-14 (The Theme Engine Rebrand)
+## [v2.0.0](https://github.com/YazanAmmar/obsidian-theme-engine/releases/tag/2.0.0) - 2026-02-14
 
-This release completes the structural transition from **Color Master** to **Theme Engine** and prepares the project for long-term maintainability.
+### Breaking Changes
 
-### Theme Engine Rebrand & Migration
+- Plugin manifest ID changed from `color-master` to `theme-engine`.
+- Command namespace updated to `theme-engine:*`.
 
-- **Plugin Identity Updated:** Manifest ID is now `theme-engine` with the new public name **Theme Engine**.
-- **Backward-Compatible Migration:** Added first-run migration for users coming from legacy IDs (`obsidian-theme-engine`, `color-master`, `obsidian-color-master`).
-- **Data Continuity:** Existing `data.json`, command hotkeys namespace, and enabled-plugin entries are migrated safely to the new identity.
-- **Non-Destructive Migration Design:** No manual steps required.
-- **Compatibility Safeguards:** Legacy identifiers are intentionally kept only where required for migration and compatibility paths.
+### Added
 
-### UX, Settings, and UI Improvements
+- First-run migration system for users upgrading from legacy plugin IDs (`obsidian-theme-engine`, `color-master`, `obsidian-color-master`).
+- Automatic migration of existing `data.json` settings to the new plugin identity.
+- Safe remapping of command hotkeys to the new namespace.
+- Migration of enabled plugin entries to the new ID.
+- Empty-results search badge in settings.
 
-- Added empty-results search badge and hides the Like card when no results match.
-- Polished CSS snippets behavior and removed reorder flicker.
-- Grouped related settings using native `SettingGroup` with a safe fallback path.
-- Improved search behavior alignment and cleaned up profile manager layout.
-- Applied multiple visual and spacing improvements, including better light-mode action-button visibility.
-- Redesigned the Like Plugin card to better match Obsidian settings aesthetics.
+### Changed
 
-### Architecture, Types, and Code Quality
+- Public plugin identity updated to **Theme Engine**.
+- CSS snippet interaction refined to eliminate reorder flicker.
+- Related settings grouped using native `SettingGroup` with fallback handling.
+- Search behavior alignment and profile manager layout improvements.
+- Improved light-mode action button visibility.
+- Support / Like card redesigned to align with Obsidian settings aesthetics.
 
-- Refactored UI modals into a modular directory architecture.
-- Migrated styles into a modular SCSS architecture.
-- Strengthened typings for settings and removed unsafe/unknown cast patterns.
-- Fixed typing issues and prevented pinned profile variable reset regressions.
-- Aligned ESLint configuration with Obsidian bot validation expectations.
-- Resolved all lint warnings/errors and normalized formatting with Prettier.
+### Refactored
 
-### Maintenance and Project Hygiene
+- UI modals reorganized into a modular directory structure.
+- Styling architecture migrated to structured SCSS modules.
+- Type definitions strengthened across settings.
+- Removed unsafe and unknown type casts.
+- Prevented pinned profile variable reset regressions.
+- ESLint configuration aligned with Obsidian validation standards.
 
-- Updated dependencies and manifest handling.
-- Stopped tracking generated build artifacts (`main.js`, `styles.css`).
-- Removed unused empty-state file.
-- Updated external project links (repo, issues, wiki/related references).
+### Removed
+
+- Tracking of generated build artifacts (`main.js`, `styles.css`).
+- Unused empty-state file.
+
+### Maintenance
+
+- Dependencies updated.
+- Manifest handling updated for new plugin identity.
+- External repository links refreshed.
+- Formatting normalized with Prettier and lint warnings resolved.
 
 ## [v1.2.0](https://github.com/YazanAmmar/obsidian-theme-engine/releases/tag/1.2.0) - 2025-11-29 (The Theme Engine Update)
 
-This update represents a fundamental shift in how Theme Engine interacts with Obsidian. We've rewritten the core color engine, overhauled the translation system, and introduced a suite of "smart" UI behaviors that make customizing your vault feel more natural and responsive than ever.
+### Added
 
-### The New Theme Engine
+- Dynamic theme capture system that reads active theme CSS values when creating or using the Default profile.
+- Transparent Default profile behavior acting as a pass-through layer over the active Obsidian theme.
+- Custom language creation support via settings.
+- Tree-based translation editor with nested key browsing and deep search.
+- Translation import/export, copy, and paste via JSON.
+- Explicit RTL direction configuration for custom languages.
+- Fallback-to-English mechanism for missing translation keys.
+- "Highlight Only" notice styling mode for keyword-specific coloring.
+- Granular Reset Plugin options allowing selective deletion of Profiles, Snippets, Backgrounds, Settings, or Languages.
+- Lock button for CSS Snippets to prevent reordering.
 
-Theme Engine is no longer just a list of colors; it's now a smart layer on top of your Obsidian theme.
+### Changed
 
-- **Dynamic Theme Capture:** When you create a new profile or use the "Default" profile, the plugin now **captures the actual CSS values** of your currently active Obsidian theme (e.g., Minimal, Things, ITS). No more hardcoded static colors that clash with your theme.
-- **Smart "Default" Profile:** The default profile is now a clean slate. It acts as a transparent pass-through layer, adopting your current theme's colors automatically. This eliminates conflicts when switching between different community themes while Theme Engine is active.
-- **Intelligent UI Feedback (Dim/Bright):**
-  - **Pristine State:** Settings that match the default theme value are now **dimmed** (`opacity: 0.6`), letting you focus on what matters.
-  - **Modified State:** As soon as you change a color, its row **lights up** (`opacity: 1`), clearly highlighting your customizations.
-  - **Smart Delete:** Clearing a color value (making it empty) removes the variable from the profile entirely and restores the row to its dimmed state.
-  - **Smart Undo:** The undo button now respects this state, dimming the row if you revert to the original value.
+- UI state feedback system distinguishing pristine vs modified values.
+- Graph View color updates applied instantly without requiring tab reload.
+- Render loop optimized by separating lightweight CSS updates from heavier DOM operations.
+- Custom variable modal default value initialized as empty instead of white.
+- Snapshot pin behavior refined to treat the current state as a new baseline.
 
-### Complete i18n Overhaul (Translation System)
+### Refactored
 
-We've rebuilt the translation architecture from the ground up to be robust, type-safe, and extensible.
+- Core color engine rewritten to dynamically align with active theme values.
+- Translation system architecture rebuilt for stronger typing and extensibility.
+- Internal color processing unified to standardized HEX/HEXA format.
+- Styling system fully migrated to SCSS.
+- ESLint integrated with stricter validation rules.
 
-- **Custom Languages Support:** You are no longer limited to the built-in languages. You can add **any language** (e.g., Bulgarian, Chinese, Spanish) directly from the settings.
-- **Tree-View Translation Editor:** A powerful new modal allows you to browse and edit translations in a nested tree structure.
-  - **Deep Search:** Search by key, English text, or translated value.
-  - **Highlighting:** Search terms are highlighted in real-time.
-  - **RTL Support:** Custom languages can explicitly set Right-to-Left directionality.
-- **Smart Fallback Engine:** The plugin now gracefully falls back to English for any missing keys, preventing UI crashes or empty labels in incomplete translations.
-- **Management Tools:** Import, Export, Copy, and Paste translations as JSON. Added specific "Delete" and "Restore" actions for managing custom and core language overrides.
+### Fixed
 
-### Performance & Graph View
+- 8-digit HEX (alpha transparency) rendering issue in the color picker.
 
-- **Optimized Render Loop:** We've separated lightweight CSS updates from heavy DOM operations (like repainting icons). Dragging color pickers is now significantly smoother.
-- **Instant Graph Refresh:** The Graph View coloring logic has been simplified and optimized. Changes are applied instantly without the need for "Apply" buttons or reloading tabs.
-- **Unified HEX Converter:** All captured colors (RGB, HSL) are automatically converted to standard HEX/HEXA format for consistent editing.
+### Removed
 
-### Advanced Notice Styling
+- Legacy "Cyberpunk" and "Solarized Nebula" built-in profiles.
 
-The `processNotice` system has been upgraded for precision styling.
+### Maintenance
 
-- **Keyword Highlighting:** Added a new "Highlight Only" mode. This uses a `TreeWalker` to surgically wrap specific keywords in `<span>` tags within notices, applying color **only** to the word without affecting the rest of the message.
-- **Priority Rules:** Full-message coloring rules are applied first, followed by specific keyword highlights using `!important` to ensure visibility.
-
-### Quality of Life Improvements
-
-- **Hexa Transparency Support:** Fixed an issue where 8-digit Hex codes (colors with alpha transparency) rendered incorrectly in the color picker.
-- **Refined "Pin" Behavior:** Pinning a snapshot now treats the current state as the "baseline," dimming unmodified rows to allow for a fresh round of iteration.
-- **Selective Data Reset:** The "Reset Plugin" feature is now granular. You can choose to delete only specific categories of data (Profiles, Snippets, Backgrounds, Settings, or Languages).
-- **Custom Variable Polish:** The "Add Custom Variable" modal now initializes with an empty value instead of white, encouraging cleaner overrides.
-- **Snippet Locking:** Added a "Lock" button to the CSS Snippets section to prevent accidental reordering.
-
-### Housekeeping
-
-- **Removed Legacy Profiles:** The "Cyberpunk" and "Solarized Nebula" profiles have been retired to focus on the new dynamic engine.
-- **SCSS Migration:** The project's styling has been fully migrated to SCSS for better maintainability.
-- **ESLint Implementation:** The codebase now adheres to strict linting rules tailored for Obsidian plugin development, ensuring cleaner and safer code.
+- Internal cleanup and structural adjustments following engine and translation rewrites.
 
 ## [v1.1.1](https://github.com/YazanAmmar/obsidian-theme-engine/releases/tag/1.1.1) - 2025-11-01
 
-This update introduces the plugin's most-requested feature: **Video Backgrounds**. You can now fully customize your workspace with looped videos, alongside a host of performance improvements and smart new settings.
+### Added
 
-### New Feature: Video Backgrounds
+- Video background support (`.mp4`, `.webm`) alongside image backgrounds.
+- Dedicated video settings including opacity control and mute toggle.
+- Interactive video previews in the background browser.
+- Active background visual indicator in the browser modal.
+- Custom variable system supporting multiple data types (Color, Size, Text, Number).
+- Context-aware input controls for each custom variable type.
+- Duplicate variable name prevention across default and custom variables.
+- Search and highlighting support for custom variable names and descriptions.
+- "Convert to JPG" option for image uploads (excluding GIF).
+- Persistent settings state (search query and scroll position).
 
-Bring your workspace to life by setting looped videos as your background, in addition to static images.
+### Changed
 
-- **Video Background Support:** The plugin now fully supports `.mp4` and `.webm` video files as backgrounds.
-- **Redesigned Settings Modal:** The "Background Settings" (⚙️) modal has been completely redesigned with a new "Setting Type" toggle.
-- **Dedicated Media Settings:**
-  - **Image Tab:** Now contains image-specific settings, including the new **"Convert to JPG"** feature.
-  - **Video Tab:** Contains new video-specific settings:
-    - **Video Opacity:** A slider to control the video's transparency for better readability.
-    - **Mute Video:** A toggle to mute the video (enabled by default).
-- **Interactive Previews:** Video previews in the "Browse Backgrounds" modal are now interactive. You can click to play/pause them.
-- **Active Background Highlight:** The currently active background (image or video) is now highlighted with a border and shadow in the "Browse Backgrounds" modal for easy identification.
+- Background settings modal redesigned with separate Image and Video configuration tabs.
+- Background-related UI terminology updated from "Image" to "Background" where applicable.
+- Reset Plugin behavior updated to preserve installation date, language preference, and RTL/LTR layout settings.
+- Background system unified internally using `backgroundPath` and `backgroundType`.
 
-### Improvements & UX Enhancements
+### Fixed
 
-- **New: Convert to JPG (Performance):** A new option in the "Image" settings tab allows you to automatically convert PNG, WEBP, or BMP images to JPG on upload. This significantly reduces file size and improves performance. (GIFs are automatically skipped to preserve animation).
-- **New: Remember Settings State:** The plugin now remembers your last search query and scroll position in the settings tab. When you reopen the settings, it auto-filters and scrolls down to your last position. (This state is cleared when the plugin unloads).
-- **Smart Plugin Integration (Iconize):**
-  - Added a "Not Installed" badge next to the "Iconize" color setting if the plugin is missing or disabled.
-  - The "Override Iconize Colors" toggle will now automatically disable itself if the Iconize plugin is uninstalled.
-- **Smarter Plugin Reset:** When using the "Reset All Data" function, the plugin will now preserve your installation date ("Days of Use"), language preference, and RTL/LTR layout settings.
-- **Unified Media System:** The entire background system has been refactored (`backgroundPath`, `backgroundType`) to intelligently handle both images and videos. All related functions have been updated for cleaner, more maintainable code.
-- **Translation Updates:** All relevant UI text (buttons, descriptions, modals) has been updated from "Image" to "Background" or "Image/Video" across all supported languages.
+- Background switching flicker during image or video transitions.
 
-### Smart Custom Variables
+### Maintenance
 
-The "Add Custom Variable" feature has been completely rebuilt from the ground up to be smarter, more powerful, and easier to use.
-
-- **Support for Multiple Data Types:** You can now create variables that are not just colors. The modal fully supports 'Color', 'Size (px/em)', 'Text', and 'Number' types.
-- **Context-Aware Controls:**
-  - The "Add" modal provides the correct input for each type (e.g., a number input + unit dropdown for 'Size').
-  - The main settings page now renders the correct control for each custom variable (e.g., a size input for `--my-font-size` instead of a color picker).
-- **Duplicate Variable Prevention:** The modal now intelligently checks against all default and existing custom variables to prevent you from creating a duplicate (e.g., `--h1-color`).
-- **Improved Search & Highlighting:** Custom variables are now fully searchable by their name _and_ their description. Search term highlighting also works correctly on both the name and description.
+- Internal refactoring to support unified media handling and improved background performance.
 
 ## [v1.1.0](https://github.com/YazanAmmar/obsidian-theme-engine/releases/tag/1.1.0) - 2025-10-25
 
-This update introduces the most requested feature: **Custom Background Images**. You now have full control over your workspace's appearance with custom background images, which can be assigned uniquely to each profile.
+### Added
 
-### New Feature: Custom Backgrounds
+- Custom background image support per profile.
+- Global background storage in `.obsidian/backgrounds`.
+- Multiple background input methods (file upload, URL, paste, drag-and-drop).
+- Background browser with preview, rename (locked extension), and delete support.
+- Per-profile background enable/disable toggle.
+- Automatic transparency handling for core UI variables when a background is active.
 
-- **Add & Manage Images:** A new "Set Custom Background" option has been added to the Advanced Settings card.
-- **Multiple Input Methods:** Add images easily via file upload, pasting a URL, pasting a copied image, or dragging & dropping directly into the "Add New" modal.
-- **Global Storage & Access:** All background images are now stored centrally in the **global backgrounds folder** (`.obsidian/backgrounds`).
-- **Image Browser:** A new "Browse" (📦) icon opens a modal gallery displaying all images saved to the backgrounds folder.
-- **Full Control:** From the browser, you can select an image, delete it (with confirmation), or rename it directly in the UI. The file extension is locked during rename to prevent errors.
-- **Enable/Disable Toggle:** A new settings icon (⚙️) opens a modal where you can quickly enable or disable the background image for the current profile without removing it.
+### Fixed
 
-### Improvements & UX Enhancements
+- Resolved `EBUSY` error occurring during plugin reset when background files were locked.
 
-- **Smart Transparency:** When a background is applied, key UI variables (like `--background-primary`) are automatically set to `transparent`. Disabling or removing the background intelligently restores these variables to their default theme values.
+### Removed
 
-### Fixes & Code Quality
+- Default "OLED Green Glow" and "OLED Active Line Highlight" snippets from the OLED Matrix profile.
 
-- **Fixed: Plugin Reset Bug:** Resolved an `EBUSY` error that could occur when resetting the plugin. The process now reliably shows the "Reload" notice _before_ attempting to delete the (potentially locked) backgrounds folder.
-- **Cleanup:** Removed the default "OLED Green Glow" and "OLED Active Line Highlight" snippets from the "OLED Matrix" profile for a cleaner start.
+### Maintenance
+
+- Internal cleanup related to background file handling and reset logic.
 
 ## [v1.0.9](https://github.com/YazanAmmar/obsidian-theme-engine/releases/tag/1.0.9) - 2025-10-17
 
-This is a massive quality-of-life update focused on professional workflows, UI polish, and deep integration with your Obsidian environment. We've introduced direct importing from your installed themes, a smarter UI that warns you about conflicts, and a host of powerful new features and commands to streamline your customization process.
+### Added
 
-### New Features
+- Import from installed community themes to create editable CSS-based profiles.
+- Import from local CSS snippets to generate new profiles.
+- Quick theme toggle button in the Profile Manager (Force Light / Force Dark / Automatic).
+- Command to cycle the active profile theme.
+- Reset Plugin Settings option to restore factory state by removing `data.json`.
 
-- **Import from Installed Themes & Snippets**: You can now directly import CSS from your installed community themes and local snippets to create new, editable CSS-based profiles. This is a powerful way to start customizing your favorite themes without needing to find the source code manually.
-- **Quick Theme Toggle for Profiles**: A new icon button (`sun`/`moon`/`sun-moon`) has been added to the Profile Manager. It allows you to instantly cycle the active profile's theme setting between "Force Light," "Force Dark," and "Auto (follows Obsidian)" without needing to create a new profile.
-- **New Command: Cycle Profile Theme**: A new command, `Theme Engine: Cycle active profile theme`, has been added. You can assign a hotkey to it for rapid switching between light, dark, and auto modes, with a confirmation notice for each change.
-- **Reset Plugin Settings**: A powerful and safe "Reset Plugin Settings" option has been added to the Advanced Settings. It allows you to completely reset the plugin to its factory state by deleting the `data.json` file, which is useful for troubleshooting or starting fresh.
+### Changed
 
-### Improvements & UX Enhancements
+- Advanced Settings section redesigned with a card-based layout.
+- JSON import modal enhanced with automatic profile name detection.
+- Search system refined for improved filtering accuracy and UI clarity.
+- Built-in profiles no longer include pre-created snapshots by default.
 
-- **Theme Interference Warning**: The plugin is now smarter! A warning icon (⚠️) will appear next to your active profile if you have a community theme enabled. The tooltip explains that the external theme might interfere with your profile's appearance and recommends switching to the default theme for best results.
-- **Redesigned "Advanced Settings" Section**: The old "Options" section has been completely redesigned into a modern, card-based layout and renamed to "Advanced Settings" for better clarity and aesthetics.
-- **Streamlined JSON Import**: The "Import / Paste JSON" modal now includes a "Profile Name" input field, which is automatically filled from the imported file's name. This improves the workflow and removes the need for the previous duplicate-name warning modal.
-- **Complete Search Bar Overhaul**: The search bar has been significantly improved with a cleaner design, more efficient filtering logic, and better handling of different states, building upon all the iterative improvements from previous versions.
-- **On-Demand Snapshots for Built-in Profiles**: To give users a cleaner start, built-in profiles (like "OLED Matrix") no longer come with a pre-made snapshot. You now have full control to create the first snapshot yourself, while the "Restore to original" functionality remains available.
+### Refactored
 
-### Bug Fixes & Code Quality
+- Removed inline `.style` usage to improve themability.
+- Replaced `.innerHTML` usage with safe DOM methods (`createEl`, `setText`) to reduce XSS risk.
+- Cleaned up command naming by removing redundant plugin name prefixes.
 
-- **Fixed: Multi-Word Tag Styling**: Fixed a long-standing rendering bug where tags containing underscores (e.g., `#tag_with_words`) were incorrectly highlighted instead of being styled as a single, continuous tag pill in Live Preview.
-- **Major Refactoring & Security Hardening**:
-  - Removed all instances of inline `.style` from the TypeScript code, allowing all UI elements to be themed more easily via external CSS.
-  - Replaced all uses of `.innerHTML` with safer DOM manipulation methods (`createEl`, `setText`) to eliminate the risk of XSS vulnerabilities.
-  - Cleaned up all command names by removing the "Theme Engine" prefix, as Obsidian adds this automatically, resulting in a cleaner command palette.
-- And many other minor performance enhancements and bug fixes.
+### Fixed
+
+- Multi-word tag rendering issue (e.g., `#tag_with_words`) in Live Preview.
+
+### Maintenance
+
+- Internal performance improvements and structural cleanup.
 
 ## [v1.0.8](https://github.com/YazanAmmar/obsidian-theme-engine/releases/tag/1.0.8) - 2025-09-22
 
-This version introduces powerful new features like **Global CSS Snippets** and a suite of workflow enhancements, including new hotkeys and a complete UI redesign for a more intuitive and polished user experience.
+### Added
 
-### New Features
+- Global CSS Snippets that remain active across all profiles.
+- "Save as Global Snippet" toggle in the snippet creation modal.
+- Visual badge indicator distinguishing global snippets from profile-specific snippets.
+- Command to cycle to the previous profile.
+- Command to open the plugin settings tab directly.
+- Ribbon icon for quick access to plugin settings.
+- RTL layout toggle option for users of Right-to-Left languages.
 
-- **Global CSS Snippets:**
-  - A major new feature that allows you to create **Global Snippets**. These are special CSS snippets that remain active across **all** of your profiles.
-  - **Use Case:** Perfect for applying universal styles—like a custom font, a small UI tweak, or hiding an element—that you want to persist regardless of which color theme is active.
-  - **Implementation:** A "Save as Global Snippet" toggle has been added to the snippet creation modal. Global snippets are clearly distinguished in the UI with a "Global" badge and are listed separately above profile-specific snippets.
-- **New Hotkeys for Faster Workflow:**
-  - **Cycle Previous Profile**: A new command, Theme Engine: Cycle to previous profile, has been added. You can now assign a hotkey to navigate backward through your profile list, complementing the existing command for cycling forward.
-  - **Open Settings Hotkey:** A new command, `Theme Engine: Open settings tab`, lets you assign a hotkey to instantly jump to the plugin's settings panel.
-- **Quick Access Ribbon Icon:**
-  - A paint bucket icon has been added to the app ribbon, providing one-click access to the Theme Engine settings from anywhere in your workspace.
-- **Flexible RTL Layout Option:**
-  - A new settings modal, accessible via a gear icon next to the language dropdown, now appears for users of RTL languages (Arabic, Persian).
-  - This contains a toggle to **Enable Right-to-Left (RTL) Layout**, giving users the freedom to disable the flipped interface if they prefer the standard LTR layout even while using an RTL language.
+### Changed
 
-## [v1.0.7](https://github.com/YazanAmmar/obsidian-theme-engine/releases/tag/1.0.7) - 2025-09-19 (TypeScript)
+- Iconize integration settings moved into a dedicated modal.
+- Settings interface visually redesigned for improved consistency.
+- Search bar clear button replaced with a brush icon.
+- `Import / Paste (.css)` action limited to creating CSS-based profiles.
+- Snippet creation separated into a dedicated "Create New Snippet" workflow.
 
-### Major Milestone: The TypeScript Rewrite
+### Maintenance
 
-The entire Theme Engine codebase has been successfully migrated from JavaScript to **TypeScript**! This is a massive step forward for the project's health, stability, and future development.
+- Internal UI consistency improvements and structural adjustments.
 
-- **Enhanced Stability:** TypeScript's static typing catches common errors during development, significantly reducing the chance of bugs making it into a release.
-- **Easier Maintenance:** A strongly-typed codebase is easier to read, refactor, and build upon.
-- **Faster Future Development:** This migration paves the way for adding more complex features with greater confidence and speed.
+## [v1.0.7](https://github.com/YazanAmmar/obsidian-theme-engine/releases/tag/1.0.7) - 2025-09-19
 
-> **A personal note from the developer:** I sincerely apologize for the delay in this migration (spanning several versions). As I was learning TypeScript from scratch with limited time, I wanted to ensure the transition was done right. Thank you for your patience! The foundation is now rock-solid for the future.
+### Added
 
-### New Features
+- Drag-and-drop reordering support for CSS Snippets.
+- Custom CSS variable creation support.
+- Session-persistent Undo/Redo history for CSS editors (cleared on Obsidian restart).
+- Full UI translations for French and Persian.
 
-- **Drag & Drop to Reorder CSS Snippets**
-  - You can now drag and drop snippets in the list to control their execution order. This gives you precise control over the CSS cascade; rules in snippets lower in the list will override those above them in case of a conflict.
-  - _Example:_ If Snippet A makes `h1` blue and Snippet B makes `h1` red, placing Snippet B _after_ Snippet A will result in a red `h1`.
+### Changed
 
-- **Add Custom CSS Variables**
-  - A new feature that allows you to add any CSS variable from Obsidian's official documentation directly into the plugin.
-  - Your custom variables are saved with your profile and are included when you export or share it.
+- Notice rules are now case-insensitive.
+- Improved RTL/LTR compatibility when plugin language and Obsidian interface direction differ.
+- "Create New Snippet" button positioned for faster access.
+- Custom variables included in statistics count.
 
-- **Session-Persistent Undo/Redo for Editors**
-  - The CSS editor for snippets and profiles now remembers your changes for the entire Obsidian session.
-  - You can now close the editor modal, test your changes, and re-open it to continue using **Ctrl+Z** (Undo) and **Ctrl+Y** (Redo) without losing your history. The history is cleared when Obsidian is closed.
+### Refactored
 
-- **New Languages**
-  - Added full UI translations for **French** and **Persian**.
+- Complete migration of the codebase from JavaScript to TypeScript.
+- Strongly typed internal architecture for improved stability and maintainability.
 
-### Improvements & Fixes
+### Fixed
 
-- **RTL/LTR:** Vastly improved Right-to-Left (RTL) language support. Fixed major UI layout issues that occurred when using an LTR plugin language (like English) inside an RTL Obsidian interface (like Arabic), and vice-versa.
-- **Notice Rules:**
-  - Rules are now **case-insensitive**. A keyword like "Success" will now match "success" and "SUCCESS".
-  - Fixed a critical bug where notice rules failed to match non-Latin keywords (e.g., Arabic, Persian) due to incorrect Regex logic.
-- **Custom Variables:** Custom variables are now correctly included in the statistics card count.
-- **UI:** The "Create New Snippet" button is now always visible at the top of the snippets list for quicker access.
-- **And many other minor bug fixes and performance enhancements.**
+- Notice rules failing to match non-Latin keywords due to incorrect RegEx behavior.
+- RTL layout inconsistencies in mixed LTR/RTL environments.
 
-## [v1.0.6](https://github.com/YazanAmmar/obsidian-theme-engine/releases/tag/1.0.6) - 2025-09-13 (The Thematic Intelligence Update)
+### Maintenance
 
-This update focuses on two core principles: **intelligence and elegance**. We're introducing the revolutionary Advanced Notice Coloring system, adding a new layer of interactive intelligence to your workspace. This comes alongside a comprehensive UI overhaul and precise enhancements to every corner of the plugin, making your experience smoother and more professional than ever.
+- Internal structural cleanup and typing refinements following TypeScript migration.
 
-### New Features & Major Improvements
+## [v1.0.6](https://github.com/YazanAmmar/obsidian-theme-engine/releases/tag/1.0.6) - 2025-09-13
 
-- **Introducing Advanced Notice Coloring!**
-- For the first time, you can now control the background and text color of notices based on their content. Create prioritized rules using keywords or Regex to make your workspace more dynamic and informative.
-- The user interface for creating rules has been redesigned with an intuitive tag-based input for keywords, smart duplicate detection, and smooth animations for adding/deleting rules.
-- Includes a new “Test Rule” button (🔔) to instantly preview how a notice will look.
+### Added
 
-- **Full Right-to-Left (RTL) Language Support:**
-- The plugin now has foundational support for RTL languages, starting with a complete **Arabic** translation.
-- All UI components, including new mods and controls, have been re-engineered to display perfectly in both LTR and RTL layouts. This centralized architecture makes adding new languages ​​in the future incredibly simple.
+- Advanced Notice Coloring system with prioritized keyword and Regular Expression (RegEx) rules.
+- Profile-specific notice rules stored within each profile and included in export/import operations.
+- "Test Rule" button for previewing notice styling.
+- Additional Markdown color variables including:
+  - `--blockquote-bg`
+  - `--hr-color`
+  - `--code-normal`
+  - `--code-background`
+  - `--text-highlight-bg`
+- Foundational Right-to-Left (RTL) language support with full Arabic translation.
 
-- **Expanded Markdown Color Control:**
-- Added several new color variables for finer control over your notes' appearance, including:
-- `--blockquote-bg`: A brand new variable to control the background color of blockquotes.
-- `--hr-color`: For horizontal styling rules.
-- `--code-normal` & `--code-background`: For inline code blocks.
-- `--text-highlight-bg`: For highlighted text.
+### Changed
 
-### UI/UX Enhancements & Polish
+- Search system expanded to include variable descriptions in filtering results.
+- Search result highlighting added for matched terms.
+- Notice rule creation interface redesigned with tag-based keyword input.
+- Multiple modals redesigned for improved clarity and usability.
 
-- **Massive Search & Filtering Overhaul:**
-- **Deeper Search:** The search function is now more powerful and searches within variable **descriptions**, not just their names.
-- **Animated Highlighting:** Search terms are now highlighted with a beautiful, animated wave gradient wherever they appear, making results easy to spot.
-- The search bar has been enhanced with a new search icon for a cleaner look.
+### Refactored
 
-- **Smarter & Safer Profile Importing:**
-- Importing a profile with a name that already exists will now open a new dialog prompting you for a different name, preventing you from accidentally overwriting your work.
+- Notice rule storage migrated from global scope to profile-specific architecture.
+- Internal structure updated to better support RTL and future language expansion.
+- Integrated SortableJS for drag-and-drop functionality.
+- Adopted `npm run build` workflow for standardized builds.
 
-- **Polished & Redesigned Modals:**
-- The "Advanced Notice Rules" and "Duplicate Profile Name" modals have been completely redesigned with a modern, clean, and more intuitive interface.
+### Fixed
 
-### Behind the Scenes
+- Notice rules failing to match non-Latin keywords due to incorrect RegEx handling.
 
-- **Architectural Upgrade: Profile-Specific Rules:**
-- Notice rules are no longer a global setting. They are now an integral part of each profile and are **automatically exported and imported** with them.
+### Maintenance
 
-- **Professional Development Workflow:**
-- The project has now officially integrated the `SortableJS` library for smooth drag-and-drop functionality and has adopted a professional `npm run build` workflow, enhancing stability and maintainability.
+- General performance and interface stability improvements.
 
-> and many other important fixes, performance and interface improvements!
+## [v1.0.5](https://github.com/YazanAmmar/obsidian-theme-engine/releases/tag/1.0.5) - 2025-09-08
 
-## [v1.0.5](https://github.com/YazanAmmar/obsidian-theme-engine/releases/tag/1.0.5) - 2025-09-08 (The Snippet & Polish Update)
+### Added
 
-### New Features & Major Improvements
+- CSS Snippets system allowing creation of lightweight, reusable CSS customizations alongside full CSS Profiles.
+- Ability to toggle, edit, and copy snippet code independently from profiles.
+- Full editing support for CSS-based profiles (rename and modify CSS code).
+- Restore button for built-in profiles to revert them to their original state.
+- Automatic recovery support for deleted default profiles when recreated with the same name.
+- Tag styling variables: `--tag-color`, `--tag-color-hover`, and `--tag-bg`.
+- "Create New" option in the JSON import modal to generate a new profile from imported data.
+- Eraser button in color pickers to instantly set values to `transparent`.
+- Expanded contrast checker coverage for tags, icons, and interactive elements.
 
-- **Introducing CSS Snippets!**
-  - The "Paste CSS" feature has been completely upgraded and now allows you to save code as either a full **Profile** or a lightweight **Snippet**.
-  - **Why is this a game-changer?** Now you can save small, reusable CSS tweaks (like coloring a specific header or styling checkboxes) without creating an entire profile. This keeps your setup clean, organized, and powerful. You can toggle snippets on and off, edit them, and even copy their code with a new dedicated button.
+### Changed
 
-- **Full Editing for CSS Profiles:**
-  - You can now edit your existing CSS-based profiles directly. Change the name or update the CSS code at any time without needing to create a new profile from scratch.
+- "Paste CSS" button renamed to "Paste / Import (CSS)..." for clarity.
+- Profile rename process improved to preserve associated snapshots.
 
-- **Restore Built-in Profiles with One Click!**
-  - A new **Restore (`history`) button** now appears next to the default profiles (like OLED Matrix). If you've modified a built-in theme and want to go back to its original state, just click this button.
-  - **Smart Recovery:** Accidentally deleted a default profile? No problem! Just create a new, empty profile with the _exact same name_ (e.g., "OLED Matrix"), and the restore button will magically reappear, allowing you to bring it back to its factory settings.
+### Fixed
 
-- **Complete Tag Styling Control:**
-  - Added three new color variables specifically for styling tags, giving you pixel-perfect control over their appearance:
-    - `--tag-color`: Sets the main text color of the tag.
-    - `--tag-color-hover`: The text color when you hover over the tag.
-    - `--tag-bg`: The background color of the tag "pill".
+- Snapshot system for CSS Profiles now correctly saves and restores both color variables and CSS code.
+- Snapshot data no longer lost when renaming profiles.
+- Resolved issue where updating a CSS profile with the same name triggered duplicate notifications.
 
-- **Powerful Import Modal:** The JSON import modal is now much more powerful. We've replaced the confusing "Merge" button with a highly-requested **"Create New"** button. You can now import a `.json` file and instantly create a new profile from it.
+### Maintenance
 
-- **More Accurate Contrast Checker:** The accessibility checker is now more comprehensive and correctly checks the contrast for tags, icons, and interactive elements.
+- General internal stability and reliability improvements.
 
-### Bug Fixes & Quality of Life Enhancements
+## [v1.0.4](https://github.com/YazanAmmar/obsidian-theme-engine/releases/tag/1.0.4) - 2025-09-04
 
-- **Snapshots Now Save Everything!**
-  - Fixed a critical issue where taking a Snapshot of a CSS Profile would only save the color variables but not the CSS code. Now, Snapshots correctly save and restore **both** the colors and the associated CSS code, making them completely reliable.
+### Added
 
-- **Smarter Profile Renaming:**
-  - Fixed a bug where renaming a profile would cause its Snapshot to be lost. Now, when you rename a profile, its pinned Snapshot is intelligently renamed with it.
-  - Fixed a related bug where updating a CSS profile's name would fail or not save correctly. The process is now seamless.
+- Support for creating CSS-based profiles by pasting raw CSS code.
+- Multi-step color undo system storing up to five previous values per color variable.
+- Dedicated button linking to the developer’s GitHub profile.
 
-- **New "Transparent" Tool:**
-  - Added a new **Eraser (`eraser`) button** next to each color picker. Clicking it instantly sets the color to `transparent`, which is perfect for removing backgrounds or borders.
+### Changed
 
-- **UI & Wording Improvements:**
-  - The "Paste CSS" button has been renamed to **"Paste / Import (CSS)..."** to better reflect its ability to Import and paste `.css` files.
-  - Fixed a minor bug where updating a CSS profile with the same name would show two notifications. Now, it correctly shows only "Profile updated."
+- Search bar repositioned to the top of the settings panel.
+- Search mode hides unrelated UI sections to provide a focused results view.
+- Improved search filtering logic to prevent empty category headers.
+- Support section visually redesigned for improved clarity.
 
-## [v1.0.4](https://github.com/YazanAmmar/obsidian-theme-engine/releases/tag/1.0.4) - 2025-09-04 (The CSS Freedom Update)
+### Maintenance
 
-### New Features & Major Improvements
+- Minor internal UI refinements and consistency adjustments.
 
-- **New: Paste CSS for Instant Theming!**
-  - Introducing a revolutionary way to create color profiles! You can now click the new "Paste CSS" button to paste raw CSS code from any theme or snippet.
-  - This creates a special "CSS Profile" that directly applies your pasted code, allowing you to use complex themes without needing to install them separately. It's the ultimate tool for theme experimentation and customization.
+## [v1.0.3](https://github.com/YazanAmmar/obsidian-theme-engine/releases/tag/1.0.3) - 2025-09-03
 
-- **New: Multi-Step Color Undo**
-  - The "Reset" button next to each color picker has been upgraded to an intelligent **Undo** button .
-  - It now remembers the last 5 changes you made to that specific color. If you make a mistake or want to go back, simply click Undo to step back through your recent edits.
-  - If there's no history, it will simply notify you instead of reverting to default, giving you full control.
+### Added
 
-- **Complete Search Overhaul**
-  - **Better Placement**: The entire search interface has been moved to the top of the settings panel, right where you'd expect it to be.
-  - **Focus Mode**: When you start typing in the search bar, all irrelevant sections (like Profile Manager and Options) automatically disappear, providing a clean and focused view of your color variables and results.
-  - **Smarter Filtering**: Fixed a bug where searching for a term like `h1` would show empty category titles. Now, only the categories that actually contain a matching result will be displayed.
+- Profile Snapshots system with Pin and Reset to Pinned functionality.
+- Search bar in the Profile Manager for filtering color variables by name or value.
+- Case-sensitive and Regular Expression (RegEx) search support.
+- Command to toggle the plugin on or off.
+- Command to cycle to the next profile.
+- Live Update FPS slider (0–60 FPS) to control preview rendering performance.
+- Copy JSON action for profiles.
+- Enhanced Import modal supporting Merge and Replace modes.
+- Redesigned support section with live usage statistics.
 
-### UI & UX Enhancements
+### Changed
 
-- **Redesigned Support Area**: The "Like the Plugin?" section has been visually updated for a cleaner and more engaging look.
-- **New 'My GitHub' Button**: Added a new button that links directly to Yazan Ammar's GitHub profile, making it easier to connect.
+- Graph View editing now uses a temporary state system for Apply/Cancel handling.
+- Closing the settings window while editing Graph View colors automatically cancels unsaved changes.
+- Profile action UI redesigned and repositioned for improved clarity.
 
-## [v1.0.3](https://github.com/YazanAmmar/obsidian-theme-engine/releases/tag/1.0.3) - 2025-09-03 (The Power User Update)
+### Fixed
 
-### New Features & Major Improvements
+- Iconize colors not updating live while dragging the color picker.
 
-- **Profile Snapshots:** Added new **Pin** and **Reset to Pinned** buttons, allowing users to save and restore a snapshot of their color profiles for risk-free editing.
-- **Advanced Search & Filtering:** Implemented a powerful search bar in the Profile Manager to filter color variables by name or value, with toggles for case-sensitivity and Regular Expressions.
-- **Workflow Hotkeys:** :Speed up your workflow with two new commands that you can assign to hotkeys:
-  - Toggle Theme Engine: Quickly enable or disable the plugin without opening the settings.
-  - Cycle Theme Engine Profile: Instantly switch to the next color profile in your list.
+### Maintenance
 
-- **Performance Control (FPS Slider):** Added a `Live Update FPS` slider (0-60 FPS) to the settings, giving users control over live preview performance, which is especially useful for lower-spec devices.
-- **Enhanced Profile Management:** Upgraded the profile actions with new `Copy JSON` and an advanced `Paste / Import` modal that supports both **Merge** and **Replace** actions for greater flexibility. The UI for these actions has been redesigned and repositioned for a cleaner look.
-- **Polished UI & Stats:** The support card has been completely redesigned with a modern, professional look, featuring animated progress bars that display live stats about your usage (profiles, colors, and days of use) and stylish new buttons.
-
-### Bug Fixes & Minor Enhancements
-
-- **Robust Graph View Editing:** The editing experience for the Graph View has been completely overhauled for reliability. The `Apply` and `Cancel` buttons now use a temporary state system, ensuring changes are only saved when intended and `Cancel` reliably discards all edits.
-- **Intuitive Hide Behavior:** Closing the settings window while editing Graph View colors now correctly and automatically cancels the changes, preventing accidental saves.
-- **True Live Previews for Iconize:** Fixed a bug where Iconize plugin colors would not update instantly while dragging the color picker. Previews are now perfectly live.
+- General internal stability and performance improvements.
 
 ## [v1.0.2](https://github.com/YazanAmmar/obsidian-theme-engine/releases/tag/1.0.2) - 2025-08-30
 
-### New Features & Major Improvements
+### Added
 
-- **Instant UI Refresh:**
-  - The **Apply** button for the Graph View now triggers an instant, workspace-wide refresh. All open views, including existing Graph View tabs, will now update their colors immediately. **No more need to open new tabs!**
-  - We've added a **permanent Refresh** button to the Graph View section, to solve any color hang issue with the click of a button.
-- **Profile-Specific Themes:**
-  - You can now classify new profiles as **'Dark Mode'**, **'Light Mode'**, or **'Automatic'**.
-  - Activating a profile will now automatically switch Obsidian to the corresponding theme, giving you complete environmental control with a single click.
+- Per-profile theme classification (Light, Dark, Automatic).
+- Automatic Obsidian theme switching when activating a profile.
+- Instant workspace-wide refresh when applying Graph View color changes.
+- Permanent Refresh button in the Graph View section.
+- Automated cleanup system for orphaned `Iconize` icons when the Iconize plugin is uninstalled.
+- Configurable cleanup interval setting for Iconize integration.
+- Support section in settings displaying usage statistics and repository links.
 
-- **Smart Iconize Cleanup & Integration:**
-  - Added an automated cleanup system that periodically checks for and removes orphaned `Iconize` icons if the plugin is ever uninstalled, keeping your vault clean.
-  - Added a "Cleanup Interval" slider in the settings, allowing you to control how often this check runs.
-  - Improved the reliability of color overrides for `Iconize` by using a `MutationObserver` to re-apply colors dynamically as your vault's interface changes.
+### Changed
 
-- **Enhanced User Experience:**
-  - The settings panel is now smarter! If you change Graph View colors and then close the settings window without saving, your changes are **automatically discarded**.
-  - Added a new "Like the Plugin?" support section with live stats and quick links to star the project on GitHub or report an issue.
+- Iconize color overrides now use a `MutationObserver` to ensure consistent re-application during UI updates.
 
-### Bug Fixes
+### Fixed
 
-- **Fixed: Graph View colors not updating!** The biggest fix of this release. The old issue where colors on existing Graph View tabs wouldn't update has been definitively solved with the new instant refresh system.
+- Graph View color updates not applying to already opened Graph View tabs.
+
+### Maintenance
+
+- Internal reliability improvements related to UI refresh handling.
 
 ## [v1.0.1](https://github.com/YazanAmmar/obsidian-theme-engine/releases/tag/1.0.1) - 2025-08-28
 
-- **New Feature:** Added integration with the Iconize plugin, allowing full control over its icon colors from within Theme Engine.
-- **Fixed:** Resolved a bug where Iconize colors would persist after the main plugin was disabled.
-- **Improved:** Relocated the "Override Iconize Colors" toggle to a more logical position in the settings for a better user experience.
+### Added
+
+- Integration with the Iconize plugin.
+- Option to override Iconize default icon colors directly from the plugin settings.
+
+### Changed
+
+- Relocated the "Override Iconize Colors" setting under the Profile Manager section for improved accessibility.
+
+### Fixed
+
+- Resolved issue where Iconize colors persisted after disabling the main plugin toggle.
+
+### Maintenance
+
+- Minor internal code cleanup and performance improvements.
 
 ## [v1.0.0](https://github.com/YazanAmmar/obsidian-theme-engine/releases/tag/1.0.0) - 2025-08-22
 
-- Initial release of Theme Engine!
-- Live color editor for all core Obsidian CSS variables.
-- Full profile management (create, delete, switch).
-- Import/export profiles as `.json` files.
-- Bilingual UI (English & Arabic) with RTL support.
-- Includes 5 beautiful default themes: Default, OLED Matrix, Solarized Nebula, Cyberpunk Sunset, and Citrus Zest.
+### Added
+
+- Live UI editor for core Obsidian CSS color variables with instant preview.
+- Profile management system (create, delete, switch between profiles).
+- Import and export support for profiles using `.json` files.
+- Bilingual user interface (English and Arabic).
+- Right-to-Left (RTL) layout support for Arabic.
+- Bundled default profiles:
+  - Default
+  - OLED Matrix
+  - Solarized Nebula
+  - Cyberpunk Sunset
+  - Citrus Zest
