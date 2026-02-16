@@ -40,12 +40,10 @@
 
 ### Maintenance
 
-- Dependencies updated.
+- Updated dependencies to latest compatible versions.
 - Manifest handling updated for new plugin identity.
-- External repository links refreshed.
-- Formatting normalized with Prettier and lint warnings resolved.
 
-## [v1.2.0](https://github.com/YazanAmmar/obsidian-theme-engine/releases/tag/1.2.0) - 2025-11-29 (The Theme Engine Update)
+## [v1.2.0](https://github.com/YazanAmmar/obsidian-theme-engine/releases/tag/1.2.0) - 2025-11-29
 
 ### Added
 
@@ -86,7 +84,7 @@
 
 ### Maintenance
 
-- Internal cleanup and structural adjustments following engine and translation rewrites.
+- Refactored internal engine and translation modules to support the new architecture.
 
 ## [v1.1.1](https://github.com/YazanAmmar/obsidian-theme-engine/releases/tag/1.1.1) - 2025-11-01
 
@@ -116,7 +114,7 @@
 
 ### Maintenance
 
-- Internal refactoring to support unified media handling and improved background performance.
+- Refactored background media handling to support unified image and video system.
 
 ## [v1.1.0](https://github.com/YazanAmmar/obsidian-theme-engine/releases/tag/1.1.0) - 2025-10-25
 
@@ -136,10 +134,6 @@
 ### Removed
 
 - Default "OLED Green Glow" and "OLED Active Line Highlight" snippets from the OLED Matrix profile.
-
-### Maintenance
-
-- Internal cleanup related to background file handling and reset logic.
 
 ## [v1.0.9](https://github.com/YazanAmmar/obsidian-theme-engine/releases/tag/1.0.9) - 2025-10-17
 
@@ -168,10 +162,6 @@
 
 - Multi-word tag rendering issue (e.g., `#tag_with_words`) in Live Preview.
 
-### Maintenance
-
-- Internal performance improvements and structural cleanup.
-
 ## [v1.0.8](https://github.com/YazanAmmar/obsidian-theme-engine/releases/tag/1.0.8) - 2025-09-22
 
 ### Added
@@ -191,10 +181,6 @@
 - Search bar clear button replaced with a brush icon.
 - `Import / Paste (.css)` action limited to creating CSS-based profiles.
 - Snippet creation separated into a dedicated "Create New Snippet" workflow.
-
-### Maintenance
-
-- Internal UI consistency improvements and structural adjustments.
 
 ## [v1.0.7](https://github.com/YazanAmmar/obsidian-theme-engine/releases/tag/1.0.7) - 2025-09-19
 
@@ -224,7 +210,7 @@
 
 ### Maintenance
 
-- Internal structural cleanup and typing refinements following TypeScript migration.
+- Improved type safety following TypeScript migration.
 
 ## [v1.0.6](https://github.com/YazanAmmar/obsidian-theme-engine/releases/tag/1.0.6) - 2025-09-13
 
@@ -259,10 +245,6 @@
 
 - Notice rules failing to match non-Latin keywords due to incorrect RegEx handling.
 
-### Maintenance
-
-- General performance and interface stability improvements.
-
 ## [v1.0.5](https://github.com/YazanAmmar/obsidian-theme-engine/releases/tag/1.0.5) - 2025-09-08
 
 ### Added
@@ -288,10 +270,6 @@
 - Snapshot data no longer lost when renaming profiles.
 - Resolved issue where updating a CSS profile with the same name triggered duplicate notifications.
 
-### Maintenance
-
-- General internal stability and reliability improvements.
-
 ## [v1.0.4](https://github.com/YazanAmmar/obsidian-theme-engine/releases/tag/1.0.4) - 2025-09-04
 
 ### Added
@@ -306,10 +284,6 @@
 - Search mode hides unrelated UI sections to provide a focused results view.
 - Improved search filtering logic to prevent empty category headers.
 - Support section visually redesigned for improved clarity.
-
-### Maintenance
-
-- Minor internal UI refinements and consistency adjustments.
 
 ## [v1.0.3](https://github.com/YazanAmmar/obsidian-theme-engine/releases/tag/1.0.3) - 2025-09-03
 
@@ -335,10 +309,6 @@
 
 - Iconize colors not updating live while dragging the color picker.
 
-### Maintenance
-
-- General internal stability and performance improvements.
-
 ## [v1.0.2](https://github.com/YazanAmmar/obsidian-theme-engine/releases/tag/1.0.2) - 2025-08-30
 
 ### Added
@@ -359,10 +329,6 @@
 
 - Graph View color updates not applying to already opened Graph View tabs.
 
-### Maintenance
-
-- Internal reliability improvements related to UI refresh handling.
-
 ## [v1.0.1](https://github.com/YazanAmmar/obsidian-theme-engine/releases/tag/1.0.1) - 2025-08-28
 
 ### Added
@@ -377,10 +343,6 @@
 ### Fixed
 
 - Resolved issue where Iconize colors persisted after disabling the main plugin toggle.
-
-### Maintenance
-
-- Minor internal code cleanup and performance improvements.
 
 ## [v1.0.0](https://github.com/YazanAmmar/obsidian-theme-engine/releases/tag/1.0.0) - 2025-08-22
 
