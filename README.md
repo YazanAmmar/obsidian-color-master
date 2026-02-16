@@ -111,7 +111,7 @@ Designed for both:
 - **Quick Theme Toggle**: Instantly cycle the active profile's theme setting between "Force Light," "Force Dark," and "Auto" with a new icon in the profile manager.
 - **Ribbon Icon**: Access the Theme Engine settings with a single click from the Obsidian ribbon.
 - **Selective Data Reset**: The "Reset Plugin" feature is now granular. You can choose to delete only specific categories of data (Profiles, Snippets, Backgrounds, Settings, or Languages).
-- **Theme Interference Warning**: A small ⚠️ icon appears if you have a community theme enabled, warning you that it might override your Theme Engine settings.
+- **Theme Interference Warning**: A small icon appears if you have a community theme enabled, warning you that it might override your Theme Engine settings.
 - **Add Custom CSS Variables**:
   - Add any CSS variable (e.g., from another plugin) to the UI.
   - Define its type (color, size, text, number) for the correct UI controls.
@@ -134,35 +134,35 @@ src/
 |- utils.ts                 # Cross-cutting utility helpers
 |
 |- commands/
-|  `- index.ts              # Command registration and command handlers
+|  |- index.ts              # Command registration and command handlers
 |
 |- i18n/
 |  |- strings.ts            # Translation engine + fallback behavior
 |  |- types.ts              # i18n-specific typings
-|  `- locales/              # Built-in locales + custom locale files
+|  |- locales/              # Built-in locales + custom locale files
 |     |- en.ts
 |     |- ar.ts
 |     |- fr.ts
-|     `- fa.ts
+|     |- fa.ts
 |
 |- styles/
 |  |- main.scss             # Root SCSS entry (compiled to styles.css)
 |  |- base/                 # Core tokens, animation, layout direction, editor styles
 |  |- components/           # Shared component-level styles
 |  |- modals/               # Styles scoped to modal experiences
-|  `- settings/             # Settings tab layout, controls, search, accessibility
+|  |- settings/             # Settings tab layout, controls, search, accessibility
 |
-`- ui/
+|- ui/
    |- settingsTab.ts        # Main settings screen composition
    |- components/           # Reusable settings UI sections/widgets
-   `- modals/               # Modal architecture split by feature domain
+   |- modals/               # Modal architecture split by feature domain
       |- index.ts           # Central modal exports
       |- base.ts            # Shared modal base class/infrastructure
       |- info.ts            # Informational modal(s)
       |- common/            # Generic dialogs (confirmation, file conflict)
       |- editors/           # Content editors (CSS, notice rules, custom vars)
       |- profiles/          # Profile creation/import/browser modals
-      `- settings/          # Settings-related modals (language, translator, etc.)
+      |- settings/          # Settings-related modals (language, translator, etc.)
 ```
 
 ---
@@ -484,7 +484,7 @@ Please follow the existing code style, and ensure your contributions are **innov
 
 ## Troubleshooting / FAQ
 
-### Q: ⚠️ Why are my colors not changing after I activate a profile?
+### Q: Why are my colors not changing after I activate a profile?
 
 A: This is the most common issue. You likely have a **Community Theme** (like Minimal, Atom, etc.) enabled simultaneously. This external theme imposes its own color rules and interferes with the variables set by **Theme Engine**.
 
@@ -492,7 +492,7 @@ A: This is the most common issue. You likely have a **Community Theme** (like Mi
 
 1. Go to Obsidian's **Settings** -> **Appearance** -> **Themes**.
 2. Select the **Default** theme for Obsidian.
-3. The ⚠️ warning icon in Theme Engine settings will disappear, and your profile's colors will apply correctly.
+3. The warning icon in Theme Engine settings will disappear, and your profile's colors will apply correctly.
 
 **Advanced Solution (To customize an external theme):**
 
@@ -535,7 +535,7 @@ A: Snapshots are a safety feature.
 
 ---
 
-### Q: 🌍 Does the plugin support Right-to-Left (RTL) languages?
+### Q: Does the plugin support Right-to-Left (RTL) languages?
 
 A: Yes, absolutely. The plugin fully supports **Arabic** (العَرَبيَّةُ) and **Persian** (فارسی). You can find the **Enable Right-to-Left (RTL) Layout** setting near the language dropdown to flip the interface completely for a seamless reading experience.
 
@@ -551,4 +551,4 @@ MIT — see [LICENSE](https://github.com/YazanAmmar/obsidian-theme-engine/blob/m
 
 - **GitHub Repo**: [https://github.com/YazanAmmar/obsidian-theme-engine](https://github.com/YazanAmmar/obsidian-theme-engine)
 - **Issues & Features**: [GitHub Issues Page](https://github.com/YazanAmmar/obsidian-theme-engine/issues)
-- **Telegram Channel**: [https://t.me/ObsidianThemeEngine](https://t.me/ThemeEngine)
+- **Telegram Channel**: [https://t.me/ThemeEngine](https://t.me/ThemeEngine)
