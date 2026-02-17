@@ -1,34 +1,17 @@
-import {
-  App,
-  ButtonComponent,
-  DropdownComponent,
-  Notice,
-  PluginSettingTab,
-  Setting,
-  SettingGroup,
-  setIcon,
-  SearchComponent,
-} from 'obsidian';
+import { App, ButtonComponent, Notice, PluginSettingTab } from 'obsidian';
+import Sortable from 'sortablejs';
 import { DEFAULT_VARS, TEXT_TO_BG_MAP } from '../constants';
 import { t } from '../i18n/strings';
 import type ThemeEngine from '../main';
-import { flattenVars, getAccessibilityRating, getContrastRatio, debounce } from '../utils';
-import { drawColorPickers } from './components/color-pickers';
-import { drawImportExport } from './components/import-export';
-import { drawLikePluginCard } from './components/like-plugin-card';
-import { drawOptionsSection } from './components/options-section';
-import { drawProfileManager } from './components/profile-manager';
-import { drawCssSnippetsUI } from './components/snippets-ui';
-import { LanguageSettingsModal } from './modals';
-import Sortable from 'sortablejs';
-import { loadLanguage } from '../i18n/strings';
-import { CORE_LANGUAGES, LocaleCode } from '../i18n/types';
+import { flattenVars, getAccessibilityRating, getContrastRatio } from '../utils';
+import { renderSettingsTab } from './settings/render';
 import {
-  AddNewLanguageModal,
-  LanguageTranslatorModal,
-  ConfirmationModal,
-  LanguageInfoModal,
-} from './modals';
+  applySearchFilter as applySearchFilterCore,
+  clearSearchAndFilters,
+  highlightRowMatches as highlightRowMatchesCore,
+  initSearchUI as initSearchUICore,
+  type SearchState,
+} from './settings/search';
 
 export class ThemeEngineSettingTab extends PluginSettingTab {
   plugin: ThemeEngine;
@@ -37,12 +20,7 @@ export class ThemeEngineSettingTab extends PluginSettingTab {
   caseToggle: HTMLButtonElement;
   regexToggle: HTMLButtonElement;
   sectionSelect: HTMLSelectElement;
-  _searchState: {
-    query: string;
-    regex: boolean;
-    caseSensitive: boolean;
-    section: string;
-  };
+  _searchState: SearchState;
   staticContentContainer: HTMLDivElement;
   resetPinBtn: ButtonComponent | null = null;
   pinBtn: ButtonComponent | null = null;
@@ -92,340 +70,19 @@ export class ThemeEngineSettingTab extends PluginSettingTab {
   }
 
   _clearSearchAndFilters() {
-    if (!this.searchInput || !this.sectionSelect) return;
-
-    this.searchInput.value = '';
-    this.sectionSelect.value = '';
-
-    this._searchState.query = '';
-    this._searchState.section = '';
-
-    // Clear saved settings
-    this.plugin.settings.lastSearchQuery = '';
-    this.plugin.settings.lastSearchSection = '';
-    void this.plugin.saveData(this.plugin.settings).catch((err) => {
-      console.error('Failed to save search input state:', err);
-    });
-
-    const filterButton = this.containerEl.querySelector('button[data-cm-action="filter"]');
-    const filterOptionsContainer = this.containerEl.querySelector('.cm-search-filter-options');
-
-    if (filterButton) filterButton.classList.remove('is-active');
-    if (filterOptionsContainer) filterOptionsContainer.classList.add('is-hidden');
-
-    this._applySearchFilter();
+    clearSearchAndFilters(this);
   }
 
   initSearchUI(containerEl: HTMLElement) {
-    // Load saved section here
-    this._searchState = {
-      query: this.plugin.settings.lastSearchQuery || '',
-      regex: false,
-      caseSensitive: false,
-      section: this.plugin.settings.lastSearchSection || '',
-    };
-
-    const searchShell = containerEl.createDiv({
-      cls: 'cm-search-shell',
-    });
-    this.searchContainer = searchShell;
-
-    const searchBarContainer = searchShell.createDiv({
-      cls: 'cm-search-bar-container',
-    });
-
-    // --- 1. Input field section ---
-    const searchInputContainer = searchBarContainer.createDiv({
-      cls: 'cm-search-input-container',
-    });
-
-    const searchComponent = new SearchComponent(searchInputContainer)
-      .setPlaceholder(t('settings.searchPlaceholder'))
-      .setValue(this._searchState.query)
-      .onChange((value) => {
-        if (this._searchState.regex) return;
-        this._searchState.query = value;
-        this.plugin.settings.lastSearchQuery = value;
-        void this.plugin.saveData(this.plugin.settings).catch((err) => {
-          console.error('Failed to save search/filter reset state:', err);
-        });
-        debouncedFilter();
-      });
-
-    this.searchInput = searchComponent.inputEl;
-
-    this.searchInput.addEventListener('keydown', (e: KeyboardEvent) => {
-      if (e.key === 'Enter' && this._searchState.regex) {
-        this._searchState.query = (e.target as HTMLInputElement).value;
-        debouncedFilter();
-      }
-    });
-
-    // --- 2. Control buttons section ---
-    const searchActions = searchBarContainer.createDiv({
-      cls: 'cm-search-actions',
-    });
-
-    this.caseToggle = searchActions.createEl('button', {
-      cls: 'cm-search-action-btn',
-    });
-    this.caseToggle.textContent = 'Aa';
-    this.caseToggle.setAttr('aria-label', t('settings.ariaCase'));
-
-    this.regexToggle = searchActions.createEl('button', {
-      cls: 'cm-search-action-btn',
-    });
-    setIcon(this.regexToggle, 'regex');
-    this.regexToggle.setAttr('aria-label', t('settings.ariaRegex'));
-
-    const filterOptionsContainer = searchActions.createDiv({
-      cls: 'cm-search-filter-options is-hidden',
-    });
-
-    const dropdown = new DropdownComponent(filterOptionsContainer)
-      .addOption('', t('settings.allSections'))
-      .onChange(async (value) => {
-        this._searchState.section = value;
-
-        // Save the filter section
-        this.plugin.settings.lastSearchSection = value;
-        await this.plugin.saveData(this.plugin.settings);
-
-        filterOptionsContainer.classList.toggle('is-filter-active', value !== '');
-        debouncedFilter();
-      });
-
-    // Restore filter state
-    dropdown.setValue(this._searchState.section);
-    if (this._searchState.section) {
-      filterOptionsContainer.classList.remove('is-hidden');
-    }
-
-    try {
-      Object.keys(DEFAULT_VARS || {}).forEach((category) => {
-        let categoryKey: string;
-        const lowerCategory = category.toLowerCase();
-
-        if (lowerCategory === 'interactive elements') categoryKey = 'interactive';
-        else if (lowerCategory === 'ui elements') categoryKey = 'ui';
-        else if (lowerCategory === 'graph view') categoryKey = 'graph';
-        else if (lowerCategory === 'plugin integrations') categoryKey = 'pluginintegrations';
-        else categoryKey = lowerCategory.replace(/ /g, '');
-
-        const translatedCategory = t(`categories.${categoryKey}`) || category;
-        dropdown.addOption(category, translatedCategory);
-      });
-    } catch {
-      // ignore invalid category translation
-    }
-
-    const activeProfile = this.plugin.settings.profiles[this.plugin.settings.activeProfile];
-    if (
-      activeProfile?.customVarMetadata &&
-      Object.keys(activeProfile.customVarMetadata).length > 0
-    ) {
-      dropdown.addOption('Custom', t('categories.custom'));
-    }
-
-    dropdown.selectEl.classList.add('cm-search-small');
-    this.sectionSelect = dropdown.selectEl;
-
-    const filterButton = searchActions.createEl('button', {
-      cls: 'cm-search-action-btn',
-    });
-    setIcon(filterButton, 'sliders-horizontal');
-    filterButton.dataset.cmAction = 'filter';
-
-    // Activate button if section is saved
-    if (this._searchState.section) filterButton.classList.add('is-active');
-
-    const debouncedFilter = debounce(() => this._applySearchFilter(), 180);
-
-    this.caseToggle.addEventListener('click', () => {
-      this._searchState.caseSensitive = !this._searchState.caseSensitive;
-      this.caseToggle.toggleClass('is-active', this._searchState.caseSensitive);
-      debouncedFilter();
-    });
-
-    this.regexToggle.addEventListener('click', () => {
-      this._searchState.regex = !this._searchState.regex;
-      this.regexToggle.toggleClass('is-active', this._searchState.regex);
-      if (this._searchState.regex) {
-        searchComponent.setPlaceholder(t('settings.regexPlaceholder'));
-      } else {
-        searchComponent.setPlaceholder(t('settings.searchPlaceholder'));
-      }
-      this._searchState.query = this.searchInput.value;
-      debouncedFilter();
-    });
-
-    filterButton.addEventListener('click', () => {
-      if (filterButton.classList.contains('is-active')) {
-        this._clearSearchAndFilters();
-      } else {
-        filterOptionsContainer.classList.remove('is-hidden');
-        filterButton.classList.add('is-active');
-      }
-    });
-
-    this.sectionSelect.addEventListener('change', (e: Event) => {
-      this._searchState.section = (e.target as HTMLSelectElement).value;
-      debouncedFilter();
-    });
+    initSearchUICore(this, containerEl);
   }
 
   _applySearchFilter() {
-    const s = this._searchState;
-    const activeProfile = this.plugin.settings.profiles[this.plugin.settings.activeProfile];
-    const isSearching = s.query.trim().length > 0 || s.section !== '';
-    const rows = Array.from(
-      this.containerEl.querySelectorAll<HTMLElement>('.cm-var-row, .cm-searchable-row'),
-    );
-
-    let qRegex: RegExp | null = null;
-
-    if (s.query && s.query.trim()) {
-      if (s.regex) {
-        try {
-          qRegex = new RegExp(s.query, s.caseSensitive ? '' : 'i');
-        } catch {
-          qRegex = null;
-        }
-      }
-    }
-
-    rows.forEach((row) => {
-      const varName = row.dataset.var || '';
-      const snippetName = row.dataset.name || '';
-      const textInput = row.querySelector<HTMLInputElement>("input[type='text']");
-      const varValue = textInput ? textInput.value.trim() : '';
-
-      let displayName = '';
-      let description = '';
-      const customMeta = activeProfile?.customVarMetadata?.[varName];
-
-      if (customMeta) {
-        displayName = customMeta.name;
-        description = customMeta.desc;
-      } else {
-        displayName = t(`colors.names.${varName}`) || snippetName;
-        description = t(`colors.descriptions.${varName}`) || '';
-      }
-
-      if (s.section && s.section !== row.dataset.category) {
-        row.classList.add('cm-hidden');
-        return;
-      }
-
-      if (s.query && s.query.trim()) {
-        const q = s.query.trim();
-        let isMatch = false;
-
-        if (s.regex && qRegex) {
-          isMatch =
-            qRegex.test(varName) ||
-            qRegex.test(varValue) ||
-            qRegex.test(displayName) ||
-            qRegex.test(description);
-        } else {
-          const queryLower = s.caseSensitive ? q : q.toLowerCase();
-          const nameLower = s.caseSensitive ? varName : varName.toLowerCase();
-          const valueLower = s.caseSensitive ? varValue : varValue.toLowerCase();
-          const displayNameLower = s.caseSensitive ? displayName : displayName.toLowerCase();
-          const descriptionLower = s.caseSensitive ? description : description.toLowerCase();
-
-          isMatch =
-            nameLower.includes(queryLower) ||
-            valueLower.includes(queryLower) ||
-            displayNameLower.includes(queryLower) ||
-            descriptionLower.includes(queryLower);
-        }
-
-        if (!isMatch) {
-          row.classList.add('cm-hidden');
-          return;
-        }
-      }
-
-      row.classList.remove('cm-hidden');
-      this._highlightRowMatches(row, s);
-    });
-
-    const headings = this.containerEl.querySelectorAll<HTMLElement>('.cm-category-container');
-    headings.forEach((heading) => {
-      const category = heading.dataset.category;
-      const hasVisibleRows = this.containerEl.querySelector(
-        `.cm-var-row[data-category="${category}"]:not(.cm-hidden)`,
-      );
-
-      if (hasVisibleRows) {
-        heading.classList.remove('cm-hidden');
-      } else {
-        heading.classList.add('cm-hidden');
-      }
-    });
-
-    const hasVisibleSearchResults = rows.some((row) => !row.classList.contains('cm-hidden'));
-    const showNoResults = isSearching && !hasVisibleSearchResults;
-
-    if (this.noSearchResultsEl) {
-      this.noSearchResultsEl.classList.toggle('is-hidden', !showNoResults);
-    }
-    if (this.likeCardEl) {
-      this.likeCardEl.classList.toggle('is-hidden', showNoResults);
-    }
+    applySearchFilterCore(this);
   }
 
-  _highlightRowMatches(row: HTMLElement, state: typeof this._searchState) {
-    const query = state.query.trim();
-
-    const highlightElement = (element: HTMLElement | null) => {
-      if (!element) return;
-
-      if (!element.dataset.originalText) {
-        element.dataset.originalText = element.textContent || '';
-      }
-      const originalText = element.dataset.originalText;
-
-      element.empty();
-
-      if (!query) {
-        element.setText(originalText);
-        return;
-      }
-
-      const flags = state.caseSensitive ? 'g' : 'gi';
-      let regex: RegExp;
-
-      try {
-        regex = state.regex
-          ? new RegExp(query, flags)
-          : new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), flags);
-
-        let lastIndex = 0;
-        let match;
-
-        while ((match = regex.exec(originalText)) !== null) {
-          if (match.index > lastIndex) {
-            element.appendText(originalText.substring(lastIndex, match.index));
-          }
-          element.createSpan({ cls: 'cm-search-match', text: match[0] });
-          lastIndex = regex.lastIndex;
-        }
-
-        if (lastIndex < originalText.length) {
-          element.appendText(originalText.substring(lastIndex));
-        }
-      } catch {
-        element.setText(originalText);
-      }
-    };
-
-    const nameEl = row.querySelector<HTMLElement>('.cm-var-name');
-    const descEl = row.querySelector<HTMLElement>('.setting-item-description');
-
-    highlightElement(nameEl);
-    highlightElement(descEl);
+  _highlightRowMatches(row: HTMLElement, state: SearchState) {
+    highlightRowMatchesCore(row, state);
   }
 
   _updatePinButtons() {
@@ -452,12 +109,12 @@ export class ThemeEngineSettingTab extends PluginSettingTab {
   }
 
   _getCurrentProfileJson() {
-    const p = this.plugin.settings.profiles?.[this.plugin.settings.activeProfile];
-    if (!p) return null;
+    const profile = this.plugin.settings.profiles?.[this.plugin.settings.activeProfile];
+    if (!profile) return null;
     return {
       name: this.plugin.settings.activeProfile,
       exportedAt: new Date().toISOString(),
-      profile: p,
+      profile,
     };
   }
 
@@ -481,12 +138,12 @@ export class ThemeEngineSettingTab extends PluginSettingTab {
       type: 'application/json',
     });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.download = `${this.plugin.settings.activeProfile}.profile.json`;
-    a.href = url;
-    a.click();
+    const anchor = document.createElement('a');
+    anchor.download = `${this.plugin.settings.activeProfile}.profile.json`;
+    anchor.href = url;
+    anchor.click();
     URL.revokeObjectURL(url);
-    a.remove();
+    anchor.remove();
     new Notice(t('notices.exportSuccess'));
   }
 
@@ -520,316 +177,12 @@ export class ThemeEngineSettingTab extends PluginSettingTab {
   }
 
   display(): void {
-    // call the async renderer and handle any error
     void this.renderDisplay().catch((err) => {
       console.error('Error in SettingsTab.renderDisplay:', err);
     });
   }
 
   private async renderDisplay(): Promise<void> {
-    const themeDefaults = await this.plugin.getThemeDefaults();
-
-    const { containerEl } = this;
-    containerEl.classList.add('theme-engine-settings-tab');
-    containerEl.empty();
-    containerEl.classList.add('theme-engine-hidden');
-
-    const langCode = this.plugin.settings.language;
-    const customLang = this.plugin.settings.customLanguages?.[langCode];
-    const isCoreRtlLang = langCode === 'ar' || langCode === 'fa';
-    const isCustomRtlLang = customLang?.isRtl === true;
-    const isRtlCapable = isCoreRtlLang || isCustomRtlLang;
-    const isRtlEnabled = this.plugin.settings.useRtlLayout;
-    const isRTL = isRtlCapable && isRtlEnabled;
-    const isCustom = !!customLang;
-    const isCore = !!CORE_LANGUAGES[langCode as LocaleCode];
-
-    this.containerEl.setAttribute('dir', isRTL ? 'rtl' : 'ltr');
-
-    const topSettingsContainer = containerEl.createDiv({
-      cls: 'cm-top-settings-group',
-    });
-
-    let createTopSetting: () => Setting;
-
-    if (typeof SettingGroup === 'function') {
-      const topGroup = new SettingGroup(topSettingsContainer);
-      topGroup.addClass('cm-native-setting-group');
-
-      createTopSetting = () => {
-        let createdSetting: Setting | null = null;
-        topGroup.addSetting((setting) => {
-          createdSetting = setting;
-        });
-
-        if (!createdSetting) {
-          console.warn('Theme Engine: Failed to create top setting group item. Falling back.');
-          return new Setting(topSettingsContainer);
-        }
-
-        return createdSetting;
-      };
-    } else {
-      topSettingsContainer.classList.add('cm-fallback-setting-group');
-      const topSettingsBody = topSettingsContainer.createDiv({
-        cls: 'cm-setting-group-body',
-      });
-      createTopSetting = () => new Setting(topSettingsBody);
-    }
-
-    createTopSetting()
-      .setName(t('settings.enablePlugin'))
-      .setDesc(t('settings.enablePluginDesc'))
-      .addToggle((toggle) => {
-        toggle.setValue(this.plugin.settings.pluginEnabled).onChange(async (value) => {
-          this.plugin.settings.pluginEnabled = value;
-
-          if (value) {
-            this.plugin.enableObservers();
-          } else {
-            this.plugin.disableObservers();
-          }
-
-          await this.plugin.saveSettings();
-          this.plugin.restartColorUpdateLoop();
-          new Notice(value ? t('notices.pluginEnabled') : t('notices.pluginDisabled'));
-        });
-      });
-
-    const languageSetting = createTopSetting()
-      .setName(t('settings.language'))
-      .setDesc(t('settings.languageDesc'));
-
-    const langIcon = languageSetting.nameEl.createSpan({
-      cls: 'cm-setting-icon',
-    });
-    setIcon(langIcon, 'languages');
-    languageSetting.nameEl.prepend(langIcon);
-
-    const flyoutContainer = languageSetting.controlEl.createDiv({
-      cls: 'cm-flyout-menu-container',
-    });
-
-    const buttonListEl = flyoutContainer.createDiv({
-      cls: 'cm-flyout-menu-buttons',
-    });
-
-    const triggerBtn = new ButtonComponent(flyoutContainer)
-      .setIcon('settings')
-      .setTooltip(t('tooltips.langMenu'))
-      .setClass('cm-flyout-trigger-btn')
-      .onClick(() => {
-        buttonListEl.toggleClass('is-open', !buttonListEl.classList.contains('is-open'));
-      });
-    triggerBtn.buttonEl.classList.add('cm-control-icon-button');
-
-    // Info Button
-    new ButtonComponent(buttonListEl)
-      .setIcon('info')
-      .setTooltip(t('tooltips.langInfo'))
-      .setClass('cm-control-icon-button')
-      .onClick(() => {
-        new LanguageInfoModal(this.app, this.plugin).open();
-      });
-
-    // Edit Button
-    new ButtonComponent(buttonListEl)
-      .setIcon('pencil')
-      .setTooltip(t('tooltips.editLang'))
-      .setClass('cm-control-icon-button')
-      .onClick(() => {
-        const langCode = this.plugin.settings.language;
-        new LanguageTranslatorModal(this.app, this.plugin, this, langCode).open();
-      });
-
-    // Add Button
-    new ButtonComponent(buttonListEl)
-      .setIcon('plus')
-      .setTooltip(t('modals.addLang.title'))
-      .setClass('cm-control-icon-button')
-      .onClick(() => {
-        new AddNewLanguageModal(this.app, this.plugin, this).open();
-      });
-
-    // RTL Button
-    if (isRtlCapable) {
-      new ButtonComponent(buttonListEl)
-        .setIcon('settings-2') //
-        .setTooltip(t('settings.languageSettingsModalTitle'))
-        .setClass('cm-control-icon-button')
-        .onClick(() => {
-          new LanguageSettingsModal(this.app, this.plugin).open();
-        });
-    }
-
-    // History/Restore Button for Core Languages that are customized
-    if (isCore && isCustom) {
-      const restoreBtn = new ButtonComponent(buttonListEl)
-        .setIcon('history')
-        .setTooltip(t('tooltips.restoreDefaultLang'))
-        .setClass('mod-warning')
-        .onClick(() => {
-          new ConfirmationModal(
-            this.app,
-            this.plugin,
-            t('modals.confirmation.restoreLangTitle'),
-            t('modals.confirmation.restoreLangDesc', CORE_LANGUAGES[langCode as LocaleCode]),
-            () => {
-              void (async () => {
-                if (this.plugin.settings.customLanguages) {
-                  delete this.plugin.settings.customLanguages[langCode];
-                  loadLanguage(this.plugin.settings);
-                  await this.plugin.saveSettings();
-                  this.display();
-                  new Notice(t('notices.langRestored'));
-                }
-              })().catch((err) => {
-                // Short human comment in English (as you requested)
-                console.error('Failed to restore language:', err);
-              });
-            },
-            { buttonText: t('buttons.restore'), buttonClass: 'mod-warning' },
-          ).open();
-        });
-      restoreBtn.buttonEl.classList.add('cm-control-icon-button');
-    }
-
-    if (isCustom && !isCore) {
-      const deleteBtn = new ButtonComponent(buttonListEl)
-        .setIcon('trash')
-        .setTooltip(t('buttons.delete') + ` (${customLang.languageName})`)
-        .setClass('mod-warning')
-        .onClick(() => {
-          new ConfirmationModal(
-            this.app,
-            this.plugin,
-            t('modals.confirmation.deleteLangTitle'),
-            t('modals.confirmation.deleteLangDesc', customLang.languageName),
-            () => {
-              void (async () => {
-                if (!this.plugin.settings.customLanguages) return;
-                delete this.plugin.settings.customLanguages[langCode];
-                this.plugin.settings.language = 'en';
-                loadLanguage(this.plugin.settings);
-                await this.plugin.saveSettings();
-                this.display();
-                new Notice(t('notices.langDeleted', customLang.languageName));
-              })().catch((err) => {
-                console.error('Failed to delete custom language:', err);
-              });
-            },
-            { buttonText: t('buttons.delete'), buttonClass: 'mod-warning' },
-          ).open();
-        });
-      deleteBtn.buttonEl.classList.add('cm-control-icon-button');
-    }
-
-    languageSetting.addDropdown((dropdown) => {
-      const customLangs = this.plugin.settings.customLanguages || {};
-
-      // 1. Add Core languages FIRST
-      for (const code in CORE_LANGUAGES) {
-        // Use custom name if it exists, otherwise use core name
-        let displayName = CORE_LANGUAGES[code as LocaleCode];
-        if (customLangs[code]) {
-          displayName = customLangs[code].languageName;
-        }
-        dropdown.addOption(code, displayName);
-      }
-
-      // 2. Add purely Custom languages (that are NOT core overrides)
-      const customCodes = Object.keys(customLangs);
-      for (const code of customCodes) {
-        if (CORE_LANGUAGES[code as LocaleCode]) continue;
-
-        const langName = customLangs[code].languageName;
-        dropdown.addOption(code, langName);
-      }
-
-      dropdown.setValue(this.plugin.settings.language);
-      dropdown.onChange(async (value) => {
-        this.plugin.settings.language = value;
-        loadLanguage(this.plugin.settings);
-
-        await this.plugin.saveSettings();
-        this.display();
-      });
-    });
-
-    this.staticContentContainer = containerEl.createDiv({
-      cls: 'cm-static-sections',
-    });
-    drawProfileManager(this.staticContentContainer, this);
-    drawImportExport(this.staticContentContainer, this);
-    drawOptionsSection(this.staticContentContainer, this);
-    this.staticContentContainer.createEl('hr');
-    drawCssSnippetsUI(this.staticContentContainer, this);
-    containerEl.createEl('hr', { cls: 'cm-search-divider' });
-    this.initSearchUI(containerEl);
-    drawColorPickers(this.containerEl, this, themeDefaults);
-    containerEl.createEl('hr');
-
-    const noResultsBadge = containerEl.createDiv({
-      cls: 'cm-search-empty-badge is-hidden',
-    });
-    const noResultsIcon = noResultsBadge.createDiv({
-      cls: 'cm-search-empty-icon',
-    });
-    setIcon(noResultsIcon, 'search-x');
-    noResultsBadge.createDiv({
-      cls: 'cm-search-empty-title',
-      text: t('settings.noResultsFound'),
-    });
-    noResultsBadge.createDiv({
-      cls: 'cm-search-empty-subtitle',
-      text: t('settings.noResultsHint'),
-    });
-    this.noSearchResultsEl = noResultsBadge;
-
-    this.likeCardEl = drawLikePluginCard(containerEl, this);
-
-    //---Implement automatic search and scrolling---
-
-    // Make sure that the filter is applied
-    this._applySearchFilter();
-
-    if (this._searchState.query) {
-      setTimeout(() => {
-        // Find the first "visible" line
-        const firstVisibleRow = this.containerEl.querySelector<HTMLElement>(
-          '.cm-var-row:not(.cm-hidden)',
-        );
-
-        if (firstVisibleRow) {
-          firstVisibleRow.scrollIntoView({
-            behavior: 'smooth',
-            block: 'center',
-          });
-        }
-      }, 0);
-    }
-    const scrollContainer = this.containerEl.closest<HTMLElement>('.vertical-tab-content');
-
-    if (!scrollContainer) {
-      console.warn('Theme Engine: Could not find scroll container.');
-    } else {
-      const debouncedScrollSave = debounce(() => {
-        this.plugin.settings.lastScrollPosition = scrollContainer.scrollTop;
-        void this.plugin.saveData(this.plugin.settings).catch((err) => {
-          console.error('Failed to save scroll position:', err);
-        });
-      }, 200);
-
-      this.plugin.registerDomEvent(scrollContainer, 'scroll', debouncedScrollSave);
-
-      if (!this._searchState.query && this.plugin.settings.lastScrollPosition) {
-        scrollContainer.scrollTo({
-          top: this.plugin.settings.lastScrollPosition,
-          behavior: 'auto',
-        });
-      }
-    }
-
-    containerEl.classList.remove('theme-engine-hidden');
+    await renderSettingsTab(this);
   }
 }

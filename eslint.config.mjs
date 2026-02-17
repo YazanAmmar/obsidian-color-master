@@ -1,7 +1,7 @@
 import js from "@eslint/js";
 import tseslint from "typescript-eslint";
 import obsidianmd from "eslint-plugin-obsidianmd";
-import eslintComments from "eslint-plugin-eslint-comments";
+import eslintComments from "@eslint-community/eslint-plugin-eslint-comments";
 import globals from "globals";
 
 export default tseslint.config(
@@ -25,7 +25,7 @@ export default tseslint.config(
   {
     files: ["src/**/*.ts", "src/**/*.tsx"],
     plugins: {
-      "eslint-comments": eslintComments,
+      "@eslint-community/eslint-comments": eslintComments,
     },
     languageOptions: {
       ecmaVersion: 2022,
@@ -47,8 +47,9 @@ export default tseslint.config(
       "obsidianmd/hardcoded-config-path": "error",
       "obsidianmd/no-forbidden-elements": "error",
       "@typescript-eslint/await-thenable": "error",
-      "eslint-comments/require-description": "error",
-      "eslint-comments/no-restricted-disable": [
+      "@eslint-community/eslint-comments/require-description": "error",
+      "@eslint-community/eslint-comments/no-unused-disable": "error",
+      "@eslint-community/eslint-comments/no-restricted-disable": [
         "error",
         "obsidianmd/no-forbidden-elements",
         "obsidianmd/ui/sentence-case",
